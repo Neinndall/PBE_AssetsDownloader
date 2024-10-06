@@ -7,10 +7,18 @@
 </div>
 
 <div align="center">
-  <img src="https://img.shields.io/github/license/Neinndall/PBE_AssetsDownloader" alt="License"/>
-  <img src="https://img.shields.io/github/release/Neinndall/PBE_AssetsDownloader" alt="Release"/>
-  <img src="https://img.shields.io/github/issues/Neinndall/PBE_AssetsDownloader" alt="Issues"/>
-  <img src="https://img.shields.io/github/stars/Neinndall/PBE_AssetsDownloader" alt="Stars"/>
+  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/Neinndall/PBE_AssetsDownloader" alt="License"/>
+  </a>
+  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/releases">
+    <img src="https://img.shields.io/github/release/Neinndall/PBE_AssetsDownloader" alt="Release"/>
+  </a>
+  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/issues">
+    <img src="https://img.shields.io/github/issues/Neinndall/PBE_AssetsDownloader" alt="Issues"/>
+  </a>
+  <a href="https://github.com/Neinndall/PBE_AssetsDownloader">
+    <img src="https://img.shields.io/github/stars/Neinndall/PBE_AssetsDownloader" alt="Stars"/>
+  </a>
 </div>
 
 <div align="center">

@@ -6,20 +6,10 @@
   <h1>PBE_AssetsDownloader</h1>
 </div>
 
-<div align="center">
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Neinndall/PBE_AssetsDownloader" alt="License"/>
-  </a>
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/releases">
-    <img src="https://img.shields.io/github/release/Neinndall/PBE_AssetsDownloader" alt="Release"/>
-  </a>
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/issues">
-    <img src="https://img.shields.io/github/issues/Neinndall/PBE_AssetsDownloader" alt="Issues"/>
-  </a>
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader">
-    <img src="https://img.shields.io/github/stars/Neinndall/PBE_AssetsDownloader" alt="Stars"/>
-  </a>
-</div>
+[![License](https://img.shields.io/github/license/Neinndall/PBE_AssetsDownloader)](https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/LICENSE)
+[![Release](https://img.shields.io/github/release/Neinndall/PBE_AssetsDownloader)](https://github.com/Neinndall/PBE_AssetsDownloader/releases)
+[![Issues](https://img.shields.io/github/issues/Neinndall/PBE_AssetsDownloader)](https://github.com/Neinndall/PBE_AssetsDownloader/issues)
+[![Stars](https://img.shields.io/github/stars/Neinndall/PBE_AssetsDownloader)](https://github.com/Neinndall/PBE_AssetsDownloader)
 
 <div align="center">
   <p>Tool for League of Legends that allows you to stay up to date with new assets with each update of the PBE Server using <a href="https://raw.communitydragon.org/">CommunityDragon</a>.</p>

@@ -6,19 +6,19 @@
   <h1>PBE_AssetsDownloader</h1>
 </div>
 
-<div align="center"> 
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Neinndall/PBE_AssetsDownloader" alt="License"/>
-  </a>
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/releases">
-    <img src="https://img.shields.io/github/release/Neinndall/PBE_AssetsDownloader" alt="Release"/>
-  </a>
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/issues">
-    <img src="https://img.shields.io/github/issues/Neinndall/PBE_AssetsDownloader" alt="Issues"/>
-  </a>
-  <a href="https://github.com/Neinndall/PBE_AssetsDownloader/stargazers"/>
-    <img src="https://img.shields.io/github/stars/Neinndall/PBE_AssetsDownloader?style=flat-square" alt="Stars" />
-  </a>
+<div align="center">
+  <c href="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/LICENSE">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/Neinndall/PBE_AssetsDownloader">
+  </c>
+  <c href="https://github.com/Neinndall/PBE_AssetsDownloader/releases">
+    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/Neinndall/PBE_AssetsDownloader">
+  </c>
+  <c href="https://github.com/Neinndall/PBE_AssetsDownloader/issues">
+    <img alt="GitHub Issues" src="https://img.shields.io/github/issues/Neinndall/PBE_AssetsDownloader">
+  </c>
+  <c href="https://github.com/Neinndall/PBE_AssetsDownloader/stargazers">
+    <img alt="GitHub stars" src="https://img.shields.io/github/stars/Neinndall/PBE_AssetsDownloader?style=flat">
+  </c>
 </div>
 
 <div align="center">

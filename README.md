@@ -12,7 +12,7 @@
 </a>
   
 <a href="https://github.com/Neinndall/PBE_AssetsDownloader/releases">
-  <img alt="GitHub Release" target="_blank" src="https://img.shields.io/github/license/Neinndall/PBE_AssetsDownloader">
+  <img alt="GitHub Release" target="_blank" src="https://img.shields.io/github/release/Neinndall/PBE_AssetsDownloader">
 
 <a href="https://github.com/Neinndall/PBE_AssetsDownloader/issues">
   <img alt="GitHub Issues" target="_blank" src="https://img.shields.io/github/issues/Neinndall/PBE_AssetsDownloader">

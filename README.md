@@ -35,7 +35,7 @@ To use this software you need [.Net 8 Runtime](https://dotnet.microsoft.com/en-u
 </div>
 
 1. Open the .exe
-2. Go to "Settings" and click on the option to synchronize hashes with CDTB
+2. Go to "Settings" and click on the option to synchronize hashes with CDTB. Be sure to say: YES
 3. Put the directory of new hashes and old hashes
 5. Start!
 5. Done!

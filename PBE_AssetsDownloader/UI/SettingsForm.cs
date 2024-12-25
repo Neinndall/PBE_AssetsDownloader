@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Http;
 using Newtonsoft.Json;
-using PBE_NewFileExtractor.Info;
-using PBE_NewFileExtractor.Utils;
-using PBE_NewFileExtractor.Services;
+using PBE_AssetsDownloader.Info;
+using PBE_AssetsDownloader.Utils;
+using PBE_AssetsDownloader.Services;
 
-namespace PBE_NewFileExtractor.UI
+namespace PBE_AssetsDownloader.UI
 {
     public partial class SettingsForm : Form
     {
@@ -17,87 +17,81 @@ namespace PBE_NewFileExtractor.UI
         private Status _status;
 
         public bool syncHashesWithCDTB { get; private set; }
+        public bool AutoCopyHashes { get; private set; }
 
-        public SettingsForm(bool syncHashesWithCDTB, Status status)
+        // Evento para notificar cambios en la configuración
+        public event EventHandler SettingsChanged;
+
+        public SettingsForm(bool syncHashesWithCDTB, bool autoCopyHashes, Status status)
         {
             InitializeComponent();
-            // LLamamos al Icono en la pestaña de Settings
             ApplicationInfos.SetIcon(this);
-
-            // Cargar configuración y establecer el estado del checkbox
-            var settings = LoadSettings();
-            syncHashesWithCDTB = settings.syncHashesWithCDTB; // Actualizar la propiedad
-            checkBoxSyncHashes.Checked = syncHashesWithCDTB; // Usar la propiedad aquí
 
             var httpClient = new HttpClient();
             _directoriesCreator = new DirectoriesCreator();
             _requests = new Requests(httpClient, _directoriesCreator);
             _status = new Status(AppendLog);
+
+            var settings = LoadSettings();
+            this.syncHashesWithCDTB = settings.syncHashesWithCDTB;
+            checkBoxSyncHashes.Checked = syncHashesWithCDTB;
+
+            this.AutoCopyHashes = settings.AutoCopyHashes;
+            checkBoxAutoCopy.Checked = AutoCopyHashes;
         }
 
         private async void btnSave_Click(object sender, EventArgs e)
         {
-            // Actualizar la propiedad syncHashesWithCDTB desde el checkbox
             syncHashesWithCDTB = checkBoxSyncHashes.Checked;
+            AutoCopyHashes = checkBoxAutoCopy.Checked;
 
-            var settings = LoadSettings(); // Cargar configuraciones existentes
-            settings.syncHashesWithCDTB = this.syncHashesWithCDTB; // Actualizar solo el campo de sincronización
+            var settings = LoadSettings();
+            settings.syncHashesWithCDTB = syncHashesWithCDTB;
+            settings.AutoCopyHashes = AutoCopyHashes;
 
-            var result = MessageBox.Show("Do you want to sync files now?", "Confirm synchronization", MessageBoxButtons.YesNo);
+            SaveSettings(settings.syncHashesWithCDTB, settings.lastUpdateHashes);
 
-            if (result == DialogResult.Yes)
+            if (syncHashesWithCDTB)
             {
-                AppendLog("Checking for updates on the server...");
-                bool isUpdated = await _status.IsUpdatedAsync();
+                var result = MessageBox.Show("Do you want to sync files now?", "Confirm synchronization", MessageBoxButtons.YesNo);
 
-                if (!isUpdated)
+                if (result == DialogResult.Yes)
                 {
-                    _status.CheckForUpdates(isUpdated);
-                    SaveSettings(settings.syncHashesWithCDTB, settings.lastUpdateFile); // Mantener lastUpdateFile
-                    return; // No proceder con la descarga
-                }
+                    AppendLog("Checking for updates on the server...");
+                    bool isUpdated = await _status.IsUpdatedAsync();
 
-                // Solo ejecutar la sincronización si se ha marcado la opción
-                AppendLog("Starting sync...");
-                string lastUpdateFile = DateTime.UtcNow.ToString("o"); // O el valor que obtengas de la sincronización
-                await DownloadFiles(this.syncHashesWithCDTB, lastUpdateFile);
-                MessageBox.Show("Synchronization completed."); // Mensaje de éxito
+                    if (!isUpdated)
+                    {
+                        _status.CheckForUpdates(isUpdated);
+                        return;
+                    }
+
+                    AppendLog("Starting sync...");
+                    await DownloadFiles(syncHashesWithCDTB, settings.lastUpdateHashes);
+                    AppendLog("Synchronization completed.");
+                }
             }
-            else
-            {
-                SaveSettings(settings.syncHashesWithCDTB, settings.lastUpdateFile); // Mantener lastUpdateFile
-                this.DialogResult = DialogResult.OK; // Cerrar formulario si no se desea sincronizar
-                this.Close();
-            }
+
+            SettingsChanged?.Invoke(this, EventArgs.Empty);
+            AppendLog("Settings updated.");
         }
 
-        private async Task DownloadFiles(bool syncHashesWithCDTB, string lastUpdateFile)
+        private async Task DownloadFiles(bool syncHashesWithCDTB, string lastUpdateHashes)
         {
             string downloadDirectory = _directoriesCreator.GetHashesNewsDirectoryPath();
 
             try
             {
-                // Descargar archivos usando Requests
                 await _requests.DownloadHashesFilesAsync(downloadDirectory, logMessage =>
                 {
-                    // Muestra el mensaje en el cuadro de texto de logs si es necesario
-                    if (InvokeRequired)
-                    {
-                        Invoke(new Action(() => textBoxLogs.AppendText(logMessage + Environment.NewLine)));
-                    }
-                    else
-                    {
-                        textBoxLogs.AppendText(logMessage + Environment.NewLine);
-                    }
+                    AppendLog(logMessage);
                 });
 
-                // Actualizar lastUpdateFile tras la sincronización
-                SaveSettings(syncHashesWithCDTB, lastUpdateFile);
+                SaveSettings(syncHashesWithCDTB, lastUpdateHashes);
             }
             catch (Exception ex)
             {
-                // Manejo de errores
-                _status.HandleError(ex); // Usar el método en Status
+                _status.HandleError(ex);
             }
         }
 
@@ -111,42 +105,51 @@ namespace PBE_NewFileExtractor.UI
                 return JsonConvert.DeserializeObject<AppSettings>(json);
             }
 
-            return new AppSettings { syncHashesWithCDTB = false }; // Valor por defecto
+            return new AppSettings { syncHashesWithCDTB = false, AutoCopyHashes = false };
         }
 
-        private void SaveSettings(bool syncHashesWithCDTB, string lastUpdateFile = null)
+        private void SaveSettings(bool syncHashesWithCDTB, string lastUpdateHashes = null)
         {
-            var settings = LoadSettings(); // Cargar la configuración existente
-
+            var settings = LoadSettings();
             settings.syncHashesWithCDTB = syncHashesWithCDTB;
+            settings.AutoCopyHashes = AutoCopyHashes;
 
-            // Solo actualizar lastUpdateFile si se proporciona un nuevo valor
-            if (!string.IsNullOrEmpty(lastUpdateFile))
+            if (!string.IsNullOrEmpty(lastUpdateHashes))
             {
-                settings.lastUpdateFile = lastUpdateFile;
+                settings.lastUpdateHashes = lastUpdateHashes;
             }
 
             var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
             File.WriteAllText("config.json", json);
         }
 
-        // Agrega mensajes al log en la interfaz de usuario
         public void AppendLog(string message)
         {
-            if (textBoxLogs.InvokeRequired)
+            if (richTextBoxLogs.InvokeRequired)
             {
-                textBoxLogs.Invoke(new Action(() => textBoxLogs.AppendText(message + Environment.NewLine)));
+                richTextBoxLogs.Invoke(new Action(() => 
+                {
+                    // Añadir timestamp a cada mensaje
+                    string timestampedMessage = $"[{DateTime.Now:HH:mm:ss}] {message}";
+                    richTextBoxLogs.AppendText(timestampedMessage + Environment.NewLine);
+                    richTextBoxLogs.SelectionStart = richTextBoxLogs.TextLength;
+                    richTextBoxLogs.ScrollToCaret();
+                }));
             }
             else
             {
-                textBoxLogs.AppendText(message + Environment.NewLine);
+                string timestampedMessage = $"[{DateTime.Now:HH:mm:ss}] {message}";
+                richTextBoxLogs.AppendText(timestampedMessage + Environment.NewLine);
+                richTextBoxLogs.SelectionStart = richTextBoxLogs.TextLength;
+                richTextBoxLogs.ScrollToCaret();
             }
         }
 
         public class AppSettings
         {
             public bool syncHashesWithCDTB { get; set; }
-            public string lastUpdateFile { get; set; } // Asegúrate de que esta propiedad esté presente
+            public string lastUpdateHashes { get; set; }
+            public bool AutoCopyHashes { get; set; }
         }
     }
 }

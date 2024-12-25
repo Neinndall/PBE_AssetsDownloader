@@ -2,9 +2,9 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using PBE_NewFileExtractor.Utils;
+using PBE_AssetsDownloader.Utils;
 
-namespace PBE_NewFileExtractor.Services
+namespace PBE_AssetsDownloader.Services
 {
     public class Requests
     {

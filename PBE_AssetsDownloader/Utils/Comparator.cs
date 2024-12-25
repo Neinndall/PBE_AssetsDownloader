@@ -5,27 +5,30 @@ using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
 
-namespace PBE_NewFileExtractor.Utils
+namespace PBE_AssetsDownloader.Utils
 {
     public class FilesComparator
     {
-        private readonly string _oldGameHashesPath;
-        private readonly string _newGameHashesPath;
-        private readonly string _oldLcuHashesPath;
-        private readonly string _newLcuHashesPath;
-        private readonly string _differencesGameFilePath;
-        private readonly string _differencesLcuFilePath;
+        private string _oldGameHashesPath;
+        private string _newGameHashesPath;
+        private string _oldLcuHashesPath;
+        private string _newLcuHashesPath;
+        private string _differencesGameFilePath;
+        private string _differencesLcuFilePath;
 
-        public FilesComparator(string oldGameHashesPath, string newGameHashesPath, string oldLcuHashesPath, string newLcuHashesPath, string differencesGameFilePath, string differencesLcuFilePath)
+        // Método para inicializar rutas y ejecutar la comparación
+        public void HashesComparator(string newHashesDirectory, string oldHashesDirectory, string resourcesPath)
         {
-            _oldGameHashesPath = oldGameHashesPath;
-            _newGameHashesPath = newGameHashesPath;
-            _oldLcuHashesPath = oldLcuHashesPath;
-            _newLcuHashesPath = newLcuHashesPath;
-            _differencesGameFilePath = differencesGameFilePath;
-            _differencesLcuFilePath = differencesLcuFilePath;
+            // Configura las rutas necesarias
+            _newGameHashesPath = Path.Combine(newHashesDirectory, "hashes.game.txt");
+            _oldGameHashesPath = Path.Combine(oldHashesDirectory, "hashes.game.txt");
+            _newLcuHashesPath = Path.Combine(newHashesDirectory, "hashes.lcu.txt");
+            _oldLcuHashesPath = Path.Combine(oldHashesDirectory, "hashes.lcu.txt");
+            _differencesGameFilePath = Path.Combine(resourcesPath, "differences_game.txt");
+            _differencesLcuFilePath = Path.Combine(resourcesPath, "differences_lcu.txt");
         }
 
+        // Método para verificar las diferencias entre los archivos
         public async Task CheckFilesDiffAsync()
         {
             try
@@ -47,6 +50,7 @@ namespace PBE_NewFileExtractor.Utils
             }
         }
 
+        // Método para comparar los hashes entre dos archivos
         private IEnumerable<string> CompareHashes(string oldFile, string newFile)
         {
             var oldHashes = File.ReadAllLines(oldFile);
@@ -54,6 +58,7 @@ namespace PBE_NewFileExtractor.Utils
             return newHashes.Except(oldHashes);
         }
 
+        // Método para guardar las diferencias en un archivo
         private async Task SaveDifferencesToFile(IEnumerable<string> differences, string fileName)
         {
             await File.WriteAllLinesAsync(fileName, differences);

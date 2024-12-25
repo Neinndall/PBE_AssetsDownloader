@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace PBE_NewFileExtractor.Info
+namespace PBE_AssetsDownloader.Info
 {
     public static class ApplicationInfos
     {

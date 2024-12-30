@@ -22,7 +22,7 @@
 </div>
 
 <div align="center">
-  <p>Tool for League of Legends that allows you to stay up to date with new assets with each update of the PBE Server using <a href="https://raw.communitydragon.org/">CommunityDragon</a>.</p>
+  <p>This tool is designed to automatically download and manage new assets from League of Legends PBE server updates. It helps content creators, players of league of legends, and more stay up-to-date with the latest changes and additions to the game. <a href="https://raw.communitydragon.org/">CommunityDragon</a>.</p>
 </div>
 
 # Installation

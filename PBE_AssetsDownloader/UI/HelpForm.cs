@@ -1,58 +1,71 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using PBE_NewFileExtractor.Info;
+using PBE_AssetsDownloader.Info;
 
-namespace PBE_NewFileExtractor.UI
+namespace PBE_AssetsDownloader.UI
 {
     public partial class HelpForm : Form
     {
-        private const string ChangelogFilePath = "changelogs.txt"; // Ruta del archivo de changelogs
+        private const string ChangelogFilePath = "changelogs.txt";
 
         public HelpForm()
         {
             InitializeComponent();
-            // LLamamos al Icono en la pestaña de Settings
             ApplicationInfos.SetIcon(this);
         }
 
-        // Mensaje sobre la herramienta
         private void btnAbout_Click(object sender, EventArgs e)
         {
-            ShowText("PBE_AssetsDownloader is a tool to download new assets from each Server Update (PBE).");   // \nVersión 1.0
+            string aboutText = 
+                "PBE_AssetsDownloader - League of Legends" + Environment.NewLine +
+                Environment.NewLine +
+                "Description:" + Environment.NewLine +
+                "This tool is designed to automatically download and manage new assets from League of Legends PBE server updates. " +
+                "It helps content creators and developers stay up-to-date with the latest changes and additions to the game." + Environment.NewLine +
+                Environment.NewLine +
+                "Key Features:" + Environment.NewLine +
+                "• Automatic detection of new PBE updates." + Environment.NewLine +
+                "• Downloads and organizes new game assets." + Environment.NewLine +
+                "• Supports synchronization with CDTB." + Environment.NewLine +
+                "• Auto-copy functionality for hash files." + Environment.NewLine +
+                Environment.NewLine +
+                "How to Use:" + Environment.NewLine +
+                "1. Configure your desired settings in the Settings menu" + Environment.NewLine +
+                "2. Select the directories for the old and new hashes files." + Environment.NewLine +
+                "3. Enable auto-copy if needed." + Environment.NewLine +
+                "4. The tool will automatically check for and download new PBE assets." + Environment.NewLine +
+                Environment.NewLine +
+                "For more information and updates, check the Changelogs section.";
+
+            ShowText(aboutText);
         }
 
         private void btnChangelogs_Click(object sender, EventArgs e)
         {
-            if (File.Exists(ChangelogFilePath))
+            try
             {
-                string changelogContent = File.ReadAllText(ChangelogFilePath);
-                ShowText(changelogContent);
+                if (File.Exists(ChangelogFilePath))
+                {
+                    string changelogContent = File.ReadAllText(ChangelogFilePath);
+                    ShowText(changelogContent);
+                }
+                else
+                {
+                    ShowText("The changelog file was not found.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ShowText("The changelog file was not found.");
+                ShowText($"Error reading changelog file: {ex.Message}");
             }
         }
 
         private void ShowText(string text)
         {
-            // Limpiar el panel de contenido
-            contentPanel.Controls.Clear();
-
-            // Crear un nuevo Label para mostrar el texto
-            Label contentLabel = new Label
-            {
-                AutoSize = false,
-                Text = text,
-                Dock = DockStyle.Fill,
-                TextAlign = System.Drawing.ContentAlignment.TopLeft,
-                Padding = new Padding(10),
-                AutoEllipsis = true
-            };
-
-            // Añadir el Label al panel de contenido
-            contentPanel.Controls.Add(contentLabel);
+            richTextBoxContent.Clear();
+            richTextBoxContent.SelectionIndent = 4;
+            richTextBoxContent.Text = text;
         }
     }
 }

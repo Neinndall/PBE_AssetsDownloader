@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace PBE_NewFileExtractor.Utils
+namespace PBE_AssetsDownloader.Utils
 {
     public class ProcessManager
     {

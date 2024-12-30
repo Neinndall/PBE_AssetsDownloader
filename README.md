@@ -31,15 +31,13 @@ To use this software you need [.Net 8 Runtime](https://dotnet.microsoft.com/en-u
 # How to use
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/ef99efe4-468a-4c9f-a6c8-b41d15d4bee7" alt="Interfaz" width="380x380"/>
+  <img src="https://github.com/user-attachments/assets/7c5db522-3ae3-46dc-9d52-f618dd09865b" alt="Interfaz" width="380x380"/>
 </div>
 
-1. Open the .exe
-2. Go to "Settings" and click on the option to synchronize hashes with CDTB. Be sure to say: YES
-3. Put the directory of new hashes and old hashes
-5. Start!
-5. Done!
-5. Check the "AssetsDownloaded" folder and you will find the new assets.
+1. Open the program
+2. If you want to review the settings and select the settings that are necessary, I recommend synchronizing with CDTB.
+3. Select the appropriate directories.
+4. Start!
 
 # Special thanks
 Thanks to [MaNeRz](https://github.com/MaNeRz) for letting me upload this tool with improvements.

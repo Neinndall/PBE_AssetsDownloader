@@ -56,6 +56,15 @@ namespace PBE_AssetsDownloader.Utils
 
         private string GetImageFolder(string fileName, string url)
         {
+            if (url.Contains("/summoneremotes/") || fileName.Contains(".accessories") || fileName.Contains("_accessories") || fileName.Contains("Inventory.TFT") || fileName.Contains("_inventory"))
+                return Path.Combine(SubAssetsDownloadedPath, "Images", "Emotes");
+            if (url.Contains("/profile-icons/"))
+                return Path.Combine(SubAssetsDownloadedPath, "Images", "Icons");
+            if (url.Contains("/champion-chroma-images/"))
+                return Path.Combine(SubAssetsDownloadedPath, "Images", "Chromas");
+            if (url.Contains("/loadingscreen/"))
+                return Path.Combine(SubAssetsDownloadedPath, "Images", "LoadingScreen");
+            
             if (url.Contains("/hud/") && (fileName.Contains("circle") || fileName.Contains("square")))
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Hud");
             if (fileName.Contains("loadscreen_") || fileName.Contains("loadscreen"))
@@ -64,21 +73,24 @@ namespace PBE_AssetsDownloader.Utils
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins", "SplashArts");
             if (url.Contains("/skins/") && url.Contains("/particles/"))
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins", "Particles");
-            if (url.Contains("/skins/") && (fileName.Contains("2x_") || fileName.Contains("4x_") || fileName.Contains("_skin")))
+            if (url.Contains("/skins/") && (fileName.Contains("2x_") || fileName.Contains("4x_") || fileName.Contains("_skin") || fileName.Contains("_base")))
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins");
-            if (url.Contains("tft"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "TFT");
             if (url.Contains("/regalia/"))
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Banners");
-            if ((url.Contains("/maps/") && (fileName.Contains("_env_update") || fileName.Contains("_env"))) || url.Contains("/terrainpaint/"))
+            if (url.Contains("/maps/") && (url.Contains("/srs/") || (fileName.Contains("_env_update") || fileName.Contains("_env"))) || url.Contains("/terrainpaint/"))
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps");
+
+            if (url.Contains("/maps/") && (url.Contains("/tft/") || (url.Contains("/mapgeometry/"))))
+                return Path.Combine(SubAssetsDownloadedPath, "Images", "TFT", "Maps");
+            if (url.Contains("tft"))
+                return Path.Combine(SubAssetsDownloadedPath, "Images", "TFT");
+                
             if (url.Contains("/maps/particles/"))
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps", "Particles");
             if (url.Contains("/shared/particles/"))
                 return Path.Combine(SubAssetsDownloadedPath, "Images", "Shared", "Particles");
-            if (url.Contains("/summoneremotes/") && fileName.Contains(".accessories"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Emotes");
 
+                
             return Path.Combine(SubAssetsDownloadedPath, "Images");
         }
 

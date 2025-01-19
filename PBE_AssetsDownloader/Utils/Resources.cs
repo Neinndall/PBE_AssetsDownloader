@@ -20,7 +20,7 @@ namespace PBE_AssetsDownloader.Utils
             _assetDownloader = new AssetDownloader(_httpClient, directoryCreator);
         }
 
-        public async Task DownloadAssetsAsync()
+        public async Task GetResourcesFiles()
         {
             var directoryCreator = new DirectoriesCreator();
             await directoryCreator.CreateDirAssetsDownloadedAsync();

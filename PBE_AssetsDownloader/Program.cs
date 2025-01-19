@@ -58,7 +58,7 @@ namespace PBE_AssetsDownloader
 
                 // Crear una instancia de Resources para descargar los assets
                 var resourcesDownloader = new Resources(httpClient, directoryCreator); // Pasar directoryCreator aquí
-                await resourcesDownloader.DownloadAssetsAsync();
+                await resourcesDownloader.GetResourcesFiles();
 
                 Log.Information("Download complete.");
 

@@ -18,7 +18,7 @@ namespace PBE_AssetsDownloader.Services
         {
             ".luabin", ".luabin64", ".preload", ".scb",
             ".sco", ".skl", ".mapgeo", ".subchunktoc", ".stringtable",
-            ".anm"
+            ".anm", ".dat", ".bnk", ".wpk"
         };
 
         public AssetDownloader(HttpClient httpClient, DirectoriesCreator directoriesCreator)

@@ -70,6 +70,7 @@ namespace PBE_AssetsDownloader.Utils
             // Modificar las URLs no encontradas para los Game Assets
             var modifiedNotFoundGameAssets = notFoundGameAssets
                 .Select(url => url.EndsWith(".dds") ? url.Replace(".dds", ".png") : url)
+                .Select(url => url.EndsWith(".tex") ? url.Replace(".tex", ".png") : url)
                 .ToList();
 
             // Combinar todas las URLs no encontradas

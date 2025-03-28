@@ -23,7 +23,13 @@ namespace PBE_AssetsDownloader
             Application.Run(new MainForm());
         }
 
-        public static async Task<string> RunExtraction(string newHashesDirectory, string oldHashesDirectory, bool syncHashesWithCDTB, bool autoCopyHashes, Action<string> logAction)
+        public static async Task RunExtraction(
+            string newHashesDirectory, 
+            string oldHashesDirectory, 
+            bool syncHashesWithCDTB, 
+            bool autoCopyHashes, 
+            bool CreateBackUpOldHashes, 
+            Action<string> logAction)
         {
             // Configurar el logger
             Log.Logger = new LoggerConfiguration()
@@ -45,37 +51,31 @@ namespace PBE_AssetsDownloader
                 // Obtener la ruta de Resources con timestamp
                 var resourcesPath = directoryCreator.ResourcesPath;
 
-                // Crear instancia de FilesComparator
-                var comparator = new FilesComparator();
-                comparator.HashesComparator(newHashesDirectory, oldHashesDirectory, resourcesPath);
-
-                // Mensajes de comparación
-                await comparator.CheckFilesDiffAsync();
+                // Obtener la lista de extensiones excluidas desde la instancia de AssetDownloader
+                var excludedExtensions = assetDownloader.ExcludedExtensions;
 
                 // Crear una instancia de HashesManager para comparar hashes
-                var hashesManager = new HashesManager(oldHashesDirectory, newHashesDirectory, resourcesPath);
+                var hashesManager = new HashesManager(oldHashesDirectory, newHashesDirectory, resourcesPath, excludedExtensions);
                 await hashesManager.CompareHashesAsync();
 
                 // Crear una instancia de Resources para descargar los assets
-                var resourcesDownloader = new Resources(httpClient, directoryCreator); // Pasar directoryCreator aquí
+                var resourcesDownloader = new Resources(httpClient, directoryCreator); 
                 await resourcesDownloader.GetResourcesFiles();
 
                 Log.Information("Download complete.");
+                
+                // Crear una instancia de BackUp para manejar el respaldo de hashes antiguos
+                var backUp = new BackUp(directoryCreator);
+                var backupResult = await backUp.HandleBackUpAsync(CreateBackUpOldHashes);
 
-                // Crear una instancia de HashCopier para hacer el copiar de hashes si está activado
-                if (autoCopyHashes)
-                {
-                    var hashCopier = new HashCopier();
-                    return await hashCopier.CopyNewHashesToOlds(newHashesDirectory, oldHashesDirectory);
-                }
-
-                return "Hashes were not replaced because autoCopyHashes is disabled.";
+                // Crear una instancia de HashCopier para manejar el copiado de nuevos hashes a antiguos
+                var hashCopier = new HashCopier();
+                var copyResult = await hashCopier.HandleCopyAsync(autoCopyHashes, newHashesDirectory, oldHashesDirectory);
             }
             catch (Exception ex)
             {
                 Log.Fatal(ex, "An unexpected error has occurred.");
                 Log.Fatal(ex, "StackTrace: {0}", ex.StackTrace);
-                return "An error occurred during the process.";
             }
             finally
             {

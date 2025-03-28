@@ -5,12 +5,14 @@ namespace PBE_AssetsDownloader.UI
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.CheckBox checkBoxSyncHashes;
         private System.Windows.Forms.CheckBox checkBoxAutoCopy;
+        private System.Windows.Forms.CheckBox CheckBoxCreateBackUp;
         private System.Windows.Forms.RichTextBox richTextBoxLogs; // Cambiado a RichTextBox
 
         private void InitializeComponent()
         {
             this.checkBoxSyncHashes = new System.Windows.Forms.CheckBox();
             this.checkBoxAutoCopy = new System.Windows.Forms.CheckBox();
+            this.CheckBoxCreateBackUp = new System.Windows.Forms.CheckBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.richTextBoxLogs = new System.Windows.Forms.RichTextBox(); // Inicialización del RichTextBox
 
@@ -35,8 +37,19 @@ namespace PBE_AssetsDownloader.UI
             this.checkBoxAutoCopy.Name = "checkBoxAutoCopy";
             this.checkBoxAutoCopy.Size = new System.Drawing.Size(250, 24);
             this.checkBoxAutoCopy.TabIndex = 1;
-            this.checkBoxAutoCopy.Text = "Automatically copy new hashes to old";
+            this.checkBoxAutoCopy.Text = "Automatically replace old hashes";
             this.checkBoxAutoCopy.UseVisualStyleBackColor = true;
+            
+            // 
+            // CheckBoxCreateBackUp
+            // 
+            this.CheckBoxCreateBackUp.AutoSize = true;
+            this.CheckBoxCreateBackUp.Location = new System.Drawing.Point(12, 48);
+            this.CheckBoxCreateBackUp.Name = "CheckBoxCreateBackUp";
+            this.CheckBoxCreateBackUp.Size = new System.Drawing.Size(250, 24);
+            this.CheckBoxCreateBackUp.TabIndex = 1;
+            this.CheckBoxCreateBackUp.Text = "Create backup old hashes";
+            this.CheckBoxCreateBackUp.UseVisualStyleBackColor = true;
 
             // 
             // richTextBoxLogs
@@ -72,6 +85,7 @@ namespace PBE_AssetsDownloader.UI
             this.ClientSize = new System.Drawing.Size(284, 261);
             this.Controls.Add(this.checkBoxAutoCopy);
             this.Controls.Add(this.checkBoxSyncHashes);
+            this.Controls.Add(this.CheckBoxCreateBackUp);
             this.Controls.Add(this.richTextBoxLogs);
             this.Controls.Add(this.btnSave);
             this.Name = "SettingsForm";

@@ -18,11 +18,12 @@ namespace PBE_AssetsDownloader.UI
 
         public bool syncHashesWithCDTB { get; private set; }
         public bool AutoCopyHashes { get; private set; }
+        public bool CreateBackUpOldHashes { get; private set; }
 
         // Evento para notificar cambios en la configuración
         public event EventHandler SettingsChanged;
 
-        public SettingsForm(bool syncHashesWithCDTB, bool autoCopyHashes, Status status)
+        public SettingsForm(bool syncHashesWithCDTB, bool autoCopyHashes, bool CreateBackUpOldHashes, Status status)
         {
             InitializeComponent();
             ApplicationInfos.SetIcon(this);
@@ -38,16 +39,21 @@ namespace PBE_AssetsDownloader.UI
 
             this.AutoCopyHashes = settings.AutoCopyHashes;
             checkBoxAutoCopy.Checked = AutoCopyHashes;
+            
+            this.CreateBackUpOldHashes = settings.CreateBackUpOldHashes;
+            CheckBoxCreateBackUp.Checked = CreateBackUpOldHashes;
         }
 
         private async void btnSave_Click(object sender, EventArgs e)
         {
             syncHashesWithCDTB = checkBoxSyncHashes.Checked;
             AutoCopyHashes = checkBoxAutoCopy.Checked;
+            CreateBackUpOldHashes = CheckBoxCreateBackUp.Checked;
 
             var settings = LoadSettings();
             settings.syncHashesWithCDTB = syncHashesWithCDTB;
             settings.AutoCopyHashes = AutoCopyHashes;
+            settings.CreateBackUpOldHashes = CreateBackUpOldHashes;
 
             SaveSettings(settings.syncHashesWithCDTB, settings.lastUpdateHashes);
 
@@ -105,7 +111,7 @@ namespace PBE_AssetsDownloader.UI
                 return JsonConvert.DeserializeObject<AppSettings>(json);
             }
 
-            return new AppSettings { syncHashesWithCDTB = false, AutoCopyHashes = false };
+            return new AppSettings { syncHashesWithCDTB = false, AutoCopyHashes = false, CreateBackUpOldHashes = false };
         }
 
         private void SaveSettings(bool syncHashesWithCDTB, string lastUpdateHashes = null)
@@ -113,6 +119,7 @@ namespace PBE_AssetsDownloader.UI
             var settings = LoadSettings();
             settings.syncHashesWithCDTB = syncHashesWithCDTB;
             settings.AutoCopyHashes = AutoCopyHashes;
+            settings.CreateBackUpOldHashes = CreateBackUpOldHashes;
 
             if (!string.IsNullOrEmpty(lastUpdateHashes))
             {
@@ -150,6 +157,7 @@ namespace PBE_AssetsDownloader.UI
             public bool syncHashesWithCDTB { get; set; }
             public string lastUpdateHashes { get; set; }
             public bool AutoCopyHashes { get; set; }
+            public bool CreateBackUpOldHashes { get; set; }
         }
     }
 }

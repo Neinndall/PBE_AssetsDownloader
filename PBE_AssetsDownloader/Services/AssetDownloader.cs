@@ -12,15 +12,15 @@ namespace PBE_AssetsDownloader.Services
     {
         private readonly HttpClient _httpClient;
         private readonly DirectoriesCreator _directoriesCreator; // Crea una instancia de DirectoriesCreator
-
-        // Lista de extensiones excluidas
-        private readonly List<string> _excludedExtensions = new()
+        private readonly List<string> _excludedExtensions = new() // Lista de extensiones excluidas
         {
             ".luabin", ".luabin64", ".preload", ".scb",
             ".sco", ".skl", ".mapgeo", ".subchunktoc", ".stringtable",
-            ".anm", ".dat", ".bnk", ".wpk"
+            ".anm", ".dat", ".bnk", ".wpk", 
+            ".cfg", ".cfgbin"
         };
 
+        public List<string> ExcludedExtensions => _excludedExtensions;
         public AssetDownloader(HttpClient httpClient, DirectoriesCreator directoriesCreator)
         {
             _httpClient = httpClient;
@@ -29,6 +29,12 @@ namespace PBE_AssetsDownloader.Services
 
         private string AdjustUrlBasedOnRules(string url)
         {
+            // Ignorar shaders del juego
+            if (url.Contains("/shaders/"))
+            {
+                return null; // Ignorar
+            }
+  
             // Cambiar extensión o ignorar según las reglas específicas
             if (url.EndsWith(".dds") &&
                 (url.Contains("/loot/companions/") || 
@@ -40,8 +46,11 @@ namespace PBE_AssetsDownloader.Services
                  url.Contains("/skins/") || 
                  url.Contains("uiautoatlas") || 
                  url.Contains("/summonerbanners/") || 
+                 url.Contains("/summoneremotes/") ||
                  url.Contains("/hud/") || 
-                 url.Contains("/regalia/")))
+                 url.Contains("/regalia/") ||
+                 url.Contains("/levels/") ||
+                 url.Contains("/spells/")))
             {
                 // Si contiene "/hud/" y termina en ".png", ignorar la URL
                 if (url.Contains("/hud/") && url.EndsWith(".png"))
@@ -74,12 +83,31 @@ namespace PBE_AssetsDownloader.Services
                     return null; // Ignorar el resto
                 }
             }
+            
+            // Si contiene "/summonericons/" y termina en ".tex", ignorar la URL
+            if (url.Contains("/summonericons/") && url.EndsWith(".tex"))
+            {
+                return null; // Ignorar
+            }
+            
             // Si la url termina en .tex cambiar la extensión a png y descargar
             if (url.EndsWith(".tex"))
             {
                 url = Path.ChangeExtension(url, ".png"); // Cambiar la extensión a ".png"
             }
+            
+            // Si la url termina en .atlas cambiar la extensión a png y descargar
+            if (url.EndsWith(".atlas"))
+            {
+                url = Path.ChangeExtension(url, ".png"); // Cambiar la extensión a ".png"
+            }
 
+            // Ignoramos los archivos bins de campeones que son urls muy largas
+            if (url.Contains("/game/data/") && url.EndsWith(".bin"))
+            {
+                return null; // Ignorar
+            }
+            
             return url;
         }
         
@@ -102,10 +130,10 @@ namespace PBE_AssetsDownloader.Services
                 var extension = Path.GetExtension(url);
                 
                 // Excluir extensiones para los assets (por si acaso no fue filtrado antes)
-                if (_excludedExtensions.Contains(extension))
-                {
-                    continue;
-                }
+                //if (_excludedExtensions.Contains(extension))
+                //{
+                //    continue;
+                //}
 
                 // Funcion para ajustar los url con la extension adecuada segun criterios
                 url = AdjustUrlBasedOnRules(url);

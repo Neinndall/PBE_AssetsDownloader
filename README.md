@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/img/new/test.png" alt="Icono PBE_AssetsDownloader" width="120"/>
+  <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/dev_logo/img/new/test2.png" alt="Icono PBE_AssetsDownloader" width="120"/>
 </div>
 
 <div align="center">

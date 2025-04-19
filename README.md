@@ -3,6 +3,10 @@
 </div>
 
 <div align="center">
+  <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/dev_logo/img/new/logo2.png" alt="Icono PBE_AssetsDownloader" width="120"/>
+</div>
+
+<div align="center">
   <h1>PBE_AssetsDownloader</h1>
 </div>
 

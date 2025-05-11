@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
 
@@ -12,8 +13,10 @@ namespace PBE_AssetsDownloader.Utils
 
         public DirectoriesCreator()
         {
-            SubAssetsDownloadedPath = Path.Combine("AssetsDownloaded", DateTime.Now.ToString("dd-M-yyyy"));
-            ResourcesPath = Path.Combine("Resources", DateTime.Now.ToString("dd-M-yyyy"));
+            string date = DateTime.Now.ToString("dd-M-yyyy.H.mm.ss");  // Con horas, minutos y segundos
+
+            SubAssetsDownloadedPath = Path.Combine("AssetsDownloaded", date);
+            ResourcesPath = Path.Combine("Resources", date);
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);
@@ -22,11 +25,11 @@ namespace PBE_AssetsDownloader.Utils
 
         public Task CreateHashesNewDirectoryAsync() => CreateFoldersAsync(Path.Combine("hashes", "new"));
 
-        public Task CreateBackUpOldHashesAsync() => CreateFoldersAsync(Path.Combine("hashes", "olds", "BackUp", DateTime.Now.ToString("dd-M-yyyy")));
+        public Task CreateBackUpOldHashesAsync() => CreateFoldersAsync(Path.Combine("hashes", "olds", "BackUp", DateTime.Now.ToString("dd-M-yyyy.H.mm.ss")));
 
         public string GetHashesNewsDirectoryPath() => Path.Combine("hashes", "new");
 
-        public string GetBackUpOldHashesPath() => Path.Combine("hashes", "olds", "BackUp", DateTime.Now.ToString("dd-M-yyyy"));
+        public string GetBackUpOldHashesPath() => Path.Combine("hashes", "olds", "BackUp", DateTime.Now.ToString("dd-M-yyyy.H.mm.ss"));
 
         public async Task CreateAllDirectoriesAsync()
         {
@@ -34,113 +37,47 @@ namespace PBE_AssetsDownloader.Utils
             await CreateDirAssetsDownloadedAsync();
             await CreateHashesNewDirectoryAsync();
         }
-
-        public string CreateAssetTypeDirectory(string finalExtension, string fileName, string url)
+        
+        public string CreateAssetDirectoryFromPath(string url, string downloadDirectory)
         {
-            string assetTypeFolder = finalExtension switch
-            {
-                ".png" or ".jpg" or ".jpeg" => GetImageFolder(fileName, url),
-                ".webm" or ".mp4" => Path.Combine(SubAssetsDownloadedPath, "Videos"),
-                ".ogg" or ".mp3" or ".wav" => Path.Combine(SubAssetsDownloadedPath, "Audios"),
-                ".skn" or ".skl" or ".scb" or ".anm" => Path.Combine(SubAssetsDownloadedPath, "Meshes"),
-                ".json" or ".txt" => Path.Combine(SubAssetsDownloadedPath, "Text Files"),
-                ".bin" => Path.Combine(SubAssetsDownloadedPath, "Bin Files"),
-                ".svg" => Path.Combine(SubAssetsDownloadedPath, "Svgs"),
-                _ => string.Empty
-            };
+            // Extraer la ruta del asset desde la URL
+            string path = new Uri(url).AbsolutePath; // /pbe/plugins/...
 
-            if (!string.IsNullOrEmpty(assetTypeFolder) && !Directory.Exists(assetTypeFolder))
+            // Quitar el prefijo "/pbe/"
+            if (path.StartsWith("/pbe/"))
             {
-                Directory.CreateDirectory(assetTypeFolder);
-                Log.Information("Directory created for asset type: {0}", assetTypeFolder);
+                path = path.Substring(5); // Eliminar "/pbe/"
             }
 
-            return assetTypeFolder;
+            // Reemplazar "rcp-be-lol-game-data/global/" por "GameData/"
+            string patternToReplace = "rcp-be-lol-game-data/global/default/";
+            if (path.Contains(patternToReplace))
+            {
+                path = path.Replace(patternToReplace, "rcp-be-lol-game-data/");
+            }
+
+            // Convertir a formato de Windows
+            string safePath = path.Replace("/", "\\");
+
+            // Reemplazar caracteres no válidos en la ruta
+            foreach (char invalidChar in Path.GetInvalidPathChars())
+            {
+                safePath = safePath.Replace(invalidChar.ToString(), "_");
+            }
+
+            // Crear el path completo
+            string fullDirectoryPath = Path.Combine(downloadDirectory, safePath);
+            string directory = Path.GetDirectoryName(fullDirectoryPath);
+
+            // Si la carpeta no existe, crearla
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory); // Crear las carpetas necesarias
+            }
+
+            return directory; // Devolver la carpeta donde se guardará el archivo
         }
 
-        private string GetImageFolder(string fileName, string url)
-        {
-            if (url.Contains("/summoneremotes/") || fileName.Contains(".accessories") || fileName.Contains("_accessories") || fileName.Contains("Inventory.TFT") || fileName.Contains("_inventory"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Emotes");
-            
-            if (url.Contains("/profile-icons/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Icons");
-            
-            if (url.Contains("/ux") && (url.Contains("/teamicons/")))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Others Icons");
-            
-            if (url.Contains("/champion-chroma-images/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Chromas");
-            
-            if (url.Contains("/loadingscreen/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "LoadingScreen");
-            
-            if (url.Contains("/hud/") && (fileName.Contains("circle") || fileName.Contains("square")))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Hud");
-            
-            if (fileName.Contains("loadscreen_") || fileName.Contains("loadscreen"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins", "LoadScreen");
-            
-            if (url.Contains("/tft") && (fileName.Contains("splash_tile") || fileName.Contains("splash_uncentered") || fileName.Contains("splash_centered")))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins", "SplashArts", "TFT");
-            
-            if (url.Contains("plugins") && (fileName.Contains("splash_centered") || fileName.Contains("splash_tile") || fileName.Contains("splash_uncentered")))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins", "SplashArts");
-            
-            if (url.Contains("/skins/") && url.Contains("/particles/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins", "Particles");
-            
-            if (url.Contains("/skins/") && (url.Contains("skinfeaturespreview")))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins", "Exalted");
-            
-            if (url.Contains("/skins/") && (fileName.Contains("2x_") || fileName.Contains("4x_") || fileName.Contains("_skin") || fileName.Contains("_base")))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Skins");
-            
-            if (url.Contains("/regalia/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Banners");
-            
-            if (url.Contains("/maps/") && (url.Contains("/kitpieces") && url.Contains("/textures/")))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps", "Textures");
-            
-            if (url.Contains("/maps/") && url.Contains("/kitpieces"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps");
-            
-            if (url.Contains("/maps/") && (url.Contains("/srs/") || fileName.Contains("_env_update") || fileName.Contains("_env")) || url.Contains("/terrainpaint/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps");
-            
-            if (url.Contains("levels/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps");
-            
-            if (url.Contains("/maps/") && url.Contains("/mapgeometry/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps");
-            
-            if (url.Contains("tft"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "TFT");
-                
-            if (url.Contains("/maps/particles/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Maps", "Particles");
-            
-            if (url.Contains("/shared/particles/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Shared", "Particles");
-            
-            if (url.Contains("/augments/") && url.Contains("/icons/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Augments");
-            
-            if (url.Contains("/augments/") && url.Contains("/statanvil/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Augments", "Statanvil");
-            
-            if (url.Contains("/companions/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Companions");
-            
-            if (url.Contains("/loot/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Loot");
-            
-            if (url.Contains("/seasons/"))
-                return Path.Combine(SubAssetsDownloadedPath, "Images", "Seasons");
-            
-            // Si ninguna de las condiciones anteriores se cumple, clasificar como "Unclassified"
-            return Path.Combine(SubAssetsDownloadedPath, "Images", "Unclassified");
-        }
 
         private static Task CreateFoldersAsync(string path)
         {

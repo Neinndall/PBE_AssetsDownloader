@@ -18,7 +18,7 @@ namespace PBE_AssetsDownloader.Services
             _directoriesCreator = directoriesCreator;
         }
 
-        public async Task DownloadFileAsync(string fileName, string downloadDirectory, Action<string> logAction)
+        public async Task DownloadHashesAsync(string fileName, string downloadDirectory, Action<string> logAction)
         {
             var url = $"{BaseUrl}/{fileName}";
 
@@ -52,8 +52,8 @@ namespace PBE_AssetsDownloader.Services
 
         public async Task DownloadHashesFilesAsync(string downloadDirectory, Action<string> logAction)
         {
-            await DownloadFileAsync("hashes.game.txt", downloadDirectory, logAction);
-            await DownloadFileAsync("hashes.lcu.txt", downloadDirectory, logAction);
+            await DownloadHashesAsync("hashes.game.txt", downloadDirectory, logAction);
+            await DownloadHashesAsync("hashes.lcu.txt", downloadDirectory, logAction);
         }
 
         public async Task SyncHashesIfEnabledAsync(bool syncHashesWithCDTB, Action<string> logAction)

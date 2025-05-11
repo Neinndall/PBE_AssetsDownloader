@@ -21,8 +21,11 @@ namespace PBE_AssetsDownloader.UI
         private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.Button btnHelp;
         private System.Windows.Forms.Button btnSettings;
+        private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.RichTextBox richTextBoxLogs; // RichTextBox para mostrar los logs
+
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+        private ToolTip toolTip; // Informacion
 
         protected override void Dispose(bool disposing)
         {
@@ -35,154 +38,151 @@ namespace PBE_AssetsDownloader.UI
 
         private void InitializeComponent()
         {
-            this.labelNewHashes = new System.Windows.Forms.Label();
-            this.newHashesTextBox = new System.Windows.Forms.TextBox();
-            this.btnSelectNewHashesDirectory = new System.Windows.Forms.Button();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            labelNewHashes = new Label();
+            newHashesTextBox = new TextBox();
+            btnSelectNewHashesDirectory = new Button();
+            labelOldHashes = new Label();
+            oldHashesTextBox = new TextBox();
+            btnSelectOldHashesDirectory = new Button();
+            startButton = new Button();
+            btnHelp = new Button();
+            btnSettings = new Button();
+            btnExport = new Button();
+            richTextBoxLogs = new RichTextBox();
+            folderBrowserDialog = new FolderBrowserDialog();
+            toolTip = new ToolTip();
+            SuspendLayout();
             
-            this.labelOldHashes = new System.Windows.Forms.Label();
-            this.oldHashesTextBox = new System.Windows.Forms.TextBox();
-            this.btnSelectOldHashesDirectory = new System.Windows.Forms.Button();
-            
-            this.startButton = new System.Windows.Forms.Button();
-            this.btnHelp = new System.Windows.Forms.Button();
-            this.btnSettings = new System.Windows.Forms.Button();
-            this.richTextBoxLogs = new System.Windows.Forms.RichTextBox(); // Inicialización del RichTextBox
-            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            
-            this.SuspendLayout();
-
-            // 
             // labelNewHashes
-            // 
-            this.labelNewHashes.AutoSize = true;
-            this.labelNewHashes.Location = new System.Drawing.Point(10, 50); // Ajustar la ubicación
-            this.labelNewHashes.Name = "labelNewHashes";
-            this.labelNewHashes.Size = new System.Drawing.Size(226, 17);
-            this.labelNewHashes.TabIndex = 0;
-            this.labelNewHashes.Text = "Choose your directory new hashes";
-            
-            // 
-            // newHashesTextBox
-            // 
-            this.newHashesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.newHashesTextBox.Location = new System.Drawing.Point(10, 70); // Ajustar la ubicación
-            this.newHashesTextBox.Name = "newHashesTextBox";
-            this.newHashesTextBox.Size = new System.Drawing.Size(690, 20);
-            this.newHashesTextBox.TabIndex = 1;
-            
-            // 
-            // btnSelectNewHashesDirectory
-            // 
-            this.btnSelectNewHashesDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSelectNewHashesDirectory.Location = new System.Drawing.Point(705, 70); // Ajustar la ubicación
-            this.btnSelectNewHashesDirectory.Name = "btnSelectNewHashesDirectory";
-            this.btnSelectNewHashesDirectory.Size = new System.Drawing.Size(75, 26);
-            this.btnSelectNewHashesDirectory.TabIndex = 2;
-            this.btnSelectNewHashesDirectory.Text = "Browse";
-            this.btnSelectNewHashesDirectory.UseVisualStyleBackColor = true;
-            this.btnSelectNewHashesDirectory.Click += new System.EventHandler(this.btnSelectNewHashesDirectory_Click);
-            
-            // 
-            // labelOldHashes
-            // 
-            this.labelOldHashes.AutoSize = true;
-            this.labelOldHashes.Location = new System.Drawing.Point(10, 100); // Ajustar la ubicación
-            this.labelOldHashes.Name = "labelOldHashes";
-            this.labelOldHashes.Size = new System.Drawing.Size(226, 17);
-            this.labelOldHashes.TabIndex = 3;
-            this.labelOldHashes.Text = "Choose your directory old hashes";
-            
-            // 
-            // oldHashesTextBox
-            // 
-            this.oldHashesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.oldHashesTextBox.Location = new System.Drawing.Point(10, 120); // Ajustar la ubicación
-            this.oldHashesTextBox.Name = "oldHashesTextBox";
-            this.oldHashesTextBox.Size = new System.Drawing.Size(690, 20);
-            this.oldHashesTextBox.TabIndex = 4;
-            
-            // 
-            // btnSelectOldHashesDirectory
-            // 
-            this.btnSelectOldHashesDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSelectOldHashesDirectory.Location = new System.Drawing.Point(705, 120); // Ajustar la ubicación
-            this.btnSelectOldHashesDirectory.Name = "btnSelectOldHashesDirectory";
-            this.btnSelectOldHashesDirectory.Size = new System.Drawing.Size(75, 26);
-            this.btnSelectOldHashesDirectory.TabIndex = 5;
-            this.btnSelectOldHashesDirectory.Text = "Browse";
-            this.btnSelectOldHashesDirectory.UseVisualStyleBackColor = true;
-            this.btnSelectOldHashesDirectory.Click += new System.EventHandler(this.btnSelectOldHashesDirectory_Click);
-    
-            // 
-            // richTextBoxLogs
-            // 
-            this.richTextBoxLogs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.richTextBoxLogs.Location = new System.Drawing.Point(10, 150);
-            this.richTextBoxLogs.Name = "richTextBoxLogs";
-            this.richTextBoxLogs.Size = new System.Drawing.Size(770, 288);
-            this.richTextBoxLogs.TabIndex = 6;
-            this.richTextBoxLogs.ReadOnly = true;
-            this.richTextBoxLogs.SelectionIndent = 4;
-            this.richTextBoxLogs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.richTextBoxLogs.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.richTextBoxLogs.BackColor = System.Drawing.SystemColors.Window;
-            this.richTextBoxLogs.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            
-            // 
-            // startButton
-            // 
-            this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
-            this.startButton.Location = new System.Drawing.Point(10, 12); // Ajustar la ubicación
-            this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(75, 26);
-            this.startButton.TabIndex = 7;
-            this.startButton.Text = "Start";
-            this.startButton.UseVisualStyleBackColor = true;
-            this.startButton.Click += new System.EventHandler(this.startButton_Click);
-            
-            // 
-            // btnHelp
-            //
-            this.btnHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnHelp.Location = new System.Drawing.Point(705, 12);
-            this.btnHelp.Name = "btnHelp";
-            this.btnHelp.Size = new System.Drawing.Size(75, 26);
-            this.btnHelp.TabIndex = 8;
-            this.btnHelp.Text = "Help";
-            this.btnHelp.UseVisualStyleBackColor = true;
-            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
-            
-            // 
-            // btnSettings
-            // 
-            this.btnSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSettings.Location = new System.Drawing.Point(625, 12);
-            this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Size = new System.Drawing.Size(75, 26);
-            this.btnSettings.TabIndex = 9;
-            this.btnSettings.Text = "Settings";
-            this.btnSettings.UseVisualStyleBackColor = true;
-            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
+            labelNewHashes.AutoSize = true;
+            labelNewHashes.Location = new Point(9, 47); // Ajustar la ubicación
+            labelNewHashes.Name = "labelNewHashes";
+            labelNewHashes.Size = new Size(177, 15);
+            labelNewHashes.TabIndex = 0;
+            labelNewHashes.Text = "Choose your new hash directory";
+            Controls.Add(labelNewHashes);
 
-            // 
+            // newHashesTextBox
+            newHashesTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            newHashesTextBox.Location = new Point(9, 66); // Ajustar la ubicación
+            newHashesTextBox.Name = "newHashesTextBox";
+            newHashesTextBox.Size = new Size(604, 23);
+            newHashesTextBox.TabIndex = 1;
+            Controls.Add(newHashesTextBox);
+
+            // btnSelectNewHashesDirectory
+            btnSelectNewHashesDirectory.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSelectNewHashesDirectory.Location = new Point(617, 66); // Ajustar la ubicación
+            btnSelectNewHashesDirectory.Name = "btnSelectNewHashesDirectory";
+            btnSelectNewHashesDirectory.Size = new Size(66, 23);
+            btnSelectNewHashesDirectory.TabIndex = 2;
+            btnSelectNewHashesDirectory.Text = "Browse";
+            btnSelectNewHashesDirectory.UseVisualStyleBackColor = true;
+            btnSelectNewHashesDirectory.Click += btnSelectNewHashesDirectory_Click;
+            Controls.Add(btnSelectNewHashesDirectory);
+
+            // labelOldHashes
+            labelOldHashes.AutoSize = true;
+            labelOldHashes.Location = new Point(9, 94); // Ajustar la ubicación
+            labelOldHashes.Name = "labelOldHashes";
+            labelOldHashes.Size = new Size(183, 15);
+            labelOldHashes.TabIndex = 3;
+            labelOldHashes.Text = "Choose your old hashes directory";
+            Controls.Add(labelOldHashes);
+
+            // oldHashesTextBox
+            oldHashesTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            oldHashesTextBox.Location = new Point(9, 112); // Ajustar la ubicación
+            oldHashesTextBox.Name = "oldHashesTextBox";
+            oldHashesTextBox.Size = new Size(604, 23);
+            oldHashesTextBox.TabIndex = 4;
+            Controls.Add(oldHashesTextBox);
+
+            // btnSelectOldHashesDirectory
+            btnSelectOldHashesDirectory.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSelectOldHashesDirectory.Location = new Point(617, 112); // Ajustar la ubicación
+            btnSelectOldHashesDirectory.Name = "btnSelectOldHashesDirectory";
+            btnSelectOldHashesDirectory.Size = new Size(66, 23);
+            btnSelectOldHashesDirectory.TabIndex = 5;
+            btnSelectOldHashesDirectory.Text = "Browse";
+            btnSelectOldHashesDirectory.UseVisualStyleBackColor = true;
+            btnSelectOldHashesDirectory.Click += btnSelectOldHashesDirectory_Click;
+            Controls.Add(btnSelectOldHashesDirectory);
+            
+            // richTextBoxLogs
+            richTextBoxLogs.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            richTextBoxLogs.BackColor = SystemColors.Window;
+            richTextBoxLogs.BorderStyle = BorderStyle.FixedSingle;
+            richTextBoxLogs.Font = new Font("Segoe UI", 9F);
+            richTextBoxLogs.Location = new Point(9, 141); // Ajustar la ubicación
+            richTextBoxLogs.Name = "richTextBoxLogs";
+            richTextBoxLogs.ReadOnly = true;
+            richTextBoxLogs.ScrollBars = RichTextBoxScrollBars.Vertical;
+            richTextBoxLogs.Size = new Size(674, 270);
+            richTextBoxLogs.TabIndex = 6;
+            richTextBoxLogs.Text = "";
+            Controls.Add(richTextBoxLogs);
+
+            // startButton
+            this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            startButton.Location = new Point(617, 11); // Ajustar la ubicación
+            startButton.Name = "startButton";
+            startButton.Size = new Size(66, 24);
+            startButton.TabIndex = 7;
+            startButton.Text = "Start";
+            // startButton.FlatStyle = FlatStyle.System; // Tipos: Standar, Flat, System, Popup
+            startButton.UseVisualStyleBackColor = true;
+            startButton.Click += startButton_Click; 
+            toolTip.SetToolTip(startButton, "Start the download process");
+            Controls.Add(startButton);
+            
+            // btnHelp
+            this.btnHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            btnHelp.Location = new Point(153, 11);
+            btnHelp.Name = "btnHelp";
+            btnHelp.Size = new Size(66, 24);
+            btnHelp.TabIndex = 8;
+            btnHelp.Text = "Help";
+            // btnHelp.FlatStyle = FlatStyle.Popup;
+            btnHelp.UseVisualStyleBackColor = true;
+            btnHelp.Click += btnHelp_Click;
+            toolTip.SetToolTip(btnHelp, "Help and support");
+            Controls.Add(btnHelp);
+
+            // btnSettings
+            this.btnSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            btnSettings.Location = new Point(81, 11);
+            btnSettings.Name = "btnSettings";
+            btnSettings.Size = new Size(66, 24);
+            btnSettings.TabIndex = 9;
+            btnSettings.Text = "Settings";
+            // btnSettings.FlatStyle = FlatStyle.System;
+            btnSettings.UseVisualStyleBackColor = true;
+            btnSettings.Click += btnSettings_Click;
+            toolTip.SetToolTip(btnSettings, "Configure your settings");
+            Controls.Add(btnSettings);
+            
+            // btnExport
+            this.btnExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            btnExport.Location = new Point(9, 11);
+            btnExport.Name = "btnExport";
+            btnExport.Size = new Size(66, 24);
+            btnExport.TabIndex = 10;
+            btnExport.Text = "Export";
+            // btnExport.FlatStyle = FlatStyle.System;
+            btnExport.UseVisualStyleBackColor = true;
+            btnExport.Click += btnExport_Click;
+            toolTip.SetToolTip(btnExport, "Export manually downloaded assets");
+            Controls.Add(btnExport);
+
             // MainForm
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.labelNewHashes);
-            this.Controls.Add(this.newHashesTextBox);
-            this.Controls.Add(this.btnSelectNewHashesDirectory);
-            this.Controls.Add(this.labelOldHashes);
-            this.Controls.Add(this.oldHashesTextBox);
-            this.Controls.Add(this.btnSelectOldHashesDirectory);
-            this.Controls.Add(this.startButton);
-            this.Controls.Add(this.btnHelp);
-            this.Controls.Add(this.btnSettings);
-            this.Controls.Add(this.richTextBoxLogs); // Agregar el RichTextBox a los controles del formulario
-            this.Name = "MainForm";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(700, 422);
+            Name = "MainForm";
+            ResumeLayout(false);
+            PerformLayout();
         }
     }
 }

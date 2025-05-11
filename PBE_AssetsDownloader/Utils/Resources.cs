@@ -13,20 +13,21 @@ namespace PBE_AssetsDownloader.Utils
     {
         private readonly HttpClient _httpClient;
         private readonly AssetDownloader _assetDownloader;
+        private readonly DirectoriesCreator _directoryCreator;
 
         public Resources(HttpClient httpClient, DirectoriesCreator directoryCreator)
         {
             _httpClient = httpClient;
-            _assetDownloader = new AssetDownloader(_httpClient, directoryCreator);
+            _directoryCreator = directoryCreator;
+            _assetDownloader = new AssetDownloader(_httpClient, _directoryCreator);
         }
 
         public async Task GetResourcesFiles()
         {
-            var directoryCreator = new DirectoriesCreator();
-            await directoryCreator.CreateDirAssetsDownloadedAsync();
+            await _directoryCreator.CreateDirAssetsDownloadedAsync();
 
             // Obtener la ruta de Resources con timestamp
-            var resourcesPath = directoryCreator.ResourcesPath;
+            var resourcesPath = _directoryCreator.ResourcesPath;
             var differencesGameFilePath = Path.Combine(resourcesPath, "differences_game.txt");
             var differencesLcuFilePath = Path.Combine(resourcesPath, "differences_lcu.txt");
 
@@ -42,7 +43,7 @@ namespace PBE_AssetsDownloader.Utils
                 // Leer las líneas de los archivos de diferencias
                 var gameDifferences = await File.ReadAllLinesAsync(differencesGameFilePath);
                 var lcuDifferences = await File.ReadAllLinesAsync(differencesLcuFilePath);
-                var downloadDirectory = directoryCreator.SubAssetsDownloadedPath;
+                var downloadDirectory = _directoryCreator.SubAssetsDownloadedPath;
 
                 // Inicializar las listas para los activos no encontrados
                 var notFoundGameAssets = new List<string>();

@@ -23,12 +23,13 @@ namespace PBE_AssetsDownloader
             Application.Run(new MainForm());
         }
 
-        public static async Task RunExtraction(
+       public static async Task RunExtraction(
             string newHashesDirectory, 
             string oldHashesDirectory, 
             bool syncHashesWithCDTB, 
             bool autoCopyHashes, 
-            bool CreateBackUpOldHashes, 
+            bool createBackUpOldHashes, 
+            bool onlyCheckDifferences,
             Action<string> logAction)
         {
             // Configurar el logger
@@ -46,39 +47,53 @@ namespace PBE_AssetsDownloader
                 // Crear todas las carpetas necesarias
                 await directoryCreator.CreateAllDirectoriesAsync().ConfigureAwait(false);
 
+                // Preparar solicitudes de descarga de assets
                 var requests = new Requests(httpClient, directoryCreator);
 
                 // Obtener la ruta de Resources con timestamp
                 var resourcesPath = directoryCreator.ResourcesPath;
 
-                // Obtener la lista de extensiones excluidas desde la instancia de AssetDownloader
+                // Obtener las extensiones excluidas desde la instancia de AssetDownloader
                 var excludedExtensions = assetDownloader.ExcludedExtensions;
 
-                // Crear una instancia de HashesManager para comparar hashes
+                // Comparar hashes (si aplica)
                 var hashesManager = new HashesManager(oldHashesDirectory, newHashesDirectory, resourcesPath, excludedExtensions);
-                await hashesManager.CompareHashesAsync();
+                await hashesManager.CompareHashesAsync(); // Siempre se comparan los hashes
 
-                // Crear una instancia de Resources para descargar los assets
+                if (onlyCheckDifferences)
+                {
+                    // Si solo queremos verificar las diferencias, no descargamos recursos ni respaldamos hashes
+                    logAction("Only differences check complete. No resources were downloaded or hashes were backed up.");
+                    return;  // Salir aquí si solo se verifican las diferencias
+                }
+
+                // Descargar recursos (si no es solo verificar diferencias)
                 var resourcesDownloader = new Resources(httpClient, directoryCreator); 
                 await resourcesDownloader.GetResourcesFiles();
 
-                Log.Information("Download complete.");
-                
-                // Crear una instancia de BackUp para manejar el respaldo de hashes antiguos
+                logAction("Download complete.");
+                        
+                // Limpiar carpetas vacías dentro de las principales (por ejemplo, plugins y game)
+                var directoryCleaner = new DirectoryCleaner(directoryCreator);  // Pasar la instancia de directoryCreator
+                directoryCleaner.CleanEmptyDirectories(); // Llamar al método para limpiar las carpetas vacías
+                        
+                // Manejar respaldo de hashes antiguos
                 var backUp = new BackUp(directoryCreator);
-                var backupResult = await backUp.HandleBackUpAsync(CreateBackUpOldHashes);
+                var backupResult = await backUp.HandleBackUpAsync(createBackUpOldHashes);
 
-                // Crear una instancia de HashCopier para manejar el copiado de nuevos hashes a antiguos
+                // Copiar los nuevos hashes a los antiguos (si aplica)
                 var hashCopier = new HashCopier();
                 var copyResult = await hashCopier.HandleCopyAsync(autoCopyHashes, newHashesDirectory, oldHashesDirectory);
             }
             catch (Exception ex)
             {
+                // Manejo de excepciones global
                 Log.Fatal(ex, "An unexpected error has occurred.");
                 Log.Fatal(ex, "StackTrace: {0}", ex.StackTrace);
             }
             finally
             {
+                // Asegurarse de que los logs se cierren correctamente
                 Log.CloseAndFlush();
             }
         }

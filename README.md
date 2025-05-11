@@ -31,13 +31,13 @@ To use this software you need [.Net 8 Runtime](https://dotnet.microsoft.com/en-u
 # How to use
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/7c5db522-3ae3-46dc-9d52-f618dd09865b" alt="Interfaz" width="380x380"/>
+  <img src="https://github.com/user-attachments/assets/5af821bd-9025-4a15-a2de-6543c2cf8a81" alt="Interfaz" width="380x380"/>
 </div>
 
-1. Open the program
-2. If you want to review the settings and select the settings that are necessary, I recommend synchronizing with CDTB.
-3. Select the appropriate directories.
-4. Start!
+1. Open PBE_AssetsDownloader.exe
+2. Review the app settings and adjust them to your liking
+3. Select the correct directories for the old and new assets
+4. Hit start!
 
 # Special thanks
 Thanks to [MaNeRz](https://github.com/MaNeRz) for letting me upload this tool with improvements.

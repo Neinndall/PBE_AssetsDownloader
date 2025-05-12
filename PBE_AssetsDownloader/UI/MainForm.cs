@@ -42,6 +42,9 @@ namespace PBE_AssetsDownloader.UI
             {
                 AppendLog("Backup old hashes enabled.");
             }
+            
+            // Llamar al verificador de actualizaciones
+            _ = UpdateManager.CheckForUpdatesAsync(false);
         }
 
         private void MainForm_Load(object sender, EventArgs e)

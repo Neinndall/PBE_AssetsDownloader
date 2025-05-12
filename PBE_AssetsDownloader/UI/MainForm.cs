@@ -51,14 +51,16 @@ namespace PBE_AssetsDownloader.UI
             }
 
             // Llamada al sync después de mostrar configuraciones
-            if (_syncHashesWithCDTB)
-            {
+            if (_syncHashesWithCDTB) { 
                 _ = _status.SyncHashesIfNeeds(_syncHashesWithCDTB);
             }
             
             // Cargar las rutas de los directorios desde la configuración al arrancar el programa
             newHashesTextBox.Text = settings.NewHashesPath ?? "";
             oldHashesTextBox.Text = settings.OldHashesPath ?? "";
+            
+            // Llamar al verificador de actualizaciones
+            _ = UpdateManager.CheckForUpdatesAsync(false);
         }
 
         private void MainForm_Load(object sender, EventArgs e)

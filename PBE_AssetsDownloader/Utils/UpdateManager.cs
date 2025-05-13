@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
+using PBE_AssetsDownloader.UI;
+
 namespace PBE_AssetsDownloader.Utils
 {
     public static class UpdateManager

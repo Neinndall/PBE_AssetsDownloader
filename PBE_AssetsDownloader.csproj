@@ -3,10 +3,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <ApplicationIcon>img\Icon.ico</ApplicationIcon>
-    <Version>1.1.1.0-Beta</Version>
-    <AssemblyVersion>1.1.1.0</AssemblyVersion>
-    <FileVersion>1.1.1.0</FileVersion>
+    <ApplicationIcon>img\new\logo.ico</ApplicationIcon>
+    <Version>1.2.0.0</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <UseWindowsForms>true</UseWindowsForms>
@@ -39,13 +39,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
-    <None Update="changelogs.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
-    <None Update="img\Icon.ico">
+    <None Update="img\new\logo.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
+</ItemGroup>
+
+<ItemGroup>
+  <EmbeddedResource Include="changelogs.txt" />
+  <EmbeddedResource Include="img\background\season2025_background.jpg" />
+</ItemGroup>
 
 </Project>

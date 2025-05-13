@@ -20,6 +20,8 @@ namespace PBE_AssetsDownloader.UI
         private System.Windows.Forms.Label lblDownloadTargetPath;
         private System.Windows.Forms.Label lblDifferencesPath;
 
+        private System.Windows.Forms.Button btnPreviewAssets;
+
         private System.Windows.Forms.RichTextBox richTextBoxLogs;
 
         protected override void Dispose(bool disposing)
@@ -47,6 +49,8 @@ namespace PBE_AssetsDownloader.UI
 
             this.lblDownloadTargetPath = new System.Windows.Forms.Label();
             this.lblDifferencesPath = new System.Windows.Forms.Label();
+
+            this.btnPreviewAssets = new System.Windows.Forms.Button();
 
             this.richTextBoxLogs = new System.Windows.Forms.RichTextBox();
 
@@ -87,6 +91,15 @@ namespace PBE_AssetsDownloader.UI
             this.txtDownloadTargetPath.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.tabAssets.Controls.Add(this.txtDownloadTargetPath);
 
+            // btnPreviewAssets
+            this.btnPreviewAssets.Location = new System.Drawing.Point(13, 250); // Mismo Y que btnExport
+            this.btnPreviewAssets.Size = new System.Drawing.Size(160, 30);
+            this.btnPreviewAssets.Text = "View Assets";
+            this.btnPreviewAssets.UseVisualStyleBackColor = true;
+            this.btnPreviewAssets.Click += new System.EventHandler(this.btnPreviewAssets_Click);
+            this.btnPreviewAssets.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Left;
+            this.tabAssets.Controls.Add(this.btnPreviewAssets);
+
             // txtDifferencesPath
             this.txtDifferencesPath.BackColor = System.Drawing.Color.White;
             this.txtDifferencesPath.Location = new System.Drawing.Point(13, 220);
@@ -112,11 +125,11 @@ namespace PBE_AssetsDownloader.UI
             this.tabAssets.Controls.Add(this.btnBrowseDifferencesPath);
 
             // btnExport
-            this.btnExport.Location = new System.Drawing.Point(13, 250);
-            this.btnExport.Size = new System.Drawing.Size(507, 30);  // Aumentado el tamaño y con margen
+            this.btnExport.Location = new System.Drawing.Point(180, 250); // Justo a la derecha del otro
+            this.btnExport.Size = new System.Drawing.Size(340, 30);  // Reduce para que entre en la fila
             this.btnExport.Text = "Download Selected Assets";
-            this.btnExport.Click += new System.EventHandler(this.BtnExport_Click);
-            this.btnExport.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            this.btnExport.Click += new System.EventHandler(this.BtnDownloadSelectedAssets_Click);
+            this.btnExport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             this.tabAssets.Controls.Add(this.btnExport);
 
             // lblDownloadTargetPath

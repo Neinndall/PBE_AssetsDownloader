@@ -26,17 +26,40 @@ namespace PBE_AssetsDownloader.UI
 
             _httpClient = new HttpClient();
             _directoriesCreator = new DirectoriesCreator();
-            _assetDownloader = new AssetDownloader(_httpClient, _directoriesCreator);
+            _assetDownloader = new AssetDownloader(_httpClient, _directoriesCreator); 
         }
 
-        private async void BtnExport_Click(object sender, EventArgs e)
+        private void btnPreviewAssets_Click(object sender, EventArgs e)
+        {
+            string inputFolder = txtDifferencesPath.Text;
+
+            if (string.IsNullOrWhiteSpace(inputFolder) || !Directory.Exists(inputFolder))
+            {
+                MessageBox.Show("Select a valid folder that contains the differences_game and differences_lcu files.", "Invalid path", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var selectedAssetTypes = clbAssets.CheckedItems.Cast<string>().ToList();
+
+            if (!selectedAssetTypes.Any())
+            {
+                MessageBox.Show("Select at least one type for preview.", "Type not selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Abrir el formulario PreviewAssetsForm y pasar los datos, incluyendo la función FilterAssetsByType
+            var previewForm = new PreviewAssetsForm(inputFolder, selectedAssetTypes, FilterAssetsByType);
+            previewForm.ShowDialog();
+        }
+
+        private async void BtnDownloadSelectedAssets_Click(object sender, EventArgs e)
         {
             string inputFolder = txtDifferencesPath.Text;
             string downloadFolder = txtDownloadTargetPath.Text;
 
             if (string.IsNullOrWhiteSpace(inputFolder) || !Directory.Exists(inputFolder))
             {
-                MessageBox.Show("Select a valid folder that contains the files 'differences_game.txt' and 'differences_lcu.txt'.", "Invalid path", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Select a valid folder that contains the differences_game and differences_lcu files.", "Invalid path", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -50,7 +73,7 @@ namespace PBE_AssetsDownloader.UI
 
             if (!selectedAssetTypes.Any())
             {
-                MessageBox.Show("Select at least one asset type for asset download.", "Type not selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Select at least one type for preview.", "Type not selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -109,7 +132,7 @@ namespace PBE_AssetsDownloader.UI
                 MessageBox.Show("Download completed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-        
+
         private List<string> FilterAssetsByType(IEnumerable<string> lines, List<string> selectedTypes)
         {
             return lines
@@ -120,7 +143,7 @@ namespace PBE_AssetsDownloader.UI
                 {
                     if (selectedTypes.Any(type => type.Equals("All", StringComparison.OrdinalIgnoreCase)))
                         return true;
-        
+
                     foreach (var type in selectedTypes)
                     {
                         if (type.Equals("Images", StringComparison.OrdinalIgnoreCase) &&
@@ -128,11 +151,9 @@ namespace PBE_AssetsDownloader.UI
                              path.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
                              path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                              path.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))) return true;
-        
+
                         if (type.Equals("Audios", StringComparison.OrdinalIgnoreCase) && path.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase)) return true;
-               
                         if (type.Equals("Plugins", StringComparison.OrdinalIgnoreCase) && path.StartsWith("plugins/", StringComparison.OrdinalIgnoreCase)) return true;
-        
                         if (type.Equals("Game", StringComparison.OrdinalIgnoreCase) && path.StartsWith("assets/", StringComparison.OrdinalIgnoreCase)) return true;
                     }
                     return false;
@@ -156,7 +177,7 @@ namespace PBE_AssetsDownloader.UI
                 txtDifferencesPath.Text = folderBrowserDialog.SelectedPath;
             }
         }
-        
+
         public void AppendLog(string message)
         {
             // Comprobación de si el formulario está desechado o cerrado

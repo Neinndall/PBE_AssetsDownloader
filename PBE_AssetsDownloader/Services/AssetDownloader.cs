@@ -28,7 +28,7 @@ namespace PBE_AssetsDownloader.Services
             _directoriesCreator = directoriesCreator; // Inicializar el creador de directorios
         }
 
-        private string AdjustUrlBasedOnRules(string url)
+        public static string AdjustUrlBasedOnRules(string url)
         {
             // Ignorar shaders del juego
             if (url.Contains("/shaders/"))
@@ -53,6 +53,20 @@ namespace PBE_AssetsDownloader.Services
                  url.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
                 return null;
 
+            // Si la URL acaba en .tex y contiene /summoneremotes/ y _glow, se descarga como .png
+            if (url.EndsWith(".tex", StringComparison.OrdinalIgnoreCase) &&
+                url.Contains("/summoneremotes/", StringComparison.OrdinalIgnoreCase) &&
+                url.Contains("_glow.", StringComparison.OrdinalIgnoreCase))
+            {
+                url = Path.ChangeExtension(url, ".png");
+            }
+            // Si la URL acaba en .tex y contiene /summoneremotes/ sin _glow, se ignora
+            else if (url.EndsWith(".tex", StringComparison.OrdinalIgnoreCase) &&
+                     url.Contains("/summoneremotes/", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+            
             // Cambiar .dds a .png si corresponde
             if (url.EndsWith(".dds", StringComparison.OrdinalIgnoreCase) &&
                 (url.Contains("/loot/companions/") || 
@@ -88,13 +102,13 @@ namespace PBE_AssetsDownloader.Services
                     return null;
                 }
             }
-
+            
             // Cambiar .tex a .png
             if (url.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
             {
                 url = Path.ChangeExtension(url, ".png");
             }
-
+            
             // Cambiar .atlas a .png
             if (url.EndsWith(".atlas", StringComparison.OrdinalIgnoreCase))
             {

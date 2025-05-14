@@ -97,10 +97,11 @@ namespace PBE_AssetsDownloader.Services
                     .Select(path => path[..path.LastIndexOf('.')])  // Eliminamos la extensión para la comparación
             );
 
-            // Lista para almacenar las diferencias filtradas
+            // Listas para almacenar las diferencias filtradas
             var filteredDifferencesGame = new ConcurrentBag<string>();
+            var filteredDifferencesLcu = new ConcurrentBag<string>();
 
-            // Procesamos las diferencias en paralelo para mejorar el rendimiento
+            // Procesamos las diferencias de GAME en paralelo
             Parallel.ForEach(differencesGame, line =>
             {
                 try
@@ -111,6 +112,11 @@ namespace PBE_AssetsDownloader.Services
 
                     // Si la extensión está en la lista de excluidas, ignoramos este archivo
                     if (_excludedExtensions.Contains(extension))
+                        return;
+
+                    // Si la ruta es ignorada por las reglas personalizadas, la descartamos
+                    string adjusted = AssetDownloader.AdjustUrlBasedOnRules(filePath);
+                    if (adjusted == null)
                         return;
 
                     // Si es un archivo .tex, lo comparamos con las rutas antiguas sin extensión
@@ -130,18 +136,38 @@ namespace PBE_AssetsDownloader.Services
                 catch (Exception ex)
                 {
                     // Si ocurre algún error procesando una línea, lo registramos en los logs
-                    Log.Warning("Error filtrando línea '{Line}': {Message}", line, ex.Message);
+                    Log.Warning("Error filtrando línea GAME '{Line}': {Message}", line, ex.Message);
+                }
+            });
+
+            // Procesamos las diferencias de LCU en paralelo
+            Parallel.ForEach(differencesLcu, line =>
+            {
+                try
+                {
+                    var parts = line.Split(' ');  // Dividimos la línea en partes
+                    var filePath = parts[1];     // Obtenemos la ruta del archivo
+
+                    // Si la ruta es ignorada por las reglas personalizadas, la descartamos
+                    string adjusted = AssetDownloader.AdjustUrlBasedOnRules(filePath);
+                    if (adjusted != null)
+                    {
+                        filteredDifferencesLcu.Add(line);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning("Error filtrando línea LCU '{Line}': {Message}", line, ex.Message);
                 }
             });
 
             // Guardamos las diferencias filtradas en los archivos correspondientes
             await File.WriteAllLinesAsync(Path.Combine(_resourcesPath, "differences_game.txt"), filteredDifferencesGame);
-            await File.WriteAllLinesAsync(Path.Combine(_resourcesPath, "differences_lcu.txt"), differencesLcu);
+            await File.WriteAllLinesAsync(Path.Combine(_resourcesPath, "differences_lcu.txt"), filteredDifferencesLcu);
 
             // Mensajes de log indicando que las diferencias se guardaron correctamente
             Log.Information("Filtered differences saved to {0}", Path.Combine(_resourcesPath, "differences_game.txt"));
             Log.Information("Filtered differences saved to {0}", Path.Combine(_resourcesPath, "differences_lcu.txt"));
         }
-
     }
 }

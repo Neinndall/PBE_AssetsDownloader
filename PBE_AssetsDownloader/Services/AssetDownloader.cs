@@ -53,8 +53,9 @@ namespace PBE_AssetsDownloader.Services
                     continue; // No añadir a NotFounds.txt si fue ignorada
                 }
 
-                var result = await DownloadFileAsync(url, downloadDirectory, logAction, NotFoundAssets, originalUrl);
-                if (!result) {
+                var result = await DownloadFileAsync(url, downloadDirectory, logAction, originalUrl);
+                if (!result)
+                {
                     NotFoundAssets.Add(originalUrl); // Añadir solo si no se descargó correctamente
                 }
             }
@@ -62,7 +63,7 @@ namespace PBE_AssetsDownloader.Services
             return NotFoundAssets;
         }
 
-        private async Task<bool> DownloadFileAsync(string url, string downloadDirectory, Action<string> logAction, List<string> notFoundAssets, string originalUrl)
+        private async Task<bool> DownloadFileAsync(string url, string downloadDirectory, Action<string> logAction, string originalUrl)
         {
             try
             {
@@ -100,15 +101,12 @@ namespace PBE_AssetsDownloader.Services
                 }
                 else
                 {
-                    // Si no se encuentra, agregar a la lista de assets no encontrados
-                    notFoundAssets.Add(originalUrl);
-                    return false;
+                    return false; // No volver a agregar aquí
                 }
             }
             catch (Exception)
             {
-                notFoundAssets.Add(originalUrl);
-                return false;
+                return false; // Tampoco volver a agregar aquí
             }
         }
     }

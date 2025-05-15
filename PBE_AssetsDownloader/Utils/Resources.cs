@@ -75,7 +75,11 @@ namespace PBE_AssetsDownloader.Utils
                 .ToList();
 
             // Combinar todas las URLs no encontradas
-            var allNotFoundAssets = modifiedNotFoundGameAssets.Concat(notFoundLcuAssets).ToList();
+            var allNotFoundAssets = modifiedNotFoundGameAssets
+            .Concat(notFoundLcuAssets)
+            .ToList();
+            // .Distinct() // Eliminar duplicados
+            
             var notFoundFilePath = Path.Combine(resourcesPath, "NotFounds.txt");
 
             try

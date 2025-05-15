@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
+using PBE_AssetsDownloader.Utils;
 
 namespace PBE_AssetsDownloader.Services
 {
@@ -115,7 +116,7 @@ namespace PBE_AssetsDownloader.Services
                         return;
 
                     // Si la ruta es ignorada por las reglas personalizadas, la descartamos
-                    string adjusted = AssetDownloader.AdjustUrlBasedOnRules(filePath);
+                    string adjusted = AssetUrlRules.Adjust(filePath);
                     if (adjusted == null)
                         return;
 
@@ -136,7 +137,7 @@ namespace PBE_AssetsDownloader.Services
                 catch (Exception ex)
                 {
                     // Si ocurre algún error procesando una línea, lo registramos en los logs
-                    Log.Warning("Error filtrando línea GAME '{Line}': {Message}", line, ex.Message);
+                    Log.Warning("Error filtering GAME line '{Line}': {Message}", line, ex.Message);
                 }
             });
 
@@ -149,7 +150,7 @@ namespace PBE_AssetsDownloader.Services
                     var filePath = parts[1];     // Obtenemos la ruta del archivo
 
                     // Si la ruta es ignorada por las reglas personalizadas, la descartamos
-                    string adjusted = AssetDownloader.AdjustUrlBasedOnRules(filePath);
+                    string adjusted = AssetUrlRules.Adjust(filePath);
                     if (adjusted != null)
                     {
                         filteredDifferencesLcu.Add(line);
@@ -157,7 +158,7 @@ namespace PBE_AssetsDownloader.Services
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning("Error filtrando línea LCU '{Line}': {Message}", line, ex.Message);
+                    Log.Warning("Error filtering LCU line '{Line}': {Message}", line, ex.Message);
                 }
             });
 

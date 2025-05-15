@@ -34,7 +34,7 @@ namespace PBE_AssetsDownloader.Utils
             // Verificar si los archivos de diferencias existen
             if (!File.Exists(differencesGameFilePath) || !File.Exists(differencesLcuFilePath))
             {
-                Log.Error("Uno o más archivos de diferencias no existen.");
+                Log.Error("One or more diff files do not exist.");
                 return;
             }
 
@@ -58,7 +58,7 @@ namespace PBE_AssetsDownloader.Utils
             }
             catch (Exception ex)
             {
-                Log.Error($"Error al procesar los archivos de diferencias: {ex.Message}");
+                Log.Error($"Error processing difference files: {ex.Message}");
                 throw;
             }
         }
@@ -66,7 +66,7 @@ namespace PBE_AssetsDownloader.Utils
         private async Task SaveNotFoundAssets(List<string> notFoundGameAssets, List<string> notFoundLcuAssets, string resourcesPath)
         {
             if (string.IsNullOrWhiteSpace(resourcesPath))
-                throw new ArgumentException("La ruta de recursos no está definida.", nameof(resourcesPath));
+                throw new ArgumentException("The resource path is not defined.", nameof(resourcesPath));
 
             // Modificar las URLs no encontradas para los Game Assets
             var modifiedNotFoundGameAssets = notFoundGameAssets

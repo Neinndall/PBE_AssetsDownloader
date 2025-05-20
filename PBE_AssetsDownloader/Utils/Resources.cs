@@ -13,27 +13,28 @@ namespace PBE_AssetsDownloader.Utils
     {
         private readonly HttpClient _httpClient;
         private readonly AssetDownloader _assetDownloader;
+        private readonly DirectoriesCreator _directoryCreator;
 
         public Resources(HttpClient httpClient, DirectoriesCreator directoryCreator)
         {
             _httpClient = httpClient;
-            _assetDownloader = new AssetDownloader(_httpClient, directoryCreator);
+            _directoryCreator = directoryCreator;
+            _assetDownloader = new AssetDownloader(_httpClient, _directoryCreator);
         }
 
         public async Task GetResourcesFiles()
         {
-            var directoryCreator = new DirectoriesCreator();
-            await directoryCreator.CreateDirAssetsDownloadedAsync();
+            await _directoryCreator.CreateDirAssetsDownloadedAsync();
 
             // Obtener la ruta de Resources con timestamp
-            var resourcesPath = directoryCreator.ResourcesPath;
+            var resourcesPath = _directoryCreator.ResourcesPath;
             var differencesGameFilePath = Path.Combine(resourcesPath, "differences_game.txt");
             var differencesLcuFilePath = Path.Combine(resourcesPath, "differences_lcu.txt");
 
             // Verificar si los archivos de diferencias existen
             if (!File.Exists(differencesGameFilePath) || !File.Exists(differencesLcuFilePath))
             {
-                Log.Error("Uno o más archivos de diferencias no existen.");
+                Log.Error("One or more diff files do not exist.");
                 return;
             }
 
@@ -42,7 +43,7 @@ namespace PBE_AssetsDownloader.Utils
                 // Leer las líneas de los archivos de diferencias
                 var gameDifferences = await File.ReadAllLinesAsync(differencesGameFilePath);
                 var lcuDifferences = await File.ReadAllLinesAsync(differencesLcuFilePath);
-                var downloadDirectory = directoryCreator.SubAssetsDownloadedPath;
+                var downloadDirectory = _directoryCreator.SubAssetsDownloadedPath;
 
                 // Inicializar las listas para los activos no encontrados
                 var notFoundGameAssets = new List<string>();
@@ -57,7 +58,7 @@ namespace PBE_AssetsDownloader.Utils
             }
             catch (Exception ex)
             {
-                Log.Error($"Error al procesar los archivos de diferencias: {ex.Message}");
+                Log.Error($"Error processing difference files: {ex.Message}");
                 throw;
             }
         }
@@ -65,7 +66,7 @@ namespace PBE_AssetsDownloader.Utils
         private async Task SaveNotFoundAssets(List<string> notFoundGameAssets, List<string> notFoundLcuAssets, string resourcesPath)
         {
             if (string.IsNullOrWhiteSpace(resourcesPath))
-                throw new ArgumentException("La ruta de recursos no está definida.", nameof(resourcesPath));
+                throw new ArgumentException("The resource path is not defined.", nameof(resourcesPath));
 
             // Modificar las URLs no encontradas para los Game Assets
             var modifiedNotFoundGameAssets = notFoundGameAssets
@@ -74,7 +75,11 @@ namespace PBE_AssetsDownloader.Utils
                 .ToList();
 
             // Combinar todas las URLs no encontradas
-            var allNotFoundAssets = modifiedNotFoundGameAssets.Concat(notFoundLcuAssets).ToList();
+            var allNotFoundAssets = modifiedNotFoundGameAssets
+            .Concat(notFoundLcuAssets)
+            .ToList();
+            // .Distinct() // Eliminar duplicados
+            
             var notFoundFilePath = Path.Combine(resourcesPath, "NotFounds.txt");
 
             try

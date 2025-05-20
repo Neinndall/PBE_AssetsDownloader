@@ -14,16 +14,16 @@ namespace PBE_AssetsDownloader.Info
             var version = Application.ProductVersion;
 
             // Actualizar el título de la ventana
-            form.Text = $"PBE_AssetsDownloader - League Of Legends | v.{version}";
+            form.Text = $"PBE_AssetsDownloader - League of Legends | v.{version}";
 
             // Establecer el icono de la aplicación
-            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "Icon.ico");
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "new", "logo.ico");
             form.Icon = new Icon(iconPath);
         }
 
         public static void SetIcon(Form form)
         {
-            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "Icon.ico");
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "new", "logo.ico");
             if (File.Exists(iconPath))
             {
                 form.Icon = new Icon(iconPath);

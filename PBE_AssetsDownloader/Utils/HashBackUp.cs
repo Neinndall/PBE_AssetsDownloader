@@ -32,16 +32,10 @@ namespace PBE_AssetsDownloader.Utils
         {
             try
             {
-                // Obtén la ruta del directorio de respaldo desde DirectoriesCreator
-                await _directoriesCreator.CreateBackUpOldHashesAsync(); // Solo espera a que el directorio sea creado
+                // Crear la carpeta de respaldo asincrónicamente
+                await _directoriesCreator.CreateBackUpOldHashesAsync();
 
-                // Obtén la ruta del directorio old
-                string oldDirectory = Path.Combine("hashes", "olds");
-
-                // La ruta de la carpeta de respaldo es la que se crea en CreateBackUpOldHashesAsync
-                //string backupDirectory = Path.Combine("hashes", "olds", "BackUp", DateTime.Now.ToString("dd-M-yyyy"));
-                
-                // Obtén la ruta del directorio de respaldo desde DirectoriesCreator
+                // Obtener la ruta de la carpeta de respaldo
                 string backupDirectory = _directoriesCreator.GetBackUpOldHashesPath();
 
                 // Verifica que el directorio de respaldo exista antes de copiar
@@ -55,7 +49,7 @@ namespace PBE_AssetsDownloader.Utils
 
                 foreach (var fileName in filesToCopy)
                 {
-                    string sourceFilePath = Path.Combine(oldDirectory, fileName);
+                    string sourceFilePath = Path.Combine("hashes", "olds", fileName);
                     string destinationFilePath = Path.Combine(backupDirectory, fileName);
 
                     // Verificar que el archivo de origen exista antes de copiar
@@ -63,7 +57,6 @@ namespace PBE_AssetsDownloader.Utils
                     {
                         // Copiar el archivo
                         File.Copy(sourceFilePath, destinationFilePath, true);
-                        //Log.Information("File {0} copied to backup directory.", fileName);
                     }
                 }
 

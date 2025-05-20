@@ -21,102 +21,17 @@ namespace PBE_AssetsDownloader.Services
         };
 
         public List<string> ExcludedExtensions => _excludedExtensions;
+        
         public AssetDownloader(HttpClient httpClient, DirectoriesCreator directoriesCreator)
         {
             _httpClient = httpClient;
             _directoriesCreator = directoriesCreator; // Inicializar el creador de directorios
         }
 
-        private string AdjustUrlBasedOnRules(string url)
-        {
-            // Ignorar shaders del juego
-            if (url.Contains("/shaders/"))
-            {
-                return null; // Ignorar
-            }
-  
-            // Cambiar extensión o ignorar según las reglas específicas
-            if (url.EndsWith(".dds") &&
-                (url.Contains("/loot/companions/") || 
-                 url.Contains("2x_") || 
-                 url.Contains("4x_") || 
-                 url.Contains("tx_cm") || 
-                 url.Contains("/particles/") || 
-                 url.Contains("/clash/") ||
-                 url.Contains("/skins/") || 
-                 url.Contains("uiautoatlas") || 
-                 url.Contains("/summonerbanners/") || 
-                 url.Contains("/summoneremotes/") ||
-                 url.Contains("/hud/") || 
-                 url.Contains("/regalia/") ||
-                 url.Contains("/levels/") ||
-                 url.Contains("/spells/")))
-            {
-                // Si contiene "/hud/" y termina en ".png", ignorar la URL
-                if (url.Contains("/hud/") && url.EndsWith(".png"))
-                {
-                    return null; // Ignorar
-                }
-
-                url = Path.ChangeExtension(url, ".png"); // Cambiar la extensión a ".png"
-            }
-            // Si contiene "/loot/companions/" y termina en ".png", ignorar la URL
-            if (url.Contains("/loot/companions/") && url.EndsWith(".png"))
-            {
-                return null; // Ignorar
-            }
-            // Si contiene "_le." y termina en ".dds", ignorar la URL
-            if (url.Contains("_le.") && url.EndsWith(".dds"))
-            {
-                return null; // Ignorar
-            }
-            // Si contiene "/summonericons/" y termina en ".dds"
-            if (url.Contains("/summonericons/") && url.EndsWith(".dds"))
-            {   
-                // Si también contiene ".accessories_", procesarlo cambiando la extensión a .png
-                if (url.Contains(".accessories_"))
-                {
-                    url = Path.ChangeExtension(url, ".png"); // Cambiar la extensión a ".png"
-                }
-                else
-                {
-                    return null; // Ignorar el resto
-                }
-            }
-            
-            // Si contiene "/summonericons/" y termina en ".tex", ignorar la URL
-            if (url.Contains("/summonericons/") && url.EndsWith(".tex"))
-            {
-                return null; // Ignorar
-            }
-            
-            // Si la url termina en .tex cambiar la extensión a png y descargar
-            if (url.EndsWith(".tex"))
-            {
-                url = Path.ChangeExtension(url, ".png"); // Cambiar la extensión a ".png"
-            }
-            
-            // Si la url termina en .atlas cambiar la extensión a png y descargar
-            if (url.EndsWith(".atlas"))
-            {
-                url = Path.ChangeExtension(url, ".png"); // Cambiar la extensión a ".png"
-            }
-
-            // Ignoramos los archivos bins de campeones que son urls muy largas
-            if (url.Contains("/game/data/") && url.EndsWith(".bin"))
-            {
-                return null; // Ignorar
-            }
-            
-            return url;
-        }
-        
         public async Task<List<string>> DownloadAssets(IEnumerable<string> differences, string baseUrl, string downloadDirectory, Action<string> logAction, List<string> notFoundAssets)
         {
-            // Lista para URLs no encontradas que se retorna al final
             var NotFoundAssets = new List<string>();
 
-            // Asegurarse de que el directorio de descarga exista
             if (!Directory.Exists(downloadDirectory))
             {
                 Directory.CreateDirectory(downloadDirectory);
@@ -124,63 +39,74 @@ namespace PBE_AssetsDownloader.Services
 
             foreach (var line in differences)
             {
-                var url = baseUrl + line.Split(' ').Skip(1).First();
-                var originalUrl = url;
+                string[] parts = line.Split(' ');
+                string relativePath = parts.Length >= 2 ? parts[1] : parts[0]; // Evitar errores con hash + path
 
-                var extension = Path.GetExtension(url);
-                
-                // Excluir extensiones para los assets (por si acaso no fue filtrado antes)
-                //if (_excludedExtensions.Contains(extension))
-                //{
-                //    continue;
-                //}
+                string url = baseUrl + relativePath;
+                string originalUrl = url;
 
-                // Funcion para ajustar los url con la extension adecuada segun criterios
-                url = AdjustUrlBasedOnRules(url);
+                url = AssetUrlRules.Adjust(url);
 
-                if (string.IsNullOrEmpty(url)) {
-                    continue;
+                // Si la URL es null (es decir, ha sido ignorada), no continuar con la descarga
+                if (string.IsNullOrEmpty(url))
+                {
+                    continue; // No añadir a NotFounds.txt si fue ignorada
                 }
 
-                var result = await DownloadFileAsync(url, downloadDirectory, logAction, NotFoundAssets, originalUrl);
-                if (!result) {
-                    NotFoundAssets.Add(originalUrl);
+                var result = await DownloadFileAsync(url, downloadDirectory, logAction, originalUrl);
+                if (!result)
+                {
+                    NotFoundAssets.Add(originalUrl); // Añadir solo si no se descargó correctamente
                 }
             }
-
+            
             return NotFoundAssets;
         }
 
-        private async Task<bool> DownloadFileAsync(string url, string downloadDirectory, Action<string> logAction, List<string> notFoundAssets, string originalUrl)
+        private async Task<bool> DownloadFileAsync(string url, string downloadDirectory, Action<string> logAction, string originalUrl)
         {
             try
             {
+                // Obtener el nombre del archivo y la extensión
                 var fileName = Path.GetFileName(url);
                 var finalExtension = Path.GetExtension(fileName);
 
-                string extensionFolder = _directoriesCreator.CreateAssetTypeDirectory(finalExtension, fileName, url);
+                // Crear el directorio de destino basado en la URL
+                string extensionFolder = _directoriesCreator.CreateAssetDirectoryFromPath(url, downloadDirectory); // Organizar por URL
                 var filePath = Path.Combine(extensionFolder, fileName);
 
+                // Comprobar si el archivo ya existe
+                int counter = 1;
+                while (File.Exists(filePath))
+                {
+                    // Si el archivo ya existe, añadir un sufijo para evitar sobrescribir
+                    string newFileName = Path.GetFileNameWithoutExtension(fileName) + $"_{counter}{finalExtension}";
+                    filePath = Path.Combine(extensionFolder, newFileName);
+                    counter++;
+                }
+
+                // Realizar la solicitud HTTP para obtener el archivo
                 var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
+                    // Descargar el archivo y guardarlo en el directorio correspondiente
                     await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                     {
                         await response.Content.CopyToAsync(fileStream);
                     }
-                    logAction($"Download: {fileName}");
+
+                    // Si necesitas hacer algo con el log, hazlo aquí directamente
+                    logAction($"Downloaded: {fileName}");
                     return true;
                 }
                 else
                 {
-                    notFoundAssets.Add(originalUrl);
-                    return false;
+                    return false; // No volver a agregar aquí
                 }
             }
             catch (Exception)
             {
-                notFoundAssets.Add(originalUrl);
-                return false;
+                return false; // Tampoco volver a agregar aquí
             }
         }
     }

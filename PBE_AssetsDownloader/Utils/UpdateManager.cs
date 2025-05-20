@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
+
+using PBE_AssetsDownloader.UI;
 
 namespace PBE_AssetsDownloader.Utils
 {
@@ -68,6 +70,11 @@ namespace PBE_AssetsDownloader.Utils
                             string fileName = $"PBE_AssetsDownloader_{latestVersionRaw}.zip";
                             string downloadPath = Path.Combine(userDownloadsFolder, fileName);
 
+                            // Mostramos el tamaño total antes de iniciar la descarga
+                            string downloadSize = $"{(totalBytes / 1024.0 / 1024.0):0.00} MB";
+                            progressForm.SetProgress(0, $"Downloading {downloadSize}...");
+                            await Task.Delay(500); // Breve espera para que la UI actualice
+
                             // Iniciamos la descarga del archivo ZIP
                             using (var responseDownload = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead))
                             {
@@ -86,21 +93,18 @@ namespace PBE_AssetsDownloader.Utils
                                             await fs.WriteAsync(buffer, 0, bytesRead);
                                             bytesDownloaded += bytesRead;
 
+                                            // Actualizamos el progreso durante la descarga
                                             if (totalBytes > 0)
                                             {
                                                 int progressPercentage = (int)((double)bytesDownloaded / totalBytes * 100);
                                                 progressForm.SetProgress(progressPercentage, 
-                                                    $"{bytesDownloaded / 1024 / 1024} MB / {totalBytes / 1024 / 1024} MB");
+                                                    $"Downloading... {(bytesDownloaded / 1024.0 / 1024.0):0.00} MB / {downloadSize}");
                                             }
                                         }
                                     }
                                 }
-
-                                // Aseguramos mostrar progreso al 100% al finalizar
-                                progressForm.SetProgress(100, 
-                                    $"{(totalBytes / 1024.0 / 1024.0):0.00} MB / {(totalBytes / 1024.0 / 1024.0):0.00} MB");
-                                await Task.Delay(1000); // Breve espera para que la UI actualice
-
+                                await Task.Delay(1200); // Breve espera para que la UI actualice
+                                
                                 // Cerramos el formulario de progreso de forma segura
                                 if (progressForm.IsHandleCreated)
                                     progressForm.Invoke(() => { progressForm.Close(); progressForm.Dispose(); });

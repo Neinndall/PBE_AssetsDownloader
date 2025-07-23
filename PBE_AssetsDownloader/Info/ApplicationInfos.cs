@@ -1,36 +1,17 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
+﻿// PBE_AssetsDownloader/Info/ApplicationInfos.cs
+using System;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace PBE_AssetsDownloader.Info
 {
     public static class ApplicationInfos
     {
-        public static void SetInfo(Form form)
+        public static string Version 
         {
-            // Obtener la versión de la aplicación desde el manifiesto del proyecto
-            var version = Application.ProductVersion;
-
-            // Actualizar el título de la ventana
-            form.Text = $"PBE_AssetsDownloader - League of Legends | v.{version}";
-
-            // Establecer el icono de la aplicación
-            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "new", "logo.ico");
-            form.Icon = new Icon(iconPath);
-        }
-
-        public static void SetIcon(Form form)
-        {
-            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img", "new", "logo.ico");
-            if (File.Exists(iconPath))
+            get
             {
-                form.Icon = new Icon(iconPath);
-            }
-            else
-            {
-                MessageBox.Show("Icon not found at the specified path.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "vUnknown";
             }
         }
     }

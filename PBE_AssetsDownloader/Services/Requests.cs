@@ -1,4 +1,5 @@
-﻿using System;
+﻿// PBE_AssetsDownloader/Services/Requests.cs
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,18 +11,19 @@ namespace PBE_AssetsDownloader.Services
     {
         private readonly HttpClient _httpClient;
         private readonly DirectoriesCreator _directoriesCreator;
+        private readonly LogService _logService;
         private const string BaseUrl = "https://raw.communitydragon.org/data/hashes/lol/";
 
-        public Requests(HttpClient httpClient, DirectoriesCreator directoriesCreator)
+        public Requests(HttpClient httpClient, DirectoriesCreator directoriesCreator, LogService logService)
         {
             _httpClient = httpClient;
             _directoriesCreator = directoriesCreator;
+            _logService = logService;
         }
 
-        public async Task DownloadHashesAsync(string fileName, string downloadDirectory, Action<string> logAction)
+        public async Task DownloadHashesAsync(string fileName, string downloadDirectory)
         {
             var url = $"{BaseUrl}/{fileName}";
-
             try
             {
                 var filePath = Path.Combine(downloadDirectory, fileName);
@@ -29,39 +31,33 @@ namespace PBE_AssetsDownloader.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Asegúrate de que el directorio existe antes de guardar el archivo
-                    await _directoriesCreator.CreateHashesNewDirectoryAsync(); // Crea el directorio hashes/new si no existe
-
-                    await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                    {
-                        await response.Content.CopyToAsync(fileStream);
-                    }
-
-                    logAction($"Download: {fileName}");
+                    await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                    await response.Content.CopyToAsync(fileStream);
+                    _logService.Log($"Download completed: {fileName}");
                 }
                 else
                 {
-                    logAction($"Error downloading {fileName}");
+                    _logService.LogError($"Error downloading {fileName}. Status code: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                logAction($"Error trying to download {fileName}: {ex.Message}");
+                _logService.LogError($"Exception downloading {fileName}: {ex.Message}");
             }
         }
 
-        public async Task DownloadHashesFilesAsync(string downloadDirectory, Action<string> logAction)
+        public async Task DownloadHashesFilesAsync(string downloadDirectory)
         {
-            await DownloadHashesAsync("hashes.game.txt", downloadDirectory, logAction);
-            await DownloadHashesAsync("hashes.lcu.txt", downloadDirectory, logAction);
+            await DownloadHashesAsync("hashes.game.txt", downloadDirectory);
+            await DownloadHashesAsync("hashes.lcu.txt", downloadDirectory);
         }
 
-        public async Task SyncHashesIfEnabledAsync(bool syncHashesWithCDTB, Action<string> logAction)
+        public async Task SyncHashesIfEnabledAsync(bool syncHashesWithCDTB)
         {
             if (syncHashesWithCDTB)
             {
-                var downloadDirectory = _directoriesCreator.GetHashesNewsDirectoryPath(); // Obtener el directorio de descarga
-                await DownloadHashesFilesAsync(downloadDirectory, logAction);
+                var downloadDirectory = _directoriesCreator.GetHashesNewsDirectoryPath();
+                await DownloadHashesFilesAsync(downloadDirectory);
             }
         }
     }

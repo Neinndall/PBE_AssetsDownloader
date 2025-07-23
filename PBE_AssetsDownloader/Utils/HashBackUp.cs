@@ -1,17 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Serilog;
+using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
 
 namespace PBE_AssetsDownloader.Utils
 {
     public class BackUp
     {
         private readonly DirectoriesCreator _directoriesCreator;
+        private readonly LogService _logService;
 
-        public BackUp(DirectoriesCreator directoriesCreator)
+        public BackUp(DirectoriesCreator directoriesCreator, LogService logService)
         {
             _directoriesCreator = directoriesCreator;
+            _logService = logService;
         }
 
         public async Task<string> HandleBackUpAsync(bool createBackUp)
@@ -23,7 +25,7 @@ namespace PBE_AssetsDownloader.Utils
             }
             else
             {
-                Log.Information("BackUpOldHashes is disabled.");  // Solo el log, sin devolver el mensaje
+                _logService.Log("BackUpOldHashes is disabled.");  // Solo el log, sin devolver el mensaje
                 return string.Empty;  // Puedes devolver un string vacío o algún otro valor si no es necesario
             }
         }
@@ -60,12 +62,12 @@ namespace PBE_AssetsDownloader.Utils
                     }
                 }
 
-                Log.Information("Backup created successfully at {0}", backupDirectory);
+                _logService.Log($"Backup created successfully at {backupDirectory}");
                 return backupDirectory;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error occurred while creating backup");
+                _logService.LogError(ex, "Error occurred while creating backup");
                 return "Error occurred while creating backup";
             }
         }

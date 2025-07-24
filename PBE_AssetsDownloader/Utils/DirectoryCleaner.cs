@@ -1,28 +1,28 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Serilog;
+using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
 
 namespace PBE_AssetsDownloader.Utils
 {
     public class DirectoryCleaner
     {
         private readonly DirectoriesCreator _directoriesCreator;
+        private readonly LogService _logService;
 
-        // Constructor que recibe una instancia de DirectoriesCreator
-        public DirectoryCleaner(DirectoriesCreator directoriesCreator)
+        public DirectoryCleaner(DirectoriesCreator directoriesCreator, LogService logService)
         {
             _directoriesCreator = directoriesCreator ?? throw new ArgumentNullException(nameof(directoriesCreator));
+            _logService = logService ?? throw new ArgumentNullException(nameof(logService));
         }
 
         public void CleanEmptyDirectories()
         {
-            // Accedemos a SubAssetsDownloadedPath desde la instancia de DirectoriesCreator
             var subAssetsDownloadedPath = _directoriesCreator.SubAssetsDownloadedPath;
             
             if (!Directory.Exists(subAssetsDownloadedPath))
             {
-                Log.Warning("The folder doesn't exist: {Path}", subAssetsDownloadedPath);
+                _logService.LogWarning($"The folder doesn't exist: {subAssetsDownloadedPath}");
                 return;
             }
                 
@@ -48,28 +48,22 @@ namespace PBE_AssetsDownloader.Utils
             {
                 if (!Directory.Exists(directory))
                 {
-                    // La carpeta ya fue eliminada o nunca existió, no se hace nada
                     return;
                 }
         
-                // Procesamos todas las subcarpetas de forma recursiva
                 foreach (var subDir in Directory.GetDirectories(directory))
                 {
                     DeleteEmptyDirectoriesRecursively(subDir);
                 }
         
-                // Si la carpeta está vacía (sin archivos ni subcarpetas), la eliminamos
                 if (!Directory.EnumerateFileSystemEntries(directory).Any())
                 {
-                    // Eliminar la carpeta vacía
                     Directory.Delete(directory);
-                    // Log.Information("Carpeta vacía eliminada: {Directory}", directory); // Creo que no es necesario mostrar los logs
                 }
             }
             catch (Exception ex)
             {
-                // Solo logueamos si ocurre un error real al intentar procesar una carpeta
-                Log.Warning("The folder could not be processed: {Directory}. Error: {Message}", directory, ex.Message);
+                _logService.LogWarning($"The folder could not be processed: {directory}. Error: {ex.Message}");
             }
         }
     }

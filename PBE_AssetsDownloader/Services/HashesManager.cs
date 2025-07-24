@@ -4,65 +4,73 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog;
 using PBE_AssetsDownloader.Utils;
 
 namespace PBE_AssetsDownloader.Services
 {
     public class HashesManager
     {
-        // Directorios de los hashes antiguos y nuevos, y el directorio de recursos
+        // Directories for old and new hashes, and the resources directory
         private readonly string _oldHashesDirectory;
         private readonly string _newHashesDirectory;
         private readonly string _resourcesPath;
         private readonly List<string> _excludedExtensions;
+        private readonly LogService _logService;
 
-        // Constructor que recibe los directorios y las extensiones excluidas
-        public HashesManager(string oldHashesDirectory, string newHashesDirectory, string resourcesPath, List<string> excludedExtensions)
+        // Constructor that receives directories and excluded extensions
+
+        public HashesManager(string oldHashesDirectory, string newHashesDirectory, string resourcesPath, List<string> excludedExtensions, LogService logService)
         {
             _oldHashesDirectory = oldHashesDirectory;
             _newHashesDirectory = newHashesDirectory;
             _resourcesPath = resourcesPath;
             _excludedExtensions = excludedExtensions;
+            _logService = logService; // ¡NUEVO: Asignar la instancia de LogService!
         }
 
-        // Método principal para comparar los hashes
+        // Main method to compare hashes
         public async Task CompareHashesAsync()
         {
-            // Mensaje de log indicando que se está comparando y filtrando hashes
-            Log.Information("Comparing and filtering hashes, please wait...");
+            // Log message indicating that hashes are being compared and filtered
+            _logService.Log("Comparing and filtering hashes, please wait...");
 
-            // Definimos las rutas de los archivos de hashes
+            // Define paths for hash files
             string oldGameHashesPath = Path.Combine(_oldHashesDirectory, "hashes.game.txt");
             string oldLcuHashesPath = Path.Combine(_oldHashesDirectory, "hashes.lcu.txt");
             string newGameHashesPath = Path.Combine(_newHashesDirectory, "hashes.game.txt");
             string newLcuHashesPath = Path.Combine(_newHashesDirectory, "hashes.lcu.txt");
 
-            // Leemos los archivos de hashes de forma asíncrona
-            var oldGameHashesTask = File.ReadAllLinesAsync(oldGameHashesPath);
-            var oldLcuHashesTask = File.ReadAllLinesAsync(oldLcuHashesPath);
-            var newGameHashesTask = File.ReadAllLinesAsync(newGameHashesPath);
-            var newLcuHashesTask = File.ReadAllLinesAsync(newLcuHashesPath);
+            // Asegúrate de que los archivos existan antes de intentar leerlos.
+            if (!File.Exists(oldGameHashesPath)) _logService.LogWarning($"Old game hashes file not found: {oldGameHashesPath}");
+            if (!File.Exists(oldLcuHashesPath)) _logService.LogWarning($"Old LCU hashes file not found: {oldLcuHashesPath}");
+            if (!File.Exists(newGameHashesPath)) _logService.LogWarning($"New game hashes file not found: {newGameHashesPath}");
+            if (!File.Exists(newLcuHashesPath)) _logService.LogWarning($"New LCU hashes file not found: {newLcuHashesPath}");
 
-            // Esperamos que se completen todas las lecturas
+            // Read hash files asynchronously
+            var oldGameHashesTask = TryReadAllLinesAsync(oldGameHashesPath);
+            var oldLcuHashesTask = TryReadAllLinesAsync(oldLcuHashesPath);
+            var newGameHashesTask = TryReadAllLinesAsync(newGameHashesPath);
+            var newLcuHashesTask = TryReadAllLinesAsync(newLcuHashesPath);
+
+            // Wait for all reads to complete
             await Task.WhenAll(oldGameHashesTask, oldLcuHashesTask, newGameHashesTask, newLcuHashesTask);
 
-            // Asignamos los resultados leídos de los archivos
-            var oldGameHashes = await oldGameHashesTask;
-            var oldLcuHashes = await oldLcuHashesTask;
-            var newGameHashes = await newGameHashesTask;
-            var newLcuHashes = await newLcuHashesTask;
+            // Assign the results read from the files
+            var oldGameHashes = oldGameHashesTask.Result;
+            var oldLcuHashes = oldLcuHashesTask.Result;
+            var newGameHashes = newGameHashesTask.Result;
+            var newLcuHashes = newLcuHashesTask.Result;
 
-            // Convertimos los hashes antiguos en HashSet para mejorar la búsqueda (O(1) de complejidad)
-            var oldGameHashesSet = new HashSet<string>(oldGameHashes);
-            var oldLcuHashesSet = new HashSet<string>(oldLcuHashes);
+            // Convert old hashes into HashSet for improved lookup performance (O(1) complexity)
+            var oldGameHashesSet = new HashSet<string>(oldGameHashes ?? Enumerable.Empty<string>()); // Manejar posibles nulls
+            var oldLcuHashesSet = new HashSet<string>(oldLcuHashes ?? Enumerable.Empty<string>()); // Manejar posibles nulls
 
-            // Usamos Parallel.ForEach para comparar los hashes en paralelo y mejorar el rendimiento
+            // Use Parallel.ForEach to compare hashes in parallel for better performance
             var differencesGame = new ConcurrentBag<string>();
             var differencesLcu = new ConcurrentBag<string>();
 
-            // Comparamos los nuevos hashes con los antiguos en paralelo (para hashes de "game")
-            Parallel.ForEach(newGameHashes, newHash =>
+            // Compare new hashes with old hashes in parallel (for "game" hashes)
+            Parallel.ForEach(newGameHashes ?? Enumerable.Empty<string>(), newHash => // Manejar posibles nulls
             {
                 if (!oldGameHashesSet.Contains(newHash))
                 {
@@ -70,8 +78,8 @@ namespace PBE_AssetsDownloader.Services
                 }
             });
 
-            // Comparamos los nuevos hashes con los antiguos en paralelo (para hashes de "lcu")
-            Parallel.ForEach(newLcuHashes, newHash =>
+            // Compare new hashes with old hashes in parallel (for "lcu" hashes)
+            Parallel.ForEach(newLcuHashes ?? Enumerable.Empty<string>(), newHash => // Manejar posibles nulls
             {
                 if (!oldLcuHashesSet.Contains(newHash))
                 {
@@ -79,77 +87,97 @@ namespace PBE_AssetsDownloader.Services
                 }
             });
 
-            // Llamamos al método de filtrado para las diferencias encontradas
+            // Call the filtering method for the found differences
             await FilterAndSaveDifferencesAsync(differencesGame.ToList(), differencesLcu.ToList());
         }
 
-        // Método que filtra y guarda las diferencias, eliminando las que no cumplen ciertos criterios
+        // Método auxiliar para leer archivos y manejar errores de forma más elegante
+        private async Task<string[]> TryReadAllLinesAsync(string path)
+        {
+            try
+            {
+                return await File.ReadAllLinesAsync(path);
+            }
+            catch (FileNotFoundException)
+            {
+                _logService.LogWarning($"Hash file not found, treating as empty: {path}");
+                return Array.Empty<string>();
+            }
+            catch (Exception ex)
+            {
+                _logService?.LogError(ex, $"Error reading hash file: {path}");
+                return Array.Empty<string>();
+            }
+        }
+
+        // Method that filters and saves differences, removing those that do not meet certain criteria
         public async Task FilterAndSaveDifferencesAsync(List<string> differencesGame, List<string> differencesLcu)
         {
-            // Leemos el archivo de hashes antiguos (game.txt) para realizar comparaciones
+            // Read the old hashes file (game.txt) for comparisons
             string oldHashesPath = Path.Combine(_oldHashesDirectory, "hashes.game.txt");
-            var oldHashes = await File.ReadAllLinesAsync(oldHashesPath);
+            // ¡MODIFICADO: Usar TryReadAllLinesAsync!
+            var oldHashes = await TryReadAllLinesAsync(oldHashesPath);
 
-            // Creamos un HashSet con las rutas de los archivos, eliminando la extensión para comparación de .tex
+            // Create a HashSet with file paths, removing the extension for .tex comparison
             var oldPathsWithoutTex = new HashSet<string>(
                 oldHashes
-                    .Select(line => line.Split(' ')[1])  // Obtenemos la ruta del archivo
-                    .Where(path => path.EndsWith(".dds"))  // Filtramos por las extensiones que nos interesan (en este caso solo .dds)
-                    .Select(path => path[..path.LastIndexOf('.')])  // Eliminamos la extensión para la comparación
+                    .Select(line => line.Split(' ')[1]) // Get the file path
+                    .Where(path => path.EndsWith(".dds")) // Filter by desired extensions (only .dds in this case)
+                    .Select(path => path[..path.LastIndexOf('.')]) // Remove the extension for comparison
             );
 
-            // Listas para almacenar las diferencias filtradas
+            // Lists to store filtered differences
             var filteredDifferencesGame = new ConcurrentBag<string>();
             var filteredDifferencesLcu = new ConcurrentBag<string>();
 
-            // Procesamos las diferencias de GAME en paralelo
+            // Process GAME differences in parallel
             Parallel.ForEach(differencesGame, line =>
             {
                 try
                 {
-                    var parts = line.Split(' ');  // Dividimos la línea en partes
-                    var filePath = parts[1];     // Obtenemos la ruta del archivo
-                    var extension = Path.GetExtension(filePath);  // Obtenemos la extensión del archivo
+                    var parts = line.Split(' '); // Split the line into parts
+                    var filePath = parts[1];     // Get the file path
+                    var extension = Path.GetExtension(filePath); // Get the file extension
 
-                    // Si la extensión está en la lista de excluidas, ignoramos este archivo
+                    // If the extension is in the excluded list, ignore this file
                     if (_excludedExtensions.Contains(extension))
                         return;
 
-                    // Si la ruta es ignorada por las reglas personalizadas, la descartamos
+                    // If the path is ignored by custom rules, discard it
                     string adjusted = AssetUrlRules.Adjust(filePath);
                     if (adjusted == null)
                         return;
 
-                    // Si es un archivo .tex, lo comparamos con las rutas antiguas sin extensión
+                    // If it's a .tex file, compare it with old paths without extension
                     if (filePath.EndsWith(".tex"))
                     {
-                        var baseFile = filePath[..filePath.LastIndexOf('.')]; // Removemos la extensión .tex
-                        if (!oldPathsWithoutTex.Contains(baseFile))  // Si no lo encontramos en las rutas sin extensión, lo añadimos a las diferencias
+                        var baseFile = filePath[..filePath.LastIndexOf('.')]; // Remove the .tex extension
+                        if (!oldPathsWithoutTex.Contains(baseFile)) // If not found in paths without extension, add it to differences
                         {
                             filteredDifferencesGame.Add(line);
                         }
                     }
                     else
                     {
-                        filteredDifferencesGame.Add(line);  // Si no es un .tex, lo añadimos directamente
+                        filteredDifferencesGame.Add(line); // If it's not a .tex, add it directly
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Si ocurre algún error procesando una línea, lo registramos en los logs
-                    Log.Warning("Error filtering GAME line '{Line}': {Message}", line, ex.Message);
+                    // If an error occurs processing a line, log it
+                    _logService.LogWarning($"Error filtering GAME line '{line}': {ex.Message}");
                 }
             });
 
-            // Procesamos las diferencias de LCU en paralelo
+            // Process LCU differences in parallel
             Parallel.ForEach(differencesLcu, line =>
             {
                 try
                 {
-                    var parts = line.Split(' ');  // Dividimos la línea en partes
-                    var filePath = parts[1];     // Obtenemos la ruta del archivo
+                    var parts = line.Split(' '); // Split the line into parts
+                    var filePath = parts[1];     // Get the file path
 
-                    // Si la ruta es ignorada por las reglas personalizadas, la descartamos
+                    // If the path is ignored by custom rules, discard it
                     string adjusted = AssetUrlRules.Adjust(filePath);
                     if (adjusted != null)
                     {
@@ -158,17 +186,29 @@ namespace PBE_AssetsDownloader.Services
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning("Error filtering LCU line '{Line}': {Message}", line, ex.Message);
+                    _logService.LogWarning($"Error filtering LCU line '{line}': {ex.Message}");
                 }
             });
+            
+            try
+            {
+                await File.WriteAllLinesAsync(Path.Combine(_resourcesPath, "differences_game.txt"), filteredDifferencesGame);
+                _logService.Log($"Filtered differences saved to {Path.Combine(_resourcesPath, "differences_game.txt")}");
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, $"Error saving game differences to {Path.Combine(_resourcesPath, "differences_game.txt")}");
+            }
 
-            // Guardamos las diferencias filtradas en los archivos correspondientes
-            await File.WriteAllLinesAsync(Path.Combine(_resourcesPath, "differences_game.txt"), filteredDifferencesGame);
-            await File.WriteAllLinesAsync(Path.Combine(_resourcesPath, "differences_lcu.txt"), filteredDifferencesLcu);
-
-            // Mensajes de log indicando que las diferencias se guardaron correctamente
-            Log.Information("Filtered differences saved to {0}", Path.Combine(_resourcesPath, "differences_game.txt"));
-            Log.Information("Filtered differences saved to {0}", Path.Combine(_resourcesPath, "differences_lcu.txt"));
+            try
+            {
+                await File.WriteAllLinesAsync(Path.Combine(_resourcesPath, "differences_lcu.txt"), filteredDifferencesLcu);
+                _logService.Log($"Filtered differences saved to {Path.Combine(_resourcesPath, "differences_lcu.txt")}");
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, $"Error saving LCU differences to {Path.Combine(_resourcesPath, "differences_lcu.txt")}");
+            }
         }
     }
 }

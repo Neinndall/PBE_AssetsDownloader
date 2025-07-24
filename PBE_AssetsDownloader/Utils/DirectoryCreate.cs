@@ -2,7 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog;
+using Serilog; // Aunque no se usa directamente en este archivo, es bueno mantenerlo si otros lo usan
+using PBE_AssetsDownloader.Services; // Asegúrate de tener este using para LogService
 
 namespace PBE_AssetsDownloader.Utils
 {
@@ -10,14 +11,22 @@ namespace PBE_AssetsDownloader.Utils
     {
         public string ResourcesPath { get; private set; }
         public string SubAssetsDownloadedPath { get; }
+        private readonly LogService _logService; // Campo para almacenar la instancia de LogService
 
-        public DirectoriesCreator()
+        // Constructor por defecto (sin argumentos) - Mantenerlo si lo necesitas en algún otro lugar
+        // Considera si este constructor es realmente necesario si siempre inyectas LogService.
+        // Si no se usa, es mejor eliminarlo para forzar la inyección de LogService.
+        public DirectoriesCreator(LogService logService)
         {
-            string date = DateTime.Now.ToString("dd-M-yyyy.H.mm.ss");  // Con horas, minutos y segundos
+            _logService = logService;
 
+            // Mueve la inicialización de Paths a este constructor también
+            // O crea un método InitializePaths() que ambos constructores llamen.
+            string date = DateTime.Now.ToString("dd-M-yyyy.H.mm.ss");
             SubAssetsDownloadedPath = Path.Combine("AssetsDownloaded", date);
             ResourcesPath = Path.Combine("Resources", date);
         }
+
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);
 
@@ -37,61 +46,59 @@ namespace PBE_AssetsDownloader.Utils
             await CreateDirAssetsDownloadedAsync();
             await CreateHashesNewDirectoryAsync();
         }
-        
+
         public string CreateAssetDirectoryFromPath(string url, string downloadDirectory)
         {
-            // Extraer la ruta del asset desde la URL
-            string path = new Uri(url).AbsolutePath; // /pbe/plugins/...
+            // ... (tu código existente para CreateAssetDirectoryFromPath)
+            string path = new Uri(url).AbsolutePath;
 
-            // Quitar el prefijo "/pbe/"
             if (path.StartsWith("/pbe/"))
             {
                 path = path.Substring(5); // Eliminar "/pbe/"
             }
 
-            // Reemplazar "rcp-be-lol-game-data/global/" por "GameData/"
+            // Reemplazar "rcp-be-lol-game-data/global/" por "rcp-be-lol-game-data/"
             string patternToReplace = "rcp-be-lol-game-data/global/default/";
             if (path.Contains(patternToReplace))
             {
                 path = path.Replace(patternToReplace, "rcp-be-lol-game-data/");
             }
 
-            // Convertir a formato de Windows
             string safePath = path.Replace("/", "\\");
 
-            // Reemplazar caracteres no válidos en la ruta
             foreach (char invalidChar in Path.GetInvalidPathChars())
             {
                 safePath = safePath.Replace(invalidChar.ToString(), "_");
             }
 
-            // Crear el path completo
             string fullDirectoryPath = Path.Combine(downloadDirectory, safePath);
             string directory = Path.GetDirectoryName(fullDirectoryPath);
 
-            // Si la carpeta no existe, crearla
             if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory(directory); // Crear las carpetas necesarias
+                Directory.CreateDirectory(directory);
+                // Opcional: _logService.LogDebug($"Created directory for asset: {directory}");
             }
 
-            return directory; // Devolver la carpeta donde se guardará el archivo
+            return directory;
         }
 
-
-        private static Task CreateFoldersAsync(string path)
+        // Modifica este método para usar _logService si está disponible
+        private Task CreateFoldersAsync(string path)
         {
             try
             {
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
-                    Log.Information("Directory created: {0}", path);
+                    // MODIFICACIÓN: Usar interpolación de cadenas
+                    _logService.Log($"Directory created: {path}");
                 }
             }
             catch (Exception e)
             {
-                Log.Error(e, "Error during directory creation: {0}", path);
+                // MODIFICACIÓN: Usar interpolación de cadenas para el mensaje
+                _logService.LogError(e, $"Error during directory creation for path: {path}");
             }
 
             return Task.CompletedTask;

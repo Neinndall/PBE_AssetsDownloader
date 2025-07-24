@@ -14,6 +14,8 @@ namespace PBE_AssetsDownloader.Utils
         public string NewHashesPath { get; set; }
         public string OldHashesPath { get; set; }
         public Dictionary<string, long> HashesSizes { get; set; }
+        public bool CheckJsonDataUpdates { get; set; }
+        public Dictionary<string, long> JsonDataSizes { get; set; }
 
         private const string ConfigFilePath = "config.json";
 
@@ -33,7 +35,7 @@ namespace PBE_AssetsDownloader.Utils
                 
                 if (settings == null)
                 {
-                    Console.WriteLine("Error: Configuration file is invalid, loading default settings.");
+                    Serilog.Log.Error("Error: Configuration file is invalid, loading default settings.");
                     return GetDefaultSettings();
                 }
 
@@ -41,7 +43,7 @@ namespace PBE_AssetsDownloader.Utils
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al cargar la configuración: {ex.Message}");
+                Serilog.Log.Error(ex, "Error al cargar la configuración.");
             }
 
             return GetDefaultSettings();
@@ -56,7 +58,9 @@ namespace PBE_AssetsDownloader.Utils
                 AutoCopyHashes = false,
                 CreateBackUpOldHashes = false,
                 OnlyCheckDifferences = false,
-                HashesSizes = new Dictionary<string, long>() // Inicializamos HashesSizes
+                HashesSizes = new Dictionary<string, long>(), // Inicializamos HashesSizes
+                CheckJsonDataUpdates = false, // Por defecto, esta nueva opción estará desactivada
+                JsonDataSizes = new Dictionary<string, long>() // Inicializamos el nuevo diccionario
             };
         }
 
@@ -71,7 +75,7 @@ namespace PBE_AssetsDownloader.Utils
             catch (Exception ex)
             {
                 // Maneja el error de guardado si es necesario
-                Console.WriteLine($"Error al guardar la configuración: {ex.Message}");
+                Serilog.Log.Error(ex, "Error al guardar la configuración.");
             }
         }
     }

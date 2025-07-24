@@ -1,12 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Serilog;
+using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
 
 namespace PBE_AssetsDownloader.Utils
 {
     public class HashCopier
     {
+        private readonly LogService _logService;
+
+        public HashCopier(LogService logService)
+        {
+            _logService = logService;
+        }
+
         public async Task<string> HandleCopyAsync(bool autoCopyHashes, string sourcePath, string destinationPath)
         {
             if (autoCopyHashes)
@@ -16,7 +23,7 @@ namespace PBE_AssetsDownloader.Utils
             }
             else
             {
-                Log.Information("AutoCopyHashes is disabled.");
+                _logService.Log("AutoCopyHashes is disabled.");
                 return string.Empty; // Retornar cadena vacía si autoCopyHashes está deshabilitado
             }
         }
@@ -26,7 +33,7 @@ namespace PBE_AssetsDownloader.Utils
             // Verificar si el directorio fuente existe
             if (!Directory.Exists(sourcePath))
             {
-                Log.Error("Source directory does not exist: {0}", sourcePath);
+                _logService.LogError($"Source directory does not exist: {sourcePath}");
                 return "Hashes were not replaced because the source directory does not exist.";
             }
 
@@ -37,7 +44,7 @@ namespace PBE_AssetsDownloader.Utils
                 {
                     // Si no existe, crear el directorio de destino
                     Directory.CreateDirectory(destinationPath);
-                    Log.Information("Destination directory did not exist and was created: {0}", destinationPath);
+                    _logService.Log($"Destination directory did not exist and was created: {destinationPath}");
                 }
 
                 // Copiar los archivos y subdirectorios desde el directorio fuente al destino, sobrescribiendo si es necesario
@@ -46,18 +53,18 @@ namespace PBE_AssetsDownloader.Utils
                 // Verificar que el directorio de destino existe después de la copia
                 if (Directory.Exists(destinationPath))
                 {
-                    Log.Information("Hashes replaced successfully.");
+                    _logService.Log("Hashes replaced successfully.");
                     return "Hashes replaced successfully.";
                 }
                 else
                 {
-                    Log.Error("Destination directory was not created: {0}", destinationPath);
+                    _logService.LogError($"Failed to replace hashes: destination directory not created.");
                     return "Failed to replace hashes: destination directory not created.";
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occurred while copying hashes.");
+                _logService.LogError(ex, "An error occurred while copying hashes.");
                 return "An error occurred while copying hashes.";
             }
         }
@@ -94,7 +101,7 @@ namespace PBE_AssetsDownloader.Utils
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error copying directory.");
+                _logService.LogError(ex, "Error copying directory.");
                 throw new InvalidOperationException("Error copying directory", ex);
             }
         }

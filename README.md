@@ -25,7 +25,7 @@ This tool is designed to automatically download and manage new assets from Leagu
 
 ### Prerequisites
 
-*   .NET 8.0 Runtime (or higher) installed on your system.
+*   [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.8-windows-x64-installer) (or higher) installed on your system.
 
 ### Installation
 

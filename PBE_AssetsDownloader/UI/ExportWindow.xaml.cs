@@ -244,9 +244,8 @@ namespace PBE_AssetsDownloader.UI
                 string notFoundFilePath = Path.Combine(txtDownloadTargetPath.Text, "NotFoundAssets.txt");
                 File.WriteAllLines(notFoundFilePath, notFoundAssets);
 
-                string message = $"Some assets could not be downloaded. A list of missing assets has been saved to: {notFoundFilePath}";
+                string message = $"Some assets could not be downloaded. A list of missing assets has been saved to NotFoundAssets.txt";
                 _logService.LogWarning(message);
-                MessageBox.Show(message, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             else
             {

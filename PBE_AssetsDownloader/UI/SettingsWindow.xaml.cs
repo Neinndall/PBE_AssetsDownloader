@@ -99,8 +99,6 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
-        
-
         private void btnBrowseNew_Click(object sender, RoutedEventArgs e)
         {
             using (var folderDialog = new CommonOpenFileDialog())
@@ -133,11 +131,8 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
-        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            // Capture the previous state of SyncHashesWithCDTB for conditional logic
-            bool wasSyncHashesWithCDTB = _appSettings.SyncHashesWithCDTB; // Use _appSettings to get previous state
-
             // 1. Update the _appSettings instance properties with the current UI control values
             _appSettings.SyncHashesWithCDTB = checkBoxSyncHashes.IsChecked ?? false;
             _appSettings.CheckJsonDataUpdates = checkBoxCheckJsonData.IsChecked ?? false; // Guardar el nuevo valor
@@ -149,40 +144,7 @@ namespace PBE_AssetsDownloader.UI
             // 2. Save the updated settings using the centralized method
             AppSettings.SaveSettings(_appSettings);
 
-            // 3. Conditional synchronization logic
-            if (_appSettings.SyncHashesWithCDTB && !wasSyncHashesWithCDTB) // If enabled and previously wasn't
-            {
-                var result = MessageBox.Show("Do you want to sync files now?", "Synchronization Required", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    _logService.Log("Checking for updates on the server...");
-                    bool isUpdated = await _status.IsUpdatedAsync();
-
-                    // Llamamos a CheckForUpdates para que gestione el log apropiado
-                    _status.CheckForUpdates(isUpdated); 
-
-                    if (isUpdated) // Si isUpdated es true, entonces hay actualización y procedemos a la descarga/sincronización
-                    {
-                        _logService.Log("Starting sync...");
-                        await DownloadFiles();    
-                        _logService.LogSuccess("Synchronization completed.");
-                    }
-                    else
-                    {
-                        // Si no hay actualización (isUpdated es false), CheckForUpdates ya ha logueado el mensaje.
-                        // Solo necesitamos un mensaje general de que las configuraciones se actualizaron.
-                        _logService.Log("Settings updated. No synchronization needed at this time.");
-                    }
-                }
-            }
-            // Si la sincronización no se activó o el usuario dijo "No" al MessageBox,
-            else
-            {
-                _logService.Log("Settings updated.");
-            }
-
-            MessageBox.Show("Settings updated successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            _logService.LogSuccess("Settings updated.");
 
             // Notify MainWindow that settings have changed
             SettingsChanged?.Invoke(this, EventArgs.Empty);
@@ -200,7 +162,6 @@ namespace PBE_AssetsDownloader.UI
             catch (Exception ex)
             {
                 _logService.LogError($"Error during download: {ex.Message}");
-                MessageBox.Show($"Error during download: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

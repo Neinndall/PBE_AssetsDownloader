@@ -153,7 +153,7 @@ namespace PBE_AssetsDownloader.UI
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
             var settingsWindow = new SettingsWindow(
-                _logService,
+                new LogService(),
                 _httpClient,
                 _directoriesCreator,
                 _requests,
@@ -163,9 +163,6 @@ namespace PBE_AssetsDownloader.UI
             
             settingsWindow.SettingsChanged += OnSettingsChanged;
             settingsWindow.ShowDialog();
-            
-             // ✅ RESTAURAR la conexión del LogService después de cerrar Settings
-            _logService.SetLogOutput(LogView.LogRichTextBox, LogView.LogScrollViewerControl, preserveExistingLogs: true);
         }
         
         // Metodo para actualizar en Home las rutas de hashes predeterminadas

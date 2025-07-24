@@ -101,7 +101,7 @@ namespace PBE_AssetsDownloader.Services
                 }
                 else
                 {
-                    _logService.LogError($"Failed to download '{fileName}' from {url}. Status Code: {response.StatusCode} - {response.ReasonPhrase}");
+                    _logService.LogError($"Failed to download '{fileName}'. Reason: {response.StatusCode} - {response.ReasonPhrase}");
                     return false;
                 }
             }

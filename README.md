@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/dev/PBE_AssetsDownloader/img/new/full_logo.ico?raw=true" alt="PBE_AssetsDownloader Logo" width="150">
+</div>
+
 ## 🛠️ PBE_AssetsDownloader
 
 This tool is designed to automatically download and manage new assets from League of Legends PBE server updates. It helps content creators, League of Legends players, and more stay up-to-date with the latest changes and additions to the game, leveraging data from [Communitydragon](https://raw.communitydragon.org/). Forget manual checks and downloads; PBE_AssetsDownloader streamlines your workflow, ensuring you always have the most current game files.

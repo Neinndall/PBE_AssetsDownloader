@@ -133,7 +133,7 @@
                                       CornerRadius="4">
                                     <RichTextBox x:Name="richTextBoxAbout" 
                                                BorderThickness="0"
-                                               Foreground="{StaticResource PrimaryTextBrush}"
+                                               Foreground="{StaticResource TextPrimary}"
                                                FontFamily="Consolas"
                                                FontSize="12"
                                                IsReadOnly="True"
@@ -195,7 +195,7 @@
                                                 HorizontalScrollBarVisibility="Disabled">
                                         <RichTextBox x:Name="richTextBoxChangelogs" 
                                                    BorderThickness="0"
-                                                   Foreground="{StaticResource PrimaryTextBrush}"
+                                                   Foreground="{StaticResource TextPrimary}"
                                                    FontFamily="Consolas"
                                                    FontSize="14"
                                                    IsReadOnly="True"

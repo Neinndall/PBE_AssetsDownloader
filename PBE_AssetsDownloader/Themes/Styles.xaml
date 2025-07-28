@@ -302,4 +302,122 @@
         </Setter>
     </Style>
 
+    <!-- Global ContextMenu Style - Mejorado -->
+    <Style TargetType="ContextMenu">
+        <Setter Property="Background" Value="{StaticResource DarkBackground}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="HasDropShadow" Value="True"/>
+        <Setter Property="MinWidth" Value="180"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black" 
+                                            Direction="270" 
+                                            ShadowDepth="4" 
+                                            Opacity="0.3" 
+                                            BlurRadius="12"/>
+                        </Border.Effect>
+                        <StackPanel IsItemsHost="True" 
+                                  KeyboardNavigation.DirectionalNavigation="Cycle"
+                                  Margin="4"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Global MenuItem Style - Mejorado -->
+    <Style TargetType="MenuItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="12,10,16,10"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="MinHeight" Value="32"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Margin="2,1"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemIcon"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemGesture"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemArrow"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Icono -->
+                            <ContentPresenter x:Name="Icon" 
+                                            Grid.Column="0" 
+                                            VerticalAlignment="Center" 
+                                            Margin="8,0,12,0"
+                                            Width="16" 
+                                            Height="16"/>
+                            
+                            <!-- Texto principal -->
+                            <ContentPresenter Grid.Column="1" 
+                                            ContentSource="Header" 
+                                            RecognizesAccessKey="True" 
+                                            VerticalAlignment="Center"/>
+                            
+                            <!-- Atajo de teclado -->
+                            <TextBlock x:Name="GestureText" 
+                                     Grid.Column="2" 
+                                     Text="{TemplateBinding InputGestureText}"
+                                     VerticalAlignment="Center" 
+                                     Margin="16,0,8,0"
+                                     FontSize="12"
+                                     Foreground="{StaticResource TextSecondary}"
+                                     Opacity="0.8"/>
+                            
+                            <!-- Flecha para submenús -->
+                            <Path x:Name="ArrowPath"
+                                Grid.Column="3"
+                                Data="M0,0 L4,4 L0,8 z"
+                                Fill="{StaticResource TextSecondary}"
+                                VerticalAlignment="Center"
+                                Margin="0,0,8,0"
+                                Visibility="Collapsed"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Hover effect -->
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter TargetName="GestureText" Property="Foreground" Value="White"/>
+                            <Setter TargetName="GestureText" Property="Opacity" Value="0.9"/>
+                            <Setter TargetName="ArrowPath" Property="Fill" Value="White"/>
+                        </Trigger>
+                        
+                        <!-- Disabled state -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                        
+                        <!-- Submenu indicator -->
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="ArrowPath" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

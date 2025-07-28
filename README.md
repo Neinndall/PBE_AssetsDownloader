@@ -2,6 +2,14 @@
   <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/PBE_AssetsDownloader/img/new/full_logo.ico?raw=true" alt="PBE_AssetsDownloader Logo" width="150">
 </div>
 
+## ✅ APP Reliability
+I decided to create this section to give reliability to this tool, which I've been developing for some time, so that all GitHub programmers and users can trust my projects and future projects, so I decided to do this so that we're all safe.
+So that you can check that no files have been modified after publication, GitHub contains a verification code in case it has been modified **SHA-256**, and you can find this number in [releases of the Ttol](https://github.com/Neinndall/PBE_AssetsDownloader/releases), where the assets appear. You can confirm this number and if it contains **MALWARE** in **GITHUB** and **VIRUSTOTAL**. You'll have all the details below with the releases.
+
+*   **Latest Version v2.0.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f/details)** 
+     *   `(Github: sha256:6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f)` 
+     *   `(VirusTotal: SHA-256 6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f)` 
+
 ## 🛠️ PBE_AssetsDownloader
 
 This tool is designed to automatically download and manage new assets from League of Legends PBE server updates. It helps content creators, League of Legends players, and more stay up-to-date with the latest changes and additions to the game, leveraging data from [Communitydragon](https://raw.communitydragon.org/). Forget manual checks and downloads; PBE_AssetsDownloader streamlines your workflow, ensuring you always have the most current game files.

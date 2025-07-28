@@ -2,36 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
 
-
-
-    
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="#FF4163A0"/>
+    <!-- Lo usamos para Styles.xaml / SidebarMenuButton -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#FF5577CC"/> 
     <SolidColorBrush x:Key="AccentPressedBrush" Color="#FF2E3B5C"/>
-
-
-
-    <SolidColorBrush x:Key="GroupBoxBackgroundBrush" Color="#FF222222"/>
-
-    <SolidColorBrush x:Key="AccentBrush" Color="#FF5577CC"/>  <!-- Azulito -->
-    
-    <SolidColorBrush x:Key="ContentBackgroundBrush" Color="#FF2C3E50"/> <!-- azul oscuro con tinte grisáceo -->
-    
-    
-    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#FF333333"/> <!-- Grisaceo oscuro Panel -->
-    <SolidColorBrush x:Key="TextBoxForegroundBrush" Color="#FF000000"/>
-
-    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FFDDDDDD"/> <!-- Gris un poco más oscuro -->
-    <SolidColorBrush x:Key="SecondaryTextBrush" Color="#FFCCCCCC"/> <!-- Gris más claro, menos contraste -->
-
-    
-    
-    <SolidColorBrush x:Key="BackgroundBrush" Color="#F8FAFC"/> <!-- Blanco con un tono azulito -->
-
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1E293B"/> <!-- Azul muy oscuro -->
-    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/> <!-- blanco puro -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#E2E8F0"/> <!-- gris azulado muy claro --> 
-    
-    
     
     <!-- Modern Dark Theme Colors -->
     <SolidColorBrush x:Key="DarkBackground" Color="#FF1E1E1E"/>
@@ -40,12 +13,14 @@
     <SolidColorBrush x:Key="AccentBlue" Color="#FF007ACC"/>
     <SolidColorBrush x:Key="AccentGreen" Color="#FF16825D"/>
     <SolidColorBrush x:Key="AccentOrange" Color="#FFD7BA7D"/>
+    <SolidColorBrush x:Key="AccentRed" Color="#FFCC3333"/>
     <SolidColorBrush x:Key="TextPrimary" Color="#FFCCCCCC"/>
     <SolidColorBrush x:Key="TextSecondary" Color="#FF969696"/>
     <SolidColorBrush x:Key="TextMuted" Color="#FF6A6A6A"/>
     <SolidColorBrush x:Key="BorderColor" Color="#FF3F3F46"/>
     <SolidColorBrush x:Key="HoverColor" Color="#FF3A3A3C"/>
-        
+    
+    <!-- Colores que usará CustomScrollbarStyles.xaml -->
     <SolidColorBrush x:Key="ScrollBarBackground" Color="#252526" />
     <SolidColorBrush x:Key="ScrollBarThumbBackground" Color="#505050" />
     <SolidColorBrush x:Key="ScrollBarThumbHoverBackground" Color="#707070" />

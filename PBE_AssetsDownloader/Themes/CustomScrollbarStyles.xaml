@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <SolidColorBrush x:Key="ScrollBarBackground" Color="#252526" /> <SolidColorBrush x:Key="ScrollBarThumbBackground" Color="#505050" /> <SolidColorBrush x:Key="ScrollBarThumbHoverBackground" Color="#707070" /> <SolidColorBrush x:Key="ScrollBarThumbPressedBackground" Color="#909090" /> <SolidColorBrush x:Key="ScrollBarArrowColor" Color="#BBBBBB" /> <SolidColorBrush x:Key="ScrollBarArrowHoverColor" Color="White" /> <Style x:Key="ScrollBarButton" TargetType="{x:Type RepeatButton}">
+    <Style x:Key="ScrollBarButton" TargetType="{x:Type RepeatButton}">
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>

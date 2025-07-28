@@ -1,4 +1,4 @@
-﻿// PBE_AssetsDownloader/App.xaml.cs
+// PBE_AssetsDownloader/App.xaml.cs
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,6 +22,7 @@ namespace PBE_AssetsDownloader
         private Status _status;
         private AssetDownloader _assetDownloader;
         private AppSettings _appSettings;
+        private JsonDataService _jsonDataService;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -52,8 +53,9 @@ namespace PBE_AssetsDownloader
             _directoriesCreator = new DirectoriesCreator(_logService);
             _requests = new Requests(_httpClient, _directoriesCreator, _logService);
             _assetDownloader = new AssetDownloader(_httpClient, _directoriesCreator, _logService);
-            _appSettings = AppSettings.LoadSettings(); // ✅ Cargar aquí una sola vez
-            _status = new Status(_logService, _httpClient, _requests, _appSettings);
+            _appSettings = AppSettings.LoadSettings(); // Cargar aquí una sola vez
+            _jsonDataService = new JsonDataService(_logService, _httpClient);
+            _status = new Status(_logService, _httpClient, _requests, _appSettings, _directoriesCreator, _jsonDataService);
 
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -104,11 +106,26 @@ namespace PBE_AssetsDownloader
         {
             try
             {
-                string baseApplicationPath = AppDomain.CurrentDomain.BaseDirectory;
-                string previewParentDirectory = Path.Combine(baseApplicationPath, "PBE_PreviewAssets");
+                // Llamamos al directorio de PreviewAssets
+                string previewParentDirectory = _directoriesCreator.PreviewAssetsPath;
 
                 if (Directory.Exists(previewParentDirectory))
                 {
+                    // Eliminar archivos sueltos directamente en el directorio padre
+                    var files = Directory.GetFiles(previewParentDirectory);
+                    foreach (var file in files)
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            _logService.LogDebug($"Successfully deleted old preview file: {file}");
+                        }
+                        catch (IOException ex)
+                        {
+                            _logService.LogWarning($"Could not delete old preview file {file}, it might still be in use. Error: {ex.Message}");
+                        }
+                    }
+
                     var subDirectories = Directory.GetDirectories(previewParentDirectory);
                     foreach (var dir in subDirectories)
                     {
@@ -168,8 +185,8 @@ namespace PBE_AssetsDownloader
                 var backUp = new BackUp(directoriesCreator, logService);
                 await backUp.HandleBackUpAsync(createBackUpOldHashes);
 
-                var hashCopier = new HashCopier(logService);
-                await hashCopier.HandleCopyAsync(autoCopyHashes, newHashesDirectory, oldHashesDirectory);
+                var hashCopier = new HashCopier(logService, directoriesCreator);
+                await hashCopier.HandleCopyAsync(autoCopyHashes);
             }
             catch (Exception ex)
             {

@@ -1,0 +1,61 @@
+<UserControl x:Class="PBE_AssetsDownloader.UI.Views.LogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="220" d:DesignWidth="600"
+             Background="Transparent"> 
+    <Border Background="{StaticResource DarkBackground}" 
+            CornerRadius="8"
+            BorderBrush="{StaticResource BorderColor}"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" 
+                    Background="{StaticResource AccentBlue}"
+                    CornerRadius="8,8,0,0"
+                    Padding="12,8">
+                <StackPanel Orientation="Horizontal">
+                    <materialIcons:MaterialIcon Kind="Console" 
+                                                Width="16" 
+                                                Height="16" 
+                                                Foreground="{StaticResource TextPrimary}" 
+                                                VerticalAlignment="Center"/>
+                    <TextBlock Text="Application Logs" 
+                               FontWeight="Medium" 
+                               FontSize="13" 
+                               Foreground="{StaticResource TextPrimary}" 
+                               VerticalAlignment="Center" 
+                               Margin="8,0,0,0"
+                               FontFamily="Consolas, Courier New"/>
+                </StackPanel>
+            </Border>
+            
+            <ScrollViewer x:Name="LogScrollViewer" 
+                          Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          Background="{StaticResource DarkBackground}">
+                
+                <ScrollViewer.Resources>
+                    <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernVerticalScrollBar}"/>
+                </ScrollViewer.Resources>
+
+                <RichTextBox x:Name="richTextBoxLogs" 
+                             Style="{StaticResource LogRichTextBoxStyle}"
+                             FlowDirection="LeftToRight"
+                             Background="{StaticResource DarkBackground}" 
+                             Foreground="{StaticResource TextPrimary}"
+                             FontFamily="Consolas, Courier New"
+                             FontSize="12"
+                             BorderThickness="0"
+                             Padding="12,8">
+                </RichTextBox>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl>

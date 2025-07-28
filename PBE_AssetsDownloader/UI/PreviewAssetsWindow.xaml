@@ -138,10 +138,10 @@
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="Border" Property="Background" Value="#FF2D2D30"/>
+                                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource CardBackground}"/>
                                                     </Trigger>
                                                     <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentBlue}"/>
+                                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentBrush}"/>
                                                         <Setter Property="Foreground" Value="White"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
@@ -184,6 +184,25 @@
                             BorderBrush="{StaticResource BorderColor}"
                             BorderThickness="1"
                             CornerRadius="6">
+                        <!-- Menu Context - Save as -->
+                        <Border.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Click="MenuItem_Click_SaveAs">
+                                    <MenuItem.Header>
+                                        <StackPanel Orientation="Horizontal" 
+                                                   HorizontalAlignment="Left"
+                                                   Margin="-16,0,0,0">
+                                            <TextBlock Text="💾" 
+                                                      FontSize="18" 
+                                                      Margin="0,0,12,0" 
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock Text="Save as..." 
+                                                      VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Border.ContextMenu>
                         <Grid>
                             <!-- No Data Message -->
                             <StackPanel x:Name="noDataPanel"

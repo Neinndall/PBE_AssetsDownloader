@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Microsoft.Win32;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
@@ -105,7 +106,7 @@ namespace PBE_AssetsDownloader.UI
 
       if (IsHeaderOrSeparator(selectedAssetName))
       {
-        textBlockNoData.Visibility = Visibility.Visible;
+        textBlockNoData.Visibility = Visibility.Collapsed;
         return;
       }
 
@@ -274,6 +275,33 @@ namespace PBE_AssetsDownloader.UI
         _logService.LogError(ex, $"An unexpected error occurred while creating the image display for {url}.");
         ShowInfoMessage("An error occurred while trying to display the image.");
       }
+    }
+
+    private void MenuItem_Click_SaveAs(object sender, RoutedEventArgs e)
+    {
+        if (borderMediaPlayer.Child is Image image && image.Source is BitmapSource bitmapSource)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "PNG Image|*.png";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    PngBitmapEncoder encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                    using (FileStream stream = new FileStream(saveFileDialog.FileName, FileMode.Create))
+                    {
+                        encoder.Save(stream);
+                    }
+                    _logService.LogSuccess($"Image saved successfully to {saveFileDialog.FileName}");
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError(ex, $"Failed to save image to {saveFileDialog.FileName}");
+                    MessageBox.Show($"Failed to save image: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
     }
 
     private void DisplayAudioExternal(string filePath)

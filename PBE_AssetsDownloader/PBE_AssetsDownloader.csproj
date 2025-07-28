@@ -27,6 +27,7 @@
   </PropertyGroup>
 
  <ItemGroup>
+    <PackageReference Include="DiffPlex" Version="1.8.0" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
@@ -45,8 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-  <Resource Include="img\background\season2025_background.jpg" />
-  <EmbeddedResource Include="changelogs.txt" />
+    <EmbeddedResource Include="changelogs.txt" />
   </ItemGroup>
 
 </Project>

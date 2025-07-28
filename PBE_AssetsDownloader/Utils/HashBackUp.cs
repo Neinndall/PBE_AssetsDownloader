@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
@@ -34,17 +34,11 @@ namespace PBE_AssetsDownloader.Utils
         {
             try
             {
-                // Crear la carpeta de respaldo asincrónicamente
+                // Crear la carpeta de respaldo asincrónicamente + Mensaje de creacion
                 await _directoriesCreator.CreateBackUpOldHashesAsync();
 
                 // Obtener la ruta de la carpeta de respaldo
-                string backupDirectory = _directoriesCreator.GetBackUpOldHashesPath();
-
-                // Verifica que el directorio de respaldo exista antes de copiar
-                if (!Directory.Exists(backupDirectory))
-                {
-                    return "Backup directory does not exist";
-                }
+                string backupDirectory = _directoriesCreator.BackUpOldHashesPath;                
 
                 // Definir los archivos específicos que se deben copiar
                 var filesToCopy = new[] { "hashes.game.txt", "hashes.lcu.txt" };
@@ -62,7 +56,7 @@ namespace PBE_AssetsDownloader.Utils
                     }
                 }
 
-                _logService.Log($"Backup created successfully at {backupDirectory}");
+                // _logService.Log($"Backup created successfully at {backupDirectory}");
                 return backupDirectory;
             }
             catch (Exception ex)

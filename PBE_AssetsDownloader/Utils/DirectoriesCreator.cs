@@ -29,10 +29,13 @@ namespace PBE_AssetsDownloader.Utils
       
       HashesNewPath = Path.Combine("hashes", "new");
       HashesOldsPaths = Path.Combine("hashes", "olds");
+
+      string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+      string appFolderPath = Path.Combine(appDataPath, "PBE_AssetsDownloader");
       
-      PreviewAssetsPath = Path.Combine("PBE_PreviewAssets");
-      JsonCacheNewPath = Path.Combine("json_cache", "new");
-      JsonCacheOldPath = Path.Combine("json_cache", "old");
+      PreviewAssetsPath = Path.Combine(appFolderPath, "PBE_PreviewAssets");
+      JsonCacheNewPath = Path.Combine(appFolderPath, "json_cache", "new");
+      JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
       BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
       
     }

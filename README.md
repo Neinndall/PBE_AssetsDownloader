@@ -3,8 +3,11 @@
 </div>
 
 ## ✅ APP Reliability
-I decided to create this section to give reliability to this tool, which I've been developing for some time, so that all GitHub programmers and users can trust my projects and future projects, so I decided to do this so that we're all safe.
-So that you can check that no files have been modified after publication, GitHub contains a verification code in case it has been modified **SHA-256**, and you can find this number in [releases of the tool](https://github.com/Neinndall/PBE_AssetsDownloader/releases), where the assets appear. You can confirm this number and if it contains **MALWARE** in **GITHUB** and **VIRUSTOTAL**. You'll have all the details below with the releases.
+I decided to create this section to provide reliability to the tool I've been developing for some time, so that all GitHub developers and users can trust my projects and future ones. Therefore, I decided to do it for your security. So you can verify that no file has been modified since its publication and that it is free of malware.
+
+GitHub includes a **SHA-256** security code linked to the .rar package. You can find this **SHA-256** number in the [releases of the tool](https://github.com/Neinndall/PBE_AssetsDownloader/releases) section, in the **ASSETS** section. It gives you the option to copy it and verify it with the **VIRUSTOTAL** link I will provide with each version release.
+
+If both the **SHA-256** from **GitHub** and **VIRUSTOTAL** match, it means that the .rar package that was scanned by virustotal has not been modified at any point, so you can confidently verify that the scan was performed on the .rar package of the latest version. With each release, I will provide you with the URL of each virustotal scan with its details and the package name for the version that will appear just above with its details. Most importantly, **SHA-256**, don't forget to check every detail.
 
 *   **Latest Version v2.0.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f/details)** 
      *   `(Github: sha256:6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f)` 

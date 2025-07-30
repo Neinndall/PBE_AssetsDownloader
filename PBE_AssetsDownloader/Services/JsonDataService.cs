@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using PBE_AssetsDownloader.UI;
+using PBE_AssetsDownloader.Utils;
 
 namespace PBE_AssetsDownloader.Services
 {
@@ -11,12 +14,18 @@ namespace PBE_AssetsDownloader.Services
     {
         private readonly LogService _logService;
         private readonly HttpClient _httpClient;
+        private readonly AppSettings _appSettings;
+        private readonly DirectoriesCreator _directoriesCreator;
+        private readonly Requests _requests;
         private readonly string statusUrl = "https://raw.communitydragon.org/data/hashes/lol/";
 
-        public JsonDataService(LogService logService, HttpClient httpClient)
+        public JsonDataService(LogService logService, HttpClient httpClient, AppSettings appSettings, DirectoriesCreator directoriesCreator, Requests requests)
         {
             _logService = logService;
             _httpClient = httpClient;
+            _appSettings = appSettings;
+            _directoriesCreator = directoriesCreator;
+            _requests = requests;
         }
 
         public async Task<Dictionary<string, long>> GetRemoteHashesSizesAsync()
@@ -80,45 +89,196 @@ namespace PBE_AssetsDownloader.Services
             return result;
         }
 
-        public long ParseSize(string sizeStr)
+        public async Task CheckJsonDataUpdatesAsync()
         {
-            var culture = CultureInfo.InvariantCulture;
-            sizeStr = sizeStr.Trim();
-
-            Match numericMatch = Regex.Match(sizeStr, @"([\d\.]+)");
-            if (!numericMatch.Success || !double.TryParse(numericMatch.Groups[1].Value, NumberStyles.Any, culture, out double size))
+            if (!_appSettings.CheckJsonDataUpdates || (_appSettings.MonitoredJsonDirectories == null && _appSettings.MonitoredJsonFiles == null))
             {
-                _logService.LogWarning($"Could not parse numeric part of size string: '{sizeStr}'. Defaulting to 0 bytes.");
-                return 0;
+                return; // La opción no está activada o ninguna lista de archivos/directorios está configurada.
             }
 
-            if (sizeStr.EndsWith("KiB", StringComparison.OrdinalIgnoreCase)) return (long)(size * 1024);
-            if (sizeStr.EndsWith("MiB", StringComparison.OrdinalIgnoreCase)) return (long)(size * 1024 * 1024);
-            if (sizeStr.EndsWith("GiB", StringComparison.OrdinalIgnoreCase)) return (long)(size * 1024 * 1024 * 1024);
-            if (sizeStr.EndsWith("TiB", StringComparison.OrdinalIgnoreCase)) return (long)(size * 1024L * 1024L * 1024L * 1024L);
+            // Creamos directorios necesarios + Mensaje de creacion
+            await _directoriesCreator.CreateDirJsonCacheNewAsync();
+            await _directoriesCreator.CreateDirJsonCacheOldAsync();
 
-            if (sizeStr.EndsWith("KB", StringComparison.OrdinalIgnoreCase)) return (long)(size * 1000);
-            if (sizeStr.EndsWith("MB", StringComparison.OrdinalIgnoreCase)) return (long)(size * 1000 * 1000);
-            if (sizeStr.EndsWith("GB", StringComparison.OrdinalIgnoreCase)) return (long)(size * 1000 * 1000 * 1000);
+            _logService.Log("Checking for JSON file updates...");
+            var serverJsonDataEntries = new Dictionary<string, (DateTime Date, string FullUrl)>();
+            bool anyUrlProcessed = false;
 
-            if (sizeStr.EndsWith("B", StringComparison.OrdinalIgnoreCase)) return (long)size;
+            // Procesar directorios monitoreados
+            if (_appSettings.MonitoredJsonDirectories != null)
+            {
+                foreach (var url in _appSettings.MonitoredJsonDirectories)
+                {
+                    if (string.IsNullOrWhiteSpace(url))
+                    {
+                        continue;
+                    }
 
-            return (long)size;
+                    try
+                    {
+                        string html = await _httpClient.GetStringAsync(url);
+                        var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
+                        foreach (Match match in regex.Matches(html))
+                        {
+                            string filename = match.Groups["filename"].Value;
+                            string dateStr = match.Groups["date"].Value.Trim();
+                            if (ParseDate(dateStr, out DateTime parsedDate))
+                            {
+                                string fullFileUrl = url + filename; // Construir la URL completa
+                                serverJsonDataEntries[filename] = (parsedDate, fullFileUrl); // Usar el nombre del archivo como clave
+                                anyUrlProcessed = true;
+                            }
+                            else
+                            {
+                                _logService.LogWarning($"Could not parse date for {filename}: {dateStr}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logService.LogError(ex, $"Error processing monitored directory URL: {url}");
+                    }
+                }
+            }
+
+            // Procesar archivos individuales monitoreados
+            if (_appSettings.MonitoredJsonFiles != null)
+            {
+                foreach (var url in _appSettings.MonitoredJsonFiles)
+                {
+                    if (string.IsNullOrWhiteSpace(url))
+                    {
+                        continue;
+                    }
+
+                    string parentDirectoryUrl = string.Empty;
+                    try
+                    {
+                        // Extraer la URL del directorio padre
+                        Uri fileUri = new Uri(url);
+                        parentDirectoryUrl = fileUri.GetLeftPart(UriPartial.Path);
+                        parentDirectoryUrl = parentDirectoryUrl.Substring(0, parentDirectoryUrl.LastIndexOf('/') + 1); // Asegurarse de que termine con /
+
+                        string html = await _httpClient.GetStringAsync(parentDirectoryUrl);
+                        // Reutilizar la regex para parsear listados de directorios
+                        var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
+                        bool foundInParent = false;
+                        foreach (Match match in regex.Matches(html))
+                        {
+                            string filenameInParent = match.Groups["filename"].Value;
+                            if (url.EndsWith(filenameInParent)) // Comprobar si es nuestro archivo
+                            {
+                                string dateStr = match.Groups["date"].Value.Trim();
+                                if (ParseDate(dateStr, out DateTime parsedDate))
+                                {
+                                    serverJsonDataEntries[filenameInParent] = (parsedDate, url); // Usar el nombre del archivo como clave
+                                    anyUrlProcessed = true;
+                                    foundInParent = true;
+                                    _logService.LogDebug($"Found {url} in parent directory listing. Date: {parsedDate}");
+                                    break; // Encontramos nuestro archivo, no es necesario continuar el bucle
+                                }
+                                else
+                                {
+                                    _logService.LogWarning($"Could not parse date for {url}: {dateStr}");
+                                }
+                            }
+                        }
+
+                        if (!foundInParent)
+                        {
+                            _logService.LogWarning($"Could not find {url} in its parent directory listing: {parentDirectoryUrl}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logService.LogError(ex, $"Error fetching or parsing parent directory {parentDirectoryUrl} for file {url}");
+                    }
+                }
+            }
+
+            if (!anyUrlProcessed)
+            {
+                _logService.LogWarning("No JSON files could be processed from the configured URLs.");
+                return;
+            }
+
+            var localJsonDataDates = _appSettings.JsonDataModificationDates ?? new Dictionary<string, DateTime>();
+            bool updated = false;
+
+            foreach (var serverEntry in serverJsonDataEntries)
+            {
+                string filename = serverEntry.Key;
+                DateTime serverDate = serverEntry.Value.Date;
+                string fullUrl = serverEntry.Value.FullUrl;
+
+                if (!localJsonDataDates.ContainsKey(filename) || localJsonDataDates[filename] != serverDate)
+                {
+                    string message = $"File updated or new: {filename} (Server Date: {serverDate.ToString("yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture)})";
+                    localJsonDataDates[filename] = serverDate;
+                    updated = true;
+
+                    string jsonFileName = filename;
+                    string oldFilePath = Path.Combine(_directoriesCreator.JsonCacheOldPath, jsonFileName);
+                    string newFilePath = Path.Combine(_directoriesCreator.JsonCacheNewPath, jsonFileName);
+
+                    try
+                    {
+                        if (File.Exists(newFilePath))
+                        {
+                            File.Copy(newFilePath, oldFilePath, true);
+                        }
+
+                        // Usar el nuevo método de Requests para descargar y guardar el JSON
+                        bool downloadSuccess = await _requests.DownloadJsonContentAsync(fullUrl, newFilePath);
+
+                        if (downloadSuccess)
+                        {
+                            _logService.LogDebug($"Saved new JSON content to {newFilePath}");
+                            // Log interactive message
+                            _logService.LogInteractive(
+                                message,
+                                "View Diff",
+                                () =>
+                                {
+                                    string oldContent = File.Exists(oldFilePath) ? File.ReadAllText(oldFilePath) : "";
+                                    string newContent = File.Exists(newFilePath) ? File.ReadAllText(newFilePath) : "";
+                                    var diffWindow = new JsonDiffWindow(oldContent, newContent);
+                                    diffWindow.Show();
+                                }
+                            );
+                        }
+                        else
+                        {
+                            // Si la descarga falla, loguear el error y no marcar como actualizado
+                            _logService.LogError($"Failed to download and save JSON content for {fullUrl}. Check logs for details.");
+                            updated = false; // No se actualizó correctamente
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logService.LogError(ex, $"Error processing JSON content for {fullUrl}");
+                        updated = false; // Hubo un error, no se actualizó correctamente
+                    }
+                }
+            }
+
+            if (updated)
+            {
+                _appSettings.JsonDataModificationDates = localJsonDataDates;
+                AppSettings.SaveSettings(_appSettings);
+                _logService.LogSuccess("Local game data dates updated.");
+            }
+            else
+            {
+                _logService.Log("JSON files are up-to-date.");
+            }
         }
 
-        public string FormatBytes(long bytes)
+        private bool ParseDate(string dateStr, out DateTime date)
         {
-            string[] Suffix = { "B", "KiB", "MiB", "GiB", "TiB" };
-            int i = 0;
-            double dblSByte = bytes;
-
-            while (Math.Round(dblSByte / 1024) >= 1)
-            {
-                dblSByte /= 1024;
-                i++;
-            }
-
-            return string.Format(CultureInfo.InvariantCulture, "{0:n1} {1}", dblSByte, Suffix[i]);
+            // Example format: 2025-Jul-29 21:18
+            string format = "yyyy-MMM-dd HH:mm";
+            return DateTime.TryParseExact(dateStr, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
         }
     }
 }

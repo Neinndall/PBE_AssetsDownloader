@@ -54,8 +54,8 @@ namespace PBE_AssetsDownloader
             _requests = new Requests(_httpClient, _directoriesCreator, _logService);
             _assetDownloader = new AssetDownloader(_httpClient, _directoriesCreator, _logService);
             _appSettings = AppSettings.LoadSettings(); // Cargar aquí una sola vez
-            _jsonDataService = new JsonDataService(_logService, _httpClient);
-            _status = new Status(_logService, _httpClient, _requests, _appSettings, _directoriesCreator, _jsonDataService);
+            _jsonDataService = new JsonDataService(_logService, _httpClient, _appSettings, _directoriesCreator, _requests);
+            _status = new Status(_logService, _httpClient, _requests, _appSettings, _jsonDataService);
 
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -69,7 +69,8 @@ namespace PBE_AssetsDownloader
                 _requests,
                 _status,
                 _assetDownloader,
-                _appSettings // ✅ Inyectamos la instancia
+                _appSettings, // ✅ Inyectamos la instancia
+                _jsonDataService
             );
 
             mainWindow.Show();

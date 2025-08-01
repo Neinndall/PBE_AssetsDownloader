@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         Title="JSON Diff Viewer" Height="860" Width="1400" MinHeight="860" MinWidth="1400"
         WindowStartupLocation="CenterScreen"
@@ -47,7 +48,7 @@
         <Grid Grid.Row="1" Margin="24">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -79,12 +80,25 @@
                             BorderBrush="{StaticResource BorderColor}"
                             BorderThickness="1"
                             CornerRadius="6">
-                        <ScrollViewer>
-                            <RichTextBox x:Name="OldJsonContent" IsReadOnly="True" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextPrimary}" Padding="12,8"/>
-                        </ScrollViewer>
+                        <avalonEdit:TextEditor x:Name="OldJsonContent" 
+                                             IsReadOnly="True" 
+                                             Background="Transparent" 
+                                             BorderThickness="0" 
+                                             Foreground="{StaticResource TextPrimary}" 
+                                             Padding="0,8"
+                                             ShowLineNumbers="True"
+                                             HorizontalScrollBarVisibility="Disabled"/>
                     </Border>
                 </Grid>
             </Border>
+
+            <!-- Grid Splitter -->
+            <GridSplitter Grid.Column="1" 
+                          Width="12" 
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Stretch" 
+                          Background="Transparent"
+                          ResizeBehavior="PreviousAndNext"/>
 
             <!-- New JSON Card -->
             <Border Grid.Column="2" Style="{StaticResource SettingsCard}">
@@ -114,9 +128,14 @@
                             BorderBrush="{StaticResource BorderColor}"
                             BorderThickness="1"
                             CornerRadius="6">
-                        <ScrollViewer>
-                            <RichTextBox x:Name="NewJsonContent" IsReadOnly="True" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextPrimary}" Padding="12,8"/>
-                        </ScrollViewer>
+                        <avalonEdit:TextEditor x:Name="NewJsonContent" 
+                                             IsReadOnly="True" 
+                                             Background="Transparent" 
+                                             BorderThickness="0" 
+                                             Foreground="{StaticResource TextPrimary}" 
+                                             Padding="0,8"
+                                             ShowLineNumbers="True"
+                                             HorizontalScrollBarVisibility="Disabled"/>
                     </Border>
                 </Grid>
             </Border>

@@ -16,7 +16,7 @@ namespace PBE_AssetsDownloader.Utils
     public string OldHashesPath { get; set; }
     public Dictionary<string, long> HashesSizes { get; set; }
     public bool CheckJsonDataUpdates { get; set; }
-    public Dictionary<string, long> JsonDataSizes { get; set; }
+    public Dictionary<string, DateTime> JsonDataModificationDates { get; set; }
     public List<string> MonitoredJsonDirectories { get; set; }
     public List<string> MonitoredJsonFiles { get; set; }
 
@@ -75,6 +75,25 @@ namespace PBE_AssetsDownloader.Utils
             if (settings.MonitoredJsonDirectories == null) settings.MonitoredJsonDirectories = new List<string>();
             if (settings.MonitoredJsonFiles == null) settings.MonitoredJsonFiles = new List<string>();
 
+            // Handle backward compatibility for JsonDataSizes (old format with full URLs as keys)
+            if (jObject.TryGetValue("JsonDataSizes", out var jsonDataSizesToken) && jsonDataSizesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
+            {
+                var oldSizes = jsonDataSizesToken.ToObject<Dictionary<string, long>>();
+                if (oldSizes != null)
+                {
+                    settings.JsonDataModificationDates = oldSizes.ToDictionary(kvp => Path.GetFileName(kvp.Key), kvp => DateTime.MinValue); // Convert old sizes to default DateTime
+                }
+            }
+            // Handle loading JsonDataModificationDates (new format with filenames as keys)
+            else if (jObject.TryGetValue("JsonDataModificationDates", out var jsonDataDatesToken) && jsonDataDatesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
+            {
+                settings.JsonDataModificationDates = jsonDataDatesToken.ToObject<Dictionary<string, DateTime>>();
+            }
+            else
+            {
+                settings.JsonDataModificationDates = new Dictionary<string, DateTime>();
+            }
+
             return settings;
         }
         catch (Exception ex)
@@ -96,7 +115,7 @@ namespace PBE_AssetsDownloader.Utils
         OnlyCheckDifferences = false,
         HashesSizes = new Dictionary<string, long>(), // Inicializamos HashesSizes
         CheckJsonDataUpdates = false, // Por defecto, esta nueva opción estará desactivada
-        JsonDataSizes = new Dictionary<string, long>(), // Inicializamos el nuevo diccionario
+        JsonDataModificationDates = new Dictionary<string, DateTime>(), // Inicializamos el nuevo diccionario
         MonitoredJsonDirectories = new List<string>
         {
           "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/"

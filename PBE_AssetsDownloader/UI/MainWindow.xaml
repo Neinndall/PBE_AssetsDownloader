@@ -65,7 +65,7 @@
                 <ContentControl x:Name="MainContentArea"
                                 Background="Transparent"/>
             </Border>
-
+            <!-- Splitter del Log -->
             <GridSplitter Grid.Row="1"
                           Height="6" HorizontalAlignment="Stretch"
                           VerticalAlignment="Center"

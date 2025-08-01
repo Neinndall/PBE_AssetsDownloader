@@ -4,9 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-// Eliminamos 'using Serilog;'
-// using Serilog; 
-using PBE_AssetsDownloader.Utils; // Asegúrate de que AssetUrlRules y DirectoriesCreator estén aquí
+using PBE_AssetsDownloader.Utils;
+using Serilog; // Added Serilog using directive
 
 namespace PBE_AssetsDownloader.Services
 {
@@ -14,11 +13,10 @@ namespace PBE_AssetsDownloader.Services
     {
         private readonly HttpClient _httpClient;
         private readonly DirectoriesCreator _directoriesCreator;
-        private readonly LogService _logService; // Instancia de LogService inyectada
+        private readonly LogService _logService;
 
         public List<string> ExcludedExtensions => _excludedExtensions;
 
-        // Lista de extensiones excluidas
         private readonly List<string> _excludedExtensions = new()
         {
             ".luabin", ".luabin64", ".preload", ".scb",
@@ -27,34 +25,44 @@ namespace PBE_AssetsDownloader.Services
             ".cfg", ".cfgbin"
         };
 
-        // Constructor: Ahora recibe LogService como dependencia
+        // Eventos de progreso: ahora con total global, progreso acumulado, éxito y mensaje de error
+        public event Action<int> DownloadStarted;
+        public event Action<int, int, string, bool, string> DownloadProgressChanged;
+        public event Action DownloadCompleted;
+
         public AssetDownloader(HttpClient httpClient, DirectoriesCreator directoriesCreator, LogService logService)
         {
-            _httpClient = httpClient; // Usando tu sintaxis preferida
-            _directoriesCreator = directoriesCreator; // Usando tu sintaxis preferida
-            _logService = logService; // Asignamos el LogService inyectado
+            _httpClient = httpClient;
+            _directoriesCreator = directoriesCreator;
+            _logService = logService;
         }
 
-        // Eliminamos el parámetro logAction
-        public async Task<List<string>> DownloadAssets(IEnumerable<string> differences, string baseUrl, string downloadDirectory, List<string> notFoundAssets)
+        // Métodos públicos para notificar eventos (para ser llamados desde otras clases)
+        public void NotifyDownloadStarted(int totalFiles)
         {
-            // notFoundAssets ya es la lista que se pasa y se espera que se modifique.
-            // La variable local NotFoundAssets era redundante.
+            DownloadStarted?.Invoke(totalFiles);
+        }
 
-            if (!Directory.Exists(downloadDirectory))
+        public void NotifyDownloadProgressChanged(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
+        {
+            DownloadProgressChanged?.Invoke(completedFiles, totalFiles, currentFileName, isSuccess, errorMessage);
+        }
+
+        public void NotifyDownloadCompleted()
+        {
+            DownloadCompleted?.Invoke();
+        }
+
+        // Modificado para aceptar el total global y un offset de archivos completados
+        public async Task<List<string>> DownloadAssets(IEnumerable<(string, string)> assets, string downloadDirectory, List<string> notFoundAssets, int overallTotalFiles, int completedFilesOffset)
+        {
+            var assetsList = assets.ToList();
+            int currentBatchTotalFiles = assetsList.Count;
+            int currentBatchCompletedFiles = 0;
+
+            _logService.Log("Starting download of assets ...");
+            foreach (var (relativePath, baseUrl) in assetsList)
             {
-                // Usar _directoriesCreator para crear directorios si es su responsabilidad,
-                // o simplemente Directory.CreateDirectory si es una operación básica aquí.
-                // Por ahora, se mantiene Directory.CreateDirectory.
-                _logService.LogDebug($"Creating download directory: {downloadDirectory}");
-                Directory.CreateDirectory(downloadDirectory);
-            }
-
-            foreach (var line in differences)
-            {
-                string[] parts = line.Split(' ');
-                string relativePath = parts.Length >= 2 ? parts[1] : parts[0];
-
                 string url = baseUrl + relativePath;
                 string originalUrl = url;
 
@@ -62,32 +70,34 @@ namespace PBE_AssetsDownloader.Services
 
                 if (string.IsNullOrEmpty(url))
                 {
-                    _logService.LogDebug($"Asset skipped due to empty URL after adjustment: {originalUrl}"); // Log para depuración
-                    continue; // No añadir a NotFounds.txt si fue ignorada
+                    _logService.LogDebug($"Asset skipped due to empty URL after adjustment: {originalUrl}");
+                    continue;
                 }
 
-                // Llamamos a DownloadFileAsync sin pasar logAction
-                var result = await DownloadFileAsync(url, downloadDirectory, originalUrl);
-                if (!result)
+                // DownloadFileAsync now returns a tuple with success status and error message
+                var (success, errorMsg) = await DownloadFileAsync(url, downloadDirectory, originalUrl);
+                if (!success)
                 {
-                    // Añadir a la lista notFoundAssets que se pasa como parámetro
                     notFoundAssets.Add(originalUrl);
                 }
+
+                currentBatchCompletedFiles++;
+                // Disparamos el progreso con el total global, el progreso acumulado, el éxito y el mensaje de error
+                NotifyDownloadProgressChanged(completedFilesOffset + currentBatchCompletedFiles, overallTotalFiles, Path.GetFileName(url), success, errorMsg);
             }
 
-            return notFoundAssets; // Devolver la lista que se ha modificado
+            return notFoundAssets;
         }
 
-        // Eliminamos el parámetro logAction
-        public async Task<bool> DownloadFileAsync(string url, string downloadDirectory, string originalUrl)
+        // DownloadFileAsync now returns a tuple (bool success, string errorMessage)
+        public async Task<(bool success, string errorMessage)> DownloadFileAsync(string url, string downloadDirectory, string originalUrl)
         {
+            string fileName = Path.GetFileName(url);
+            string extensionFolder = _directoriesCreator.CreateAssetDirectoryPath(url, downloadDirectory);
+            string filePath = Path.Combine(extensionFolder, fileName);
+
             try
             {
-                var fileName = Path.GetFileName(url);
-
-                string extensionFolder = _directoriesCreator.CreateAssetDirectoryPath(url, downloadDirectory);
-                var filePath = Path.Combine(extensionFolder, fileName);
-
                 var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -95,19 +105,21 @@ namespace PBE_AssetsDownloader.Services
                     {
                         await response.Content.CopyToAsync(fileStream);
                     }
-                    _logService.Log($"Downloaded: {fileName}"); // Usamos _logService directamente
-                    return true;
+                    Serilog.Log.Information($"Downloaded: {fileName}"); // Log to file only
+                    return (true, null);
                 }
                 else
                 {
-                    _logService.LogError($"Failed to download '{fileName}'. Reason: {response.StatusCode} - {response.ReasonPhrase}");
-                    return false;
+                    string errorMsg = $"Failed to download '{fileName}'. Reason: {response.StatusCode} - {response.ReasonPhrase}";
+                    Serilog.Log.Error(errorMsg); // Log to file only
+                    return (false, errorMsg);
                 }
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Error downloading {url}");
-                return false;
+                string errorMsg = $"Error downloading {url}: {ex.Message}";
+                Serilog.Log.Error(ex, errorMsg); // Log to file only
+                return (false, errorMsg);
             }
         }
 
@@ -148,7 +160,6 @@ namespace PBE_AssetsDownloader.Services
                     else
                     {
                         var errorMessage = $"Asset not available. Status: {response.StatusCode}";
-                        // No log needed here, just return the message for the UI.
                         return (false, errorMessage);
                     }
                 }
@@ -189,7 +200,8 @@ namespace PBE_AssetsDownloader.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
+                    // Corrected FileStream constructor call
+                    await using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         await response.Content.CopyToAsync(fileStream);
                     }

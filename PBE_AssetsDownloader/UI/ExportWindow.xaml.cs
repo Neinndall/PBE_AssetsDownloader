@@ -1,4 +1,3 @@
-// PBE_AssetsDownloader/ExportWindow.xaml.cs
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -212,29 +211,31 @@ namespace PBE_AssetsDownloader.UI
 
     private async Task DownloadAssets(string[] gameLines, string[] lcuLines, List<string> selectedAssetTypes)
     {
-      _logService.Log("Starting download of assets...");
+      _logService.Log("Starting download of assets ...");
 
       var notFoundAssets = new List<string>();
-      var gameAssets = FilterAssetsByType(gameLines, selectedAssetTypes);
-      var lcuAssets = FilterAssetsByType(lcuLines, selectedAssetTypes);
+      var gameAssetsList = FilterAssetsByType(gameLines, selectedAssetTypes);
+      var lcuAssetsList = FilterAssetsByType(lcuLines, selectedAssetTypes);
 
-      _logService.Log($"Total GAME assets to download: {gameAssets.Count}");
-      await _assetDownloader.DownloadAssets(
-          gameAssets,
-          "https://raw.communitydragon.org/pbe/game/",
-          txtDownloadTargetPath.Text,
-          notFoundAssets
-      );
+      var gameAssets = gameAssetsList.Select(asset => (asset, "https://raw.communitydragon.org/pbe/game/"));
+      var lcuAssets = lcuAssetsList.Select(asset => (asset, "https://raw.communitydragon.org/pbe/"));
 
-      _logService.Log($"Total LCU assets to download: {lcuAssets.Count}");
+      var allAssets = gameAssets.Concat(lcuAssets).ToList();
+      int overallTotalFiles = allAssets.Count;
+
+      _assetDownloader.NotifyDownloadStarted(overallTotalFiles);
+
+      _logService.Log($"Total GAME assets to download: {gameAssetsList.Count} and Total LCU assets to download: {lcuAssetsList.Count}");
       await _assetDownloader.DownloadAssets(
-          lcuAssets,
-          "https://raw.communitydragon.org/pbe/",
+          allAssets,
           txtDownloadTargetPath.Text,
-          notFoundAssets
+          notFoundAssets,
+          overallTotalFiles,
+          0
       );
 
       HandleDownloadCompletion(notFoundAssets);
+      _assetDownloader.NotifyDownloadCompleted(); // Notify completion after all downloads
     }
 
     private void HandleDownloadCompletion(List<string> notFoundAssets)

@@ -25,7 +25,7 @@ namespace PBE_AssetsDownloader.Utils
             }
             else
             {
-                _logService.Log("BackUpOldHashes is disabled.");  // Solo el log, sin devolver el mensaje
+                // _logService.Log("BackUpOldHashes is disabled.");  // Solo el log, sin devolver el mensaje
                 return string.Empty;  // Puedes devolver un string vacío o algún otro valor si no es necesario
             }
         }

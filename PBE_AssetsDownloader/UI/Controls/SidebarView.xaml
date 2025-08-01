@@ -167,7 +167,7 @@
 
             <Border Grid.Row="1" Margin="8,0,8,8">
                 
-                <TextBlock Text="{x:Static info:ApplicationInfos.Version}" FontWeight="Medium" FontSize="10" Foreground="{StaticResource SecondaryTextBrush}" HorizontalAlignment="Center">
+                <TextBlock Text="{x:Static info:ApplicationInfos.Version}" FontWeight="Medium" FontSize="10" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Opacity" Value="0"/>

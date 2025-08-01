@@ -1,4 +1,3 @@
-// PBE_AssetsDownloader/Utils/Resources.cs
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +15,6 @@ namespace PBE_AssetsDownloader.Utils
         private readonly DirectoriesCreator _directoryCreator;
         private readonly LogService _logService;
 
-        // Constructor: Ahora recibe AssetDownloader como dependencia adicional
         public Resources(HttpClient httpClient, DirectoriesCreator directoryCreator, LogService logService, AssetDownloader assetDownloader)
         {
             _httpClient = httpClient;
@@ -27,7 +25,6 @@ namespace PBE_AssetsDownloader.Utils
 
         public async Task GetResourcesFiles()
         {
-            // Llamamos para que cree la carpeta de Resource + Mensaje de creacion
             var resourcesPath = _directoryCreator.ResourcesPath;
             var differencesGameFilePath = Path.Combine(resourcesPath, "differences_game.txt");
             var differencesLcuFilePath = Path.Combine(resourcesPath, "differences_lcu.txt");
@@ -40,40 +37,47 @@ namespace PBE_AssetsDownloader.Utils
 
             try
             {
-                var gameDifferences = await File.ReadAllLinesAsync(differencesGameFilePath);
-                var lcuDifferences = await File.ReadAllLinesAsync(differencesLcuFilePath);
+                var gameDifferences = (await File.ReadAllLinesAsync(differencesGameFilePath))
+                    .Select(line => line.Split(' ').Length >= 2 ? line.Split(' ')[1] : line)
+                    .Select(asset => (asset, "https://raw.communitydragon.org/pbe/game/"));
+                var lcuDifferences = (await File.ReadAllLinesAsync(differencesLcuFilePath))
+                    .Select(line => line.Split(' ').Length >= 2 ? line.Split(' ')[1] : line)
+                    .Select(asset => (asset, "https://raw.communitydragon.org/pbe/"));
+                var allDifferences = gameDifferences.Concat(lcuDifferences).ToList();
+
                 var downloadDirectory = _directoryCreator.SubAssetsDownloadedPath;
 
-                var notFoundGameAssets = new List<string>();
-                var notFoundLcuAssets = new List<string>();
+                var notFoundAssets = new List<string>();
+
+                int overallTotalFiles = allDifferences.Count;
+
+                _assetDownloader.NotifyDownloadStarted(overallTotalFiles);
 
                 await _assetDownloader.DownloadAssets(
-                    gameDifferences,
-                    "https://raw.communitydragon.org/pbe/game/",
+                    allDifferences,
                     downloadDirectory,
-                    notFoundGameAssets);
+                    notFoundAssets,
+                    overallTotalFiles,
+                    0);
 
-                await _assetDownloader.DownloadAssets(
-                    lcuDifferences,
-                    "https://raw.communitydragon.org/pbe/",
-                    downloadDirectory,
-                    notFoundLcuAssets);
+                await SaveNotFoundAssets(notFoundAssets, resourcesPath);
 
-                await SaveNotFoundAssets(notFoundGameAssets, notFoundLcuAssets, resourcesPath);
+                _assetDownloader.NotifyDownloadCompleted();
             }
             catch (Exception ex)
             {
                 _logService.LogError(ex, $"Error processing difference files in Resources: {ex.Message}");
+                _assetDownloader.NotifyDownloadCompleted(); // Ensure completion is notified even on error
                 throw;
             }
         }
 
-        private async Task SaveNotFoundAssets(List<string> notFoundGameAssets, List<string> notFoundLcuAssets, string resourcesPath)
+        private async Task SaveNotFoundAssets(List<string> notFoundAssets, string resourcesPath)
         {
             if (string.IsNullOrWhiteSpace(resourcesPath))
                 throw new ArgumentException("The resource path is not defined.", nameof(resourcesPath));
 
-            var modifiedNotFoundGameAssets = notFoundGameAssets
+            var modifiedNotFoundGameAssets = notFoundAssets
             .Select(url =>
             {
                 if (url.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
@@ -85,7 +89,6 @@ namespace PBE_AssetsDownloader.Utils
             .ToList();
 
             var allNotFoundAssets = modifiedNotFoundGameAssets
-                .Concat(notFoundLcuAssets)
                 .ToList();
 
             var notFoundFilePath = Path.Combine(resourcesPath, "NotFounds.txt");

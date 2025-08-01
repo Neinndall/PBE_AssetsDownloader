@@ -139,10 +139,10 @@
                             <CheckBox x:Name="checkBoxCheckJsonData" 
                                     Content="Check for files updates" 
                                     Style="{StaticResource ModernCheckBox}"/>
-                            <TextBlock Text="Check for updates in json files like loot, skins, etc."
+                            <TextBlock Text="Check for updates to JSON files and their differences."
                                      Foreground="{StaticResource TextMuted}" 
                                      FontSize="12" 
-                                     Margin="30,0,0,0" 
+                                     Margin="30,0,0,8" 
                                      TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>

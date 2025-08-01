@@ -117,8 +117,7 @@ namespace PBE_AssetsDownloader.UI
                 MessageBox.Show("Please select both hash directories.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
-            _logService.Log("Starting asset extraction process...");
+            
             await App.RunExtraction(
                 _logService,
                 _httpClient,

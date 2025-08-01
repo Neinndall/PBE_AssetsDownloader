@@ -12,6 +12,8 @@ using PBE_AssetsDownloader.UI.Controls;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
+using Material.Icons;
+using Serilog; // Added Serilog using directive
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -24,10 +26,13 @@ namespace PBE_AssetsDownloader.UI
     private readonly Status _status;
     private readonly AssetDownloader _assetDownloader;
     private readonly AppSettings _appSettings;
+    private readonly JsonDataService _jsonDataService;
 
     private HomeWindow _homeViewInstance;
     private ExportWindow _exportViewInstance;
 
+    private ProgressDetailsWindow _progressDetailsWindow;
+    
     public MainWindow(
         LogService logService,
         HttpClient httpClient,
@@ -35,7 +40,8 @@ namespace PBE_AssetsDownloader.UI
         Requests requests,
         Status status,
         AssetDownloader assetDownloader,
-        AppSettings appSettings)
+        AppSettings appSettings,
+        JsonDataService jsonDataService)
 
     {
       InitializeComponent();
@@ -51,6 +57,7 @@ namespace PBE_AssetsDownloader.UI
       _status = status; // Asignamos la instancia de Status que ya recibimos
       _assetDownloader = assetDownloader;
       _appSettings = appSettings; // Asignamos la instancia inyectada
+      _jsonDataService = jsonDataService; // Asignamos la instancia inyectada
 
       _homeViewInstance = new HomeWindow(
           _logService,
@@ -69,6 +76,14 @@ namespace PBE_AssetsDownloader.UI
           _assetDownloader
       );
 
+      // Conectar eventos de progreso del AssetDownloader
+      _assetDownloader.DownloadStarted += OnDownloadStarted;
+      _assetDownloader.DownloadProgressChanged += OnDownloadProgressChanged;
+      _assetDownloader.DownloadCompleted += OnDownloadCompleted;
+      
+      // Conectar evento de solicitud de detalles de progreso del LogView
+      LogView.ProgressDetailsRequested += OnProgressDetailsRequested;
+      
       // Conectar el evento de navegación del Sidebar
       Sidebar.NavigationRequested += OnSidebarNavigationRequested;
       LoadHomeView();
@@ -96,12 +111,57 @@ namespace PBE_AssetsDownloader.UI
       // Comprobar actualizaciones de datos JSON si está habilitado
       if (_appSettings.CheckJsonDataUpdates)
       {
-        _ = _status.CheckJsonDataUpdatesAsync();
+        _ = _jsonDataService.CheckJsonDataUpdatesAsync();
       }
 
       _ = UpdateManager.CheckForUpdatesAsync(false);
     }
 
+
+    private void OnDownloadStarted(int totalFiles)
+    {
+        LogView.IsProgressVisible = true;
+        LogView.ProgressIconKind = MaterialIconKind.Loading;
+        
+        // Initialize ProgressDetailsWindow here
+        _progressDetailsWindow = new ProgressDetailsWindow(_logService);
+        _progressDetailsWindow.Owner = this;
+        _progressDetailsWindow.Closed += ProgressDetailsWindow_Closed; // Subscribe to Closed event
+        _progressDetailsWindow.UpdateProgress(0, totalFiles, "Iniciando...", true, null); // Initialize with 0 completed
+    }
+
+    private void ProgressDetailsWindow_Closed(object sender, EventArgs e)
+    {
+        // Hide the window instead of setting the reference to null
+        _progressDetailsWindow?.Hide();
+    }
+
+    private void OnDownloadProgressChanged(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
+    {
+        _progressDetailsWindow?.UpdateProgress(completedFiles, totalFiles, currentFileName, isSuccess, errorMessage);
+    }
+
+    private void OnDownloadCompleted()
+    {
+        LogView.IsProgressVisible = false;
+        _progressDetailsWindow?.Close();
+        _progressDetailsWindow = null;
+        Serilog.Log.Information("Descarga de activos completada."); // Log to file only
+    }
+
+    private void OnProgressDetailsRequested()
+    {
+        if (_progressDetailsWindow != null && !_progressDetailsWindow.IsVisible)
+        {
+            _progressDetailsWindow.Show();
+        }
+        else if (_progressDetailsWindow == null)
+        {
+            // If download completed and window was closed, but user clicks again
+            _logService.Log("No hay una descarga activa para mostrar detalles.");
+        }
+    }
+    
     // Método que maneja la navegación desde el Sidebar
     private void OnSidebarNavigationRequested(string viewTag)
     {

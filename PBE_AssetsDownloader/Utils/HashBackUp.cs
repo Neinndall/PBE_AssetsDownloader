@@ -5,12 +5,12 @@ using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
 
 namespace PBE_AssetsDownloader.Utils
 {
-    public class BackUp
+    public class HashBackUp
     {
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
 
-        public BackUp(DirectoriesCreator directoriesCreator, LogService logService)
+        public HashBackUp(DirectoriesCreator directoriesCreator, LogService logService)
         {
             _directoriesCreator = directoriesCreator;
             _logService = logService;
@@ -56,13 +56,13 @@ namespace PBE_AssetsDownloader.Utils
                     }
                 }
 
-                // _logService.Log($"Backup created successfully at {backupDirectory}");
+                // _logService.Log($"HashBackUp created successfully at {backupDirectory}");
                 return backupDirectory;
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, "Error occurred while creating backup");
-                return "Error occurred while creating backup";
+                _logService.LogError(ex, "Error occurred while creating HashBackUp");
+                return "Error occurred while creating HashBackUp";
             }
         }
     }

@@ -164,22 +164,31 @@
 
             <!-- Navigation Panel -->
             <Border Grid.Column="4" Style="{StaticResource SettingsCard}" Padding="8">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                <Grid x:Name="NavigationGrid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                    <!-- Content -->
-                    <Canvas x:Name="NavigationPanel" Grid.Row="0" Background="{StaticResource DarkBackground}" ClipToBounds="True">
+                    <!-- Old Diff Navigation -->
+                    <Canvas x:Name="OldNavigationPanel" Grid.Column="0" Background="{StaticResource DarkBackground}" ClipToBounds="True" MouseLeftButtonDown="NavigationPanel_Click">
                         <Canvas.ToolTip>
                             <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
                                 <StackPanel>
-                                    <TextBlock Text="Navigation Panel" FontWeight="Bold"/>
-                                    <TextBlock Text=" - Added" Foreground="LightGreen"/>
-                                    <TextBlock Text=" - Removed" Foreground="LightCoral"/>
-                                    <TextBlock Text=" - Modified" Foreground="Yellow"/>
-                                    <TextBlock Text=" - Imaginary" Foreground="Gray"/>
-                                    <TextBlock Text="Click to navigate" FontStyle="Italic" Margin="0,5,0,0"/>
+                                    <TextBlock Text="Old Version Navigation" FontWeight="Bold"/>
+                                    <TextBlock Text="Click anywhere to scroll"/>
+                                </StackPanel>
+                            </ToolTip>
+                        </Canvas.ToolTip>
+                    </Canvas>
+
+                    <!-- New Diff Navigation -->
+                    <Canvas x:Name="NewNavigationPanel" Grid.Column="1" Background="{StaticResource DarkBackground}" ClipToBounds="True" MouseLeftButtonDown="NavigationPanel_Click">
+                        <Canvas.ToolTip>
+                            <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
+                                <StackPanel>
+                                    <TextBlock Text="New Version Navigation" FontWeight="Bold"/>
+                                    <TextBlock Text="Click anywhere to scroll"/>
                                 </StackPanel>
                             </ToolTip>
                         </Canvas.ToolTip>

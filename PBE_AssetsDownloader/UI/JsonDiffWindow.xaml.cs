@@ -150,24 +150,27 @@ namespace PBE_AssetsDownloader.UI
 
         private void CreateNavigationPanel()
         {
-            NavigationPanel.Children.Clear();
+            OldNavigationPanel.Children.Clear();
+            NewNavigationPanel.Children.Clear();
             _diffLines.Clear();
 
             if (_diffModel?.OldText?.Lines == null) return;
 
-            var panelHeight = NavigationPanel.ActualHeight > 0 ? NavigationPanel.ActualHeight : 600;
-            var lineHeight = panelHeight / Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            var panelHeight = OldNavigationPanel.ActualHeight > 0 ? OldNavigationPanel.ActualHeight : 600;
+            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            if (totalLines == 0) return;
+            var lineHeight = panelHeight / totalLines;
 
+            // Draw for Old Panel
             for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
             {
                 var changeType = _diffModel.OldText.Lines[i].Type;
                 var color = DiffColorsHelper.GetNavigationColor(changeType);
-
                 if (color == Colors.Transparent) continue;
 
                 var rect = new Rectangle
                 {
-                    Width = DiffColorsHelper.VisualSettings.NavigationRectWidth,
+                    Width = OldNavigationPanel.ActualWidth,
                     Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
                     Fill = new SolidColorBrush(color),
                     Cursor = Cursors.Hand,
@@ -176,10 +179,41 @@ namespace PBE_AssetsDownloader.UI
 
                 rect.MouseLeftButtonDown += NavigationRect_Click;
                 Canvas.SetTop(rect, i * lineHeight);
-                Canvas.SetLeft(rect, DiffColorsHelper.VisualSettings.NavigationRectLeftOffset);
-                NavigationPanel.Children.Add(rect);
-
+                OldNavigationPanel.Children.Add(rect);
                 _diffLines.Add(new DiffInfo { LineNumber = i + 1, ChangeType = changeType });
+            }
+
+            // Draw for New Panel
+            for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
+            {
+                var changeType = _diffModel.NewText.Lines[i].Type;
+                var color = DiffColorsHelper.GetNavigationColor(changeType);
+                if (color == Colors.Transparent) continue;
+
+                var rect = new Rectangle
+                {
+                    Width = NewNavigationPanel.ActualWidth,
+                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
+                    Fill = new SolidColorBrush(color),
+                    Cursor = Cursors.Hand,
+                    Tag = i + 1
+                };
+
+                rect.MouseLeftButtonDown += NavigationRect_Click;
+                Canvas.SetTop(rect, i * lineHeight);
+                NewNavigationPanel.Children.Add(rect);
+            }
+        }
+
+        private void NavigationPanel_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Canvas panel)
+            {
+                var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+                var y = e.GetPosition(panel).Y;
+                var panelHeight = panel.ActualHeight;
+                var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
+                ScrollToLine(lineNumber);
             }
         }
 
@@ -188,6 +222,7 @@ namespace PBE_AssetsDownloader.UI
             if (sender is Rectangle { Tag: int lineNumber })
             {
                 ScrollToLine(lineNumber);
+                e.Handled = true; // Prevent bubbling to the parent Canvas
             }
         }
 
@@ -196,6 +231,7 @@ namespace PBE_AssetsDownloader.UI
             _isScrollingSynced = true;
             try
             {
+                var lineIndex = Math.Max(0, lineNumber - 1);
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
             }
@@ -208,7 +244,8 @@ namespace PBE_AssetsDownloader.UI
         private void SetupScrollSync()
         {
             OldJsonContent.Loaded += (_, _) => SetupScrollSyncAfterLoaded();
-            NavigationPanel.SizeChanged += (_, _) => CreateNavigationPanel();
+            OldNavigationPanel.SizeChanged += (_, _) => CreateNavigationPanel();
+            NewNavigationPanel.SizeChanged += (_, _) => CreateNavigationPanel();
         }
 
         private void SetupScrollSyncAfterLoaded()

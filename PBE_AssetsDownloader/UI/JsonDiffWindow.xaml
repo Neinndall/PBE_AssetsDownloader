@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
-        Title="JSON Diff Viewer" Height="860" Width="1400" MinHeight="860" MinWidth="1400"
+        Title="JSON Diff Viewer" Height="960" Width="1500" MinHeight="960" MinWidth="1500"
         WindowStartupLocation="CenterScreen"
         Background="#FF1E1E1E"
         FontFamily="Consolas, Courier New">
@@ -58,6 +58,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="60"/>
             </Grid.ColumnDefinitions>
 
             <!-- Old JSON Card -->
@@ -149,6 +151,39 @@
                                              HorizontalScrollBarVisibility="Auto"
                                              VerticalScrollBarVisibility="Auto"/>
                     </Border>
+                </Grid>
+            </Border>
+
+            <!-- Grid Splitter for Navigation Panel -->
+            <GridSplitter Grid.Column="3" 
+                          Width="12" 
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Stretch" 
+                          Background="Transparent"
+                          ResizeBehavior="PreviousAndNext"/>
+
+            <!-- Navigation Panel -->
+            <Border Grid.Column="4" Style="{StaticResource SettingsCard}" Padding="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Content -->
+                    <Canvas x:Name="NavigationPanel" Grid.Row="0" Background="{StaticResource DarkBackground}" ClipToBounds="True">
+                        <Canvas.ToolTip>
+                            <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
+                                <StackPanel>
+                                    <TextBlock Text="Navigation Panel" FontWeight="Bold"/>
+                                    <TextBlock Text=" - Added" Foreground="LightGreen"/>
+                                    <TextBlock Text=" - Removed" Foreground="LightCoral"/>
+                                    <TextBlock Text=" - Modified" Foreground="Yellow"/>
+                                    <TextBlock Text=" - Imaginary" Foreground="Gray"/>
+                                    <TextBlock Text="Click to navigate" FontStyle="Italic" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </ToolTip>
+                        </Canvas.ToolTip>
+                    </Canvas>
                 </Grid>
             </Border>
         </Grid>

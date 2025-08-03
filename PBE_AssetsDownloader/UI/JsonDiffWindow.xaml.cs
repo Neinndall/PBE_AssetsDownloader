@@ -1,46 +1,43 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
+using System.Windows.Input;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using System.Collections.Generic;
 using System.Xml;
 using System.IO;
-using ICSharpCode.AvalonEdit.Folding;
 using System.Reflection;
+using System.Threading.Tasks;
+using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader.UI
 {
     public partial class JsonDiffWindow : Window
     {
-        private FoldingManager _oldFoldingManager;
-        private FoldingManager _newFoldingManager;
+        private SideBySideDiffModel _diffModel;
+        private bool _isScrollingSynced;
+        private readonly List<DiffInfo> _diffLines = new List<DiffInfo>();
+
         public JsonDiffWindow(string oldJson, string newJson)
         {
             InitializeComponent();
-         
-            // Initialize folding
-            _oldFoldingManager = FoldingManager.Install(OldJsonContent.TextArea);
-            _newFoldingManager = FoldingManager.Install(NewJsonContent.TextArea);
-
-            // Configure editors
-            ConfigureTextEditors();
-
-            // Load JSON syntax highlighting
+            ConfigureEditors();
             LoadJsonSyntaxHighlighting();
-
             _ = DisplayDiffAsync(oldJson, newJson);
+            SetupScrollSync();
         }
 
-        private void ConfigureTextEditors()
+        private void ConfigureEditors()
         {
-            // Configure both editors
             var editors = new[] { OldJsonContent, NewJsonContent };
-            
             foreach (var editor in editors)
             {
                 editor.Options.EnableHyperlinks = false;
@@ -50,13 +47,10 @@ namespace PBE_AssetsDownloader.UI
                 editor.Options.ShowTabs = false;
                 editor.Options.ConvertTabsToSpaces = true;
                 editor.Options.IndentationSize = 2;
-                editor.FontFamily = new FontFamily("Consolas, Courier New, monospace");
-                editor.FontSize = 13;
-                
-                // NO establecer Background y Foreground aquí - dejar que el highlighting lo maneje
-                
-                // Line numbers styling
+                editor.FontFamily = DiffColorsHelper.VisualSettings.EditorFontFamily;
+                editor.FontSize = DiffColorsHelper.VisualSettings.EditorFontSize;
                 editor.ShowLineNumbers = true;
+                editor.WordWrap = false;
             }
         }
 
@@ -64,166 +58,225 @@ namespace PBE_AssetsDownloader.UI
         {
             try
             {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                string[] resourceNames = assembly.GetManifestResourceNames();
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceNames = assembly.GetManifestResourceNames();
                 
-                string resourceName = null;
-                foreach (string name in resourceNames)
-                {
-                    if (name.EndsWith("JsonSyntaxHighlighting.xshd"))
-                    {
-                        resourceName = name;
-                        break;
-                    }
-                }
+                var resourceName = Array.Find(resourceNames, name => name.EndsWith("JsonSyntaxHighlighting.xshd"));
                 
                 if (resourceName != null)
                 {
-                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                    using var stream = assembly.GetManifestResourceStream(resourceName);
+                    if (stream != null)
                     {
-                        if (stream != null)
-                        {
-                            using (XmlReader reader = XmlReader.Create(stream))
-                            {
-                                IHighlightingDefinition jsonHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-                                OldJsonContent.SyntaxHighlighting = jsonHighlighting;
-                                NewJsonContent.SyntaxHighlighting = jsonHighlighting;
-                                //MessageBox.Show($"Syntax highlighting loaded successfully from: {resourceName}", "Debug Info");
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show($"Stream for resource '{resourceName}' was null.", "Error - Syntax Highlighting");
-                        }
+                        using var reader = XmlReader.Create(stream);
+                        var jsonHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                        OldJsonContent.SyntaxHighlighting = jsonHighlighting;
+                        NewJsonContent.SyntaxHighlighting = jsonHighlighting;
                     }
                 }
-                else
-                {
-                    MessageBox.Show("JsonSyntaxHighlighting.xshd resource not found in assembly.", "Error - Syntax Highlighting");
-                    // Optionally, show all available resources for debugging
-                }
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show($"Error loading syntax highlighting: {ex.Message}", "Error - Syntax Highlighting");
-            }
-        }
-
-        private string FormatJson(string json)
-        {
-            if (string.IsNullOrWhiteSpace(json)) return string.Empty;
-            try
-            {
-                var parsedJson = JsonConvert.DeserializeObject(json);
-                return JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
-            }
-            catch (JsonException)
-            {
-                return json;
+                // Silently continue without syntax highlighting if it fails
             }
         }
 
         private async Task DisplayDiffAsync(string oldJson, string newJson)
         {
-            string formattedOldJson = FormatJson(oldJson);
-            string formattedNewJson = FormatJson(newJson);
-
-            SideBySideDiffModel diffModel = null;
+            var formattedOldJson = FormatJson(oldJson);
+            var formattedNewJson = FormatJson(newJson);
 
             await Task.Run(() =>
             {
                 var differ = new Differ();
                 var diffBuilder = new SideBySideDiffBuilder(differ);
-                diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson);
+                _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson);
             });
 
-            // Set text to AvalonEdit controls
-            OldJsonContent.Text = formattedOldJson;
-            NewJsonContent.Text = formattedNewJson;
+            // Normalize both sides to have same number of lines for proper alignment
+            var normalizedOld = NormalizeTextForAlignment(_diffModel.OldText);
+            var normalizedNew = NormalizeTextForAlignment(_diffModel.NewText);
 
-            // Update folding
-            _oldFoldingManager?.Clear();
-            _newFoldingManager?.Clear();
+            // Set normalized text to AvalonEdit controls
+            OldJsonContent.Text = normalizedOld.Text;
+            NewJsonContent.Text = normalizedNew.Text;
 
-            // Apply diff highlighting using a custom renderer
-            OldJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
-            NewJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
+            // Apply diff highlighting
+            ApplyDiffHighlighting(normalizedOld.LineTypes, normalizedNew.LineTypes);
             
-            if (diffModel != null)
+            // Create navigation panel
+            CreateNavigationPanel();
+        }
+
+        private (string Text, List<ChangeType> LineTypes) NormalizeTextForAlignment(DiffPaneModel paneModel)
+        {
+            var lines = new List<string>();
+            var lineTypes = new List<ChangeType>();
+            
+            foreach (var line in paneModel.Lines)
             {
-                OldJsonContent.TextArea.TextView.BackgroundRenderers.Add(
-                    new DiffBackgroundRenderer(diffModel.OldText, Colors.Red, Colors.Orange, Colors.LightGray));
-                NewJsonContent.TextArea.TextView.BackgroundRenderers.Add(
-                    new DiffBackgroundRenderer(diffModel.NewText, Colors.LightGreen, Colors.Orange, Colors.LightGray));
+                lines.Add(line.Type == ChangeType.Imaginary ? "" : line.Text ?? "");
+                lineTypes.Add(line.Type);
+            }
+            
+            return (string.Join("\r\n", lines), lineTypes);
+        }
+
+        private static string FormatJson(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return string.Empty;
+            
+            try
+            {
+                var parsed = JsonConvert.DeserializeObject(json);
+                return JsonConvert.SerializeObject(parsed, Newtonsoft.Json.Formatting.Indented);
+            }
+            catch
+            {
+                return json;
             }
         }
 
-        protected override void OnClosed(EventArgs e)
+        private void ApplyDiffHighlighting(List<ChangeType> oldLineTypes, List<ChangeType> newLineTypes)
         {
-            // Clean up folding managers
-            _oldFoldingManager?.Clear();
-            _newFoldingManager?.Clear();
-            base.OnClosed(e);
+            // Clear existing renderers
+            OldJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
+            NewJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
+
+            // Add new diff renderers
+            OldJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(oldLineTypes));
+            NewJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(newLineTypes));
+        }
+
+        private void CreateNavigationPanel()
+        {
+            NavigationPanel.Children.Clear();
+            _diffLines.Clear();
+
+            if (_diffModel?.OldText?.Lines == null) return;
+
+            var panelHeight = NavigationPanel.ActualHeight > 0 ? NavigationPanel.ActualHeight : 600;
+            var lineHeight = panelHeight / Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+
+            for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
+            {
+                var changeType = _diffModel.OldText.Lines[i].Type;
+                var color = DiffColorsHelper.GetNavigationColor(changeType);
+
+                if (color == Colors.Transparent) continue;
+
+                var rect = new Rectangle
+                {
+                    Width = DiffColorsHelper.VisualSettings.NavigationRectWidth,
+                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
+                    Fill = new SolidColorBrush(color),
+                    Cursor = Cursors.Hand,
+                    Tag = i + 1
+                };
+
+                rect.MouseLeftButtonDown += NavigationRect_Click;
+                Canvas.SetTop(rect, i * lineHeight);
+                Canvas.SetLeft(rect, DiffColorsHelper.VisualSettings.NavigationRectLeftOffset);
+                NavigationPanel.Children.Add(rect);
+
+                _diffLines.Add(new DiffInfo { LineNumber = i + 1, ChangeType = changeType });
+            }
+        }
+
+        private void NavigationRect_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Rectangle { Tag: int lineNumber })
+            {
+                ScrollToLine(lineNumber);
+            }
+        }
+
+        private void ScrollToLine(int lineNumber)
+        {
+            _isScrollingSynced = true;
+            try
+            {
+                OldJsonContent.ScrollTo(lineNumber, 0);
+                NewJsonContent.ScrollTo(lineNumber, 0);
+            }
+            finally
+            {
+                _isScrollingSynced = false;
+            }
+        }
+
+        private void SetupScrollSync()
+        {
+            OldJsonContent.Loaded += (_, _) => SetupScrollSyncAfterLoaded();
+            NavigationPanel.SizeChanged += (_, _) => CreateNavigationPanel();
+        }
+
+        private void SetupScrollSyncAfterLoaded()
+        {
+            OldJsonContent.PreviewMouseWheel += OnEditorMouseWheel;
+            NewJsonContent.PreviewMouseWheel += OnEditorMouseWheel;
+        }
+
+        private void OnEditorMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (_isScrollingSynced) return;
+
+            _isScrollingSynced = true;
+            try
+            {
+                var currentOffset = ((ICSharpCode.AvalonEdit.TextEditor)sender).VerticalOffset;
+                var scrollLines = SystemParameters.WheelScrollLines;
+                var lineHeight = DiffColorsHelper.VisualSettings.StandardLineHeight;
+                var scrollAmount = (e.Delta > 0 ? -1 : 1) * scrollLines * lineHeight;
+                var newOffset = Math.Max(0, currentOffset + scrollAmount);
+
+                // Apply to both editors
+                OldJsonContent.ScrollToVerticalOffset(newOffset);
+                NewJsonContent.ScrollToVerticalOffset(newOffset);
+
+                e.Handled = true;
+            }
+            finally
+            {
+                _isScrollingSynced = false;
+            }
         }
     }
 
-    // Custom BackgroundRenderer for Diff Highlighting
-    public class DiffBackgroundRenderer : ICSharpCode.AvalonEdit.Rendering.IBackgroundRenderer
+    public class DiffBackgroundRenderer : IBackgroundRenderer
     {
-        private readonly DiffPaneModel _diffPaneModel;
-        private readonly Color _insertedColor;
-        private readonly Color _modifiedColor;
-        private readonly Color _imaginaryColor;
+        private readonly List<ChangeType> _lineTypes;
 
-        public DiffBackgroundRenderer(DiffPaneModel diffPaneModel, Color insertedColor, Color modifiedColor, Color imaginaryColor)
+        public DiffBackgroundRenderer(List<ChangeType> lineTypes)
         {
-            _diffPaneModel = diffPaneModel;
-            _insertedColor = insertedColor;
-            _modifiedColor = modifiedColor;
-            _imaginaryColor = imaginaryColor;
+            _lineTypes = lineTypes;
         }
 
-        public ICSharpCode.AvalonEdit.Rendering.KnownLayer Layer
-        {
-            get { return ICSharpCode.AvalonEdit.Rendering.KnownLayer.Background; }
-        }
+        public KnownLayer Layer => KnownLayer.Background;
 
-        public void Draw(ICSharpCode.AvalonEdit.Rendering.TextView textView, System.Windows.Media.DrawingContext drawingContext)
+        public void Draw(TextView textView, DrawingContext drawingContext)
         {
-            if (_diffPaneModel == null || _diffPaneModel.Lines == null) return;
+            if (_lineTypes == null) return;
 
             foreach (var line in textView.VisualLines)
             {
-                int lineNumber = line.FirstDocumentLine.LineNumber;
-                if (lineNumber > 0 && lineNumber <= _diffPaneModel.Lines.Count)
-                {
-                    var diffLine = _diffPaneModel.Lines[lineNumber - 1];
-                    Brush backgroundBrush = null;
+                var lineNumber = line.FirstDocumentLine.LineNumber - 1;
+                if (lineNumber < 0 || lineNumber >= _lineTypes.Count) continue;
 
-                    switch (diffLine.Type)
-                    {
-                        case ChangeType.Inserted:
-                            backgroundBrush = new SolidColorBrush(Color.FromArgb(50, _insertedColor.R, _insertedColor.G, _insertedColor.B));
-                            break;
-                        case ChangeType.Deleted:
-                            backgroundBrush = new SolidColorBrush(Color.FromArgb(50, Colors.Red.R, Colors.Red.G, Colors.Red.B));
-                            break;
-                        case ChangeType.Modified:
-                            backgroundBrush = new SolidColorBrush(Color.FromArgb(50, _modifiedColor.R, _modifiedColor.G, _modifiedColor.B));
-                            break;
-                        case ChangeType.Imaginary:
-                            backgroundBrush = new SolidColorBrush(Color.FromArgb(30, _imaginaryColor.R, _imaginaryColor.G, _imaginaryColor.B));
-                            break;
-                    }
+                var backgroundColor = DiffColorsHelper.GetBackgroundColor(_lineTypes[lineNumber]);
+                if (backgroundColor == Colors.Transparent) continue;
 
-                    if (backgroundBrush != null)
-                    {
-                        var rect = new Rect(0, line.VisualTop - textView.ScrollOffset.Y, 
-                                          textView.ActualWidth, line.Height);
-                        drawingContext.DrawRectangle(backgroundBrush, null, rect);
-                    }
-                }
+                var backgroundBrush = new SolidColorBrush(backgroundColor);
+                var rect = new Rect(0, line.VisualTop - textView.ScrollOffset.Y, 
+                                  textView.ActualWidth, line.Height);
+                drawingContext.DrawRectangle(backgroundBrush, null, rect);
             }
         }
+    }
+
+    public class DiffInfo
+    {
+        public int LineNumber { get; set; }
+        public ChangeType ChangeType { get; set; }
     }
 }

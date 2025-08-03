@@ -171,8 +171,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Old Diff Navigation -->
-                    <Canvas x:Name="OldNavigationPanel" Grid.Column="0" Background="{StaticResource DarkBackground}" ClipToBounds="True" 
-                            MouseLeftButtonDown="NavigationPanel_Click" MouseMove="NavigationPanel_MouseMove" MouseLeftButtonUp="NavigationPanel_MouseUp">
+                    <Canvas x:Name="OldNavigationPanel" Grid.Column="0" Background="{StaticResource DarkBackground}" ClipToBounds="True">
                         <Canvas.ToolTip>
                             <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
                                 <StackPanel>
@@ -184,8 +183,7 @@
                     </Canvas>
 
                     <!-- New Diff Navigation -->
-                    <Canvas x:Name="NewNavigationPanel" Grid.Column="1" Background="{StaticResource DarkBackground}" ClipToBounds="True" 
-                            MouseLeftButtonDown="NavigationPanel_Click" MouseMove="NavigationPanel_MouseMove" MouseLeftButtonUp="NavigationPanel_MouseUp">
+                    <Canvas x:Name="NewNavigationPanel" Grid.Column="1" Background="{StaticResource DarkBackground}" ClipToBounds="True">
                         <Canvas.ToolTip>
                             <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
                                 <StackPanel>

@@ -2,7 +2,6 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using System.Windows.Input;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
@@ -24,7 +23,7 @@ namespace PBE_AssetsDownloader.UI
     {
         private SideBySideDiffModel _diffModel;
         private bool _isScrollingSynced;
-        private readonly List<DiffInfo> _diffLines = new List<DiffInfo>();
+        private DiffPanelNavigation _diffPanelNavigation;
 
         public JsonDiffWindow(string oldJson, string newJson)
         {
@@ -59,9 +58,7 @@ namespace PBE_AssetsDownloader.UI
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                var resourceNames = assembly.GetManifestResourceNames();
-                
-                var resourceName = Array.Find(resourceNames, name => name.EndsWith("JsonSyntaxHighlighting.xshd"));
+                var resourceName = Array.Find(assembly.GetManifestResourceNames(), name => name.EndsWith("JsonSyntaxHighlighting.xshd"));
                 
                 if (resourceName != null)
                 {
@@ -93,19 +90,17 @@ namespace PBE_AssetsDownloader.UI
                 _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson);
             });
 
-            // Normalize both sides to have same number of lines for proper alignment
             var normalizedOld = NormalizeTextForAlignment(_diffModel.OldText);
             var normalizedNew = NormalizeTextForAlignment(_diffModel.NewText);
 
-            // Set normalized text to AvalonEdit controls
             OldJsonContent.Text = normalizedOld.Text;
             NewJsonContent.Text = normalizedNew.Text;
 
-            // Apply diff highlighting
             ApplyDiffHighlighting(normalizedOld.LineTypes, normalizedNew.LineTypes);
             
-            // Create navigation panel
-            CreateNavigationPanel();
+            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
+            _diffPanelNavigation.ScrollRequested += ScrollToLine;
+            _diffPanelNavigation.DrawPanels();
         }
 
         private (string Text, List<ChangeType> LineTypes) NormalizeTextForAlignment(DiffPaneModel paneModel)
@@ -139,117 +134,11 @@ namespace PBE_AssetsDownloader.UI
 
         private void ApplyDiffHighlighting(List<ChangeType> oldLineTypes, List<ChangeType> newLineTypes)
         {
-            // Clear existing renderers
             OldJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
             NewJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
 
-            // Add new diff renderers
             OldJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(oldLineTypes));
             NewJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(newLineTypes));
-        }
-
-        private void CreateNavigationPanel()
-        {
-            OldNavigationPanel.Children.Clear();
-            NewNavigationPanel.Children.Clear();
-            _diffLines.Clear();
-
-            if (_diffModel?.OldText?.Lines == null) return;
-
-            var panelHeight = OldNavigationPanel.ActualHeight > 0 ? OldNavigationPanel.ActualHeight : 600;
-            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-            if (totalLines == 0) return;
-            var lineHeight = panelHeight / totalLines;
-
-            // Draw for Old Panel
-            for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
-            {
-                var changeType = _diffModel.OldText.Lines[i].Type;
-                var color = DiffColorsHelper.GetNavigationColor(changeType);
-                if (color == Colors.Transparent) continue;
-
-                var rect = new Rectangle
-                {
-                    Width = OldNavigationPanel.ActualWidth,
-                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
-                    Fill = new SolidColorBrush(color),
-                    Cursor = Cursors.Hand,
-                    Tag = i + 1
-                };
-
-                rect.MouseLeftButtonDown += NavigationRect_Click;
-                Canvas.SetTop(rect, i * lineHeight);
-                OldNavigationPanel.Children.Add(rect);
-                _diffLines.Add(new DiffInfo { LineNumber = i + 1, ChangeType = changeType });
-            }
-
-            // Draw for New Panel
-            for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
-            {
-                var changeType = _diffModel.NewText.Lines[i].Type;
-                var color = DiffColorsHelper.GetNavigationColor(changeType);
-                if (color == Colors.Transparent) continue;
-
-                var rect = new Rectangle
-                {
-                    Width = NewNavigationPanel.ActualWidth,
-                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
-                    Fill = new SolidColorBrush(color),
-                    Cursor = Cursors.Hand,
-                    Tag = i + 1
-                };
-
-                rect.MouseLeftButtonDown += NavigationRect_Click;
-                Canvas.SetTop(rect, i * lineHeight);
-                NewNavigationPanel.Children.Add(rect);
-            }
-        }
-
-        private bool _isDragging = false;
-
-        private void NavigationPanel_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isDragging)
-            {
-                if (sender is Canvas panel)
-                {
-                    var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-                    var y = e.GetPosition(panel).Y;
-                    var panelHeight = panel.ActualHeight;
-                    var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
-                    ScrollToLine(lineNumber);
-                }
-            }
-        }
-
-        private void NavigationPanel_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            _isDragging = false;
-            if (sender is Canvas panel) panel.ReleaseMouseCapture();
-        }
-
-        private void NavigationPanel_Click(object sender, MouseButtonEventArgs e)
-        {
-            _isDragging = true;
-            if (sender is Canvas panel) panel.CaptureMouse();
-
-            if (sender is Canvas canvas)
-            {
-                var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-                var y = e.GetPosition(canvas).Y;
-                var panelHeight = canvas.ActualHeight;
-                var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
-                ScrollToLine(lineNumber);
-            }
-        }
-
-        private void NavigationRect_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Rectangle { Tag: int lineNumber })
-            {
-                ScrollToLine(lineNumber);
-                e.Handled = true; // Prevent bubbling to the parent Canvas
-            }
         }
 
         private void ScrollToLine(int lineNumber)
@@ -270,8 +159,6 @@ namespace PBE_AssetsDownloader.UI
         private void SetupScrollSync()
         {
             OldJsonContent.Loaded += (_, _) => SetupScrollSyncAfterLoaded();
-            OldNavigationPanel.SizeChanged += (_, _) => CreateNavigationPanel();
-            NewNavigationPanel.SizeChanged += (_, _) => CreateNavigationPanel();
         }
 
         private void SetupScrollSyncAfterLoaded()
@@ -293,7 +180,6 @@ namespace PBE_AssetsDownloader.UI
                 var scrollAmount = (e.Delta > 0 ? -1 : 1) * scrollLines * lineHeight;
                 var newOffset = Math.Max(0, currentOffset + scrollAmount);
 
-                // Apply to both editors
                 OldJsonContent.ScrollToVerticalOffset(newOffset);
                 NewJsonContent.ScrollToVerticalOffset(newOffset);
 
@@ -318,7 +204,7 @@ namespace PBE_AssetsDownloader.UI
         public KnownLayer Layer => KnownLayer.Background;
 
         public void Draw(TextView textView, DrawingContext drawingContext)
-        {
+        { 
             if (_lineTypes == null) return;
 
             foreach (var line in textView.VisualLines)
@@ -335,11 +221,5 @@ namespace PBE_AssetsDownloader.UI
                 drawingContext.DrawRectangle(backgroundBrush, null, rect);
             }
         }
-    }
-
-    public class DiffInfo
-    {
-        public int LineNumber { get; set; }
-        public ChangeType ChangeType { get; set; }
     }
 }

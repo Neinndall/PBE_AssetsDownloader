@@ -171,24 +171,26 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Old Diff Navigation -->
-                    <Canvas x:Name="OldNavigationPanel" Grid.Column="0" Background="{StaticResource DarkBackground}" ClipToBounds="True" MouseLeftButtonDown="NavigationPanel_Click">
+                    <Canvas x:Name="OldNavigationPanel" Grid.Column="0" Background="{StaticResource DarkBackground}" ClipToBounds="True" 
+                            MouseLeftButtonDown="NavigationPanel_Click" MouseMove="NavigationPanel_MouseMove" MouseLeftButtonUp="NavigationPanel_MouseUp">
                         <Canvas.ToolTip>
                             <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
                                 <StackPanel>
                                     <TextBlock Text="Old Version Navigation" FontWeight="Bold"/>
-                                    <TextBlock Text="Click anywhere to scroll"/>
+                                    <TextBlock Text="Click or drag to scroll"/>
                                 </StackPanel>
                             </ToolTip>
                         </Canvas.ToolTip>
                     </Canvas>
 
                     <!-- New Diff Navigation -->
-                    <Canvas x:Name="NewNavigationPanel" Grid.Column="1" Background="{StaticResource DarkBackground}" ClipToBounds="True" MouseLeftButtonDown="NavigationPanel_Click">
+                    <Canvas x:Name="NewNavigationPanel" Grid.Column="1" Background="{StaticResource DarkBackground}" ClipToBounds="True" 
+                            MouseLeftButtonDown="NavigationPanel_Click" MouseMove="NavigationPanel_MouseMove" MouseLeftButtonUp="NavigationPanel_MouseUp">
                         <Canvas.ToolTip>
                             <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
                                 <StackPanel>
                                     <TextBlock Text="New Version Navigation" FontWeight="Bold"/>
-                                    <TextBlock Text="Click anywhere to scroll"/>
+                                    <TextBlock Text="Click or drag to scroll"/>
                                 </StackPanel>
                             </ToolTip>
                         </Canvas.ToolTip>

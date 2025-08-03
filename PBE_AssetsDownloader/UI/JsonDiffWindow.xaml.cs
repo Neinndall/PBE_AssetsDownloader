@@ -205,13 +205,39 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
+        private bool _isDragging = false;
+
+        private void NavigationPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDragging)
+            {
+                if (sender is Canvas panel)
+                {
+                    var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+                    var y = e.GetPosition(panel).Y;
+                    var panelHeight = panel.ActualHeight;
+                    var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
+                    ScrollToLine(lineNumber);
+                }
+            }
+        }
+
+        private void NavigationPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _isDragging = false;
+            if (sender is Canvas panel) panel.ReleaseMouseCapture();
+        }
+
         private void NavigationPanel_Click(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Canvas panel)
+            _isDragging = true;
+            if (sender is Canvas panel) panel.CaptureMouse();
+
+            if (sender is Canvas canvas)
             {
                 var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-                var y = e.GetPosition(panel).Y;
-                var panelHeight = panel.ActualHeight;
+                var y = e.GetPosition(canvas).Y;
+                var panelHeight = canvas.ActualHeight;
                 var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
                 ScrollToLine(lineNumber);
             }

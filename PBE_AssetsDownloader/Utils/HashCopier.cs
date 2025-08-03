@@ -39,14 +39,6 @@ namespace PBE_AssetsDownloader.Utils
 
       try
       {
-        // Verificar si el directorio de destino existe
-        if (!Directory.Exists(destinationPath))
-        {
-          // Si no existe, crear el directorio de destino
-          Directory.CreateDirectory(destinationPath);
-          _logService.Log($"Destination directory did not exist and was created: {destinationPath}");
-        }
-
         // Copiar los archivos y subdirectorios desde el directorio fuente al destino, sobrescribiendo si es necesario
         await Task.Run(() => DirectoryCopy(sourcePath, destinationPath, true));
 

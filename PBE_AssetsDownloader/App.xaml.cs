@@ -183,8 +183,8 @@ namespace PBE_AssetsDownloader
                 var directoryCleaner = new DirectoryCleaner(directoriesCreator, logService);
                 directoryCleaner.CleanEmptyDirectories();
 
-                var backUp = new BackUp(directoriesCreator, logService);
-                await backUp.HandleBackUpAsync(createBackUpOldHashes);
+                var HashBackUp = new HashBackUp(directoriesCreator, logService);
+                await HashBackUp.HandleBackUpAsync(createBackUpOldHashes);
 
                 var hashCopier = new HashCopier(logService, directoriesCreator);
                 await hashCopier.HandleCopyAsync(autoCopyHashes);

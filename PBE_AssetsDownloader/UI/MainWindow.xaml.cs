@@ -214,7 +214,7 @@ namespace PBE_AssetsDownloader.UI
     private void btnSettings_Click(object sender, RoutedEventArgs e)
     {
       var settingsWindow = new SettingsWindow(
-          new LogService(),
+          new LogService(), // Añadimos nuevo sistema de LogService para que los logs de Settings no se registren en el MainLog
           _httpClient,
           _directoriesCreator,
           _requests,

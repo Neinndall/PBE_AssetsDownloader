@@ -5,6 +5,8 @@
         <ResourceDictionary Source="/Themes/Colors.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
+    
+
     <!-- Estilo para el RichTextBox de logs -->
     <Style x:Key="LogRichTextBoxStyle" TargetType="RichTextBox">
         <Setter Property="Background" Value="Transparent"/>
@@ -420,4 +422,5 @@
             </Setter.Value>
         </Setter>
     </Style>
+
 </ResourceDictionary>

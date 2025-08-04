@@ -1,25 +1,22 @@
 <?xml version="1.0"?>
 <SyntaxDefinition name="JSON" extensions=".json" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
-  <!-- VS Code inspired color scheme for dark theme -->
-  <Color name="String" foreground="#CE9178" />
-  <Color name="Number" foreground="#B5CEA8" />
-  <Color name="Boolean" foreground="#569CD6" />
-  <Color name="Null" foreground="#569CD6" />
-  <Color name="PropertyName" foreground="#9CDCFE" />
+  <!-- Custom user color scheme -->
+  <Color name="String" foreground="#DDAA77" />
+  <Color name="Number" foreground="#8CD0D3" />
+  <Color name="Boolean" foreground="#B5CEA8" />
+  <Color name="Null" foreground="#B5CEA8" />
+  <Color name="PropertyName" foreground="#569CD6" />
   <Color name="Comment" foreground="#6A9955" />
   <Color name="Punctuation" foreground="#D4D4D4" />
   <Color name="Error" foreground="#F44747" />
   <Color name="Default" foreground="#D4D4D4" />
   
   <RuleSet>
-    <!-- Property Names (keys) - Must come before regular strings -->
-    <Rule color="PropertyName">"[^"]*"(?=\s*:)</Rule>
-    
-    <!-- Strings -->
-    <Span color="String" ruleSet="StringContent">
-      <Begin>"</Begin>
-      <End>"</End>
-    </Span>
+    <!-- Rule for property names (keys) -->
+    <Rule color="PropertyName">"[^"\r\n]*"(?=\s*:)</Rule>
+
+    <!-- Rule for string values -->
+    <Rule color="String">\"(?:[^\\\"]|\\.)*\"</Rule>
     
     <!-- Numbers (including scientific notation) -->
     <Rule color="Number">-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?</Rule>
@@ -32,14 +29,5 @@
     
     <!-- Punctuation -->
     <Rule color="Punctuation">[{}\[\],:()]</Rule>
-  </RuleSet>
-  
-  <!-- Rules that apply within strings -->
-  <RuleSet name="StringContent">
-    <!-- JSON escape sequences -->
-    <Rule color="String">\\([&quot;\/bfnrt]|u[0-9a-fA-F]{4})</Rule>
-    
-    <!-- Invalid escape sequences -->
-    <Rule color="Error">\\.</Rule>
   </RuleSet>
 </SyntaxDefinition>

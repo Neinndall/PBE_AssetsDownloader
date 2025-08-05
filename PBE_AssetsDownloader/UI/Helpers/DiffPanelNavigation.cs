@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -13,6 +15,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly Canvas _newPanel;
         private readonly SideBySideDiffModel _diffModel;
         private bool _isDragging;
+        private readonly List<int> _diffLines;
 
         public event Action<int> ScrollRequested;
 
@@ -21,7 +24,9 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _oldPanel = oldPanel;
             _newPanel = newPanel;
             _diffModel = diffModel;
+            _diffLines = new List<int>();
             SetupEvents();
+            FindDiffLines();
         }
 
         private void SetupEvents()
@@ -35,6 +40,48 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _newPanel.MouseMove += NavigationPanel_MouseMove;
             _newPanel.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
             _newPanel.SizeChanged += (s, e) => DrawPanels();
+        }
+
+        private void FindDiffLines()
+        {
+            if (_diffModel == null) return;
+
+            for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
+            {
+                if (_diffModel.NewText.Lines[i].Type != ChangeType.Unchanged)
+                {
+                    _diffLines.Add(i + 1);
+                }
+            }
+        }
+
+        public void NavigateToNextDifference(int currentLine)
+        {
+            if (_diffLines.Count == 0) return;
+
+            var nextDiffLine = _diffLines.FirstOrDefault(line => line > currentLine);
+            if (nextDiffLine == 0) // Wrap around
+            {
+                nextDiffLine = _diffLines[0];
+            }
+            ScrollToLine(nextDiffLine);
+        }
+
+        public void NavigateToPreviousDifference(int currentLine)
+        {
+            if (_diffLines.Count == 0) return;
+
+            var previousDiffLine = _diffLines.LastOrDefault(line => line < currentLine);
+            if (previousDiffLine == 0) // Wrap around
+            {
+                previousDiffLine = _diffLines.Last();
+            }
+            ScrollToLine(previousDiffLine);
+        }
+
+        private void ScrollToLine(int lineNumber)
+        {
+            ScrollRequested?.Invoke(lineNumber);
         }
 
         public void DrawPanels()

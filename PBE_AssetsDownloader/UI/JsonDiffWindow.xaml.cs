@@ -113,6 +113,12 @@ namespace PBE_AssetsDownloader.UI
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
+
+            // Automatically scroll to the first difference on load
+            if (_diffPanelNavigation != null)
+            {
+                _diffPanelNavigation.NavigateToNextDifference(0);
+            }
         }
 
         private void ApplyDiffHighlighting(List<ChangeType> oldLineTypes, List<ChangeType> newLineTypes)
@@ -131,8 +137,14 @@ namespace PBE_AssetsDownloader.UI
 
             try
             {
+                // Scroll both editors to the target line
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
+
+                // Move the caret to the target line and focus the editor
+                NewJsonContent.TextArea.Caret.Line = lineNumber;
+                NewJsonContent.TextArea.Caret.Column = 1;
+                NewJsonContent.Focus();
             }
             finally
             {
@@ -181,7 +193,15 @@ namespace PBE_AssetsDownloader.UI
                 OldJsonContent.TextArea.TextView.ScrollOffsetChanged += OldEditor_ScrollChanged;
             }
         }
-    }
 
-    
+        private void NextDiffButton_Click(object sender, RoutedEventArgs e)
+        {
+            _diffPanelNavigation?.NavigateToNextDifference(NewJsonContent.TextArea.Caret.Line);
+        }
+
+        private void PreviousDiffButton_Click(object sender, RoutedEventArgs e)
+        {
+            _diffPanelNavigation?.NavigateToPreviousDifference(NewJsonContent.TextArea.Caret.Line);
+        }
+    }
 }

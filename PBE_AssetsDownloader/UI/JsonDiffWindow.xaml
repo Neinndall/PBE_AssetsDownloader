@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
         Title="JSON Diff Viewer" Height="960" Width="1500" MinHeight="960" MinWidth="1500"
         WindowStartupLocation="CenterScreen"
@@ -11,6 +12,41 @@
         FontFamily="Consolas, Courier New">
 
     <Window.Resources>
+        <Style x:Key="NavigationButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <materialDesign:MaterialIcon Kind="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                     HorizontalAlignment="Center" 
+                                                     VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource HoverColor}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentBlue}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
         <Style TargetType="{x:Type ScrollBar}">
             <Setter Property="Background" Value="{StaticResource ScrollBarBackground}"/>
             <Style.Triggers>
@@ -33,23 +69,60 @@
         </Grid.RowDefinitions>
 
         <!-- Header Section -->
-        <Border Grid.Row="0" 
+        <Border Grid.Row="0"
                 Background="{StaticResource CardBackground}"
                 BorderBrush="{StaticResource BorderColor}"
                 BorderThickness="0,0,0,1"
                 Padding="32,24">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="↔️" FontSize="24" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
-                <StackPanel>
-                    <TextBlock Text="JSON DIFFERENCE" 
-                               FontSize="24" 
-                               FontWeight="Bold"
-                               Foreground="{StaticResource AccentBlue}"/>
-                    <TextBlock Text="Compare old and new JSON file versions" 
-                               FontSize="14" 
-                               Foreground="{StaticResource TextMuted}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="↔️" FontSize="24" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                    <StackPanel>
+                        <TextBlock Text="JSON DIFFERENCE"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource AccentBlue}"/>
+                        <TextBlock Text="Compare old and new JSON file versions"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+
+                <Border Grid.Column="2" 
+                        Background="{StaticResource SidebarBackground}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="8"
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="PreviousDiffButton" 
+                                Click="PreviousDiffButton_Click" 
+                                Style="{StaticResource NavigationButton}"
+                                Content="ArrowUp">
+                            <Button.ToolTip>
+                                <ToolTip Content="Go to previous difference"/>
+                            </Button.ToolTip>
+                        </Button>
+                        <Button x:Name="NextDiffButton" 
+                                Margin="5,0,0,0"
+                                Click="NextDiffButton_Click" 
+                                Style="{StaticResource NavigationButton}"
+                                Content="ArrowDown">
+                            <Button.ToolTip>
+                                <ToolTip Content="Go to next difference"/>
+                            </Button.ToolTip>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Border>
 
         <!-- Main Content -->
@@ -74,12 +147,12 @@
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
                         <TextBlock Text="📜" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
                         <StackPanel>
-                            <TextBlock Text="Old Version" 
-                                     FontSize="16" 
+                            <TextBlock Text="Old Version"
+                                     FontSize="16"
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Content of the previous file" 
-                                     FontSize="12" 
+                            <TextBlock Text="Content of the previous file"
+                                     FontSize="12"
                                      Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
@@ -90,11 +163,11 @@
                             BorderBrush="{StaticResource BorderColor}"
                             BorderThickness="1"
                             CornerRadius="6">
-                        <avalonEdit:TextEditor x:Name="OldJsonContent" 
-                                             IsReadOnly="True" 
-                                             Background="Transparent" 
-                                             BorderThickness="0" 
-                                             Foreground="{StaticResource TextPrimary}" 
+                        <avalonEdit:TextEditor x:Name="OldJsonContent"
+                                             IsReadOnly="True"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Foreground="{StaticResource TextPrimary}"
                                              Padding="0,8"
                                              ShowLineNumbers="True"
                                              WordWrap="False"
@@ -105,10 +178,10 @@
             </Border>
 
             <!-- Grid Splitter -->
-            <GridSplitter Grid.Column="1" 
-                          Width="12" 
-                          HorizontalAlignment="Center" 
-                          VerticalAlignment="Stretch" 
+            <GridSplitter Grid.Column="1"
+                          Width="12"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
                           Background="Transparent"
                           ResizeBehavior="PreviousAndNext"/>
 
@@ -124,12 +197,12 @@
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
                         <TextBlock Text="✨" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
                         <StackPanel>
-                            <TextBlock Text="New Version" 
-                                     FontSize="16" 
+                            <TextBlock Text="New Version"
+                                     FontSize="16"
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Content of the updated file" 
-                                     FontSize="12" 
+                            <TextBlock Text="Content of the updated file"
+                                     FontSize="12"
                                      Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
@@ -140,11 +213,11 @@
                             BorderBrush="{StaticResource BorderColor}"
                             BorderThickness="1"
                             CornerRadius="6">
-                        <avalonEdit:TextEditor x:Name="NewJsonContent" 
-                                             IsReadOnly="True" 
-                                             Background="Transparent" 
-                                             BorderThickness="0" 
-                                             Foreground="{StaticResource TextPrimary}" 
+                        <avalonEdit:TextEditor x:Name="NewJsonContent"
+                                             IsReadOnly="True"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Foreground="{StaticResource TextPrimary}"
                                              Padding="0,8"
                                              ShowLineNumbers="True"
                                              WordWrap="False"
@@ -155,10 +228,10 @@
             </Border>
 
             <!-- Grid Splitter for Navigation Panel -->
-            <GridSplitter Grid.Column="3" 
-                          Width="12" 
-                          HorizontalAlignment="Center" 
-                          VerticalAlignment="Stretch" 
+            <GridSplitter Grid.Column="3"
+                          Width="12"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
                           Background="Transparent"
                           ResizeBehavior="PreviousAndNext"/>
 

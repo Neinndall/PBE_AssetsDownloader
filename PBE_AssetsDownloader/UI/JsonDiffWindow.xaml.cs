@@ -15,6 +15,7 @@ using System.Xml;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Linq;
 using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader.UI
@@ -22,7 +23,6 @@ namespace PBE_AssetsDownloader.UI
     public partial class JsonDiffWindow : Window
     {
         private SideBySideDiffModel _diffModel;
-        private bool _isScrollingSynced;
         private DiffPanelNavigation _diffPanelNavigation;
 
         public JsonDiffWindow(string oldJson, string newJson)
@@ -89,6 +89,18 @@ namespace PBE_AssetsDownloader.UI
                 var diffBuilder = new SideBySideDiffBuilder(differ);
                 _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson);
             });
+
+            // Check if there are any differences
+            if (_diffModel.OldText.Lines.All(l => l.Type == ChangeType.Unchanged) && 
+                _diffModel.NewText.Lines.All(l => l.Type == ChangeType.Unchanged))
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show(this, "No differences found. The two files are identical.", "Comparison Result", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Close();
+                });
+                return;
+            }
 
             var normalizedOld = JsonDiffHelper.NormalizeTextForAlignment(_diffModel.OldText);
             var normalizedNew = JsonDiffHelper.NormalizeTextForAlignment(_diffModel.NewText);

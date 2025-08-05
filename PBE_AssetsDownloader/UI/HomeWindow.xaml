@@ -137,6 +137,7 @@
                                 
                                 <TextBox x:Name="oldHashesTextBox" 
                                          Height="36"
+                                         IsReadOnly="True"
                                          Style="{StaticResource ModernTextBox}"
                                          Margin="0,0,3,0"
                                          ToolTip="Select the directory containing old hash files"/>

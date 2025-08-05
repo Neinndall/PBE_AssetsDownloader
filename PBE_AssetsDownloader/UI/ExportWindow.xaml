@@ -81,22 +81,12 @@
                                     <ColumnDefinition Width="12"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                
-                                <Border Grid.Column="0"
-                                        Background="{StaticResource DarkBackground}"
-                                        BorderBrush="{StaticResource BorderColor}"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                    <TextBox x:Name="txtDifferencesPath" 
-                                             Height="36"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             Foreground="{StaticResource TextPrimary}"
-                                             Padding="12,0"
-                                             VerticalContentAlignment="Center"
-                                             IsReadOnly="True"
-                                             ToolTip="Path to the differences folder"/>
-                                </Border>
+                                <TextBox x:Name="txtDifferencesPath" 
+                                         Height="36"
+                                         IsReadOnly="True"
+                                         Style="{StaticResource ModernTextBox}"
+                                         Margin="0,0,3,0"
+                                         ToolTip="Path to the differences folder"/>
                                 
                                 <Button Grid.Column="2"
                                         x:Name="BtnBrowseDifferencesPath"
@@ -129,20 +119,12 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <Border Background="{StaticResource DarkBackground}"
-                                        BorderBrush="{StaticResource BorderColor}"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                    <TextBox x:Name="txtDownloadTargetPath" 
-                                             Height="36"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             Foreground="{StaticResource TextPrimary}"
-                                             Padding="12,0"
-                                             VerticalContentAlignment="Center"
-                                             IsReadOnly="True"
-                                             ToolTip="Path to the download target folder"/>
-                                </Border>
+                                <TextBox x:Name="txtDownloadTargetPath" 
+                                         Height="36"
+                                         IsReadOnly="True"
+                                         Style="{StaticResource ModernTextBox}"
+                                         Margin="0,0,3,0"
+                                         ToolTip="Path to the download target folder"/>
                                 
                                 <Button Grid.Column="2"
                                         x:Name="BtnBrowseDownloadTargetPath"
@@ -185,10 +167,10 @@
                                        Foreground="{StaticResource TextMuted}"
                                        Margin="25,0,0,12"/>
                             
-                            <Border Background="{StaticResource DarkBackground}"
-                                    BorderBrush="{StaticResource BorderColor}"
-                                    BorderThickness="1"
-                                    CornerRadius="4"
+                            <Border Background="{StaticResource DarkBackground}" 
+                                    BorderBrush="{StaticResource BorderColor}"   
+                                    BorderThickness="1"                          
+                                    CornerRadius="4"                             
                                     Padding="15"
                                     Margin="25,0,25,0">
                                 <StackPanel>

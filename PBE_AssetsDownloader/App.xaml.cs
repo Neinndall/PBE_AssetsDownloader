@@ -10,6 +10,8 @@ using Serilog.Events;
 using PBE_AssetsDownloader.UI;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
+using PBE_AssetsDownloader.UI.Dialogs;
+using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader
 {
@@ -29,20 +31,20 @@ namespace PBE_AssetsDownloader
             base.OnStartup(e);
 
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug() // Nivel mínimo para todos los logs
+                .MinimumLevel.Debug()
                 .WriteTo.File(
-                    Path.Combine("logs", "application.log"), // Log general
+                    Path.Combine("logs", "application.log"),
                     rollingInterval: RollingInterval.Day,
-                    restrictedToMinimumLevel: LogEventLevel.Debug, // Captura Debug, Info, Warning, Error, Fatal
-                    outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}" // Sin {Exception} aquí
-                )
-                .WriteTo.File(
-                    Path.Combine("logs", "application_errors.log"), // Log de errores
-                    rollingInterval: RollingInterval.Day,
-                    restrictedToMinimumLevel: LogEventLevel.Error, // Solo captura Error y Fatal
+                    restrictedToMinimumLevel: LogEventLevel.Information,
                     outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                 )
-                .WriteTo.Debug(restrictedToMinimumLevel: LogEventLevel.Information) // Para la ventana de salida de Visual Studio
+                .WriteTo.File(
+                    Path.Combine("logs", "application_errors.log"),
+                    rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Error,
+                    outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                )
+                .WriteTo.Debug(restrictedToMinimumLevel: LogEventLevel.Information)
                 .CreateLogger();
 
             Log.Information("Application starting. Serilog initialized.");
@@ -69,7 +71,7 @@ namespace PBE_AssetsDownloader
                 _requests,
                 _status,
                 _assetDownloader,
-                _appSettings, // ✅ Inyectamos la instancia
+                _appSettings,
                 _jsonDataService
             );
 
@@ -79,10 +81,9 @@ namespace PBE_AssetsDownloader
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             // Loguear la excepción completa a Serilog para el archivo de errores
-            Serilog.Log.Error(e.Exception, "Unhandled UI exception caught in App.xaml.cs (DispatcherUnhandledException).");
-            // Mostrar un mensaje amigable en la UI a través de LogService
-            _logService?.LogError($"Unhandled UI exception: {e.Exception.Message}");
-            MessageBox.Show($"Un error inesperado ha ocurrido en la interfaz de usuario: {e.Exception.Message}\nConsulte el archivo de registro para más detalles.", "Error de UI", MessageBoxButton.OK, MessageBoxImage.Error);
+            string errorMessage = $"Unhandled UI exception caught in App.xaml.cs (DispatcherUnhandledException).\nMessage: {e.Exception.Message}\nSource: {e.Exception.Source}\nInnerException: {e.Exception.InnerException?.Message}";
+            Serilog.Log.Error(e.Exception, errorMessage);
+            CustomMessageBox.ShowInfo("Error de UI", $"Un error inesperado ha ocurrido en la interfaz de usuario: {e.Exception.Message}\nConsulte el archivo de registro para más detalles.", null, CustomMessageBoxIcon.Error);
             e.Handled = true;
         }
 
@@ -91,9 +92,7 @@ namespace PBE_AssetsDownloader
             var ex = e.ExceptionObject as Exception;
             // Loguear la excepción completa a Serilog para el archivo de errores
             Serilog.Log.Error(ex, "Unhandled non-UI exception caught in App.xaml.cs (AppDomain_UnhandledException).");
-            // Mostrar un mensaje amigable en la UI a través de LogService
-            _logService?.LogError($"Unhandled non-UI exception: {ex?.Message}");
-            MessageBox.Show($"Un error inesperado ha ocurrido: {ex?.Message}\nConsulte el archivo de registro para más detalles.", "Error Crítico", MessageBoxButton.OK, MessageBoxImage.Error);
+            CustomMessageBox.ShowInfo("Error Crítico", $"Un error inesperado ha ocurrido: {ex?.Message}\nConsulte el archivo de registro para más detalles.", null, CustomMessageBoxIcon.Error);
         }
 
         protected override void OnExit(ExitEventArgs e)

@@ -422,5 +422,14 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    
+    <!-- Modern ProgressBar Style (Basic) -->
+    <Style x:Key="ModernProgressBar" TargetType="ProgressBar">
+        <Setter Property="Background" Value="{StaticResource DarkBackground}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentBlue}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Height" Value="10"/>
+    </Style>
+   
 </ResourceDictionary>

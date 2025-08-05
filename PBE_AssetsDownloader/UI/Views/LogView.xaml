@@ -6,15 +6,11 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="220" d:DesignWidth="600"
-             Background="Transparent"> 
-    <UserControl.Resources>
-        <!-- The Storyboard is now defined in Themes/Animations.xaml and controlled from code-behind -->
-    </UserControl.Resources>
-
+             Background="Transparent">
+             
     <Border Background="{StaticResource DarkBackground}" 
             CornerRadius="8"
-            BorderBrush="{StaticResource BorderColor}"
-            BorderThickness="1">
+            BorderBrush="{StaticResource BorderColor}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Original header row -->
@@ -54,11 +50,8 @@
                 <RichTextBox x:Name="richTextBoxLogs" 
                              Style="{StaticResource LogRichTextBoxStyle}"
                              FlowDirection="LeftToRight"
-                             Background="{StaticResource DarkBackground}" 
-                             Foreground="{StaticResource TextPrimary}"
                              FontFamily="Consolas, Courier New"
                              FontSize="12"
-                             BorderThickness="0"
                              Padding="12,8">
                 </RichTextBox>
             </ScrollViewer>

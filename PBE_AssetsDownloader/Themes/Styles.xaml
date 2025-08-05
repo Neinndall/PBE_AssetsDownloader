@@ -9,10 +9,10 @@
 
     <!-- Estilo para el RichTextBox de logs -->
     <Style x:Key="LogRichTextBoxStyle" TargetType="RichTextBox">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="Background" Value="{StaticResource DarkBackground}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>                
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Margin" Value="4"/>
+        <Setter Property="Margin" Value="0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Medium"/>
@@ -183,7 +183,7 @@
 
     <!-- Modern TextBox Style -->
     <Style x:Key="ModernTextBox" TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource DarkBackground}"/>
+        <Setter Property="Background" Value="{StaticResource SidebarBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
         <Setter Property="BorderThickness" Value="1"/>

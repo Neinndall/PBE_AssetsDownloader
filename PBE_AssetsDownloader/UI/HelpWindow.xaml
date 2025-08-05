@@ -101,46 +101,52 @@
 
                         <!-- Page Header -->
                         <StackPanel Margin="0,0,0,32">
-                            <TextBlock Text="About Application" 
-                                     FontSize="28" 
-                                     FontWeight="Light" 
-                                     Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Information about the Asset Downloader application" 
-                                     FontSize="14" 
-                                     Foreground="{StaticResource TextMuted}"
-                                     Margin="0,8,0,0"/>
+                            <TextBlock Text="About"
+                                       FontSize="28"
+                                       FontWeight="Light"
+                                       Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="Information about the application"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextMuted}"
+                                       Margin="0,8,0,0"/>
                         </StackPanel>
 
-                        <!-- About Content Card -->
+                        <!-- Description Card -->
                         <Border Style="{StaticResource SettingsCard}">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                                     <TextBlock Text="ℹ️" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
-                                    <StackPanel>
-                                        <TextBlock Text="Application Information" 
-                                                 FontSize="18" 
-                                                 FontWeight="SemiBold"
-                                                 Foreground="{StaticResource TextPrimary}"/>
-                                        <TextBlock Text="Details about the application and its features" 
-                                                 FontSize="12" 
-                                                 Foreground="{StaticResource TextMuted}"/>
-                                    </StackPanel>
+                                    <TextBlock Text="Description"
+                                               FontSize="18"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               Foreground="{StaticResource TextPrimary}"/>
                                 </StackPanel>
-                                
-                                <Border Background="{StaticResource DarkBackground}"
-                                      BorderBrush="{StaticResource BorderColor}"
-                                      BorderThickness="1"
-                                      CornerRadius="4">
-                                    <RichTextBox x:Name="richTextBoxAbout" 
-                                               BorderThickness="0"
-                                               Foreground="{StaticResource TextPrimary}"
-                                               FontFamily="Consolas"
-                                               FontSize="12"
-                                               IsReadOnly="True"
-                                               Padding="14"
-                                               MinHeight="300"> 
-                                    </RichTextBox>
-                                </Border>
+                                <TextBlock Text="This app is designed to automatically download and manage new assets from League of Legends PBE server updates. It helps content creators and developers stay up-to-date with the latest changes and additions to the game."
+                                           Foreground="{StaticResource TextPrimary}"
+                                           FontSize="13"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Key Features Card -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                    <TextBlock Text="⭐" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                    <TextBlock Text="Key Features"
+                                               FontSize="18"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               Foreground="{StaticResource TextPrimary}"/>
+                                </StackPanel>
+
+                                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Automatic detection of new PBE updates."/>
+                                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Downloads and organizes new game assets."/>
+                                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Supports synchronization with CDTB."/>
+                                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Auto-copy functionality for hash files."/>
+                                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Back-Ups for old hash files."/>
+                                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Manually download assets from other days with differences text files."/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -160,51 +166,44 @@
 
                         <!-- Page Header -->
                         <StackPanel Margin="0,0,0,32">
-                            <TextBlock Text="Changelogs" 
-                                     FontSize="28" 
-                                     FontWeight="Light" 
-                                     Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Version history and feature updates" 
-                                     FontSize="14" 
-                                     Foreground="{StaticResource TextMuted}"
-                                     Margin="0,8,0,0"/>
+                            <TextBlock Text="Changelogs"
+                                       FontSize="28"
+                                       FontWeight="Light"
+                                       Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="Version history and feature updates"
+                                       FontSize="14"
+                                       Foreground="{StaticResource TextMuted}"
+                                       Margin="0,8,0,0"/>
                         </StackPanel>
 
-                        <!-- Changelogs Content Card -->
-                        <Border Style="{StaticResource SettingsCard}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                    <TextBlock Text="📜" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
-                                    <StackPanel>
-                                        <TextBlock Text="Version History" 
-                                                 FontSize="18" 
-                                                 FontWeight="SemiBold"
-                                                 Foreground="{StaticResource TextPrimary}"/>
-                                        <TextBlock Text="Latest changes and improvements to the application" 
-                                                 FontSize="12" 
-                                                 Foreground="{StaticResource TextMuted}"/>
+                        <ItemsControl x:Name="ChangelogItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,0,20">
+                                        <TextBlock Text="{Binding Version}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,16"/>
+                                        <ItemsControl ItemsSource="{Binding Groups}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Margin="0,0,0,12">
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                                            <TextBlock Text="{Binding Icon}" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                        <ItemsControl ItemsSource="{Binding Changes}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding}" FontSize="13" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" Margin="24,2,0,2"/>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
-                                </StackPanel>
-                                
-                                <Border Background="{StaticResource DarkBackground}"
-                                      BorderBrush="{StaticResource BorderColor}"
-                                      BorderThickness="1"
-                                      CornerRadius="4">
-                                    <ScrollViewer Height="400"
-                                                VerticalScrollBarVisibility="Auto"
-                                                HorizontalScrollBarVisibility="Disabled">
-                                        <RichTextBox x:Name="richTextBoxChangelogs" 
-                                                   BorderThickness="0"
-                                                   Foreground="{StaticResource TextPrimary}"
-                                                   FontFamily="Consolas"
-                                                   FontSize="14"
-                                                   IsReadOnly="True"
-                                                   Padding="14">
-                                        </RichTextBox>
-                                    </ScrollViewer>
-                                </Border>
-                            </StackPanel>
-                        </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
 
                     <!-- Bug Reports Panel -->

@@ -143,16 +143,18 @@ namespace PBE_AssetsDownloader.UI
 
         private void ScrollToLine(int lineNumber)
         {
-            _isScrollingSynced = true;
+            OldJsonContent.TextArea.TextView.ScrollOffsetChanged -= OldEditor_ScrollChanged;
+            NewJsonContent.TextArea.TextView.ScrollOffsetChanged -= NewEditor_ScrollChanged;
+
             try
             {
-                var lineIndex = Math.Max(0, lineNumber - 1);
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
             }
             finally
             {
-                _isScrollingSynced = false;
+                OldJsonContent.TextArea.TextView.ScrollOffsetChanged += OldEditor_ScrollChanged;
+                NewJsonContent.TextArea.TextView.ScrollOffsetChanged += NewEditor_ScrollChanged;
             }
         }
 
@@ -163,31 +165,37 @@ namespace PBE_AssetsDownloader.UI
 
         private void SetupScrollSyncAfterLoaded()
         {
-            OldJsonContent.PreviewMouseWheel += OnEditorMouseWheel;
-            NewJsonContent.PreviewMouseWheel += OnEditorMouseWheel;
+            OldJsonContent.TextArea.TextView.ScrollOffsetChanged += OldEditor_ScrollChanged;
+            NewJsonContent.TextArea.TextView.ScrollOffsetChanged += NewEditor_ScrollChanged;
         }
 
-        private void OnEditorMouseWheel(object sender, MouseWheelEventArgs e)
+        private void OldEditor_ScrollChanged(object sender, EventArgs e)
         {
-            if (_isScrollingSynced) return;
-
-            _isScrollingSynced = true;
+            NewJsonContent.TextArea.TextView.ScrollOffsetChanged -= NewEditor_ScrollChanged;
             try
             {
-                var currentOffset = ((ICSharpCode.AvalonEdit.TextEditor)sender).VerticalOffset;
-                var scrollLines = SystemParameters.WheelScrollLines;
-                var lineHeight = DiffColorsHelper.VisualSettings.StandardLineHeight;
-                var scrollAmount = (e.Delta > 0 ? -1 : 1) * scrollLines * lineHeight;
-                var newOffset = Math.Max(0, currentOffset + scrollAmount);
-
-                OldJsonContent.ScrollToVerticalOffset(newOffset);
-                NewJsonContent.ScrollToVerticalOffset(newOffset);
-
-                e.Handled = true;
+                var sourceView = (TextView)sender;
+                NewJsonContent.ScrollToVerticalOffset(sourceView.VerticalOffset);
+                NewJsonContent.ScrollToHorizontalOffset(sourceView.HorizontalOffset);
             }
             finally
             {
-                _isScrollingSynced = false;
+                NewJsonContent.TextArea.TextView.ScrollOffsetChanged += NewEditor_ScrollChanged;
+            }
+        }
+
+        private void NewEditor_ScrollChanged(object sender, EventArgs e)
+        {
+            OldJsonContent.TextArea.TextView.ScrollOffsetChanged -= OldEditor_ScrollChanged;
+            try
+            {
+                var sourceView = (TextView)sender;
+                OldJsonContent.ScrollToVerticalOffset(sourceView.VerticalOffset);
+                OldJsonContent.ScrollToHorizontalOffset(sourceView.HorizontalOffset);
+            }
+            finally
+            {
+                OldJsonContent.TextArea.TextView.ScrollOffsetChanged += OldEditor_ScrollChanged;
             }
         }
     }

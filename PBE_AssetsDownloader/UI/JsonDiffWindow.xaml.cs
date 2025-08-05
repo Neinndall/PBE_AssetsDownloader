@@ -80,8 +80,8 @@ namespace PBE_AssetsDownloader.UI
 
         private async Task DisplayDiffAsync(string oldJson, string newJson)
         {
-            var formattedOldJson = FormatJson(oldJson);
-            var formattedNewJson = FormatJson(newJson);
+            var formattedOldJson = JsonDiffHelper.FormatJson(oldJson);
+            var formattedNewJson = JsonDiffHelper.FormatJson(newJson);
 
             await Task.Run(() =>
             {
@@ -90,8 +90,8 @@ namespace PBE_AssetsDownloader.UI
                 _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson);
             });
 
-            var normalizedOld = NormalizeTextForAlignment(_diffModel.OldText);
-            var normalizedNew = NormalizeTextForAlignment(_diffModel.NewText);
+            var normalizedOld = JsonDiffHelper.NormalizeTextForAlignment(_diffModel.OldText);
+            var normalizedNew = JsonDiffHelper.NormalizeTextForAlignment(_diffModel.NewText);
 
             OldJsonContent.Text = normalizedOld.Text;
             NewJsonContent.Text = normalizedNew.Text;
@@ -101,35 +101,6 @@ namespace PBE_AssetsDownloader.UI
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
-        }
-
-        private (string Text, List<ChangeType> LineTypes) NormalizeTextForAlignment(DiffPaneModel paneModel)
-        {
-            var lines = new List<string>();
-            var lineTypes = new List<ChangeType>();
-            
-            foreach (var line in paneModel.Lines)
-            {
-                lines.Add(line.Type == ChangeType.Imaginary ? "" : line.Text ?? "");
-                lineTypes.Add(line.Type);
-            }
-            
-            return (string.Join("\r\n", lines), lineTypes);
-        }
-
-        private static string FormatJson(string json)
-        {
-            if (string.IsNullOrWhiteSpace(json)) return string.Empty;
-            
-            try
-            {
-                var parsed = JsonConvert.DeserializeObject(json);
-                return JsonConvert.SerializeObject(parsed, Newtonsoft.Json.Formatting.Indented);
-            }
-            catch
-            {
-                return json;
-            }
         }
 
         private void ApplyDiffHighlighting(List<ChangeType> oldLineTypes, List<ChangeType> newLineTypes)
@@ -200,34 +171,5 @@ namespace PBE_AssetsDownloader.UI
         }
     }
 
-    public class DiffBackgroundRenderer : IBackgroundRenderer
-    {
-        private readonly List<ChangeType> _lineTypes;
-
-        public DiffBackgroundRenderer(List<ChangeType> lineTypes)
-        {
-            _lineTypes = lineTypes;
-        }
-
-        public KnownLayer Layer => KnownLayer.Background;
-
-        public void Draw(TextView textView, DrawingContext drawingContext)
-        { 
-            if (_lineTypes == null) return;
-
-            foreach (var line in textView.VisualLines)
-            {
-                var lineNumber = line.FirstDocumentLine.LineNumber - 1;
-                if (lineNumber < 0 || lineNumber >= _lineTypes.Count) continue;
-
-                var backgroundColor = DiffColorsHelper.GetBackgroundColor(_lineTypes[lineNumber]);
-                if (backgroundColor == Colors.Transparent) continue;
-
-                var backgroundBrush = new SolidColorBrush(backgroundColor);
-                var rect = new Rect(0, line.VisualTop - textView.ScrollOffset.Y, 
-                                  textView.ActualWidth, line.Height);
-                drawingContext.DrawRectangle(backgroundBrush, null, rect);
-            }
-        }
-    }
+    
 }

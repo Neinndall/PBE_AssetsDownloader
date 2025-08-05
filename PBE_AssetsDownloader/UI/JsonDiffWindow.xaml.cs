@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
 using PBE_AssetsDownloader.UI.Helpers;
+using PBE_AssetsDownloader.UI.Dialogs;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -96,7 +97,7 @@ namespace PBE_AssetsDownloader.UI
             {
                 Dispatcher.Invoke(() =>
                 {
-                    MessageBox.Show(this, "No differences found. The two files are identical.", "Comparison Result", MessageBoxButton.OK, MessageBoxImage.Information);
+                    CustomMessageBox.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
                     Close();
                 });
                 return;

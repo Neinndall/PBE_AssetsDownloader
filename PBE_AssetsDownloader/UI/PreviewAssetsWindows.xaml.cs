@@ -11,6 +11,8 @@ using Microsoft.Win32;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
+using PBE_AssetsDownloader.UI.Helpers;
+using PBE_AssetsDownloader.UI.Dialogs;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -121,7 +123,7 @@ namespace PBE_AssetsDownloader.UI
       }
       else
       {
-        MessageBox.Show("Asset information not found for preview.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+        CustomMessageBox.ShowInfo("Error", "Asset information not found for preview.", this, CustomMessageBoxIcon.Warning);
         textBlockNoData.Visibility = Visibility.Visible;
       }
     }
@@ -298,7 +300,7 @@ namespace PBE_AssetsDownloader.UI
                 catch (Exception ex)
                 {
                     _logService.LogError(ex, $"Failed to save image to {saveFileDialog.FileName}");
-                    MessageBox.Show($"Failed to save image: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    CustomMessageBox.ShowInfo("Error", $"Failed to save image: {ex.Message}", this, CustomMessageBoxIcon.Error);
                 }
             }
         }

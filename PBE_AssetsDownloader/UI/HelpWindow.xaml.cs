@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Material.Icons;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
 
@@ -23,7 +24,8 @@ namespace PBE_AssetsDownloader.UI
     public class ChangeGroup
     {
         public string Title { get; set; }
-        public string Icon { get; set; }
+        public MaterialIconKind Icon { get; set; }
+        public SolidColorBrush IconColor { get; set; }
         public List<string> Changes { get; set; } = new List<string>();
     }
 
@@ -88,12 +90,12 @@ namespace PBE_AssetsDownloader.UI
                         currentGroup = new ChangeGroup { Title = title };
                         version.Groups.Add(currentGroup);
 
-                        currentGroup.Icon = title switch
+                        (currentGroup.Icon, currentGroup.IconColor) = title switch
                         {
-                            "NEW" => "✨",
-                            "IMPROVEMENTS" => "🚀",
-                            "BUG FIXES" => "🐛",
-                            _ => "📝"
+                            "NEW" => (MaterialIconKind.Star, new SolidColorBrush(Colors.Gold)),
+                            "IMPROVEMENTS" => (MaterialIconKind.RocketLaunch, new SolidColorBrush(Colors.LightBlue)),
+                            "BUG FIXES" => (MaterialIconKind.Bug, new SolidColorBrush(Colors.OrangeRed)),
+                            _ => (MaterialIconKind.Pencil, (SolidColorBrush)FindResource("TextSecondary"))
                         };
                     }
                     else if (currentGroup != null && !string.IsNullOrWhiteSpace(trimmedLine))
@@ -122,7 +124,7 @@ namespace PBE_AssetsDownloader.UI
 
         private async void buttonCheckUpdates_Click(object sender, RoutedEventArgs e)
         {
-            await UpdateManager.CheckForUpdatesAsync();
+            await UpdateManager.CheckForUpdatesAsync(this, true);
         }
     }
 }

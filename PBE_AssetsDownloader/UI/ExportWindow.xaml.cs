@@ -11,6 +11,8 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Info;
+using PBE_AssetsDownloader.UI.Helpers; 
+using PBE_AssetsDownloader.UI.Dialogs;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -187,7 +189,7 @@ namespace PBE_AssetsDownloader.UI
     private void ShowWarning(string message, string title)
     {
       _logService.LogWarning(message);
-      MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+      CustomMessageBox.ShowInfo(title, message, Window.GetWindow(this), CustomMessageBoxIcon.Warning);   
     }
 
     private void LogSelectedTypes(List<string> selectedAssetTypes)
@@ -251,7 +253,7 @@ namespace PBE_AssetsDownloader.UI
       else
       {
         _logService.LogSuccess("Download completed successfully!");
-        MessageBox.Show("Download completed successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+        CustomMessageBox.ShowInfo("Success", "Download completed successfully!", Window.GetWindow(this), CustomMessageBoxIcon.Info);
       }
     }
 

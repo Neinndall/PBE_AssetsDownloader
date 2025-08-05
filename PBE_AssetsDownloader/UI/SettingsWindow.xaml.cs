@@ -12,6 +12,7 @@ using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.UI.Dialogs; // Added for InputDialog
+using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -78,10 +79,9 @@ namespace PBE_AssetsDownloader.UI
 
         private void BtnResetDefaults_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Are you sure you want to reset all settings to default values?", "Confirm Reset",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            bool? result = CustomMessageBox.ShowYesNo("Confirm Reset", "Are you sure you want to reset all settings to default values?", this, CustomMessageBoxIcon.Warning); 
 
-            if (result == MessageBoxResult.Yes)
+            if (result == true)
             {
                 var defaultSettings = AppSettings.GetDefaultSettings();
                 
@@ -99,7 +99,7 @@ namespace PBE_AssetsDownloader.UI
                 _appSettings.MonitoredJsonFiles = new List<string>(defaultSettings.MonitoredJsonFiles);
 
                 AppSettings.SaveSettings(_appSettings);
-                MessageBox.Show("Settings have been reset to default values.", "Reset Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                CustomMessageBox.ShowInfo("Reset Successful", "Settings have been reset to default values.", this, CustomMessageBoxIcon.Info);  
 
                 // Update the UI to show the new default values
                 ApplySettingsToUI();
@@ -215,7 +215,7 @@ namespace PBE_AssetsDownloader.UI
             }
             else
             {
-                MessageBox.Show("Please select a URL to edit.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Information);
+                CustomMessageBox.ShowInfo("No Selection", "Please select a URL to edit.", this, CustomMessageBoxIcon.Warning); 
             }
         }
 
@@ -223,8 +223,8 @@ namespace PBE_AssetsDownloader.UI
         {
             if (JsonFilesListBox.SelectedItem is string selectedUrl)
             {
-                var result = MessageBox.Show($"Are you sure you want to remove '{selectedUrl}'?", "Confirm Removal", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Yes)
+                bool? result = CustomMessageBox.ShowYesNo("Confirm Removal", $"Are you sure you want to remove '{selectedUrl}'?", this, CustomMessageBoxIcon.Warning);
+                if (result == true)
                 {
                     var currentItems = JsonFilesListBox.ItemsSource as List<string>;
                     if (currentItems != null)
@@ -237,7 +237,7 @@ namespace PBE_AssetsDownloader.UI
             }
             else
             {
-                MessageBox.Show("Please select a URL to remove.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Information);
+                CustomMessageBox.ShowInfo("No Selection", "Please select a URL to remove.", this, CustomMessageBoxIcon.Warning);
             }
         }
     }

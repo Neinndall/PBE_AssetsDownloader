@@ -1,6 +1,7 @@
 <Window x:Class="PBE_AssetsDownloader.UI.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         Title="Settings" Height="720" Width="940"
         MinHeight="720" MinWidth="940"
         WindowStartupLocation="CenterOwner"
@@ -104,18 +105,23 @@
                         <TextBlock Text="General Settings" 
                                  FontSize="28" 
                                  FontWeight="Light" 
-                                 Foreground="{StaticResource TextPrimary}"/>
+                                 Foreground="{StaticResource TextPrimary}"
+                                 Margin="0,4,0,0"/>
                         <TextBlock Text="Configure basic application behavior and synchronization options" 
                                  FontSize="14" 
                                  Foreground="{StaticResource TextMuted}"
-                                 Margin="0,8,0,0"/>
+                                 Margin="0,2,0,0"/>
                     </StackPanel>
 
                     <!-- Synchronization Card -->
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <TextBlock Text="🔄" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                <materialDesign:MaterialIcon Kind="Sync" 
+                                                               Foreground="{StaticResource AccentBlue}"
+                                                               FontSize="20" 
+                                                               Margin="0,0,12,0" 
+                                                               VerticalAlignment="Center"/>
                                 <StackPanel>
                                     <TextBlock Text="Synchronization" 
                                              FontSize="18" 
@@ -151,7 +157,11 @@
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <TextBlock Text="📄" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                <materialDesign:MaterialIcon Kind="FolderSync" 
+                                                               Foreground="{StaticResource AccentGreen}"
+                                                               FontSize="20" 
+                                                               Margin="0,0,12,0" 
+                                                               VerticalAlignment="Center"/>
                                 <StackPanel>
                                     <TextBlock Text="File Management" 
                                              FontSize="18" 
@@ -187,7 +197,11 @@
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <TextBlock Text="🔍" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                <materialDesign:MaterialIcon Kind="Magnify" 
+                                                               Foreground="{StaticResource TextPrimary}"
+                                                               FontSize="20" 
+                                                               Margin="0,0,12,0" 
+                                                               VerticalAlignment="Center"/>
                                 <StackPanel>
                                     <TextBlock Text="Scan Mode" 
                                              FontSize="18" 
@@ -229,18 +243,23 @@
                         <TextBlock Text="Hash File Paths" 
                                  FontSize="28" 
                                  FontWeight="Light" 
-                                 Foreground="{StaticResource TextPrimary}"/>
+                                 Foreground="{StaticResource TextPrimary}"
+                                 Margin="0,4,0,0"/>
                         <TextBlock Text="Configure default directories for hash file storage" 
                                  FontSize="14" 
                                  Foreground="{StaticResource TextMuted}"
-                                 Margin="0,8,0,0"/>
+                                 Margin="0,2,0,0"/>
                     </StackPanel>
 
                     <!-- New Hash Directory -->
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <TextBlock Text="📁" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                <materialDesign:MaterialIcon Kind="FolderPlus" 
+                                                               Foreground="{StaticResource AccentGreen}"
+                                                               FontSize="20" 
+                                                               Margin="0,0,12,0" 
+                                                               VerticalAlignment="Center"/>
                                 <StackPanel>
                                     <TextBlock Text="New Hash Files Directory" 
                                              FontSize="18" 
@@ -280,7 +299,11 @@
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <TextBlock Text="📂" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                <materialDesign:MaterialIcon Kind="FolderMinus" 
+                                                               Foreground="{StaticResource AccentOrange}"
+                                                               FontSize="20" 
+                                                               Margin="0,0,12,0" 
+                                                               VerticalAlignment="Center"/>
                                 <StackPanel>
                                     <TextBlock Text="Old Hash Files Directory" 
                                              FontSize="18" 
@@ -335,18 +358,23 @@
                         <TextBlock Text="Advanced Settings" 
                                  FontSize="28" 
                                  FontWeight="Light" 
-                                 Foreground="{StaticResource TextPrimary}"/>
+                                 Foreground="{StaticResource TextPrimary}"
+                                 Margin="0,4,0,0"/>
                         <TextBlock Text="Performance and advanced configuration options" 
                                  FontSize="14" 
                                  Foreground="{StaticResource TextMuted}"
-                                 Margin="0,8,0,0"/>
+                                 Margin="0,2,0,0"/>
                     </StackPanel>
 
                     <!-- JSON File Monitoring Card -->
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <TextBlock Text="📄" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                <materialDesign:MaterialIcon Kind="FileDocument" 
+                                                               Foreground="{StaticResource AccentBlue}"
+                                                               FontSize="20" 
+                                                               Margin="0,0,12,0" 
+                                                               VerticalAlignment="Center"/>
                                 <StackPanel>
                                     <TextBlock Text="JSON File Monitoring" 
                                              FontSize="18" 
@@ -419,18 +447,23 @@
                         <TextBlock Text="Application Logs" 
                                  FontSize="28" 
                                  FontWeight="Light" 
-                                 Foreground="{StaticResource TextPrimary}"/>
+                                 Foreground="{StaticResource TextPrimary}"
+                                 Margin="0,4,0,0"/>
                         <TextBlock Text="View system messages and debug information" 
                                  FontSize="14" 
                                  Foreground="{StaticResource TextMuted}"
-                                 Margin="0,8,0,0"/>
+                                 Margin="0,2,0,0"/>
                     </StackPanel>
 
                     <!-- Logs Card -->
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <TextBlock Text="📋" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                                <materialDesign:MaterialIcon Kind="ClipboardText" 
+                                                               Foreground="{StaticResource TextPrimary}"
+                                                               FontSize="20" 
+                                                               Margin="0,0,12,0" 
+                                                               VerticalAlignment="Center"/>
                                 <StackPanel>
                                     <TextBlock Text="System Logs" 
                                              FontSize="18" 
@@ -476,11 +509,11 @@
                 <Grid>
                     <StackPanel Orientation="Horizontal" 
                               HorizontalAlignment="Left">
-                        <TextBlock Text="💡" 
-                                 FontSize="16" 
-                                 Margin="0,0,8,0" 
-                                 VerticalAlignment="Center"
-                                 Foreground="{StaticResource TextPrimary}"/>
+                        <materialDesign:MaterialIcon Kind="LightbulbOn" 
+                                                     FontSize="12" 
+                                                     Margin="0,0,8,0" 
+                                                     VerticalAlignment="Center"
+                                                     Foreground="Gold"/>
                         <TextBlock Text="Changes aren´t applied immediately"
                                  Foreground="{StaticResource TextMuted}" 
                                  FontSize="12" 

@@ -8,6 +8,8 @@ using Microsoft.WindowsAPICodePack.Dialogs; // Para el explorador de carpetas
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
+ using PBE_AssetsDownloader.UI.Helpers;    
+ using PBE_AssetsDownloader.UI.Dialogs;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -114,7 +116,7 @@ namespace PBE_AssetsDownloader.UI
             if (string.IsNullOrEmpty(oldHashesTextBox.Text) || string.IsNullOrEmpty(newHashesTextBox.Text))
             {
                 _logService.LogWarning("Please select both hash directories.");
-                MessageBox.Show("Please select both hash directories.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                CustomMessageBox.ShowInfo("Warning", "Please select both hash directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
                 return;
             }
             

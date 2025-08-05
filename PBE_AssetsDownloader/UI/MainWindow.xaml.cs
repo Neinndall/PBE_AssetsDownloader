@@ -114,7 +114,7 @@ namespace PBE_AssetsDownloader.UI
         _ = _jsonDataService.CheckJsonDataUpdatesAsync();
       }
 
-      _ = UpdateManager.CheckForUpdatesAsync(false);
+      _ = UpdateManager.CheckForUpdatesAsync(this, false);
     }
 
 

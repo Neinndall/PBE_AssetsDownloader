@@ -46,8 +46,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (_diffModel == null) return;
 
-            // Clear existing diff lines to avoid duplicates on redraws if any
-            _diffLines.Clear();
+            
 
             // Track the last change type to group consecutive changes
             ChangeType lastChangeType = ChangeType.Unchanged;

@@ -19,6 +19,13 @@ namespace PBE_AssetsDownloader.Services
         private readonly Requests _requests;
         private readonly string statusUrl = "https://raw.communitydragon.org/data/hashes/lol/";
 
+        // Lista de nombres de archivo que requieren una ruta única debido a posibles colisiones
+        private readonly HashSet<string> _filesRequiringUniquePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "trans.json",
+            // Añadir otros nombres de archivo aquí si causan colisiones
+        };
+
         public JsonDataService(LogService logService, HttpClient httpClient, AppSettings appSettings, DirectoriesCreator directoriesCreator, Requests requests)
         {
             _logService = logService;
@@ -96,10 +103,6 @@ namespace PBE_AssetsDownloader.Services
                 return; // La opción no está activada o ninguna lista de archivos/directorios está configurada.
             }
 
-            // Creamos directorios necesarios + Mensaje de creacion
-            await _directoriesCreator.CreateDirJsonCacheNewAsync();
-            await _directoriesCreator.CreateDirJsonCacheOldAsync();
-
             _logService.Log("Checking for JSON file updates...");
             var serverJsonDataEntries = new Dictionary<string, (DateTime Date, string FullUrl)>();
             bool anyUrlProcessed = false;
@@ -125,7 +128,16 @@ namespace PBE_AssetsDownloader.Services
                             if (ParseDate(dateStr, out DateTime parsedDate))
                             {
                                 string fullFileUrl = url + filename; // Construir la URL completa
-                                serverJsonDataEntries[filename] = (parsedDate, fullFileUrl); // Usar el nombre del archivo como clave
+                                string key;
+                                if (_filesRequiringUniquePaths.Contains(filename))
+                                {
+                                    key = PathUtils.GetUniqueLocalPathFromJsonUrl(fullFileUrl);
+                                }
+                                else
+                                {
+                                    key = filename;
+                                }
+                                serverJsonDataEntries[key] = (parsedDate, fullFileUrl); // Usar la clave (única o nombre de archivo) como clave
                                 anyUrlProcessed = true;
                             }
                             else
@@ -171,7 +183,16 @@ namespace PBE_AssetsDownloader.Services
                                 string dateStr = match.Groups["date"].Value.Trim();
                                 if (ParseDate(dateStr, out DateTime parsedDate))
                                 {
-                                    serverJsonDataEntries[filenameInParent] = (parsedDate, url); // Usar el nombre del archivo como clave
+                                    string key;
+                                    if (_filesRequiringUniquePaths.Contains(filenameInParent))
+                                    {
+                                        key = PathUtils.GetUniqueLocalPathFromJsonUrl(url);
+                                    }
+                                    else
+                                    {
+                                        key = filenameInParent;
+                                    }
+                                    serverJsonDataEntries[key] = (parsedDate, url); // Usar la clave (única o nombre de archivo) como clave
                                     anyUrlProcessed = true;
                                     foundInParent = true;
                                     _logService.LogDebug($"Found {url} in parent directory listing. Date: {parsedDate}");
@@ -207,19 +228,22 @@ namespace PBE_AssetsDownloader.Services
 
             foreach (var serverEntry in serverJsonDataEntries)
             {
-                string filename = serverEntry.Key;
+                string key = serverEntry.Key; // Puede ser la ruta única o el nombre de archivo simple
                 DateTime serverDate = serverEntry.Value.Date;
                 string fullUrl = serverEntry.Value.FullUrl;
 
-                if (!localJsonDataDates.ContainsKey(filename) || localJsonDataDates[filename] != serverDate)
+                if (!localJsonDataDates.ContainsKey(key) || localJsonDataDates[key] != serverDate)
                 {
-                    string message = $"File updated or new: {filename} (Server Date: {serverDate.ToString("yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture)})";
-                    localJsonDataDates[filename] = serverDate;
+                    string message = $"File updated or new: {key} (Server Date: {serverDate.ToString("yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture)})";
+                    localJsonDataDates[key] = serverDate;
                     updated = true;
 
-                    string jsonFileName = filename;
-                    string oldFilePath = Path.Combine(_directoriesCreator.JsonCacheOldPath, jsonFileName);
-                    string newFilePath = Path.Combine(_directoriesCreator.JsonCacheNewPath, jsonFileName);
+                    string oldFilePath = Path.Combine(_directoriesCreator.JsonCacheOldPath, key);
+                    string newFilePath = Path.Combine(_directoriesCreator.JsonCacheNewPath, key);
+
+                    // Asegurarse de que los directorios padre existan
+                    Directory.CreateDirectory(Path.GetDirectoryName(oldFilePath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));
 
                     try
                     {

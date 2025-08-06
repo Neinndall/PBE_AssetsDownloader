@@ -11,7 +11,14 @@ namespace PBE_AssetsDownloader.Info
       get
       {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        return version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "vUnknown";
+        if (version == null) return "vUnknown";
+
+        string baseVersion = $"v{version.Major}.{version.Minor}.{version.Build}";
+        if (version.Revision > 0)
+        {
+            return $"{baseVersion}.{version.Revision}";
+        }
+        return baseVersion;
       }
     }
   }

@@ -46,13 +46,44 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (_diffModel == null) return;
 
+            // Clear existing diff lines to avoid duplicates on redraws if any
+            _diffLines.Clear();
+
+            // Track the last change type to group consecutive changes
+            ChangeType lastChangeType = ChangeType.Unchanged;
+
+            // Iterate through the new text lines to find the start of each diff block
             for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
             {
-                if (_diffModel.NewText.Lines[i].Type != ChangeType.Unchanged)
+                var currentLine = _diffModel.NewText.Lines[i];
+
+                // If the current line is a change (inserted, deleted, modified)
+                // and it's different from the last change type, or it's the very first line
+                // then it marks the beginning of a new diff block.
+                if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
                 {
-                    _diffLines.Add(i + 1);
+                    _diffLines.Add(i + 1); // Add 1 because line numbers are 1-based
                 }
+                lastChangeType = currentLine.Type;
             }
+
+            // Also consider changes in the old text for navigation, especially for deletions
+            lastChangeType = ChangeType.Unchanged;
+            for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
+            {
+                var currentLine = _diffModel.OldText.Lines[i];
+                if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
+                {
+                    // Add to diffLines if not already present (e.g., for deletions that don't have a corresponding new line)
+                    if (!_diffLines.Contains(i + 1))
+                    {
+                        _diffLines.Add(i + 1);
+                    }
+                }
+                lastChangeType = currentLine.Type;
+            }
+
+            _diffLines.Sort(); // Ensure lines are in ascending order
         }
 
         public void NavigateToNextDifference(int currentLine)

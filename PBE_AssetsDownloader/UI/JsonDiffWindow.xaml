@@ -46,6 +46,43 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="NavigationToggleButton" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <materialDesign:MaterialIcon Kind="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                         HorizontalAlignment="Center" 
+                                                         VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource HoverColor}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentBlue}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBlue}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         
         <Style TargetType="{x:Type ScrollBar}">
             <Setter Property="Background" Value="{StaticResource ScrollBarBackground}"/>
@@ -120,6 +157,16 @@
                                 <ToolTip Content="Go to next difference"/>
                             </Button.ToolTip>
                         </Button>
+                        
+                        <ToggleButton x:Name="WordLevelDiffButton"
+                                      Margin="5,0,0,0"
+                                      Click="WordLevelDiffButton_Click"
+                                      Style="{StaticResource NavigationToggleButton}"
+                                      Content="Spellcheck">
+                            <ToggleButton.ToolTip>
+                                <ToolTip Content="Toggle word-level diff"/>
+                            </ToggleButton.ToolTip>
+                        </ToggleButton>
                     </StackPanel>
                 </Border>
             </Grid>

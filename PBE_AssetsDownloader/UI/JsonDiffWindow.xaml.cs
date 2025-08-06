@@ -25,13 +25,17 @@ namespace PBE_AssetsDownloader.UI
     {
         private SideBySideDiffModel _diffModel;
         private DiffPanelNavigation _diffPanelNavigation;
+        private bool _isWordLevelDiff = false;
+        private string _oldJson, _newJson;
 
         public JsonDiffWindow(string oldJson, string newJson)
         {
             InitializeComponent();
+            _oldJson = oldJson;
+            _newJson = newJson;
             ConfigureEditors();
             LoadJsonSyntaxHighlighting();
-            _ = DisplayDiffAsync(oldJson, newJson);
+            _ = DisplayDiffAsync();
             SetupScrollSync();
         }
 
@@ -79,16 +83,15 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
-        private async Task DisplayDiffAsync(string oldJson, string newJson)
+        private async Task DisplayDiffAsync()
         {
-            var formattedOldJson = JsonDiffHelper.FormatJson(oldJson);
-            var formattedNewJson = JsonDiffHelper.FormatJson(newJson);
+            var formattedOldJson = JsonDiffHelper.FormatJson(_oldJson);
+            var formattedNewJson = JsonDiffHelper.FormatJson(_newJson);
 
             await Task.Run(() =>
             {
-                var differ = new Differ();
-                var diffBuilder = new SideBySideDiffBuilder(differ);
-                _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson);
+                var diffBuilder = new SideBySideDiffBuilder(new Differ());
+                _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson, true);
             });
 
             // Check if there are any differences
@@ -109,7 +112,7 @@ namespace PBE_AssetsDownloader.UI
             OldJsonContent.Text = normalizedOld.Text;
             NewJsonContent.Text = normalizedNew.Text;
 
-            ApplyDiffHighlighting(normalizedOld.LineTypes, normalizedNew.LineTypes);
+            ApplyDiffHighlighting();
             
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
@@ -122,13 +125,13 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
-        private void ApplyDiffHighlighting(List<ChangeType> oldLineTypes, List<ChangeType> newLineTypes)
+        private void ApplyDiffHighlighting()
         {
             OldJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
             NewJsonContent.TextArea.TextView.BackgroundRenderers.Clear();
 
-            OldJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(oldLineTypes));
-            NewJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(newLineTypes));
+            OldJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(_diffModel, _isWordLevelDiff, true));
+            NewJsonContent.TextArea.TextView.BackgroundRenderers.Add(new DiffBackgroundRenderer(_diffModel, _isWordLevelDiff, false));
         }
 
         private void ScrollToLine(int lineNumber)
@@ -203,6 +206,14 @@ namespace PBE_AssetsDownloader.UI
         private void PreviousDiffButton_Click(object sender, RoutedEventArgs e)
         {
             _diffPanelNavigation?.NavigateToPreviousDifference(NewJsonContent.TextArea.Caret.Line);
+        }
+
+        private void WordLevelDiffButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isWordLevelDiff = WordLevelDiffButton.IsChecked ?? false;
+            ApplyDiffHighlighting();
+            OldJsonContent.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
+            NewJsonContent.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
         }
     }
 }

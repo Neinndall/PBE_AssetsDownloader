@@ -65,5 +65,19 @@ namespace PBE_AssetsDownloader.UI.Helpers
                 _ => Colors.Transparent
             };
         }
+
+        /// <summary>
+        /// Gets the appropriate highlight color for word-level changes.
+        /// </summary>
+        public static Color GetWordHighlightColor(DiffPlex.DiffBuilder.Model.ChangeType changeType)
+        {
+            return changeType switch
+            {
+                DiffPlex.DiffBuilder.Model.ChangeType.Deleted => Background.Deleted,
+                DiffPlex.DiffBuilder.Model.ChangeType.Inserted => Background.Inserted,
+                DiffPlex.DiffBuilder.Model.ChangeType.Modified => Background.Modified,
+                _ => Colors.Transparent
+            };
+        }
     }
 }

@@ -116,14 +116,8 @@ namespace PBE_AssetsDownloader.Utils
         HashesSizes = new Dictionary<string, long>(), // Inicializamos HashesSizes
         CheckJsonDataUpdates = false, // Por defecto, esta nueva opción estará desactivada
         JsonDataModificationDates = new Dictionary<string, DateTime>(), // Inicializamos el nuevo diccionario
-        MonitoredJsonDirectories = new List<string>
-        {
-          "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/"
-        },
-        MonitoredJsonFiles = new List<string>
-        {
-          "https://raw.communitydragon.org/pbe/game/en_us/data/menu/en_us/lol.stringtable.json"
-        }
+        MonitoredJsonDirectories = new List<string>(),
+        MonitoredJsonFiles = new List<string>()
       };
     }
 

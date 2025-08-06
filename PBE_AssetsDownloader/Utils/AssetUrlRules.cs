@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace PBE_AssetsDownloader.Utils
@@ -24,8 +24,8 @@ namespace PBE_AssetsDownloader.Utils
                 return null;
 
             // Ignorar summonericons .jpg, .tex o .png
-            if (url.Contains("/summonericons/") && 
-                (url.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || 
+            if (url.Contains("/summonericons/") &&
+                (url.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                  url.EndsWith(".tex", StringComparison.OrdinalIgnoreCase) ||
                  url.EndsWith(".png", StringComparison.OrdinalIgnoreCase)))
                 return null;
@@ -43,22 +43,22 @@ namespace PBE_AssetsDownloader.Utils
             {
                 return null;
             }
-            
+
             // Cambiar .dds a .png si corresponde
             if (url.EndsWith(".dds", StringComparison.OrdinalIgnoreCase) &&
-                (url.Contains("/loot/companions/") || 
-                 url.Contains("2x_") || 
-                 url.Contains("4x_") || 
+                (url.Contains("/loot/companions/") ||
+                 url.Contains("2x_") ||
+                 url.Contains("4x_") ||
                  url.Contains("/maps/") ||
                  url.Contains("/shared/") ||
-                 url.Contains("tx_cm") || 
-                 url.Contains("/particles/") || 
+                 url.Contains("tx_cm") ||
+                 url.Contains("/particles/") ||
                  url.Contains("/clash/") ||
-                 url.Contains("/skins/") || 
-                 url.Contains("/uiautoatlas/") || 
-                 url.Contains("/summonerbanners/") || 
+                 url.Contains("/skins/") ||
+                 url.Contains("/uiautoatlas/") ||
+                 url.Contains("/summonerbanners/") ||
                  url.Contains("/summoneremotes/") ||
-                 url.Contains("/hud/") || 
+                 url.Contains("/hud/") ||
                  url.Contains("/regalia/") ||
                  url.Contains("/levels/") ||
                  url.Contains("/spells/") ||
@@ -79,13 +79,13 @@ namespace PBE_AssetsDownloader.Utils
                     return null;
                 }
             }
-            
+
             // Cambiar .tex a .png
             if (url.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
             {
                 url = Path.ChangeExtension(url, ".png");
             }
-            
+
             // Cambiar .atlas a .png
             if (url.EndsWith(".atlas", StringComparison.OrdinalIgnoreCase))
             {

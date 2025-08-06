@@ -3,10 +3,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <ApplicationIcon>img\new\logo.ico</ApplicationIcon>
-    <Version>2.0.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <ApplicationIcon>Resources\img\logo.ico</ApplicationIcon>
+    <Version>2.1.0.0</Version>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
+    <FileVersion>2.1.0.0</FileVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
@@ -27,6 +27,8 @@
   </PropertyGroup>
 
  <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+    <PackageReference Include="DiffPlex" Version="1.8.0" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
@@ -45,8 +47,8 @@
   </ItemGroup>
 
   <ItemGroup>
-  <Resource Include="img\background\season2025_background.jpg" />
-  <EmbeddedResource Include="changelogs.txt" />
+    <EmbeddedResource Include="changelogs.txt" />
+    <EmbeddedResource Include="Resources\JsonSyntaxHighlighting.xshd" />
   </ItemGroup>
 
 </Project>

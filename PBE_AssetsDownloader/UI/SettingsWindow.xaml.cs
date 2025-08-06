@@ -6,32 +6,36 @@ using System.Windows; // For Window, MessageBox
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Collections.Generic;
+using System.Linq; // Added for ListBox.Items.Cast<string>()
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
+using PBE_AssetsDownloader.UI.Dialogs; // Added for InputDialog
+using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader.UI
 {
-    /// <summary>
-    /// Interaction logic for SettingsWindow.xaml
-    /// </summary>
+    // Define custom event arguments to pass more data
+    public class SettingsChangedEventArgs : EventArgs
+    {
+        public bool WasResetToDefaults { get; set; }
+    }
+
     public partial class SettingsWindow : Window
     {
-        // Declare fields for injected instances
         private readonly LogService _logService;
         private readonly HttpClient _httpClient;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly Requests _requests;
         private readonly Status _status;
 
-        // Private instance of AppSettings to mirror MainWindow's pattern
-        private AppSettings _appSettings; 
-        
-        // Events to notify MainWindow of changes
-        public event EventHandler SettingsChanged;
-        
-        // Constructor now receives ALL necessary dependencies
+        // The single instance of AppSettings, shared across the application
+        private readonly AppSettings _appSettings;
+
+        // Use the custom event handler
+        public event EventHandler<SettingsChangedEventArgs> SettingsChanged;
+
         public SettingsWindow(
             LogService logService,
             HttpClient httpClient,
@@ -42,128 +46,199 @@ namespace PBE_AssetsDownloader.UI
         {
             InitializeComponent();
 
-            // Assign injected instances to readonly fields
             _logService = logService;
             _httpClient = httpClient;
             _directoriesCreator = directoriesCreator;
             _requests = requests;
             _status = status;
-            _appSettings = appSettings; // usar instancia inyectada
+            _appSettings = appSettings; // Use the shared AppSettings instance
 
-            // Configure log output for this window
             _logService.SetLogOutput(richTextBoxLogs, LogScrollViewer);
-            ApplySettingsToUI();
+            ApplySettingsToUI(); // Load current settings into UI controls
         }
-        
+
         private void ApplySettingsToUI()
         {
+            // Bind UI to the current _appSettings values
             checkBoxSyncHashes.IsChecked = _appSettings.SyncHashesWithCDTB;
-            checkBoxCheckJsonData.IsChecked = _appSettings.CheckJsonDataUpdates; // Cargar el nuevo valor
+            checkBoxCheckJsonData.IsChecked = _appSettings.CheckJsonDataUpdates;
             checkBoxAutoCopy.IsChecked = _appSettings.AutoCopyHashes;
             checkBoxCreateBackUp.IsChecked = _appSettings.CreateBackUpOldHashes;
             checkBoxOnlyCheckDifferences.IsChecked = _appSettings.OnlyCheckDifferences;
             textBoxNewHashPath.Text = _appSettings.NewHashesPath;
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
+
+            // Cargar la lista combinada de URLs de JSON
+            var combinedList = new List<string>();
+            if (_appSettings.MonitoredJsonDirectories != null) combinedList.AddRange(_appSettings.MonitoredJsonDirectories);
+            if (_appSettings.MonitoredJsonFiles != null) combinedList.AddRange(_appSettings.MonitoredJsonFiles);
+
+            JsonFilesListBox.ItemsSource = null; // Limpiar antes de recargar
+            JsonFilesListBox.ItemsSource = combinedList;
         }
 
         private void BtnResetDefaults_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Are you sure you want to reset all settings to default values?", "Confirm Reset",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            bool? result = CustomMessageBox.ShowYesNo("Confirm Reset", "Are you sure you want to reset all settings to default values?", this, CustomMessageBoxIcon.Warning); 
 
-            if (result == MessageBoxResult.Yes)
+            if (result == true)
             {
-                // Preservar HashesSizes
-                var currentHashSizes = _appSettings.HashesSizes;
-
-                // Obtener valores por defecto
                 var defaultSettings = AppSettings.GetDefaultSettings();
-
-                // Sobrescribir propiedades individualmente
+                
+                // Apply defaults directly to the shared _appSettings instance
                 _appSettings.SyncHashesWithCDTB = defaultSettings.SyncHashesWithCDTB;
-                _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates; // Resetear el nuevo valor
+                _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
                 _appSettings.AutoCopyHashes = defaultSettings.AutoCopyHashes;
                 _appSettings.CreateBackUpOldHashes = defaultSettings.CreateBackUpOldHashes;
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
                 _appSettings.NewHashesPath = defaultSettings.NewHashesPath;
                 _appSettings.OldHashesPath = defaultSettings.OldHashesPath;
                 
-                // Guardar
-                AppSettings.SaveSettings(_appSettings);
+                // Asegurarse de copiar las nuevas listas
+                _appSettings.MonitoredJsonDirectories = new List<string>(defaultSettings.MonitoredJsonDirectories);
+                _appSettings.MonitoredJsonFiles = new List<string>(defaultSettings.MonitoredJsonFiles);
 
-                // Actualizar UI
+                AppSettings.SaveSettings(_appSettings);
+                CustomMessageBox.ShowInfo("Reset Successful", "Settings have been reset to default values.", this, CustomMessageBoxIcon.Info);  
+
+                // Update the UI to show the new default values
                 ApplySettingsToUI();
 
-                MessageBox.Show("Settings have been reset to default values.", "Reset Successful", MessageBoxButton.OK, MessageBoxImage.Information);
-                SettingsChanged?.Invoke(this, EventArgs.Empty);
+                // Raise the event with the flag set to true
+                SettingsChanged?.Invoke(this, new SettingsChangedEventArgs { WasResetToDefaults = true });
             }
         }
 
         private void btnBrowseNew_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
-                folderDialog.IsFolderPicker = true;
-                folderDialog.Title = "Select New Hashes Folder";
+                folderBrowserDialog.IsFolderPicker = true;
+                folderBrowserDialog.Title = "Select New Hashes Folder";
 
-                if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    _appSettings.NewHashesPath = folderDialog.FileName; // Update the _appSettings instance
-                    textBoxNewHashPath.Text = _appSettings.NewHashesPath; // Update the UI
-                    // No need to save here, save happens on btnSave_Click
+                    // Update the TextBox directly. The value will be saved on btnSave_Click.
+                    textBoxNewHashPath.Text = folderBrowserDialog.FileName;
                 }
             }
         }
 
         private void btnBrowseOld_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
-                folderDialog.IsFolderPicker = true;
-                folderDialog.Title = "Select Old Hashes Folder";
+                folderBrowserDialog.IsFolderPicker = true;
+                folderBrowserDialog.Title = "Select Old Hashes Folder";
 
-                if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    _appSettings.OldHashesPath = folderDialog.FileName; // Update the _appSettings instance
-                    textBoxOldHashPath.Text = _appSettings.OldHashesPath; // Update the UI
-                    // No need to save here, save happens on btnSave_Click
+                    // Update the TextBox directly. The value will be saved on btnSave_Click.
+                    textBoxOldHashPath.Text = folderBrowserDialog.FileName;
                 }
             }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Update the _appSettings instance properties with the current UI control values
+            // Read values directly from UI controls and apply to _appSettings
             _appSettings.SyncHashesWithCDTB = checkBoxSyncHashes.IsChecked ?? false;
-            _appSettings.CheckJsonDataUpdates = checkBoxCheckJsonData.IsChecked ?? false; // Guardar el nuevo valor
+            _appSettings.CheckJsonDataUpdates = checkBoxCheckJsonData.IsChecked ?? false;
             _appSettings.AutoCopyHashes = checkBoxAutoCopy.IsChecked ?? false;
             _appSettings.CreateBackUpOldHashes = checkBoxCreateBackUp.IsChecked ?? false;
             _appSettings.OnlyCheckDifferences = checkBoxOnlyCheckDifferences.IsChecked ?? false;
-            // NewHashesPath and OldHashesPath were already updated in btnBrowseNew/Old_Click on _appSettings
+            _appSettings.NewHashesPath = textBoxNewHashPath.Text;
+            _appSettings.OldHashesPath = textBoxOldHashPath.Text;
 
-            // 2. Save the updated settings using the centralized method
+            // Limpiar las listas existentes antes de rellenarlas
+            _appSettings.MonitoredJsonDirectories.Clear();
+            _appSettings.MonitoredJsonFiles.Clear();
+
+            // Rellenar las listas desde el ListBox, clasificando por tipo de URL
+            foreach (string url in JsonFilesListBox.Items.Cast<string>())
+            {
+                if (url.EndsWith("/"))
+                {
+                    _appSettings.MonitoredJsonDirectories.Add(url);
+                }
+                else
+                {
+                    _appSettings.MonitoredJsonFiles.Add(url);
+                }
+            }
+
             AppSettings.SaveSettings(_appSettings);
-
             _logService.LogSuccess("Settings updated.");
 
-            // Notify MainWindow that settings have changed
-            SettingsChanged?.Invoke(this, EventArgs.Empty);
+            // Raise the event with the flag set to false
+            SettingsChanged?.Invoke(this, new SettingsChangedEventArgs { WasResetToDefaults = false });
         }
 
-        private async Task DownloadFiles()
+        private void btnAddJsonFile_Click(object sender, RoutedEventArgs e)
         {
-            string downloadDirectory = _directoriesCreator.GetHashesNewsDirectoryPath();
-
-            try
+            var inputDialog = new InputDialog("Add JSON File URL", "Enter the URL of the JSON file or directory:", "");
+            if (inputDialog.ShowDialog() == true)
             {
-                // Solo pasamos el directorio, el logging se hace dentro de Requests
-                await _requests.DownloadHashesFilesAsync(downloadDirectory);
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError($"Error during download: {ex.Message}");
+                if (!string.IsNullOrWhiteSpace(inputDialog.InputText))
+                {
+                    // Añadir directamente al ListBox, la clasificación se hará al guardar
+                    var currentItems = JsonFilesListBox.ItemsSource as List<string> ?? new List<string>();
+                    currentItems.Add(inputDialog.InputText);
+                    JsonFilesListBox.ItemsSource = null; // Forzar la actualización del ListBox
+                    JsonFilesListBox.ItemsSource = currentItems;
+                }
             }
         }
 
+        private void btnEditJsonFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (JsonFilesListBox.SelectedItem is string selectedUrl)
+            {
+                var inputDialog = new InputDialog("Edit JSON File URL", "Edit the URL:", selectedUrl);
+                if (inputDialog.ShowDialog() == true)
+                {
+                    if (!string.IsNullOrWhiteSpace(inputDialog.InputText))
+                    {
+                        var currentItems = JsonFilesListBox.ItemsSource as List<string>;
+                        if (currentItems != null)
+                        {
+                            int index = currentItems.IndexOf(selectedUrl);
+                            if (index != -1)
+                            {
+                                currentItems[index] = inputDialog.InputText;
+                                JsonFilesListBox.ItemsSource = null; // Forzar la actualización del ListBox
+                                JsonFilesListBox.ItemsSource = currentItems;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                CustomMessageBox.ShowInfo("No Selection", "Please select a URL to edit.", this, CustomMessageBoxIcon.Warning); 
+            }
+        }
+
+        private void btnRemoveJsonFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (JsonFilesListBox.SelectedItem is string selectedUrl)
+            {
+                bool? result = CustomMessageBox.ShowYesNo("Confirm Removal", $"Are you sure you want to remove '{selectedUrl}'?", this, CustomMessageBoxIcon.Warning);
+                if (result == true)
+                {
+                    var currentItems = JsonFilesListBox.ItemsSource as List<string>;
+                    if (currentItems != null)
+                    {
+                        currentItems.Remove(selectedUrl);
+                        JsonFilesListBox.ItemsSource = null; // Forzar la actualización del ListBox
+                        JsonFilesListBox.ItemsSource = currentItems;
+                    }
+                }
+            }
+            else
+            {
+                CustomMessageBox.ShowInfo("No Selection", "Please select a URL to remove.", this, CustomMessageBoxIcon.Warning);
+            }
+        }
     }
 }

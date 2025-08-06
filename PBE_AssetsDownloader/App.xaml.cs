@@ -1,4 +1,4 @@
-﻿// PBE_AssetsDownloader/App.xaml.cs
+// PBE_AssetsDownloader/App.xaml.cs
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -10,6 +10,8 @@ using Serilog.Events;
 using PBE_AssetsDownloader.UI;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
+using PBE_AssetsDownloader.UI.Dialogs;
+using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader
 {
@@ -22,26 +24,27 @@ namespace PBE_AssetsDownloader
         private Status _status;
         private AssetDownloader _assetDownloader;
         private AppSettings _appSettings;
+        private JsonDataService _jsonDataService;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug() // Nivel mínimo para todos los logs
+                .MinimumLevel.Debug()
                 .WriteTo.File(
-                    Path.Combine("logs", "application.log"), // Log general
+                    Path.Combine("logs", "application.log"),
                     rollingInterval: RollingInterval.Day,
-                    restrictedToMinimumLevel: LogEventLevel.Debug, // Captura Debug, Info, Warning, Error, Fatal
-                    outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}" // Sin {Exception} aquí
-                )
-                .WriteTo.File(
-                    Path.Combine("logs", "application_errors.log"), // Log de errores
-                    rollingInterval: RollingInterval.Day,
-                    restrictedToMinimumLevel: LogEventLevel.Error, // Solo captura Error y Fatal
+                    restrictedToMinimumLevel: LogEventLevel.Information,
                     outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                 )
-                .WriteTo.Debug(restrictedToMinimumLevel: LogEventLevel.Information) // Para la ventana de salida de Visual Studio
+                .WriteTo.File(
+                    Path.Combine("logs", "application_errors.log"),
+                    rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Error,
+                    outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                )
+                .WriteTo.Debug(restrictedToMinimumLevel: LogEventLevel.Information)
                 .CreateLogger();
 
             Log.Information("Application starting. Serilog initialized.");
@@ -52,8 +55,9 @@ namespace PBE_AssetsDownloader
             _directoriesCreator = new DirectoriesCreator(_logService);
             _requests = new Requests(_httpClient, _directoriesCreator, _logService);
             _assetDownloader = new AssetDownloader(_httpClient, _directoriesCreator, _logService);
-            _appSettings = AppSettings.LoadSettings(); // ✅ Cargar aquí una sola vez
-            _status = new Status(_logService, _httpClient, _requests, _appSettings);
+            _appSettings = AppSettings.LoadSettings(); // Cargar aquí una sola vez
+            _jsonDataService = new JsonDataService(_logService, _httpClient, _appSettings, _directoriesCreator, _requests);
+            _status = new Status(_logService, _httpClient, _requests, _appSettings, _jsonDataService);
 
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -67,7 +71,8 @@ namespace PBE_AssetsDownloader
                 _requests,
                 _status,
                 _assetDownloader,
-                _appSettings // ✅ Inyectamos la instancia
+                _appSettings,
+                _jsonDataService
             );
 
             mainWindow.Show();
@@ -76,10 +81,9 @@ namespace PBE_AssetsDownloader
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             // Loguear la excepción completa a Serilog para el archivo de errores
-            Serilog.Log.Error(e.Exception, "Unhandled UI exception caught in App.xaml.cs (DispatcherUnhandledException).");
-            // Mostrar un mensaje amigable en la UI a través de LogService
-            _logService?.LogError($"Unhandled UI exception: {e.Exception.Message}");
-            MessageBox.Show($"Un error inesperado ha ocurrido en la interfaz de usuario: {e.Exception.Message}\nConsulte el archivo de registro para más detalles.", "Error de UI", MessageBoxButton.OK, MessageBoxImage.Error);
+            string errorMessage = $"Unhandled UI exception caught in App.xaml.cs (DispatcherUnhandledException).\nMessage: {e.Exception.Message}\nSource: {e.Exception.Source}\nInnerException: {e.Exception.InnerException?.Message}";
+            Serilog.Log.Error(e.Exception, errorMessage);
+            CustomMessageBox.ShowInfo("Error de UI", $"Un error inesperado ha ocurrido en la interfaz de usuario: {e.Exception.Message}\nConsulte el archivo de registro para más detalles.", null, CustomMessageBoxIcon.Error);
             e.Handled = true;
         }
 
@@ -88,9 +92,7 @@ namespace PBE_AssetsDownloader
             var ex = e.ExceptionObject as Exception;
             // Loguear la excepción completa a Serilog para el archivo de errores
             Serilog.Log.Error(ex, "Unhandled non-UI exception caught in App.xaml.cs (AppDomain_UnhandledException).");
-            // Mostrar un mensaje amigable en la UI a través de LogService
-            _logService?.LogError($"Unhandled non-UI exception: {ex?.Message}");
-            MessageBox.Show($"Un error inesperado ha ocurrido: {ex?.Message}\nConsulte el archivo de registro para más detalles.", "Error Crítico", MessageBoxButton.OK, MessageBoxImage.Error);
+            CustomMessageBox.ShowInfo("Error Crítico", $"Un error inesperado ha ocurrido: {ex?.Message}\nConsulte el archivo de registro para más detalles.", null, CustomMessageBoxIcon.Error);
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -104,11 +106,26 @@ namespace PBE_AssetsDownloader
         {
             try
             {
-                string baseApplicationPath = AppDomain.CurrentDomain.BaseDirectory;
-                string previewParentDirectory = Path.Combine(baseApplicationPath, "PBE_PreviewAssets");
+                // Llamamos al directorio de PreviewAssets
+                string previewParentDirectory = _directoriesCreator.PreviewAssetsPath;
 
                 if (Directory.Exists(previewParentDirectory))
                 {
+                    // Eliminar archivos sueltos directamente en el directorio padre
+                    var files = Directory.GetFiles(previewParentDirectory);
+                    foreach (var file in files)
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            _logService.LogDebug($"Successfully deleted old preview file: {file}");
+                        }
+                        catch (IOException ex)
+                        {
+                            _logService.LogWarning($"Could not delete old preview file {file}, it might still be in use. Error: {ex.Message}");
+                        }
+                    }
+
                     var subDirectories = Directory.GetDirectories(previewParentDirectory);
                     foreach (var dir in subDirectories)
                     {
@@ -165,11 +182,11 @@ namespace PBE_AssetsDownloader
                 var directoryCleaner = new DirectoryCleaner(directoriesCreator, logService);
                 directoryCleaner.CleanEmptyDirectories();
 
-                var backUp = new BackUp(directoriesCreator, logService);
-                await backUp.HandleBackUpAsync(createBackUpOldHashes);
+                var HashBackUp = new HashBackUp(directoriesCreator, logService);
+                await HashBackUp.HandleBackUpAsync(createBackUpOldHashes);
 
-                var hashCopier = new HashCopier(logService);
-                await hashCopier.HandleCopyAsync(autoCopyHashes, newHashesDirectory, oldHashesDirectory);
+                var hashCopier = new HashCopier(logService, directoriesCreator);
+                await hashCopier.HandleCopyAsync(autoCopyHashes);
             }
             catch (Exception ex)
             {

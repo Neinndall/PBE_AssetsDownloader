@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
@@ -8,45 +8,37 @@ namespace PBE_AssetsDownloader.Utils
     public class HashCopier
     {
         private readonly LogService _logService;
+        private readonly DirectoriesCreator _directoriesCreator;
 
-        public HashCopier(LogService logService)
+        public HashCopier(LogService logService, DirectoriesCreator directoriesCreator)
         {
             _logService = logService;
+            _directoriesCreator = directoriesCreator;
         }
 
-        public async Task<string> HandleCopyAsync(bool autoCopyHashes, string sourcePath, string destinationPath)
+        public async Task<string> HandleCopyAsync(bool autoCopyHashes)
         {
             if (autoCopyHashes)
             {
                 // Iniciar el proceso de copia de hashes
-                return await CopyNewHashesToOlds(sourcePath, destinationPath);
+                return await CopyNewHashesToOlds();
             }
             else
             {
-                _logService.Log("AutoCopyHashes is disabled.");
+                //_logService.Log("AutoCopyHashes is disabled.");
                 return string.Empty; // Retornar cadena vacía si autoCopyHashes está deshabilitado
             }
         }
 
-        public async Task<string> CopyNewHashesToOlds(string sourcePath, string destinationPath)
+        private async Task<string> CopyNewHashesToOlds()
         {
-            // Verificar si el directorio fuente existe
-            if (!Directory.Exists(sourcePath))
-            {
-                _logService.LogError($"Source directory does not exist: {sourcePath}");
-                return "Hashes were not replaced because the source directory does not exist.";
-            }
+            // Llamamos a la carpeta de donde cogeremos los hashes para copiar
+            string sourcePath = _directoriesCreator.HashesNewPath;
+            // Llamamos a la carpeta a donde copiaremos los hashes
+            string destinationPath = _directoriesCreator.HashesOldsPaths;
 
             try
             {
-                // Verificar si el directorio de destino existe
-                if (!Directory.Exists(destinationPath))
-                {
-                    // Si no existe, crear el directorio de destino
-                    Directory.CreateDirectory(destinationPath);
-                    _logService.Log($"Destination directory did not exist and was created: {destinationPath}");
-                }
-
                 // Copiar los archivos y subdirectorios desde el directorio fuente al destino, sobrescribiendo si es necesario
                 await Task.Run(() => DirectoryCopy(sourcePath, destinationPath, true));
 

@@ -6,16 +6,18 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="220" d:DesignWidth="600"
-             Background="Transparent"> 
+             Background="Transparent">
+             
     <Border Background="{StaticResource DarkBackground}" 
             CornerRadius="8"
-            BorderBrush="{StaticResource BorderColor}"
-            BorderThickness="1">
+            BorderBrush="{StaticResource BorderColor}">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/> <!-- Original header row -->
+                <RowDefinition Height="*"/>    <!-- Original scrollviewer row -->
             </Grid.RowDefinitions>
+
+            <!-- Original Header Section -->
             <Border Grid.Row="0" 
                     Background="{StaticResource AccentBlue}"
                     CornerRadius="8,8,0,0"
@@ -48,14 +50,32 @@
                 <RichTextBox x:Name="richTextBoxLogs" 
                              Style="{StaticResource LogRichTextBoxStyle}"
                              FlowDirection="LeftToRight"
-                             Background="{StaticResource DarkBackground}" 
-                             Foreground="{StaticResource TextPrimary}"
                              FontFamily="Consolas, Courier New"
                              FontSize="12"
-                             BorderThickness="0"
                              Padding="12,8">
                 </RichTextBox>
             </ScrollViewer>
+
+            <!-- Progress Icon - Now a clickable button -->
+            <Button x:Name="ProgressSummaryButton" Grid.Row="1" 
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Background="Transparent" BorderThickness="0" 
+                    Visibility="Collapsed" 
+                    Click="ProgressSummaryButton_Click"
+                    Padding="0" Margin="0,0,30,10" 
+                    Width="24" Height="24" 
+                    ToolTip="Click to see download details"
+                    Panel.ZIndex="1">
+                <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Loading" 
+                                            Width="16" Height="16" 
+                                            Foreground="{StaticResource AccentBlue}" 
+                                            VerticalAlignment="Center">
+                    <materialIcons:MaterialIcon.RenderTransform>
+                        <RotateTransform CenterX="8" CenterY="8"/>
+                    </materialIcons:MaterialIcon.RenderTransform>
+                </materialIcons:MaterialIcon>
+            </Button>
         </Grid>
     </Border>
+    <!-- Triggers are now controlled from code-behind -->
 </UserControl>

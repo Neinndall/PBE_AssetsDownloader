@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
@@ -19,20 +19,19 @@ namespace PBE_AssetsDownloader.Utils
         public void CleanEmptyDirectories()
         {
             var subAssetsDownloadedPath = _directoriesCreator.SubAssetsDownloadedPath;
-            
+
             if (!Directory.Exists(subAssetsDownloadedPath))
             {
                 _logService.LogWarning($"The folder doesn't exist: {subAssetsDownloadedPath}");
                 return;
             }
-                
-            string[] rootFoldersToClean = new[]
+
+            string[] rootFoldersToClean =
             {
                 Path.Combine(subAssetsDownloadedPath, "plugins"),
                 Path.Combine(subAssetsDownloadedPath, "game")
-                
             };
-        
+
             foreach (var folder in rootFoldersToClean)
             {
                 if (Directory.Exists(folder))
@@ -41,7 +40,7 @@ namespace PBE_AssetsDownloader.Utils
                 }
             }
         }
-        
+
         private void DeleteEmptyDirectoriesRecursively(string directory)
         {
             try
@@ -50,12 +49,12 @@ namespace PBE_AssetsDownloader.Utils
                 {
                     return;
                 }
-        
+
                 foreach (var subDir in Directory.GetDirectories(directory))
                 {
                     DeleteEmptyDirectoriesRecursively(subDir);
                 }
-        
+
                 if (!Directory.EnumerateFileSystemEntries(directory).Any())
                 {
                     Directory.Delete(directory);

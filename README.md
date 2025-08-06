@@ -9,7 +9,10 @@ GitHub includes a **SHA-256** security code linked to the .rar package. You can 
 
 If both the **SHA-256** from **GitHub** and **VIRUSTOTAL** match, it means that the .rar package that was scanned by virustotal has not been modified at any point, so you can confidently verify that the scan was performed on the .rar package of the latest version. With each release, I will provide you with the URL of each virustotal scan with its details and the package name for the version that will appear just above with its details. Most importantly, **SHA-256**, don't forget to check every detail.
 
-*   **Latest Version v2.0.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f/details)** 
+*   **Latest Version v2.1.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/8ec3a567e6906b614e0c2008ad9a558a913d87c089b6ce88cb336a5e77f42865/details)** 
+     *   `(Github: sha256:8ec3a567e6906b614e0c2008ad9a558a913d87c089b6ce88cb336a5e77f42865)` 
+     *   `(VirusTotal: SHA-256 8ec3a567e6906b614e0c2008ad9a558a913d87c089b6ce88cb336a5e77f42865)` 
+*   **Version v2.0.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f/details)** 
      *   `(Github: sha256:6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f)` 
      *   `(VirusTotal: SHA-256 6ac9b8259fa39b5221d3d272211e55cf1272fe03d4446ba3e640e6f177af935f)` 
 

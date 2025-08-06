@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/PBE_AssetsDownloader/img/new/full_logo.ico?raw=true" alt="PBE_AssetsDownloader Logo" width="150">
+  <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/PBE_AssetsDownloader/Resources/img/new/full_logo.ico?raw=true" alt="PBE_AssetsDownloader Logo" width="150">
 </div>
 
 ## ✅ APP Reliability

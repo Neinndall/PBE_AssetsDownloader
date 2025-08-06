@@ -69,9 +69,7 @@
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="32,24,32,0">
-            <ScrollViewer.Resources>
-                <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernVerticalScrollBar}"/>
-            </ScrollViewer.Resources>
+            
             
             <StackPanel>
                 <!-- Directory Configuration Card -->

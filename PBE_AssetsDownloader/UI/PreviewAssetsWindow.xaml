@@ -18,8 +18,6 @@
             <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
             <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
         </Style>
-
-        <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernVerticalScrollBar}"/>
     </Window.Resources>
 
     <Grid>
@@ -231,7 +229,6 @@
                                           Margin="0,8,0,0"
                                           Opacity="0.7"/>
                             </StackPanel>
-
                             <!-- Media Content will be added here programmatically -->
                         </Grid>
                     </Border>

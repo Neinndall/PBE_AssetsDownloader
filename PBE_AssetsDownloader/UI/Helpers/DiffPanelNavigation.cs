@@ -7,7 +7,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using DiffPlex.DiffBuilder.Model;
-using ICSharpCode.AvalonEdit;
 
 namespace PBE_AssetsDownloader.UI.Helpers
 {
@@ -15,84 +14,22 @@ namespace PBE_AssetsDownloader.UI.Helpers
     {
         private readonly Canvas _oldPanel;
         private readonly Canvas _newPanel;
-        private readonly TextEditor _oldEditor;
-        private readonly TextEditor _newEditor;
         private readonly SideBySideDiffModel _diffModel;
         private bool _isDragging;
         private Point _dragStartPoint;
         private bool _wasActuallyDragged;
         private readonly List<int> _diffLines;
-        private Rectangle _oldScrollGuide;
-        private Rectangle _newScrollGuide;
 
         public event Action<int> ScrollRequested;
 
-        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, TextEditor oldEditor, TextEditor newEditor, SideBySideDiffModel diffModel)
+        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, SideBySideDiffModel diffModel)
         {
             _oldPanel = oldPanel;
             _newPanel = newPanel;
-            _oldEditor = oldEditor;
-            _newEditor = newEditor;
             _diffModel = diffModel;
             _diffLines = new List<int>();
             SetupEvents();
             FindDiffLines();
-            InitializeScrollGuides();
-        }
-
-        private void InitializeScrollGuides()
-        {
-            _oldScrollGuide = new Rectangle
-            {
-                Width = _oldPanel.ActualWidth,
-                Fill = new SolidColorBrush(Colors.LightGray) { Opacity = 0.5 },
-                IsHitTestVisible = false // Cannot be clicked
-            };
-            _newScrollGuide = new Rectangle
-            {
-                Width = _newPanel.ActualWidth,
-                Fill = new SolidColorBrush(Colors.LightGray) { Opacity = 0.5 },
-                IsHitTestVisible = false // Cannot be clicked
-            };
-
-            _oldPanel.Children.Add(_oldScrollGuide);
-            _newPanel.Children.Add(_newScrollGuide);
-            Canvas.SetZIndex(_oldScrollGuide, 1); // Ensure guide is on top
-            Canvas.SetZIndex(_newScrollGuide, 1); // Ensure guide is on top
-        }
-
-        public void UpdateScrollGuides()
-        {
-            if (_oldEditor == null || _newEditor == null) return;
-
-            var oldPanelHeight = _oldPanel.ActualHeight;
-            var newPanelHeight = _newPanel.ActualHeight;
-
-            // Old Editor Guide
-            var oldEditorExtentHeight = _oldEditor.ExtentHeight;
-            var oldEditorViewportHeight = _oldEditor.ViewportHeight;
-            var oldEditorVerticalOffset = _oldEditor.VerticalOffset;
-
-            if (oldEditorExtentHeight > 0)
-            {
-                var oldGuideHeight = (oldEditorViewportHeight / oldEditorExtentHeight) * oldPanelHeight;
-                var oldGuideTop = (oldEditorVerticalOffset / oldEditorExtentHeight) * oldPanelHeight;
-                _oldScrollGuide.Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, oldGuideHeight);
-                Canvas.SetTop(_oldScrollGuide, oldGuideTop);
-            }
-
-            // New Editor Guide
-            var newEditorExtentHeight = _newEditor.ExtentHeight;
-            var newEditorViewportHeight = _newEditor.ViewportHeight;
-            var newEditorVerticalOffset = _newEditor.VerticalOffset;
-
-            if (newEditorExtentHeight > 0)
-            {
-                var newGuideHeight = (newEditorViewportHeight / newEditorExtentHeight) * newPanelHeight;
-                var newGuideTop = (newEditorVerticalOffset / newEditorExtentHeight) * newPanelHeight;
-                _newScrollGuide.Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, newGuideHeight);
-                Canvas.SetTop(_newScrollGuide, newGuideTop);
-            }
         }
 
         private void SetupEvents()
@@ -200,7 +137,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
                 var rect = new Rectangle
                 {
                     Width = _oldPanel.ActualWidth,
-                    Height = DiffColorsHelper.VisualSettings.NavigationRectMinHeight,
+                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
                     Fill = new SolidColorBrush(color),
                     IsHitTestVisible = false // Make rectangles non-interactive
                 };
@@ -219,22 +156,14 @@ namespace PBE_AssetsDownloader.UI.Helpers
                 var rect = new Rectangle
                 {
                     Width = _newPanel.ActualWidth,
-                    Height = DiffColorsHelper.VisualSettings.NavigationRectMinHeight,
+                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
                     Fill = new SolidColorBrush(color),
                     IsHitTestVisible = false // Make rectangles non-interactive
                 };
-
+                
                 Canvas.SetTop(rect, i * lineHeight);
                 _newPanel.Children.Add(rect);
             }
-
-            // Re-add scroll guides to ensure they are on top after clearing children
-            _oldPanel.Children.Add(_oldScrollGuide);
-            _newPanel.Children.Add(_newScrollGuide);
-            Canvas.SetZIndex(_oldScrollGuide, 1);
-            Canvas.SetZIndex(_newScrollGuide, 1);
-
-            UpdateScrollGuides(); // Initial update of guide positions
         }
 
         private void NavigationPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -272,6 +201,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private void NavigationPanel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDragging && sender is Canvas panel)
+
             {
                 if (!_wasActuallyDragged)
                 {
@@ -304,7 +234,6 @@ namespace PBE_AssetsDownloader.UI.Helpers
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
             var panelHeight = panel.ActualHeight;
             if (panelHeight <= 0) return;
-
             var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
             ScrollRequested?.Invoke(lineNumber);
         }

@@ -16,6 +16,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Windows.Threading;
 using PBE_AssetsDownloader.UI.Helpers;
 using PBE_AssetsDownloader.UI.Dialogs;
 
@@ -35,23 +36,8 @@ namespace PBE_AssetsDownloader.UI
             _newJson = newJson;
             ConfigureEditors();
             LoadJsonSyntaxHighlighting();
-            this.Loaded += JsonDiffWindow_Loaded;
+            _ = DisplayDiffAsync();
             SetupScrollSync();
-        }
-
-        private async void JsonDiffWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                await DisplayDiffAsync();
-            }
-            catch (Exception ex)
-            {
-                // Log the exception and show a user-friendly error message
-                // _logService.LogError("Failed to display JSON diff", ex);
-                CustomMessageBox.ShowInfo("Error", $"An error occurred while preparing the comparison: {ex.Message}", this, CustomMessageBoxIcon.Error);
-                this.Close();
-            }
         }
 
         private void ConfigureEditors()
@@ -127,19 +113,20 @@ namespace PBE_AssetsDownloader.UI
             OldJsonContent.Text = normalizedOld.Text;
             NewJsonContent.Text = normalizedNew.Text;
 
+            // Force the layout to be calculated immediately
+            OldJsonContent.UpdateLayout();
+            NewJsonContent.UpdateLayout();
+
             ApplyDiffHighlighting();
             
-            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, _diffModel);
+            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
 
             // Automatically scroll to the first difference on load
             if (_diffPanelNavigation != null)
             {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    _diffPanelNavigation.NavigateToNextDifference(0);
-                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                _diffPanelNavigation.NavigateToNextDifference(0);
             }
         }
 
@@ -194,7 +181,6 @@ namespace PBE_AssetsDownloader.UI
                 var sourceView = (TextView)sender;
                 var newVerticalOffset = Math.Min(sourceView.VerticalOffset, NewJsonContent.ExtentHeight - NewJsonContent.ViewportHeight);
                 var newHorizontalOffset = Math.Min(sourceView.HorizontalOffset, NewJsonContent.ExtentWidth - NewJsonContent.ViewportWidth);
-
                 NewJsonContent.ScrollToVerticalOffset(newVerticalOffset);
                 NewJsonContent.ScrollToHorizontalOffset(newHorizontalOffset);
             }
@@ -212,10 +198,8 @@ namespace PBE_AssetsDownloader.UI
                 var sourceView = (TextView)sender;
                 var newVerticalOffset = Math.Min(sourceView.VerticalOffset, OldJsonContent.ExtentHeight - OldJsonContent.ViewportHeight);
                 var newHorizontalOffset = Math.Min(sourceView.HorizontalOffset, OldJsonContent.ExtentWidth - OldJsonContent.ViewportWidth);
-
                 OldJsonContent.ScrollToVerticalOffset(newVerticalOffset);
                 OldJsonContent.ScrollToHorizontalOffset(newHorizontalOffset);
-                _diffPanelNavigation?.UpdateScrollGuides();
             }
             finally
             {

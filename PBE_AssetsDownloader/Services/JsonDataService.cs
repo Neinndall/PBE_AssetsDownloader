@@ -234,7 +234,7 @@ namespace PBE_AssetsDownloader.Services
 
                 if (!localJsonDataDates.ContainsKey(key) || localJsonDataDates[key] != serverDate)
                 {
-                    string message = $"File updated or new: {key} (Server Date: {serverDate.ToString("yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture)})";
+                    string message = $"Updated: {key} ({serverDate.ToString("yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture)})";
                     localJsonDataDates[key] = serverDate;
                     updated = true;
 

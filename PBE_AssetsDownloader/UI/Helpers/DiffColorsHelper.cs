@@ -21,9 +21,9 @@ namespace PBE_AssetsDownloader.UI.Helpers
         // Background colors for DiffBackgroundRenderer (with alpha)
         public static class Background
         {
-            public static readonly Color Deleted = Color.FromArgb(80, 255, 107, 107);    // #FF6B6B with 80 alpha
-            public static readonly Color Inserted = Color.FromArgb(80, 107, 207, 127);   // #6BCF7F with 80 alpha  
-            public static readonly Color Modified = Color.FromArgb(80, 255, 217, 61);    // #FFD93D with 80 alpha
+            public static readonly Color Deleted = Color.FromArgb(166, 255, 107, 107);    // #FF6B6B with 166 alpha (35% transparent)
+            public static readonly Color Inserted = Color.FromArgb(166, 107, 207, 127);   // #6BCF7F with 166 alpha (35% transparent)
+            public static readonly Color Modified = Color.FromArgb(166, 255, 217, 61);    // #FFD93D with 166 alpha (35% transparent)
             public static readonly Color Imaginary = Color.FromArgb(40, 128, 128, 128);  // #808080 with 40 alpha
         }
         

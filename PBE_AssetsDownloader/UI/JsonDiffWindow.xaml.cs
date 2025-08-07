@@ -35,8 +35,23 @@ namespace PBE_AssetsDownloader.UI
             _newJson = newJson;
             ConfigureEditors();
             LoadJsonSyntaxHighlighting();
-            _ = DisplayDiffAsync();
+            this.Loaded += JsonDiffWindow_Loaded;
             SetupScrollSync();
+        }
+
+        private async void JsonDiffWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await DisplayDiffAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and show a user-friendly error message
+                // _logService.LogError("Failed to display JSON diff", ex);
+                CustomMessageBox.ShowInfo("Error", $"An error occurred while preparing the comparison: {ex.Message}", this, CustomMessageBoxIcon.Error);
+                this.Close();
+            }
         }
 
         private void ConfigureEditors()
@@ -121,10 +136,10 @@ namespace PBE_AssetsDownloader.UI
             // Automatically scroll to the first difference on load
             if (_diffPanelNavigation != null)
             {
-                Dispatcher.BeginInvoke(new Action(() =>
+                await Dispatcher.InvokeAsync(() =>
                 {
                     _diffPanelNavigation.NavigateToNextDifference(0);
-                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
             }
         }
 

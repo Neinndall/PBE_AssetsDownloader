@@ -67,6 +67,7 @@ namespace PBE_AssetsDownloader.UI
             checkBoxOnlyCheckDifferences.IsChecked = _appSettings.OnlyCheckDifferences;
             textBoxNewHashPath.Text = _appSettings.NewHashesPath;
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
+            checkBoxEnableDiffHistory.IsChecked = _appSettings.EnableDiffHistory;
 
             // Cargar la lista combinada de URLs de JSON
             var combinedList = new List<string>();
@@ -75,6 +76,10 @@ namespace PBE_AssetsDownloader.UI
 
             JsonFilesListBox.ItemsSource = null; // Limpiar antes de recargar
             JsonFilesListBox.ItemsSource = combinedList;
+
+            // Cargar el historial de diferencias
+            DiffHistoryListView.ItemsSource = null;
+            DiffHistoryListView.ItemsSource = _appSettings.DiffHistory;
         }
 
         private void BtnResetDefaults_Click(object sender, RoutedEventArgs e)
@@ -93,10 +98,12 @@ namespace PBE_AssetsDownloader.UI
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
                 _appSettings.NewHashesPath = defaultSettings.NewHashesPath;
                 _appSettings.OldHashesPath = defaultSettings.OldHashesPath;
+                _appSettings.EnableDiffHistory = defaultSettings.EnableDiffHistory;
                 
                 // Asegurarse de copiar las nuevas listas
                 _appSettings.MonitoredJsonDirectories = new List<string>(defaultSettings.MonitoredJsonDirectories);
                 _appSettings.MonitoredJsonFiles = new List<string>(defaultSettings.MonitoredJsonFiles);
+                _appSettings.DiffHistory = new List<JsonDiffHistoryEntry>(defaultSettings.DiffHistory);
 
                 AppSettings.SaveSettings(_appSettings);
                 CustomMessageBox.ShowInfo("Reset Successful", "Settings have been reset to default values.", this, CustomMessageBoxIcon.Info);  
@@ -149,6 +156,7 @@ namespace PBE_AssetsDownloader.UI
             _appSettings.OnlyCheckDifferences = checkBoxOnlyCheckDifferences.IsChecked ?? false;
             _appSettings.NewHashesPath = textBoxNewHashPath.Text;
             _appSettings.OldHashesPath = textBoxOldHashPath.Text;
+            _appSettings.EnableDiffHistory = checkBoxEnableDiffHistory.IsChecked ?? false;
 
             // Limpiar las listas existentes antes de rellenarlas
             _appSettings.MonitoredJsonDirectories.Clear();
@@ -238,6 +246,41 @@ namespace PBE_AssetsDownloader.UI
             else
             {
                 CustomMessageBox.ShowInfo("No Selection", "Please select a URL to remove.", this, CustomMessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnViewDiff_Click(object sender, RoutedEventArgs e)
+        {
+            if (DiffHistoryListView.SelectedItem is JsonDiffHistoryEntry selectedEntry)
+            {
+                try
+                {
+                    string oldContent = File.Exists(selectedEntry.OldFilePath) ? File.ReadAllText(selectedEntry.OldFilePath) : "";
+                    string newContent = File.Exists(selectedEntry.NewFilePath) ? File.ReadAllText(selectedEntry.NewFilePath) : "";
+                    var diffWindow = new JsonDiffWindow(oldContent, newContent);
+                    diffWindow.Show();
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError(ex, $"Error opening diff for {selectedEntry.FileName}");
+                    CustomMessageBox.ShowInfo("Error", $"Could not open diff view. Please check the logs for details.", this, CustomMessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                CustomMessageBox.ShowInfo("No Selection", "Please select a history entry to view.", this, CustomMessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnClearHistory_Click(object sender, RoutedEventArgs e)
+        {
+            bool? result = CustomMessageBox.ShowYesNo("Confirm Clear", "Are you sure you want to clear the entire difference history? This action cannot be undone.", this, CustomMessageBoxIcon.Warning);
+            if (result == true)
+            {
+                _appSettings.DiffHistory.Clear();
+                AppSettings.SaveSettings(_appSettings);
+                ApplySettingsToUI(); // Refresh the view
+                _logService.LogSuccess("Difference history cleared.");
             }
         }
     }

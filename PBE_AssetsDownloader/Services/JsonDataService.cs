@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.UI;
 using PBE_AssetsDownloader.Utils;
 
@@ -257,6 +258,22 @@ namespace PBE_AssetsDownloader.Services
 
                         if (downloadSuccess)
                         {
+                            if (_appSettings.EnableDiffHistory)
+                            {
+                                string historyFileName = $"{Path.GetFileNameWithoutExtension(key)}_{DateTime.Now:yyyyMMddHHmmss}.json";
+                                string historyFilePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, historyFileName);
+                                File.Copy(oldFilePath, historyFilePath, true);
+
+                                var historyEntry = new JsonDiffHistoryEntry
+                                {
+                                    FileName = key,
+                                    OldFilePath = historyFilePath,
+                                    NewFilePath = newFilePath,
+                                    Timestamp = DateTime.Now
+                                };
+                                _appSettings.DiffHistory.Add(historyEntry);
+                            }
+
                             _logService.LogDebug($"Saved new JSON content to {newFilePath}");
                             // Log interactive message
                             _logService.LogInteractive(

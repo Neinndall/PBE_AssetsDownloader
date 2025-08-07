@@ -16,7 +16,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Windows.Threading;
 using PBE_AssetsDownloader.UI.Helpers;
 using PBE_AssetsDownloader.UI.Dialogs;
 

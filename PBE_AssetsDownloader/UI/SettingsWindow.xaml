@@ -147,6 +147,15 @@
                                      FontSize="12" 
                                      Margin="30,0,0,8" 
                                      TextWrapping="Wrap"/>
+
+                            <CheckBox x:Name="checkBoxEnableDiffHistory"
+                                      Content="Enable Difference History"
+                                      Style="{StaticResource ModernCheckBox}"/>
+                            <TextBlock Text="Save a history of all JSON file differences detected during updates."
+                                     Foreground="{StaticResource TextMuted}"
+                                     FontSize="12"
+                                     Margin="30,0,0,8"
+                                     TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
 
@@ -386,9 +395,11 @@
                             <ListBox x:Name="JsonFilesListBox"
                                      Background="{StaticResource DarkBackground}"
                                      BorderBrush="{StaticResource BorderColor}"
+                                     BorderThickness="1"
                                      Foreground="{StaticResource TextPrimary}"
                                      Height="250"
                                      Margin="0,0,0,12"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.Resources>
                                     <Style TargetType="ListBoxItem">
@@ -421,6 +432,94 @@
                                 <Button x:Name="btnAddJsonFile" Content="Add" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,8,0" Click="btnAddJsonFile_Click"/>
                                 <Button x:Name="btnEditJsonFile" Content="Edit" Style="{StaticResource SecondaryButton}" Width="80" Margin="0,0,8,0" Click="btnEditJsonFile_Click"/>
                                 <Button x:Name="btnRemoveJsonFile" Content="Remove" Style="{StaticResource DestructiveButton}" Width="80" Click="btnRemoveJsonFile_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Diff History Card -->
+                    <Border Style="{StaticResource SettingsCard}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <materialDesign:MaterialIcon Kind="History"
+                                                               Foreground="{StaticResource AccentPurple}"
+                                                               FontSize="20"
+                                                               Margin="0,0,12,0"
+                                                               VerticalAlignment="Center"/>
+                                <StackPanel>
+                                    <TextBlock Text="Difference History"
+                                             FontSize="18"
+                                             FontWeight="SemiBold"
+                                             Foreground="{StaticResource TextPrimary}"/>
+                                    <TextBlock Text="Review past JSON file comparisons"
+                                             FontSize="12"
+                                             Foreground="{StaticResource TextMuted}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Grid Margin="0,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,1,0,1" Padding="8,6">
+                                    <TextBlock Text="File Name" FontWeight="Medium" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Column="1" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,1,0,1">
+                                    <TextBlock Text="|" FontWeight="Medium" Foreground="{StaticResource BorderColor}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Column="2" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,1,1,1" Padding="8,6">
+                                    <TextBlock Text="Timestamp" FontWeight="Medium" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+
+                            <ListView x:Name="DiffHistoryListView"
+                                      Background="{StaticResource DarkBackground}"
+                                      BorderBrush="{StaticResource BorderColor}"
+                                      BorderThickness="1,0,1,1"
+                                      Foreground="{StaticResource TextPrimary}"
+                                      Height="250"
+                                      Margin="0,0,0,12"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListViewItem">
+                                                    <Border x:Name="Border" Background="Transparent" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Padding="5" SnapsToDevicePixels="true">
+                                                        <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource CardBackground}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridView.ColumnHeaderContainerStyle>
+                                            <Style TargetType="GridViewColumnHeader">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </Style>
+                                        </GridView.ColumnHeaderContainerStyle>
+                                        <GridViewColumn Header="File Name" Width="320" DisplayMemberBinding="{Binding FileName}"/>
+                                        <GridViewColumn Header="Timestamp" Width="320" DisplayMemberBinding="{Binding Timestamp}"/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="btnViewDiff" Content="View Diff" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,8,0" Click="btnViewDiff_Click"/>
+                                <Button x:Name="btnClearHistory" Content="Clear History" Style="{StaticResource DestructiveButton}" Width="120" Click="btnClearHistory_Click"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>

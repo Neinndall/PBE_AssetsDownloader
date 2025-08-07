@@ -114,7 +114,7 @@ namespace PBE_AssetsDownloader.UI
 
             ApplyDiffHighlighting();
             
-            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
+            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, _diffModel);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
 
@@ -200,6 +200,7 @@ namespace PBE_AssetsDownloader.UI
 
                 OldJsonContent.ScrollToVerticalOffset(newVerticalOffset);
                 OldJsonContent.ScrollToHorizontalOffset(newHorizontalOffset);
+                _diffPanelNavigation?.UpdateScrollGuides();
             }
             finally
             {

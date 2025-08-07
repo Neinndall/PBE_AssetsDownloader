@@ -21,19 +21,19 @@ namespace PBE_AssetsDownloader.UI.Helpers
         // Background colors for DiffBackgroundRenderer (with alpha)
         public static class Background
         {
-            public static readonly Color Deleted = Color.FromArgb(166, 255, 107, 107);    // #FF6B6B with 166 alpha (35% transparent)
-            public static readonly Color Inserted = Color.FromArgb(166, 107, 207, 127);   // #6BCF7F with 166 alpha (35% transparent)
-            public static readonly Color Modified = Color.FromArgb(166, 255, 217, 61);    // #FFD93D with 166 alpha (35% transparent)
+            public static readonly Color Deleted = Color.FromArgb(166, 255, 107, 107);    // #FF6B6B with 166 alpha
+            public static readonly Color Inserted = Color.FromArgb(166, 107, 207, 127);   // #6BCF7F with 166 alpha  
+            public static readonly Color Modified = Color.FromArgb(166, 255, 217, 61);    // #FFD93D with 166 alpha
             public static readonly Color Imaginary = Color.FromArgb(40, 128, 128, 128);  // #808080 with 40 alpha
         }
         
         // Navigation panel colors (solid colors)
         public static class Navigation
         {
-            public static readonly Color Deleted = Color.FromRgb(255, 68, 68);    // #FF4444
-            public static readonly Color Inserted = Color.FromRgb(50, 205, 50);   // #32CD32
-            public static readonly Color Modified = Color.FromRgb(255, 215, 0);   // #FFD700
-            public static readonly Color Imaginary = Color.FromRgb(128, 128, 128); // #808080
+            public static readonly Color Deleted = Color.FromArgb(166, 255, 107, 107);    // #FF6B6B with 166 alpha (35% transparent)
+            public static readonly Color Inserted = Color.FromArgb(166, 107, 207, 127);   // #6BCF7F with 166 alpha (35% transparent)
+            public static readonly Color Modified = Color.FromArgb(166, 255, 217, 61);    // #FFD93D with 166 alpha (35% transparent)
+            public static readonly Color Imaginary = Color.FromRgb(166, 128, 128);        // #808080
         }
         
         /// <summary>

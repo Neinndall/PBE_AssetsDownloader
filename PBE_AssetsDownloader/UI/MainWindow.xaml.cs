@@ -94,7 +94,8 @@ namespace PBE_AssetsDownloader.UI
         (_appSettings.AutoCopyHashes, "Automatically replace old hashes enabled."),
         (_appSettings.CreateBackUpOldHashes, "Backup old hashes enabled."),
         (_appSettings.OnlyCheckDifferences, "Check only differences enabled."),
-        (_appSettings.CheckJsonDataUpdates, "Check json files enabled.")
+        (_appSettings.CheckJsonDataUpdates, "Check json files enabled."),
+        (_appSettings.EnableDiffHistory, "Enable difference history enabled.")
       };
 
       foreach (var (enabled, message) in configLogs)

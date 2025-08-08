@@ -1,0 +1,105 @@
+name: "🐛 Bug Report"
+description: "Report a bug or unexpected behavior in the application."
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |-
+        Thanks for taking the time to report a bug! Your help is invaluable in improving PBE_AssetsDownloader.
+        
+        Please provide the following information as detailed as possible.
+  - type: textarea
+    id: description
+    attributes:
+      label: "📝 Description of the Bug"
+      description: "Clearly describe the problem you encountered. What were you trying to do? What happened instead?"
+      placeholder: "A clear and concise description of what the bug is."
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: "再現手順 (Steps to Reproduce)"
+      description: "List the exact steps to reproduce the behavior. This is crucial for us to investigate the issue."
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "🎯 Expected Behavior"
+      description: "Describe what you expected to happen when you followed the steps above."
+      placeholder: "A clear and concise description of what you expected to happen."
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: "💥 Actual Behavior"
+      description: "Describe what actually happened, including any error messages, crashes, or unexpected results."
+      placeholder: "A clear and concise description of what actually happened."
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 Screenshots or Videos (Optional)"
+      description: "If possible, attach screenshots or a short video showing the problem. This can greatly help in understanding the context."
+      placeholder: "Drag and drop images or videos here, or paste links."
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: "PBE_AssetsDownloader Version"
+      description: "e.g., v2.1.0.0, you can find it in the Help -> About window"
+      placeholder: "vX.Y.Z.W"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: "Operating System"
+      description: "e.g., Windows 10, Windows 11"
+      placeholder: "Windows 11"
+    validations:
+      required: true
+  - type: input
+    id: architecture
+    attributes:
+      label: "Architecture"
+      description: "e.g., x64"
+      placeholder: "x64"
+    validations:
+      required: true
+  - type: dropdown
+    id: installation-type
+    attributes:
+      label: "Installation Type"
+      description: "Is this a clean installation or an update?"
+      options:
+        - "Clean Installation"
+        - "Update"
+    validations:
+      required: true
+  - type: textarea
+    id: log-files
+    attributes:
+      label: "📄 Log Files"
+      description: "If the issue generated any messages in the application's 'Logs' section, please copy and paste them here. If the error is critical and the application crashed, look for `application.log` and `application_errors.log` files in the application's `logs` folder and attach them or paste the relevant content."
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "💡 Additional Context (Optional)"
+      description: "Any other information you deem relevant to understand or solve the problem (e.g., recent system changes, specific configurations, etc.)."
+    validations:
+      required: false

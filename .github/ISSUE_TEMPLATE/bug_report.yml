@@ -3,13 +3,16 @@ description: "Report a bug or unexpected behavior in the application."
 title: "[BUG] "
 labels: ["bug", "triage"]
 assignees: []
+
 body:
   - type: markdown
     attributes:
-      value: |-
-        Thanks for taking the time to report a bug! Your help is invaluable in improving PBE_AssetsDownloader.
-        
-        Please provide the following information as detailed as possible.
+      value: |
+        > [!IMPORTANT]  
+        > Thanks for taking the time to fill out this bug report!
+        >
+        > Please provide the following information as detailed as possible.
+
   - type: textarea
     id: description
     attributes:

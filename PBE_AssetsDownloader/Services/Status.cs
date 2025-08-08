@@ -43,7 +43,7 @@ namespace PBE_AssetsDownloader.Services
     }
 
     // Handles whether to update hashes from the server
-    public async Task SyncHashesIfNeeds(bool syncHashesWithCDTB)
+    public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB)
     {
       bool isUpdated = await IsUpdatedAsync();
       if (isUpdated)
@@ -51,11 +51,13 @@ namespace PBE_AssetsDownloader.Services
         _logService.Log("Server updated. Starting hash synchronization...");
         await _requests.SyncHashesIfEnabledAsync(syncHashesWithCDTB);
         _logService.LogSuccess("Synchronization completed.");
+        return true;
       }
       else
       {
         // This method is now handled by JsonDataService or is no longer needed.
         _logService.Log("No server updates found. Local hashes are up-to-date.");
+        return false;
       }
     }
 

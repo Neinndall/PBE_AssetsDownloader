@@ -97,11 +97,11 @@ namespace PBE_AssetsDownloader.Services
             return result;
         }
 
-        public async Task CheckJsonDataUpdatesAsync()
+        public async Task<bool> CheckJsonDataUpdatesAsync()
         {
             if (!_appSettings.CheckJsonDataUpdates || (_appSettings.MonitoredJsonDirectories == null && _appSettings.MonitoredJsonFiles == null))
             {
-                return; // La opción no está activada o ninguna lista de archivos/directorios está configurada.
+                return false; // La opción no está activada o ninguna lista de archivos/directorios está configurada.
             }
 
             _logService.Log("Checking for JSON file updates...");
@@ -221,11 +221,11 @@ namespace PBE_AssetsDownloader.Services
             if (!anyUrlProcessed)
             {
                 _logService.LogWarning("No JSON files could be processed from the configured URLs.");
-                return;
+                return false;
             }
 
             var localJsonDataDates = _appSettings.JsonDataModificationDates ?? new Dictionary<string, DateTime>();
-            bool updated = false;
+            bool wasUpdated = false;
 
             foreach (var serverEntry in serverJsonDataEntries)
             {
@@ -237,7 +237,7 @@ namespace PBE_AssetsDownloader.Services
                 {
                     string message = $"Updated: {key} ({serverDate.ToString("yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture)})";
                     localJsonDataDates[key] = serverDate;
-                    updated = true;
+                    wasUpdated = true;
 
                     string oldFilePath = Path.Combine(_directoriesCreator.JsonCacheOldPath, key);
                     string newFilePath = Path.Combine(_directoriesCreator.JsonCacheNewPath, key);
@@ -292,18 +292,18 @@ namespace PBE_AssetsDownloader.Services
                         {
                             // Si la descarga falla, loguear el error y no marcar como actualizado
                             _logService.LogError($"Failed to download and save JSON content for {fullUrl}. Check logs for details.");
-                            updated = false; // No se actualizó correctamente
+                            wasUpdated = false; // No se actualizó correctamente
                         }
                     }
                     catch (Exception ex)
                     {
                         _logService.LogError(ex, $"Error processing JSON content for {fullUrl}");
-                        updated = false; // Hubo un error, no se actualizó correctamente
+                        wasUpdated = false; // Hubo un error, no se actualizó correctamente
                     }
                 }
             }
 
-            if (updated)
+            if (wasUpdated)
             {
                 _appSettings.JsonDataModificationDates = localJsonDataDates;
                 AppSettings.SaveSettings(_appSettings);
@@ -313,6 +313,7 @@ namespace PBE_AssetsDownloader.Services
             {
                 _logService.Log("JSON files are up-to-date.");
             }
+            return wasUpdated;
         }
 
         private bool ParseDate(string dateStr, out DateTime date)

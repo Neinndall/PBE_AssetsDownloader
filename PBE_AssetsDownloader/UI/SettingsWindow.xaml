@@ -610,7 +610,7 @@
                                             VerticalScrollBarVisibility="Auto"
                                             HorizontalScrollBarVisibility="Disabled">
                                     <RichTextBox x:Name="richTextBoxLogs" 
-                                               Background="#FFCC3333"
+                                               Background="{StaticResource SidebarBackground}"
                                                BorderThickness="0"
                                                Foreground="{StaticResource TextPrimary}"
                                                FontFamily="Consolas"

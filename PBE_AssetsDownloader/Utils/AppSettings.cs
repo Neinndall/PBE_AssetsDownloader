@@ -15,6 +15,8 @@ namespace PBE_AssetsDownloader.Utils
     public bool OnlyCheckDifferences { get; set; }
     public bool CheckJsonDataUpdates { get; set; }
     public bool EnableDiffHistory { get; set; }
+    public bool EnableBackgroundUpdates { get; set; }
+    public int BackgroundUpdateFrequency { get; set; }
     
     public string NewHashesPath { get; set; }
     public string OldHashesPath { get; set; }
@@ -121,6 +123,8 @@ namespace PBE_AssetsDownloader.Utils
         OnlyCheckDifferences = false,
         CheckJsonDataUpdates = false,
         EnableDiffHistory = false,
+        EnableBackgroundUpdates = false,
+        BackgroundUpdateFrequency = 10, // Default to 10 minutes
         
         NewHashesPath = null,
         OldHashesPath = null,

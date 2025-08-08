@@ -100,7 +100,7 @@
                     BorderThickness="0,1,0,0"
                     Padding="0">
                 <views:LogView x:Name="LogView"/>
-            </Border>
+                </Border>
             </Grid>
         </Grid>
 

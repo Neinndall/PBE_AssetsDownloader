@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using PBE_AssetsDownloader.UI.Controls;
+using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
@@ -116,13 +116,12 @@ namespace PBE_AssetsDownloader.UI
             if (_updateTimer == null)
             {
                 _updateTimer = new System.Timers.Timer();
-                _updateTimer.Elapsed += async (sender, e) => await CheckForAllUpdatesAsync();
+                _updateTimer.Elapsed += async (sender, e) => await CheckForAllUpdatesAsync(true); // Silent check
                 _updateTimer.AutoReset = true;
             }
-            // Update interval from settings (convert minutes to milliseconds)
             _updateTimer.Interval = _appSettings.BackgroundUpdateFrequency * 60 * 1000;
             _updateTimer.Enabled = true;
-            _logService.Log($"Background update timer started. Frequency: {_appSettings.BackgroundUpdateFrequency} minutes.");
+            _logService.LogDebug($"Background update timer started. Frequency: {_appSettings.BackgroundUpdateFrequency} minutes.");
         }
         else
         {
@@ -134,31 +133,48 @@ namespace PBE_AssetsDownloader.UI
         }
     }
 
-    public async Task CheckForAllUpdatesAsync()
+    public async Task CheckForAllUpdatesAsync(bool silent = false)
     {
         bool hashesUpdated = false;
         if (_appSettings.SyncHashesWithCDTB)
         {
-            hashesUpdated = await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB);
+            hashesUpdated = await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB, silent);
         }
 
         bool jsonUpdated = false;
         if (_appSettings.CheckJsonDataUpdates)
         {
-            jsonUpdated = await _jsonDataService.CheckJsonDataUpdatesAsync();
+            jsonUpdated = await _jsonDataService.CheckJsonDataUpdatesAsync(silent);
         }
 
         if (hashesUpdated || jsonUpdated)
         {
-            ShowNotification(true);
+            string message = "Updates have been detected.";
+            if (hashesUpdated && jsonUpdated)
+            {
+                message = "New hashes and JSON files are available.";
+            }
+            else if (hashesUpdated)
+            {
+                message = "New hashes are available.";
+            }
+            else if (jsonUpdated)
+            {
+                message = "New JSON files are available.";
+            }
+            ShowNotification(true, message);
         }
     }
 
-    public void ShowNotification(bool show)
+    public void ShowNotification(bool show, string message = "Updates have been detected. Click to dismiss.")
     {
         Dispatcher.Invoke(() =>
         {
             UpdateNotificationIcon.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+            if (show)
+            {
+                UpdateNotificationIcon.ToolTip = message;
+            }
         });
     }
 
@@ -166,14 +182,6 @@ namespace PBE_AssetsDownloader.UI
     {
         ShowNotification(false);
         e.Handled = true; // Consume the event to prevent it from bubbling up to the window
-    }
-
-    private void Window_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (UpdateNotificationIcon.IsVisible)
-        {
-            ShowNotification(false);
-        }
     }
 
     private void OnDownloadStarted(int totalFiles)
@@ -283,10 +291,9 @@ namespace PBE_AssetsDownloader.UI
       helpWindow.ShowDialog();
     }
 
-private void btnSettings_Click(object sender, RoutedEventArgs e)
+    private void btnSettings_Click(object sender, RoutedEventArgs e)
     {
       var settingsWindow = new SettingsWindow(
-          new LogService(), // Añadimos nuevo sistema de LogService para que los logs de Settings no se registren en el MainLog
           _httpClient,
           _directoriesCreator,
           _requests,

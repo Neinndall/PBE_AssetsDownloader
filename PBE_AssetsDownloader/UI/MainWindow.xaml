@@ -13,8 +13,7 @@
         MinHeight="730" MinWidth="950"
         WindowStartupLocation="CenterScreen"
         Background="#FF1E1E1E" 
-        FontFamily="Consolas, Courier New"
-        PreviewMouseLeftButtonDown="Window_PreviewMouseLeftButtonDown">
+        FontFamily="Consolas, Courier New">
 
     <Grid>
         <!-- Main Layout Grid -->

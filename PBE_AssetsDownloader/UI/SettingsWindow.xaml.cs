@@ -11,7 +11,7 @@ using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.UI.Dialogs;
-using PBE_AssetsDownloader.UI.Views.SettingsViews;
+using PBE_AssetsDownloader.UI.Views.Settings;
 
 namespace PBE_AssetsDownloader.UI
 {

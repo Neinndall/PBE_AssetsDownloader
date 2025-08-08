@@ -12,7 +12,7 @@ using System.Windows.Media;
 using Material.Icons;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
-using PBE_AssetsDownloader.UI.Views.HelpViews;
+using PBE_AssetsDownloader.UI.Views.Help;
 
 namespace PBE_AssetsDownloader.UI
 {

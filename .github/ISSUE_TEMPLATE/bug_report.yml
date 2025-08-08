@@ -24,7 +24,7 @@ body:
   - type: textarea
     id: steps-to-reproduce
     attributes:
-      label: "再現手順 (Steps to Reproduce)"
+      label: "🛠️ (Steps to Reproduce)"
       description: "List the exact steps to reproduce the behavior. This is crucial for us to investigate the issue."
       placeholder: |
         1. Go to '...'
@@ -95,7 +95,12 @@ body:
     id: log-files
     attributes:
       label: "📄 Log Files"
-      description: "If the issue generated any messages in the application's 'Logs' section, please copy and paste them here. If the error is critical and the application crashed, look for `application.log` and `application_errors.log` files in the application's `logs` folder and attach them or paste the relevant content."
+      description: |
+        Please provide relevant log entries. You can find log files in the `logs` folder next to the application executable:
+        - `application.log`: General application logs.
+        - `application_errors.log`: Critical errors and fatal exceptions.
+        
+        If the application crashed, please attach the `application_errors.log` file directly to the issue comment after creating the issue. For smaller logs, you can paste them here.
       render: shell
     validations:
       required: false

@@ -80,9 +80,7 @@
                         VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Disabled"
                         Padding="32,24">
-                        
-            
-            
+
                 <StackPanel>
                     <!-- General Settings Panel -->
                 <StackPanel x:Name="GeneralPanel">
@@ -148,8 +146,40 @@
                                      Margin="30,0,0,8" 
                                      TextWrapping="Wrap"/>
 
+                            <CheckBox x:Name="checkBoxEnableBackgroundUpdates" 
+                                    Content="Enable background updates" 
+                                    Style="{StaticResource ModernCheckBox}"/>
+                            <TextBlock Text="Periodically check for updates while the application is running."
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="30,0,0,8" 
+                                     TextWrapping="Wrap"/>
+
+                            <!-- Frequency Selector - Visible only when background updates are enabled -->
+                            <StackPanel Margin="30,5,0,0">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=checkBoxEnableBackgroundUpdates}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Update check frequency:" 
+                                           Foreground="{StaticResource TextSecondary}" 
+                                           FontSize="12" 
+                                           Margin="0,0,0,4"/>
+                                <ComboBox x:Name="comboBoxUpdateFrequency" 
+                                          Width="150" 
+                                          HorizontalAlignment="Left"
+                                          Style="{StaticResource ModernComboBox}"/>
+                            </StackPanel>
+
                             <CheckBox x:Name="checkBoxEnableDiffHistory"
                                       Content="Enable Difference History"
+                                      Margin="0,15,0,0"
                                       Style="{StaticResource ModernCheckBox}"/>
                             <TextBlock Text="Save a history of all JSON file differences detected during updates."
                                      Foreground="{StaticResource TextMuted}"
@@ -414,11 +444,11 @@
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsSelected" Value="true">
-                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource HoverColor}"/>
+                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentBrush}"/>
                                                             <Setter Property="Foreground" Value="White"/>
                                                         </Trigger>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource HoverColor}"/>
+                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource CardBackground}"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
@@ -580,7 +610,7 @@
                                             VerticalScrollBarVisibility="Auto"
                                             HorizontalScrollBarVisibility="Disabled">
                                     <RichTextBox x:Name="richTextBoxLogs" 
-                                               Background="Transparent"
+                                               Background="#FFCC3333"
                                                BorderThickness="0"
                                                Foreground="{StaticResource TextPrimary}"
                                                FontFamily="Consolas"

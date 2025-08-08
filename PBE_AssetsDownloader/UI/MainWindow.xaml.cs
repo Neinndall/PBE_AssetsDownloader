@@ -1,19 +1,18 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Reflection;
 using System.Windows.Controls;
-using Microsoft.WindowsAPICodePack.Dialogs;
-
+using System.Windows.Input;
+using System.Windows.Media.Animation;
 using PBE_AssetsDownloader.UI.Controls;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
 using Material.Icons;
 using Serilog; // Added Serilog using directive
+using System.Timers;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -27,6 +26,8 @@ namespace PBE_AssetsDownloader.UI
     private readonly AssetDownloader _assetDownloader;
     private readonly AppSettings _appSettings;
     private readonly JsonDataService _jsonDataService;
+    private System.Timers.Timer _updateTimer;
+    private Storyboard _spinningIconAnimationStoryboard;
 
     private HomeWindow _homeViewInstance;
     private ExportWindow _exportViewInstance;
@@ -49,7 +50,7 @@ namespace PBE_AssetsDownloader.UI
       _logService = logService;
 
       // LOG PARA EXCLUSIVAMENTE MAINWINDOW (EXPORT Y HOME)
-      _logService.SetLogOutput(LogView.LogRichTextBox, LogView.LogScrollViewerControl);
+      _logService.SetLogOutput(LogView.richTextBoxLogs);
 
       _httpClient = httpClient;
       _directoriesCreator = directoriesCreator;
@@ -81,9 +82,6 @@ namespace PBE_AssetsDownloader.UI
       _assetDownloader.DownloadProgressChanged += OnDownloadProgressChanged;
       _assetDownloader.DownloadCompleted += OnDownloadCompleted;
       
-      // Conectar evento de solicitud de detalles de progreso del LogView
-      LogView.ProgressDetailsRequested += OnProgressDetailsRequested;
-      
       // Conectar el evento de navegación del Sidebar
       Sidebar.NavigationRequested += OnSidebarNavigationRequested;
       LoadHomeView();
@@ -103,27 +101,97 @@ namespace PBE_AssetsDownloader.UI
         if (enabled) _logService.Log(message);
       }
 
-      // Comprobar actualizaciones de hashes con el servidor de CDTB
-      if (_appSettings.SyncHashesWithCDTB)
-      {
-        _ = _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB);
-      }
+      SetupUpdateTimer();
 
-      // Comprobar actualizaciones de datos JSON si está habilitado
-      if (_appSettings.CheckJsonDataUpdates)
-      {
-        _ = _jsonDataService.CheckJsonDataUpdatesAsync();
-      }
+      // Initial check on startup
+      _ = CheckForAllUpdatesAsync();
 
       _ = UpdateManager.CheckForUpdatesAsync(this, false);
     }
 
+    private void SetupUpdateTimer()
+    {
+        if (_appSettings.EnableBackgroundUpdates)
+        {
+            if (_updateTimer == null)
+            {
+                _updateTimer = new System.Timers.Timer();
+                _updateTimer.Elapsed += async (sender, e) => await CheckForAllUpdatesAsync();
+                _updateTimer.AutoReset = true;
+            }
+            // Update interval from settings (convert minutes to milliseconds)
+            _updateTimer.Interval = _appSettings.BackgroundUpdateFrequency * 60 * 1000;
+            _updateTimer.Enabled = true;
+            _logService.Log($"Background update timer started. Frequency: {_appSettings.BackgroundUpdateFrequency} minutes.");
+        }
+        else
+        {
+            if (_updateTimer != null)
+            {
+                _updateTimer.Enabled = false;
+                _logService.Log("Background update timer stopped.");
+            }
+        }
+    }
+
+    public async Task CheckForAllUpdatesAsync()
+    {
+        bool hashesUpdated = false;
+        if (_appSettings.SyncHashesWithCDTB)
+        {
+            hashesUpdated = await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB);
+        }
+
+        bool jsonUpdated = false;
+        if (_appSettings.CheckJsonDataUpdates)
+        {
+            jsonUpdated = await _jsonDataService.CheckJsonDataUpdatesAsync();
+        }
+
+        if (hashesUpdated || jsonUpdated)
+        {
+            ShowNotification(true);
+        }
+    }
+
+    public void ShowNotification(bool show)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            UpdateNotificationIcon.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        });
+    }
+
+    private void UpdateNotificationIcon_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        ShowNotification(false);
+        e.Handled = true; // Consume the event to prevent it from bubbling up to the window
+    }
+
+    private void Window_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (UpdateNotificationIcon.IsVisible)
+        {
+            ShowNotification(false);
+        }
+    }
 
     private void OnDownloadStarted(int totalFiles)
     {
-        LogView.IsProgressVisible = true;
-        LogView.ProgressIconKind = MaterialIconKind.Loading;
+        ProgressSummaryButton.Visibility = Visibility.Visible;
         
+        // Initialize and start animation
+        if (_spinningIconAnimationStoryboard == null)
+        {
+            var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
+            if (originalStoryboard != null)
+            {
+                _spinningIconAnimationStoryboard = originalStoryboard.Clone();
+                Storyboard.SetTarget(_spinningIconAnimationStoryboard, ProgressIcon);
+            }
+        }
+        _spinningIconAnimationStoryboard?.Begin();
+
         // Initialize ProgressDetailsWindow here
         _progressDetailsWindow = new ProgressDetailsWindow(_logService);
         _progressDetailsWindow.Owner = this;
@@ -144,13 +212,16 @@ namespace PBE_AssetsDownloader.UI
 
     private void OnDownloadCompleted()
     {
-        LogView.IsProgressVisible = false;
+        ProgressSummaryButton.Visibility = Visibility.Collapsed;
+        _spinningIconAnimationStoryboard?.Stop();
+        _spinningIconAnimationStoryboard = null;
+
         _progressDetailsWindow?.Close();
         _progressDetailsWindow = null;
         Serilog.Log.Information("Descarga de activos completada."); // Log to file only
     }
 
-    private void OnProgressDetailsRequested()
+    private void ProgressSummaryButton_Click(object sender, RoutedEventArgs e)
     {
         if (_progressDetailsWindow != null && !_progressDetailsWindow.IsVisible)
         {
@@ -212,7 +283,7 @@ namespace PBE_AssetsDownloader.UI
       helpWindow.ShowDialog();
     }
 
-    private void btnSettings_Click(object sender, RoutedEventArgs e)
+private void btnSettings_Click(object sender, RoutedEventArgs e)
     {
       var settingsWindow = new SettingsWindow(
           new LogService(), // Añadimos nuevo sistema de LogService para que los logs de Settings no se registren en el MainLog
@@ -231,6 +302,7 @@ namespace PBE_AssetsDownloader.UI
     private void OnSettingsChanged(object sender, SettingsChangedEventArgs e)
     {
       _homeViewInstance?.UpdateSettings(_appSettings, e.WasResetToDefaults);
+      SetupUpdateTimer(); // Start or stop the timer based on the new settings
     }
   }
 }

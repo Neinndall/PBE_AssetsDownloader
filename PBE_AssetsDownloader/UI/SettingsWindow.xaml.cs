@@ -53,8 +53,18 @@ namespace PBE_AssetsDownloader.UI
             _status = status;
             _appSettings = appSettings; // Use the shared AppSettings instance
 
-            _logService.SetLogOutput(richTextBoxLogs, LogScrollViewer);
+            _logService.SetLogOutput(richTextBoxLogs);
+            PopulateFrequencyComboBox();
             ApplySettingsToUI(); // Load current settings into UI controls
+        }
+
+        private void PopulateFrequencyComboBox()
+        {
+            comboBoxUpdateFrequency.Items.Add(1);
+            comboBoxUpdateFrequency.Items.Add(5);
+            comboBoxUpdateFrequency.Items.Add(10);
+            comboBoxUpdateFrequency.Items.Add(15);
+            comboBoxUpdateFrequency.Items.Add(30);
         }
 
         private void ApplySettingsToUI()
@@ -68,6 +78,8 @@ namespace PBE_AssetsDownloader.UI
             textBoxNewHashPath.Text = _appSettings.NewHashesPath;
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
             checkBoxEnableDiffHistory.IsChecked = _appSettings.EnableDiffHistory;
+            checkBoxEnableBackgroundUpdates.IsChecked = _appSettings.EnableBackgroundUpdates;
+            comboBoxUpdateFrequency.SelectedItem = _appSettings.BackgroundUpdateFrequency;
 
             // Cargar la lista combinada de URLs de JSON
             var combinedList = new List<string>();
@@ -99,6 +111,8 @@ namespace PBE_AssetsDownloader.UI
                 _appSettings.NewHashesPath = defaultSettings.NewHashesPath;
                 _appSettings.OldHashesPath = defaultSettings.OldHashesPath;
                 _appSettings.EnableDiffHistory = defaultSettings.EnableDiffHistory;
+                _appSettings.EnableBackgroundUpdates = defaultSettings.EnableBackgroundUpdates;
+                _appSettings.BackgroundUpdateFrequency = defaultSettings.BackgroundUpdateFrequency;
                 
                 // Asegurarse de copiar las nuevas listas
                 _appSettings.MonitoredJsonDirectories = new List<string>(defaultSettings.MonitoredJsonDirectories);
@@ -157,6 +171,8 @@ namespace PBE_AssetsDownloader.UI
             _appSettings.NewHashesPath = textBoxNewHashPath.Text;
             _appSettings.OldHashesPath = textBoxOldHashPath.Text;
             _appSettings.EnableDiffHistory = checkBoxEnableDiffHistory.IsChecked ?? false;
+            _appSettings.EnableBackgroundUpdates = checkBoxEnableBackgroundUpdates.IsChecked ?? false;
+            _appSettings.BackgroundUpdateFrequency = (int)(comboBoxUpdateFrequency.SelectedItem ?? 10);
 
             // Limpiar las listas existentes antes de rellenarlas
             _appSettings.MonitoredJsonDirectories.Clear();

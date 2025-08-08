@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:PBE_AssetsDownloader.UI" 
              xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d"
-             Background="#FF1E1E1E" FontFamily="Consolas, Courier New">    
+             Background="Transparent" FontFamily="Consolas, Courier New">    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -69,7 +69,6 @@
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="32,24,32,0">
-            
             
             <StackPanel>
                 <!-- Directory Configuration Card -->

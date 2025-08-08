@@ -12,6 +12,7 @@
     <SolidColorBrush x:Key="SidebarBackground" Color="#FF252526"/>
     <SolidColorBrush x:Key="AccentBlue" Color="#FF007ACC"/>
     <SolidColorBrush x:Key="AccentGreen" Color="#FF16825D"/>
+    <SolidColorBrush x:Key="AccentPurple" Color="#9370DB"/>
     <SolidColorBrush x:Key="AccentOrange" Color="#FFD7BA7D"/>
     <SolidColorBrush x:Key="AccentRed" Color="#FFCC3333"/>
     <SolidColorBrush x:Key="TextPrimary" Color="#FFCCCCCC"/>

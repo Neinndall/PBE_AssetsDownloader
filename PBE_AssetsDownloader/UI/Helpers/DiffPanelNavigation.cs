@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -15,6 +16,8 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly Canvas _newPanel;
         private readonly SideBySideDiffModel _diffModel;
         private bool _isDragging;
+        private Point _dragStartPoint;
+        private bool _wasActuallyDragged;
         private readonly List<int> _diffLines;
 
         public event Action<int> ScrollRequested;
@@ -45,8 +48,6 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private void FindDiffLines()
         {
             if (_diffModel == null) return;
-
-            
 
             // Track the last change type to group consecutive changes
             ChangeType lastChangeType = ChangeType.Unchanged;
@@ -138,11 +139,9 @@ namespace PBE_AssetsDownloader.UI.Helpers
                     Width = _oldPanel.ActualWidth,
                     Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
                     Fill = new SolidColorBrush(color),
-                    Cursor = Cursors.Hand,
-                    Tag = i + 1
+                    IsHitTestVisible = false // Make rectangles non-interactive
                 };
 
-                rect.MouseLeftButtonDown += NavigationRect_Click;
                 Canvas.SetTop(rect, i * lineHeight);
                 _oldPanel.Children.Add(rect);
             }
@@ -159,11 +158,9 @@ namespace PBE_AssetsDownloader.UI.Helpers
                     Width = _newPanel.ActualWidth,
                     Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
                     Fill = new SolidColorBrush(color),
-                    Cursor = Cursors.Hand,
-                    Tag = i + 1
+                    IsHitTestVisible = false // Make rectangles non-interactive
                 };
-
-                rect.MouseLeftButtonDown += NavigationRect_Click;
+                
                 Canvas.SetTop(rect, i * lineHeight);
                 _newPanel.Children.Add(rect);
             }
@@ -171,11 +168,12 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
         private void NavigationPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _isDragging = true;
             if (sender is Canvas panel)
             {
+                _isDragging = true;
+                _wasActuallyDragged = false;
+                _dragStartPoint = e.GetPosition(panel);
                 panel.CaptureMouse();
-                HandleNavigation(panel, e.GetPosition(panel).Y);
             }
         }
 
@@ -183,32 +181,59 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (_isDragging && sender is Canvas panel)
             {
-                HandleNavigation(panel, e.GetPosition(panel).Y);
+                var currentPosition = e.GetPosition(panel);
+                var dragVector = _dragStartPoint - currentPosition;
+
+                if (!_wasActuallyDragged &&
+                    (Math.Abs(dragVector.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                     Math.Abs(dragVector.Y) > SystemParameters.MinimumVerticalDragDistance))
+                {
+                    _wasActuallyDragged = true;
+                }
+
+                if (_wasActuallyDragged)
+                {
+                    HandleNavigation(panel, currentPosition.Y);
+                }
             }
         }
 
         private void NavigationPanel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            _isDragging = false;
-            if (sender is Canvas panel)
+            if (_isDragging && sender is Canvas panel)
+
             {
+                if (!_wasActuallyDragged)
+                {
+                    NavigateToClosestDifference(panel, e.GetPosition(panel).Y);
+                }
+
+                _isDragging = false;
                 panel.ReleaseMouseCapture();
             }
         }
 
-        private void NavigationRect_Click(object sender, MouseButtonEventArgs e)
+        private void NavigateToClosestDifference(Canvas panel, double y)
         {
-            if (sender is Rectangle { Tag: int lineNumber })
-            {
-                ScrollRequested?.Invoke(lineNumber);
-                e.Handled = true; // Prevent bubbling to the parent Canvas
-            }
+            if (!_diffLines.Any()) return;
+
+            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            var panelHeight = panel.ActualHeight;
+            if (panelHeight <= 0) return;
+
+            var clickedLine = (int)((y / panelHeight) * totalLines) + 1;
+
+            // Find the difference line that is numerically closest to the clicked line
+            var closestDiffLine = _diffLines.OrderBy(diffLine => Math.Abs(diffLine - clickedLine)).First();
+
+            ScrollToLine(closestDiffLine);
         }
 
         private void HandleNavigation(Canvas panel, double y)
         {
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
             var panelHeight = panel.ActualHeight;
+            if (panelHeight <= 0) return;
             var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
             ScrollRequested?.Invoke(lineNumber);
         }

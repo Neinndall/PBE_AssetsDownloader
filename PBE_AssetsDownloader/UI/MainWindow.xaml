@@ -6,97 +6,138 @@
         xmlns:local="clr-namespace:PBE_AssetsDownloader.UI"
         xmlns:controls="clr-namespace:PBE_AssetsDownloader.UI.Controls"
         xmlns:views="clr-namespace:PBE_AssetsDownloader.UI.Views"
+        xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
         Title="PBE_AssetsDownloader"
         Height="730" Width="950"
         MinHeight="730" MinWidth="950"
         WindowStartupLocation="CenterScreen"
         Background="#FF1E1E1E" 
-        FontFamily="Consolas, Courier New">
+        FontFamily="Consolas, Courier New"
+        PreviewMouseLeftButtonDown="Window_PreviewMouseLeftButtonDown">
 
-    <!-- Main Grid Layout -->
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="SidebarColumn" Width="64" MinWidth="64"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <!-- Main Layout Grid -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="SidebarColumn" Width="64" MinWidth="64"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <Grid.Triggers>
-            <EventTrigger RoutedEvent="Border.MouseEnter" SourceName="Sidebar">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <StaticResource ResourceKey="ExpandSidebar"/>
-                        <BooleanAnimationUsingKeyFrames Storyboard.TargetName="Sidebar" Storyboard.TargetProperty="IsExpanded">
-                            <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="True"/>
-                        </BooleanAnimationUsingKeyFrames>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
+            <Grid.Triggers>
+                <EventTrigger RoutedEvent="Border.MouseEnter" SourceName="Sidebar">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <StaticResource ResourceKey="ExpandSidebar"/>
+                            <BooleanAnimationUsingKeyFrames Storyboard.TargetName="Sidebar" Storyboard.TargetProperty="IsExpanded">
+                                <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="True"/>
+                            </BooleanAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
 
-            <EventTrigger RoutedEvent="Border.MouseLeave" SourceName="Sidebar">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <StaticResource ResourceKey="CollapseSidebar"/>
-                        <BooleanAnimationUsingKeyFrames Storyboard.TargetName="Sidebar" Storyboard.TargetProperty="IsExpanded">
-                            <DiscreteBooleanKeyFrame KeyTime="0:0:0.16" Value="False"/>
-                        </BooleanAnimationUsingKeyFrames>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-        </Grid.Triggers>
-        
-        <!-- Sidebar -->
-        <controls:SidebarView x:Name="Sidebar"
-                              Grid.Column="0"/>
-                              
-        <!-- Main Content Area -->
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" MinHeight="200"/> 
-                <RowDefinition Height="Auto"/>              
-                <RowDefinition Height="220" MinHeight="100"/> 
-            </Grid.RowDefinitions>
+                <EventTrigger RoutedEvent="Border.MouseLeave" SourceName="Sidebar">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <StaticResource ResourceKey="CollapseSidebar"/>
+                            <BooleanAnimationUsingKeyFrames Storyboard.TargetName="Sidebar" Storyboard.TargetProperty="IsExpanded">
+                                <DiscreteBooleanKeyFrame KeyTime="0:0:0.16" Value="False"/>
+                            </BooleanAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Grid.Triggers>
 
-            <Border Grid.Row="0"
-                    Background="{StaticResource CardBackground}"
+            <!-- Sidebar -->
+            <controls:SidebarView x:Name="Sidebar"
+                                  Grid.Column="0"/>
+
+            <!-- Main Content Area -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="200"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="220" MinHeight="100"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                        Background="{StaticResource CardBackground}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="0,0,0,1"
+                        Padding="0">
+                    <ContentControl x:Name="MainContentArea"
+                                    Background="Transparent"/>
+                </Border>
+
+                <GridSplitter Grid.Row="1"
+                              Height="6" HorizontalAlignment="Stretch"
+                              VerticalAlignment="Center"
+                              Background="Transparent"
+                              Cursor="SizeNS"
+                              ResizeDirection="Rows"
+                              ResizeBehavior="PreviousAndNext">
+                    <GridSplitter.Template>
+                        <ControlTemplate TargetType="GridSplitter">
+                            <Grid Background="Transparent">
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
+                                    <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
+                                    <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
+                                    <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
+                                    <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
+
+                <!-- LogView -->
+                <Border Grid.Row="2"
+                    Background="{StaticResource SidebarBackground}"
                     BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="0,0,0,1"
-                    Padding="0">
-                <ContentControl x:Name="MainContentArea"
-                                Background="Transparent"/>
-            </Border>
-            <!-- Splitter del Log -->
-            <GridSplitter Grid.Row="1"
-                          Height="6" HorizontalAlignment="Stretch"
-                          VerticalAlignment="Center"
-                          Background="Transparent"
-                          Cursor="SizeNS"
-                          ResizeDirection="Rows"
-                          ResizeBehavior="PreviousAndNext">
-                <GridSplitter.Template>
-                    <ControlTemplate TargetType="GridSplitter">
-                        <Grid Background="Transparent">
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center">
-                                <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
-                                <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
-                                <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
-                                <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
-                                <Ellipse Width="3" Height="3" Fill="{StaticResource BorderColor}" Margin="1,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </ControlTemplate>
-                </GridSplitter.Template>
-            </GridSplitter>
-
-            <Border Grid.Row="2"
-                    Background="{StaticResource CardBackground}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="0"
+                    BorderThickness="0,1,0,0"
                     Padding="0">
                 <views:LogView x:Name="LogView"/>
-            </Border>
+                </Border>
+            </Grid>
         </Grid>
+
+        <!-- Update Notification Icon -->
+        <materialIcons:MaterialIcon x:Name="UpdateNotificationIcon"
+                                    Kind="AlertCircle"
+                                    Width="24"
+                                    Height="24"
+                                    Foreground="LightSkyBlue"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Margin="0,0,30,39"
+                                    ToolTip="Updates have been detected. Click to dismiss."
+                                    Visibility="Collapsed"
+                                    MouseLeftButtonDown="UpdateNotificationIcon_MouseLeftButtonDown">
+            <materialIcons:MaterialIcon.Effect>
+                <DropShadowEffect Color="Black" ShadowDepth="1" BlurRadius="3" Opacity="0.5"/>
+            </materialIcons:MaterialIcon.Effect>
+        </materialIcons:MaterialIcon>
+
+        <!-- Progress Icon -->
+        <Button x:Name="ProgressSummaryButton"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Background="Transparent" BorderThickness="0"
+                Visibility="Collapsed"
+                Click="ProgressSummaryButton_Click"
+                Padding="0" Margin="0,0,30,10"
+                Width="24" Height="24"
+                ToolTip="Click to see download details">
+            <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Loading"
+                                        Width="16" Height="16"
+                                        Foreground="{StaticResource AccentBlue}"
+                                        VerticalAlignment="Center">
+                <materialIcons:MaterialIcon.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8"/>
+                </materialIcons:MaterialIcon.RenderTransform>
+            </materialIcons:MaterialIcon>
+        </Button>
     </Grid>
 </Window>

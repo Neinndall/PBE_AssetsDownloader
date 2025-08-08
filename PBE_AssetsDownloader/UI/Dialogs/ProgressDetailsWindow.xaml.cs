@@ -5,7 +5,7 @@ using System.Windows.Documents;
 using System.Windows.Media.Animation;
 using PBE_AssetsDownloader.Services;
 
-namespace PBE_AssetsDownloader.UI
+namespace PBE_AssetsDownloader.UI.Dialogs
 {
     public partial class ProgressDetailsWindow : Window
     {

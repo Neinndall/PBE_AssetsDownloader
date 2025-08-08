@@ -112,6 +112,10 @@ namespace PBE_AssetsDownloader.UI
             OldJsonContent.Text = normalizedOld.Text;
             NewJsonContent.Text = normalizedNew.Text;
 
+            // Force the layout to be calculated immediately
+            OldJsonContent.UpdateLayout();
+            NewJsonContent.UpdateLayout();
+
             ApplyDiffHighlighting();
             
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
@@ -174,8 +178,10 @@ namespace PBE_AssetsDownloader.UI
             try
             {
                 var sourceView = (TextView)sender;
-                NewJsonContent.ScrollToVerticalOffset(sourceView.VerticalOffset);
-                NewJsonContent.ScrollToHorizontalOffset(sourceView.HorizontalOffset);
+                var newVerticalOffset = Math.Min(sourceView.VerticalOffset, NewJsonContent.ExtentHeight - NewJsonContent.ViewportHeight);
+                var newHorizontalOffset = Math.Min(sourceView.HorizontalOffset, NewJsonContent.ExtentWidth - NewJsonContent.ViewportWidth);
+                NewJsonContent.ScrollToVerticalOffset(newVerticalOffset);
+                NewJsonContent.ScrollToHorizontalOffset(newHorizontalOffset);
             }
             finally
             {
@@ -189,8 +195,10 @@ namespace PBE_AssetsDownloader.UI
             try
             {
                 var sourceView = (TextView)sender;
-                OldJsonContent.ScrollToVerticalOffset(sourceView.VerticalOffset);
-                OldJsonContent.ScrollToHorizontalOffset(sourceView.HorizontalOffset);
+                var newVerticalOffset = Math.Min(sourceView.VerticalOffset, OldJsonContent.ExtentHeight - OldJsonContent.ViewportHeight);
+                var newHorizontalOffset = Math.Min(sourceView.HorizontalOffset, OldJsonContent.ExtentWidth - OldJsonContent.ViewportWidth);
+                OldJsonContent.ScrollToVerticalOffset(newVerticalOffset);
+                OldJsonContent.ScrollToHorizontalOffset(newHorizontalOffset);
             }
             finally
             {

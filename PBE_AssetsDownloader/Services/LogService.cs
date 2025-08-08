@@ -12,7 +12,6 @@ namespace PBE_AssetsDownloader.Services
   public class LogService
   {
     private RichTextBox _outputRichTextBox;
-    private ScrollViewer _logScrollViewer;
     private readonly Dispatcher _dispatcher;
 
     private readonly Queue<LogEntry> _pendingLogs = new Queue<LogEntry>();
@@ -60,10 +59,9 @@ namespace PBE_AssetsDownloader.Services
       _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
     }
 
-    public void SetLogOutput(RichTextBox outputRichTextBox, ScrollViewer scrollViewer, bool preserveExistingLogs = false)
+    public void SetLogOutput(RichTextBox outputRichTextBox, bool preserveExistingLogs = false)
     {
       _outputRichTextBox = outputRichTextBox;
-      _logScrollViewer = scrollViewer;
 
       _dispatcher.Invoke(() =>
       {
@@ -218,7 +216,7 @@ namespace PBE_AssetsDownloader.Services
       }
 
       _outputRichTextBox.Document.Blocks.Add(paragraph);
-      _logScrollViewer?.ScrollToEnd();
+      _outputRichTextBox.ScrollToEnd(); // El RichTextBox hace scroll automáticamente
     }
   }
 }

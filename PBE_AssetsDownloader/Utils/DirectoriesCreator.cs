@@ -15,6 +15,7 @@ namespace PBE_AssetsDownloader.Utils
         public string HashesOldsPaths { get; private set; }
         public string JsonCacheNewPath { get; private set; }
         public string JsonCacheOldPath { get; private set; }
+        public string JsonCacheHistoryPath { get; private set; }
         public string SubAssetsDownloadedPath { get; private set; }
         public string BackUpOldHashesPath { get; private set; }
 
@@ -35,6 +36,7 @@ namespace PBE_AssetsDownloader.Utils
             PreviewAssetsPath = Path.Combine(appFolderPath, "PBE_PreviewAssets");
             JsonCacheNewPath = Path.Combine(appFolderPath, "json_cache", "new");
             JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
+            JsonCacheHistoryPath = Path.Combine(appFolderPath, "json_cache", "history");
             BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
         }
 
@@ -44,6 +46,7 @@ namespace PBE_AssetsDownloader.Utils
         public Task CreatePreviewAssetsAsync() => CreateFoldersAsync(PreviewAssetsPath);
         public Task CreateDirJsonCacheNewAsync() => CreateFoldersAsync(JsonCacheNewPath);
         public Task CreateDirJsonCacheOldAsync() => CreateFoldersAsync(JsonCacheOldPath);
+        public Task CreateDirJsonCacheHistoryAsync() => CreateFoldersAsync(JsonCacheHistoryPath);
 
         public async Task CreateAllDirectoriesAsync()
         {

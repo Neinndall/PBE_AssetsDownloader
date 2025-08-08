@@ -3,6 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using PBE_AssetsDownloader.Info;
 
 namespace PBE_AssetsDownloader.Utils
 {
@@ -12,13 +13,19 @@ namespace PBE_AssetsDownloader.Utils
     public bool AutoCopyHashes { get; set; }
     public bool CreateBackUpOldHashes { get; set; }
     public bool OnlyCheckDifferences { get; set; }
+    public bool CheckJsonDataUpdates { get; set; }
+    public bool EnableDiffHistory { get; set; }
+    public bool EnableBackgroundUpdates { get; set; }
+    public int BackgroundUpdateFrequency { get; set; }
+    
     public string NewHashesPath { get; set; }
     public string OldHashesPath { get; set; }
     public Dictionary<string, long> HashesSizes { get; set; }
-    public bool CheckJsonDataUpdates { get; set; }
+
     public Dictionary<string, DateTime> JsonDataModificationDates { get; set; }
     public List<string> MonitoredJsonDirectories { get; set; }
     public List<string> MonitoredJsonFiles { get; set; }
+    public List<JsonDiffHistoryEntry> DiffHistory { get; set; }
 
     private const string ConfigFilePath = "config.json";
 
@@ -74,6 +81,7 @@ namespace PBE_AssetsDownloader.Utils
             // Ensure lists are not null if they are missing from the JSON
             if (settings.MonitoredJsonDirectories == null) settings.MonitoredJsonDirectories = new List<string>();
             if (settings.MonitoredJsonFiles == null) settings.MonitoredJsonFiles = new List<string>();
+            if (settings.DiffHistory == null) settings.DiffHistory = new List<JsonDiffHistoryEntry>();
 
             // Handle backward compatibility for JsonDataSizes (old format with full URLs as keys)
             if (jObject.TryGetValue("JsonDataSizes", out var jsonDataSizesToken) && jsonDataSizesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
@@ -113,11 +121,19 @@ namespace PBE_AssetsDownloader.Utils
         AutoCopyHashes = false,
         CreateBackUpOldHashes = false,
         OnlyCheckDifferences = false,
-        HashesSizes = new Dictionary<string, long>(), // Inicializamos HashesSizes
-        CheckJsonDataUpdates = false, // Por defecto, esta nueva opción estará desactivada
-        JsonDataModificationDates = new Dictionary<string, DateTime>(), // Inicializamos el nuevo diccionario
+        CheckJsonDataUpdates = false,
+        EnableDiffHistory = false,
+        EnableBackgroundUpdates = false,
+        BackgroundUpdateFrequency = 10, // Default to 10 minutes
+        
+        NewHashesPath = null,
+        OldHashesPath = null,
+        HashesSizes = new Dictionary<string, long>(),
+
+        JsonDataModificationDates = new Dictionary<string, DateTime>(),
         MonitoredJsonDirectories = new List<string>(),
-        MonitoredJsonFiles = new List<string>()
+        MonitoredJsonFiles = new List<string>(),
+        DiffHistory = new List<JsonDiffHistoryEntry>()
       };
     }
 

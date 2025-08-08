@@ -5,77 +5,35 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="220" d:DesignWidth="600"
-             Background="Transparent">
-             
-    <Border Background="{StaticResource DarkBackground}" 
-            CornerRadius="8"
-            BorderBrush="{StaticResource BorderColor}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- Original header row -->
-                <RowDefinition Height="*"/>    <!-- Original scrollviewer row -->
-            </Grid.RowDefinitions>
+             d:DesignHeight="220" d:DesignWidth="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <!-- Original Header Section -->
-            <Border Grid.Row="0" 
-                    Background="{StaticResource AccentBlue}"
-                    CornerRadius="8,8,0,0"
-                    Padding="12,8">
-                <StackPanel Orientation="Horizontal">
-                    <materialIcons:MaterialIcon Kind="Console" 
-                                                Width="16" 
-                                                Height="16" 
-                                                Foreground="{StaticResource TextPrimary}" 
-                                                VerticalAlignment="Center"/>
-                    <TextBlock Text="Application Logs" 
-                               FontWeight="Medium" 
-                               FontSize="13" 
-                               Foreground="{StaticResource TextPrimary}" 
-                               VerticalAlignment="Center" 
-                               Margin="8,0,0,0"
-                               FontFamily="Consolas, Courier New"/>
-                </StackPanel>
-            </Border>
-            
-            <ScrollViewer x:Name="LogScrollViewer" 
-                          Grid.Row="1"
-                          VerticalScrollBarVisibility="Auto"
-                          Background="{StaticResource DarkBackground}">
-                
-                <ScrollViewer.Resources>
-                    <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernVerticalScrollBar}"/>
-                </ScrollViewer.Resources>
+        <!-- Header -->
+        <Border Grid.Row="0" Style="{StaticResource LogHeaderBorderStyle}">
+            <StackPanel Orientation="Horizontal">
+                <materialIcons:MaterialIcon Kind="Console" 
+                                            Width="16" 
+                                            Height="16" 
+                                            Foreground="{StaticResource TextPrimary}" 
+                                            VerticalAlignment="Center"
+                                            Margin="4,0,0,0"/>
+                <TextBlock Text="Logger" 
+                           FontWeight="Medium" 
+                           FontSize="13" 
+                           Foreground="{StaticResource TextPrimary}" 
+                           VerticalAlignment="Center" 
+                           Margin="6,0,0,0"
+                           FontFamily="Consolas, Courier New"/>
+            </StackPanel>
+        </Border>
 
-                <RichTextBox x:Name="richTextBoxLogs" 
-                             Style="{StaticResource LogRichTextBoxStyle}"
-                             FlowDirection="LeftToRight"
-                             FontFamily="Consolas, Courier New"
-                             FontSize="12"
-                             Padding="12,8">
-                </RichTextBox>
-            </ScrollViewer>
-
-            <!-- Progress Icon - Now a clickable button -->
-            <Button x:Name="ProgressSummaryButton" Grid.Row="1" 
-                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                    Background="Transparent" BorderThickness="0" 
-                    Visibility="Collapsed" 
-                    Click="ProgressSummaryButton_Click"
-                    Padding="0" Margin="0,0,30,10" 
-                    Width="24" Height="24" 
-                    ToolTip="Click to see download details"
-                    Panel.ZIndex="1">
-                <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Loading" 
-                                            Width="16" Height="16" 
-                                            Foreground="{StaticResource AccentBlue}" 
-                                            VerticalAlignment="Center">
-                    <materialIcons:MaterialIcon.RenderTransform>
-                        <RotateTransform CenterX="8" CenterY="8"/>
-                    </materialIcons:MaterialIcon.RenderTransform>
-                </materialIcons:MaterialIcon>
-            </Button>
-        </Grid>
-    </Border>
-    <!-- Triggers are now controlled from code-behind -->
+        <!-- Logs Content -->
+        <RichTextBox Grid.Row="1" 
+                     x:Name="richTextBoxLogs" 
+                     Style="{StaticResource LogRichTextBoxStyle}"/>
+    </Grid>
 </UserControl>

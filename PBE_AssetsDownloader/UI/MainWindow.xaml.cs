@@ -88,12 +88,8 @@ namespace PBE_AssetsDownloader.UI
 
       var configLogs = new (bool enabled, string message)[]
       {
-        (_appSettings.SyncHashesWithCDTB, "Sync enabled on startup."),
-        (_appSettings.AutoCopyHashes, "Automatically replace old hashes enabled."),
-        (_appSettings.CreateBackUpOldHashes, "Backup old hashes enabled."),
-        (_appSettings.OnlyCheckDifferences, "Check only differences enabled."),
-        (_appSettings.CheckJsonDataUpdates, "Check json files enabled."),
-        (_appSettings.EnableDiffHistory, "Enable difference history enabled.")
+        // Dejaremos unicamente el log importante, para no saturar el Logger
+        (_appSettings.SyncHashesWithCDTB, "Sync enabled on startup.")
       };
 
       foreach (var (enabled, message) in configLogs)
@@ -149,7 +145,7 @@ namespace PBE_AssetsDownloader.UI
 
         if (hashesUpdated || jsonUpdated)
         {
-            string message = "Updates have been detected.";
+            string message;
             if (hashesUpdated && jsonUpdated)
             {
                 message = "New hashes and JSON files are available.";
@@ -158,7 +154,7 @@ namespace PBE_AssetsDownloader.UI
             {
                 message = "New hashes are available.";
             }
-            else if (jsonUpdated)
+            else if (jsonUpdated) // jsonUpdated must be true
             {
                 message = "New JSON files are available.";
             }

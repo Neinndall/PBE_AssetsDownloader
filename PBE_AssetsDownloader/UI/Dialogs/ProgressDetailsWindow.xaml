@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
-        Title="Detalles de Descarga"
+        Title="Download Details"
         Height="400" Width="600"
         MinHeight="300" MinWidth="400"
         WindowStartupLocation="CenterOwner"
@@ -22,15 +22,15 @@
         <Border Grid.Row="0" Background="{StaticResource AccentBlue}" CornerRadius="0" Padding="12,8">
             <StackPanel Orientation="Horizontal">
                 <materialIcons:MaterialIcon Kind="Download" Width="16" Height="16" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
-                <TextBlock Text="Detalles de la Descarga" FontWeight="Medium" FontSize="13" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                <TextBlock Text="Download Details" FontWeight="Medium" FontSize="13" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" Margin="8,0,0,0"/>
             </StackPanel>
         </Border>
 
         <!-- Progress Information -->
         <StackPanel Grid.Row="1" Margin="12">
-            <TextBlock x:Name="ProgressSummaryTextBlock" Text="Descargando: 0 de 0" FontWeight="Medium" FontSize="14" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
-            <TextBlock x:Name="CurrentFileTextBlock" Text="Archivo actual: " FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,4"/>
-            <TextBlock x:Name="EstimatedTimeTextBlock" Text="Tiempo estimado: Calculando..." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,12"/>
+            <TextBlock x:Name="ProgressSummaryTextBlock" Text="Downloading: 0 of 0" FontWeight="Medium" FontSize="14" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,8"/>
+            <TextBlock x:Name="CurrentFileTextBlock" Text="Current file: " FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,4"/>
+            <TextBlock x:Name="EstimatedTimeTextBlock" Text="Estimated time: Calculating..." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,12"/>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
                 <RichTextBox x:Name="DetailedLogsRichTextBox" 
@@ -45,6 +45,6 @@
         </StackPanel>
 
         <!-- Close Button -->
-        <Button Grid.Row="2" Content="Cerrar" HorizontalAlignment="Right" Margin="12" Width="80" Click="CloseButton_Click" Style="{StaticResource SecondaryButton}"/>
+        <Button Grid.Row="2" Content="Close" HorizontalAlignment="Right" Margin="12" Width="80" Click="CloseButton_Click" Style="{StaticResource SecondaryButton}"/>
     </Grid>
 </Window>

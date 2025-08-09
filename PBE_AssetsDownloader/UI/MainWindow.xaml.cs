@@ -157,7 +157,7 @@ namespace PBE_AssetsDownloader.UI
             {
                 message = "New hashes are available.";
             }
-            else if (jsonUpdated) // jsonUpdated must be true
+            else // jsonUpdated must be true
             {
                 message = "New JSON files are available.";
             }
@@ -237,7 +237,7 @@ namespace PBE_AssetsDownloader.UI
         else if (_progressDetailsWindow == null)
         {
             // If download completed and window was closed, but user clicks again
-            _logService.Log("No hay una descarga activa para mostrar detalles.");
+            _logService.Log("No active download to show details for.");
         }
     }
     

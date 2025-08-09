@@ -55,7 +55,7 @@ namespace PBE_AssetsDownloader
             _directoriesCreator = new DirectoriesCreator(_logService);
             _requests = new Requests(_httpClient, _directoriesCreator, _logService);
             _assetDownloader = new AssetDownloader(_httpClient, _directoriesCreator, _logService);
-            _appSettings = AppSettings.LoadSettings(); // Cargar aquí una sola vez
+            _appSettings = AppSettings.LoadSettings();
             _jsonDataService = new JsonDataService(_logService, _httpClient, _appSettings, _directoriesCreator, _requests);
             _status = new Status(_logService, _httpClient, _requests, _appSettings, _jsonDataService);
 
@@ -83,7 +83,7 @@ namespace PBE_AssetsDownloader
             // Loguear la excepción completa a Serilog para el archivo de errores
             string errorMessage = $"Unhandled UI exception caught in App.xaml.cs (DispatcherUnhandledException).\nMessage: {e.Exception.Message}\nSource: {e.Exception.Source}\nInnerException: {e.Exception.InnerException?.Message}";
             Serilog.Log.Error(e.Exception, errorMessage);
-            CustomMessageBox.ShowInfo("Error de UI", $"Un error inesperado ha ocurrido en la interfaz de usuario: {e.Exception.Message}\nConsulte el archivo de registro para más detalles.", null, CustomMessageBoxIcon.Error);
+            CustomMessageBox.ShowInfo("UI Error", $"An unexpected error has occurred in the user interface: {e.Exception.Message}\nSee the log file for more details.", null, CustomMessageBoxIcon.Error);
             e.Handled = true;
         }
 
@@ -92,7 +92,7 @@ namespace PBE_AssetsDownloader
             var ex = e.ExceptionObject as Exception;
             // Loguear la excepción completa a Serilog para el archivo de errores
             Serilog.Log.Error(ex, "Unhandled non-UI exception caught in App.xaml.cs (AppDomain_UnhandledException).");
-            CustomMessageBox.ShowInfo("Error Crítico", $"Un error inesperado ha ocurrido: {ex?.Message}\nConsulte el archivo de registro para más detalles.", null, CustomMessageBoxIcon.Error);
+            CustomMessageBox.ShowInfo("Critical Error", $"An unexpected error has occurred: {ex?.Message}\nConsult the log file for more details.", null, CustomMessageBoxIcon.Error);
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -191,7 +191,7 @@ namespace PBE_AssetsDownloader
             catch (Exception ex)
             {
                 Log.Fatal(ex, "An unexpected error has occurred during RunExtraction.");
-                logService.LogError($"¡ERROR crítico durante la extracción!: {ex.Message}");
+                logService.LogError($"Critical error during extraction!: {ex.Message}");
             }
         }
     }

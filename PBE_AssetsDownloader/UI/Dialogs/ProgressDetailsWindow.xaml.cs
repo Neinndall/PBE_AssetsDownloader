@@ -25,8 +25,8 @@ namespace PBE_AssetsDownloader.UI.Dialogs
         public void UpdateProgress(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
         {
             _totalFiles = totalFiles; // Store total files for estimated time calculation
-            ProgressSummaryTextBlock.Text = $"Descargando: {completedFiles} de {totalFiles}";
-            CurrentFileTextBlock.Text = $"Archivo actual: {currentFileName}";
+            ProgressSummaryTextBlock.Text = $"Downloading: {completedFiles} of {totalFiles}";
+            CurrentFileTextBlock.Text = $"Current file: {currentFileName}";
             UpdateEstimatedTime(completedFiles, totalFiles);
         }
 
@@ -34,7 +34,7 @@ namespace PBE_AssetsDownloader.UI.Dialogs
         {
             if (completedFiles == 0 || totalFiles == 0)
             {
-                EstimatedTimeTextBlock.Text = "Tiempo estimado: Calculando...";
+                EstimatedTimeTextBlock.Text = "Estimated time: Calculating...";
                 return;
             }
 
@@ -49,16 +49,16 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                 // Ensure remaining time is not negative and use robust formatting
                 if (estimatedRemainingTime.TotalSeconds < 0)
                 {
-                    EstimatedTimeTextBlock.Text = "Tiempo estimado restante: 00:00:00";
+                    EstimatedTimeTextBlock.Text = "Estimated time remaining: 00:00:00";
                 }
                 else
                 {
-                    EstimatedTimeTextBlock.Text = $"Tiempo estimado restante: {estimatedRemainingTime.ToString(@"hh\:mm\:ss")}";
+                    EstimatedTimeTextBlock.Text = $"Estimated time remaining: {estimatedRemainingTime.ToString(@"hh\:mm\:ss")}";
                 }
             }
             else
             {
-                EstimatedTimeTextBlock.Text = "Tiempo estimado: Calculando...";
+                EstimatedTimeTextBlock.Text = "Estimated time: Calculating...";
             }
         }
 

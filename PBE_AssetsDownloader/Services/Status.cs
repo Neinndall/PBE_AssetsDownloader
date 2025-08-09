@@ -43,29 +43,28 @@ namespace PBE_AssetsDownloader.Services
     }
 
     // Handles whether to update hashes from the server
-    public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB)
+    public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB, bool silent = false)
     {
-      bool isUpdated = await IsUpdatedAsync();
+      bool isUpdated = await IsUpdatedAsync(silent);
       if (isUpdated)
       {
-        _logService.Log("Server updated. Starting hash synchronization...");
+        if (!silent) _logService.Log("Server updated. Starting hash synchronization...");
         await _requests.SyncHashesIfEnabledAsync(syncHashesWithCDTB);
-        _logService.LogSuccess("Synchronization completed.");
+        if (!silent) _logService.LogSuccess("Synchronization completed.");
         return true;
       }
       else
       {
-        // This method is now handled by JsonDataService or is no longer needed.
-        _logService.Log("No server updates found. Local hashes are up-to-date.");
+        if (!silent) _logService.Log("No server updates found. Local hashes are up-to-date.");
         return false;
       }
     }
 
-    public async Task<bool> IsUpdatedAsync()
+    public async Task<bool> IsUpdatedAsync(bool silent = false)
     {
       try
       {
-        _logService.Log("Getting update sizes from server...");
+        if (!silent) _logService.Log("Getting update sizes from server...");
         var serverSizes = await _jsonDataService.GetRemoteHashesSizesAsync();
 
         if (serverSizes == null || serverSizes.Count == 0)

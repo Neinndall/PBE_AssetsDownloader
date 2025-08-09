@@ -97,14 +97,14 @@ namespace PBE_AssetsDownloader.Services
             return result;
         }
 
-        public async Task<bool> CheckJsonDataUpdatesAsync()
+        public async Task<bool> CheckJsonDataUpdatesAsync(bool silent = false)
         {
             if (!_appSettings.CheckJsonDataUpdates || (_appSettings.MonitoredJsonDirectories == null && _appSettings.MonitoredJsonFiles == null))
             {
                 return false; // La opción no está activada o ninguna lista de archivos/directorios está configurada.
             }
 
-            _logService.Log("Checking for JSON file updates...");
+            if (!silent) _logService.Log("Checking for JSON file updates...");
             var serverJsonDataEntries = new Dictionary<string, (DateTime Date, string FullUrl)>();
             bool anyUrlProcessed = false;
 
@@ -307,11 +307,11 @@ namespace PBE_AssetsDownloader.Services
             {
                 _appSettings.JsonDataModificationDates = localJsonDataDates;
                 AppSettings.SaveSettings(_appSettings);
-                _logService.LogSuccess("Local game data dates updated.");
+                if (!silent) _logService.LogSuccess("Local game data dates updated.");
             }
             else
             {
-                _logService.Log("JSON files are up-to-date.");
+                if (!silent) _logService.Log("JSON files are up-to-date.");
             }
             return wasUpdated;
         }

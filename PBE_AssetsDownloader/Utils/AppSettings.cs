@@ -148,7 +148,7 @@ namespace PBE_AssetsDownloader.Utils
       catch (Exception ex)
       {
         // Maneja el error de guardado si es necesario
-        Serilog.Log.Error(ex, "Error al guardar la configuración.");
+        Serilog.Log.Error(ex, "Error saving settings.");
       }
     }
   }

@@ -86,15 +86,18 @@ namespace PBE_AssetsDownloader.UI
       Sidebar.NavigationRequested += OnSidebarNavigationRequested;
       LoadHomeView();
 
-      var configLogs = new (bool enabled, string message)[]
-      {
-        // Dejaremos unicamente el log importante, para no saturar el Logger
-        (_appSettings.SyncHashesWithCDTB, "Sync enabled on startup.")
-      };
+      // Log if any setting is active (true)
+      bool anySettingActive = _appSettings.SyncHashesWithCDTB ||
+                              _appSettings.AutoCopyHashes ||
+                              _appSettings.CreateBackUpOldHashes ||
+                              _appSettings.OnlyCheckDifferences ||
+                              _appSettings.CheckJsonDataUpdates ||
+                              _appSettings.EnableDiffHistory ||
+                              _appSettings.EnableBackgroundUpdates;
 
-      foreach (var (enabled, message) in configLogs)
+      if (anySettingActive)
       {
-        if (enabled) _logService.Log(message);
+          _logService.Log("Configurations configured on startup.");
       }
 
       SetupUpdateTimer();

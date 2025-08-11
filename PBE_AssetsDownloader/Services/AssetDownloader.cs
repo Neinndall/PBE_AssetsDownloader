@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using PBE_AssetsDownloader.Utils;
-using Serilog; // Added Serilog using directive
+using Serilog;
 
 namespace PBE_AssetsDownloader.Services
 {
@@ -25,7 +25,6 @@ namespace PBE_AssetsDownloader.Services
             ".cfg", ".cfgbin"
         };
 
-        // Eventos de progreso: ahora con total global, progreso acumulado, éxito y mensaje de error
         public event Action<int> DownloadStarted;
         public event Action<int, int, string, bool, string> DownloadProgressChanged;
         public event Action DownloadCompleted;
@@ -37,7 +36,6 @@ namespace PBE_AssetsDownloader.Services
             _logService = logService;
         }
 
-        // Métodos públicos para notificar eventos (para ser llamados desde otras clases)
         public void NotifyDownloadStarted(int totalFiles)
         {
             DownloadStarted?.Invoke(totalFiles);
@@ -53,7 +51,6 @@ namespace PBE_AssetsDownloader.Services
             DownloadCompleted?.Invoke();
         }
 
-        // Modificado para aceptar el total global y un offset de archivos completados
         public async Task<List<string>> DownloadAssets(IEnumerable<(string, string)> assets, string downloadDirectory, List<string> notFoundAssets, int overallTotalFiles, int completedFilesOffset)
         {
             var assetsList = assets.ToList();
@@ -74,7 +71,6 @@ namespace PBE_AssetsDownloader.Services
                     continue;
                 }
 
-                // DownloadFileAsync now returns a tuple with success status and error message
                 var (success, errorMsg) = await DownloadFileAsync(url, downloadDirectory, originalUrl);
                 if (!success)
                 {
@@ -82,14 +78,12 @@ namespace PBE_AssetsDownloader.Services
                 }
 
                 currentBatchCompletedFiles++;
-                // Disparamos el progreso con el total global, el progreso acumulado, el éxito y el mensaje de error
                 NotifyDownloadProgressChanged(completedFilesOffset + currentBatchCompletedFiles, overallTotalFiles, Path.GetFileName(url), success, errorMsg);
             }
 
             return notFoundAssets;
         }
 
-        // DownloadFileAsync now returns a tuple (bool success, string errorMessage)
         public async Task<(bool success, string errorMessage)> DownloadFileAsync(string url, string downloadDirectory, string originalUrl)
         {
             string fileName = Path.GetFileName(url);
@@ -105,21 +99,22 @@ namespace PBE_AssetsDownloader.Services
                     {
                         await response.Content.CopyToAsync(fileStream);
                     }
-                    Serilog.Log.Information($"Downloaded: {fileName}"); // Log to file only
+                    Log.Information($"Downloaded: {fileName}"); // Log to file only
                     return (true, null);
                 }
                 else
                 {
                     string errorMsg = $"Failed to download '{fileName}'. Reason: {response.StatusCode} - {response.ReasonPhrase}";
-                    Serilog.Log.Error(errorMsg); // Log to file only
+                    Log.Warning(errorMsg); // Log to file only
                     return (false, errorMsg);
                 }
             }
             catch (Exception ex)
             {
-                string errorMsg = $"Error downloading {url}: {ex.Message}";
-                Serilog.Log.Error(ex, errorMsg); // Log to file only
-                return (false, errorMsg);
+                string errorMsg = $"Error downloading {url}. See application_errors.log for details.";
+                _logService.LogError(errorMsg);
+                _logService.LogCritical(ex, $"AssetDownloader.DownloadFileAsync Exception for URL: {url}");
+                return (false, ex.Message);
             }
         }
 
@@ -140,7 +135,8 @@ namespace PBE_AssetsDownloader.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Error downloading text content from {assetUrl}");
+                _logService.LogError($"Error downloading text content from {assetUrl}. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"AssetDownloader.DownloadAssetTextAsync Exception for URL: {assetUrl}");
                 return null;
             }
         }
@@ -152,40 +148,21 @@ namespace PBE_AssetsDownloader.Services
                 using (var request = new HttpRequestMessage(HttpMethod.Head, assetUrl))
                 {
                     var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return (true, null);
-                    }
-                    else
-                    {
-                        var errorMessage = $"Asset not available. Status: {response.StatusCode}";
-                        return (false, errorMessage);
-                    }
+                    return (response.IsSuccessStatusCode, response.IsSuccessStatusCode ? null : $"Asset not available. Status: {response.StatusCode}");
                 }
-            }
-            catch (HttpRequestException ex)
-            {
-                var errorMessage = $"HTTP request failed while checking {assetUrl}: {ex.Message}";
-                _logService.LogError(errorMessage);
-                return (false, errorMessage);
             }
             catch (Exception ex)
             {
-                var errorMessage = $"An unexpected error occurred while checking {assetUrl}: {ex.Message}";
-                _logService.LogError(errorMessage);
-                return (false, errorMessage);
+                _logService.LogError($"An error occurred while checking {assetUrl}. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"AssetDownloader.CheckAssetAvailabilityAsync Exception for URL: {assetUrl}");
+                return (false, ex.Message);
             }
         }
 
         public async Task<string> DownloadAssetIfNeeded(string assetUrl, string assetName)
         {
-            // Creamos la carpeta necesaria + Mensaje de creacion
             await _directoriesCreator.CreatePreviewAssetsAsync();
-
-            // Obtener la ruta de la carpeta de preview assets
             string previewAssetsPath = _directoriesCreator.PreviewAssetsPath;
-
             string localFilePath = Path.Combine(previewAssetsPath, assetName);
 
             if (File.Exists(localFilePath))
@@ -197,10 +174,8 @@ namespace PBE_AssetsDownloader.Services
             try
             {
                 var response = await _httpClient.GetAsync(assetUrl);
-
                 if (response.IsSuccessStatusCode)
                 {
-                    // Corrected FileStream constructor call
                     await using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
                         await response.Content.CopyToAsync(fileStream);
@@ -213,14 +188,10 @@ namespace PBE_AssetsDownloader.Services
                     return null;
                 }
             }
-            catch (HttpRequestException httpEx)
-            {
-                _logService.LogError(httpEx, $"HTTP error downloading '{assetName}' from {assetUrl}.");
-                return null;
-            }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"General error downloading asset '{assetName}' from {assetUrl}.");
+                _logService.LogError($"Error downloading asset '{assetName}' from {assetUrl}. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"AssetDownloader.DownloadAssetIfNeeded Exception for URL: {assetUrl}");
                 return null;
             }
         }

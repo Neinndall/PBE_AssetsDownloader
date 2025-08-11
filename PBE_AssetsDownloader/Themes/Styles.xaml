@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF">
     <ResourceDictionary.MergedDictionaries>
@@ -541,7 +541,7 @@
         <Setter Property="Height" Value="10"/>
     </Style>
    
-    <!-- Navigation Button Style -->
+    <!-- Navigation Buttons for JsonDiffWindow.xaml -->
     <Style x:Key="NavigationButton" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
@@ -576,8 +576,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <!-- Navigation Toggle Button Style -->
+ 
     <Style x:Key="NavigationToggleButton" TargetType="ToggleButton">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>

@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
 {
-    public partial class GeneralSettingsView : UserControl
+    public partial class GeneralSettingsView : UserControl, ISettingsView
     {
         private AppSettings _appSettings;
 
@@ -28,6 +28,8 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
 
         public void SaveSettings()
         {
+            if (_appSettings == null) return;
+            
             _appSettings.SyncHashesWithCDTB = checkBoxSyncHashes.IsChecked ?? false;
             _appSettings.CheckJsonDataUpdates = checkBoxCheckJsonData.IsChecked ?? false;
             _appSettings.AutoCopyHashes = checkBoxAutoCopy.IsChecked ?? false;
@@ -35,7 +37,23 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             _appSettings.OnlyCheckDifferences = checkBoxOnlyCheckDifferences.IsChecked ?? false;
             _appSettings.EnableDiffHistory = checkBoxEnableDiffHistory.IsChecked ?? false;
             _appSettings.EnableBackgroundUpdates = checkBoxEnableBackgroundUpdates.IsChecked ?? false;
-            _appSettings.BackgroundUpdateFrequency = (int)(comboBoxUpdateFrequency.SelectedItem ?? 10);
+            if (comboBoxUpdateFrequency.SelectedItem is ComboBoxItem item)
+            {
+                _appSettings.BackgroundUpdateFrequency = int.Parse(item.Content.ToString());
+            }
+        }
+
+        private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (_appSettings != null)
+            {
+                ApplySettingsToUI(_appSettings);
+            }
+        }
+
+        private void UserControl_Unloaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            SaveSettings();
         }
     }
 }

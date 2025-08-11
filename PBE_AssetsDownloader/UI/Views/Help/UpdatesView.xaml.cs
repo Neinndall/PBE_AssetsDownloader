@@ -5,16 +5,19 @@ namespace PBE_AssetsDownloader.UI.Views.Help
 {
     public partial class UpdatesView : UserControl
     {
-        public UpdatesView()
+        private readonly UpdateManager _updateManager;
+
+        public UpdatesView(UpdateManager updateManager)
         {
             InitializeComponent();
+            _updateManager = updateManager;
         }
 
         private async void buttonCheckUpdates_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             // Assuming the parent window is the owner for the update dialog
             var parentWindow = System.Windows.Window.GetWindow(this);
-            await UpdateManager.CheckForUpdatesAsync(parentWindow, true);
+            await _updateManager.CheckForUpdatesAsync(parentWindow, true);
         }
     }
 }

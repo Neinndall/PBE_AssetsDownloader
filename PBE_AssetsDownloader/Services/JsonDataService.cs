@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.UI;
 using PBE_AssetsDownloader.Utils;
@@ -18,22 +19,22 @@ namespace PBE_AssetsDownloader.Services
         private readonly AppSettings _appSettings;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly Requests _requests;
+        private readonly IServiceProvider _serviceProvider;
         private readonly string statusUrl = "https://raw.communitydragon.org/data/hashes/lol/";
 
-        // Lista de nombres de archivo que requieren una ruta única debido a posibles colisiones
         private readonly HashSet<string> _filesRequiringUniquePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "trans.json",
-            // Añadir otros nombres de archivo aquí si causan colisiones
         };
 
-        public JsonDataService(LogService logService, HttpClient httpClient, AppSettings appSettings, DirectoriesCreator directoriesCreator, Requests requests)
+        public JsonDataService(LogService logService, HttpClient httpClient, AppSettings appSettings, DirectoriesCreator directoriesCreator, Requests requests, IServiceProvider serviceProvider)
         {
             _logService = logService;
             _httpClient = httpClient;
             _appSettings = appSettings;
             _directoriesCreator = directoriesCreator;
             _requests = requests;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<Dictionary<string, long>> GetRemoteHashesSizesAsync()
@@ -59,12 +60,14 @@ namespace PBE_AssetsDownloader.Services
             }
             catch (HttpRequestException httpEx)
             {
-                _logService.LogError($"HTTP request failed for '{statusUrl}': {httpEx.Message}. Check internet connection or URL.");
+                _logService.LogError($"HTTP request failed for '{statusUrl}'. See application_errors.log for details.");
+                _logService.LogCritical(httpEx, $"JsonDataService.GetRemoteHashesSizesAsync HttpRequestException for URL: {statusUrl}");
                 return result;
             }
             catch (Exception ex)
             {
-                _logService.LogError($"An unexpected exception occurred fetching URL '{statusUrl}': {ex.Message}");
+                _logService.LogError($"An unexpected exception occurred fetching URL '{statusUrl}'. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"JsonDataService.GetRemoteHashesSizesAsync Exception for URL: {statusUrl}");
                 return result;
             }
 
@@ -97,27 +100,22 @@ namespace PBE_AssetsDownloader.Services
             return result;
         }
 
-        public async Task<bool> CheckJsonDataUpdatesAsync()
+        public async Task<bool> CheckJsonDataUpdatesAsync(bool silent = false)
         {
             if (!_appSettings.CheckJsonDataUpdates || (_appSettings.MonitoredJsonDirectories == null && _appSettings.MonitoredJsonFiles == null))
             {
-                return false; // La opción no está activada o ninguna lista de archivos/directorios está configurada.
+                return false;
             }
 
-            _logService.Log("Checking for JSON file updates...");
+            if (!silent) _logService.Log("Checking for JSON file updates...");
             var serverJsonDataEntries = new Dictionary<string, (DateTime Date, string FullUrl)>();
             bool anyUrlProcessed = false;
 
-            // Procesar directorios monitoreados
             if (_appSettings.MonitoredJsonDirectories != null)
             {
                 foreach (var url in _appSettings.MonitoredJsonDirectories)
                 {
-                    if (string.IsNullOrWhiteSpace(url))
-                    {
-                        continue;
-                    }
-
+                    if (string.IsNullOrWhiteSpace(url)) continue;
                     try
                     {
                         string html = await _httpClient.GetStringAsync(url);
@@ -128,17 +126,9 @@ namespace PBE_AssetsDownloader.Services
                             string dateStr = match.Groups["date"].Value.Trim();
                             if (ParseDate(dateStr, out DateTime parsedDate))
                             {
-                                string fullFileUrl = url + filename; // Construir la URL completa
-                                string key;
-                                if (_filesRequiringUniquePaths.Contains(filename))
-                                {
-                                    key = PathUtils.GetUniqueLocalPathFromJsonUrl(fullFileUrl);
-                                }
-                                else
-                                {
-                                    key = filename;
-                                }
-                                serverJsonDataEntries[key] = (parsedDate, fullFileUrl); // Usar la clave (única o nombre de archivo) como clave
+                                string fullFileUrl = url + filename;
+                                string key = _filesRequiringUniquePaths.Contains(filename) ? PathUtils.GetUniqueLocalPathFromJsonUrl(fullFileUrl) : filename;
+                                serverJsonDataEntries[key] = (parsedDate, fullFileUrl);
                                 anyUrlProcessed = true;
                             }
                             else
@@ -149,55 +139,39 @@ namespace PBE_AssetsDownloader.Services
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError(ex, $"Error processing monitored directory URL: {url}");
+                        _logService.LogError($"Error processing monitored directory URL: {url}. See application_errors.log for details.");
+                        _logService.LogCritical(ex, $"JsonDataService.CheckJsonDataUpdates Exception for directory URL: {url}");
                     }
                 }
             }
 
-            // Procesar archivos individuales monitoreados
             if (_appSettings.MonitoredJsonFiles != null)
             {
                 foreach (var url in _appSettings.MonitoredJsonFiles)
                 {
-                    if (string.IsNullOrWhiteSpace(url))
-                    {
-                        continue;
-                    }
-
+                    if (string.IsNullOrWhiteSpace(url)) continue;
                     string parentDirectoryUrl = string.Empty;
                     try
                     {
-                        // Extraer la URL del directorio padre
                         Uri fileUri = new Uri(url);
-                        parentDirectoryUrl = fileUri.GetLeftPart(UriPartial.Path);
-                        parentDirectoryUrl = parentDirectoryUrl.Substring(0, parentDirectoryUrl.LastIndexOf('/') + 1); // Asegurarse de que termine con /
-
+                        parentDirectoryUrl = new Uri(fileUri, ".").ToString();
                         string html = await _httpClient.GetStringAsync(parentDirectoryUrl);
-                        // Reutilizar la regex para parsear listados de directorios
                         var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         bool foundInParent = false;
                         foreach (Match match in regex.Matches(html))
                         {
                             string filenameInParent = match.Groups["filename"].Value;
-                            if (url.EndsWith(filenameInParent)) // Comprobar si es nuestro archivo
+                            if (url.EndsWith(filenameInParent))
                             {
                                 string dateStr = match.Groups["date"].Value.Trim();
                                 if (ParseDate(dateStr, out DateTime parsedDate))
                                 {
-                                    string key;
-                                    if (_filesRequiringUniquePaths.Contains(filenameInParent))
-                                    {
-                                        key = PathUtils.GetUniqueLocalPathFromJsonUrl(url);
-                                    }
-                                    else
-                                    {
-                                        key = filenameInParent;
-                                    }
-                                    serverJsonDataEntries[key] = (parsedDate, url); // Usar la clave (única o nombre de archivo) como clave
+                                    string key = _filesRequiringUniquePaths.Contains(filenameInParent) ? PathUtils.GetUniqueLocalPathFromJsonUrl(url) : filenameInParent;
+                                    serverJsonDataEntries[key] = (parsedDate, url);
                                     anyUrlProcessed = true;
                                     foundInParent = true;
                                     _logService.LogDebug($"Found {url} in parent directory listing. Date: {parsedDate}");
-                                    break; // Encontramos nuestro archivo, no es necesario continuar el bucle
+                                    break;
                                 }
                                 else
                                 {
@@ -205,7 +179,6 @@ namespace PBE_AssetsDownloader.Services
                                 }
                             }
                         }
-
                         if (!foundInParent)
                         {
                             _logService.LogWarning($"Could not find {url} in its parent directory listing: {parentDirectoryUrl}");
@@ -213,7 +186,8 @@ namespace PBE_AssetsDownloader.Services
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError(ex, $"Error fetching or parsing parent directory {parentDirectoryUrl} for file {url}");
+                        _logService.LogError($"Error fetching or parsing parent directory {parentDirectoryUrl} for file {url}. See application_errors.log for details.");
+                        _logService.LogCritical(ex, $"JsonDataService.CheckJsonDataUpdates Exception for file URL: {url}");
                     }
                 }
             }
@@ -229,20 +203,18 @@ namespace PBE_AssetsDownloader.Services
 
             foreach (var serverEntry in serverJsonDataEntries)
             {
-                string key = serverEntry.Key; // Puede ser la ruta única o el nombre de archivo simple
+                string key = serverEntry.Key;
                 DateTime serverDate = serverEntry.Value.Date;
                 string fullUrl = serverEntry.Value.FullUrl;
 
                 if (!localJsonDataDates.ContainsKey(key) || localJsonDataDates[key] != serverDate)
                 {
-                    string message = $"Updated: {key} ({serverDate.ToString("yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture)})";
                     localJsonDataDates[key] = serverDate;
                     wasUpdated = true;
 
                     string oldFilePath = Path.Combine(_directoriesCreator.JsonCacheOldPath, key);
                     string newFilePath = Path.Combine(_directoriesCreator.JsonCacheNewPath, key);
 
-                    // Asegurarse de que los directorios padre existan
                     Directory.CreateDirectory(Path.GetDirectoryName(oldFilePath));
                     Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));
 
@@ -253,7 +225,6 @@ namespace PBE_AssetsDownloader.Services
                             File.Copy(newFilePath, oldFilePath, true);
                         }
 
-                        // Usar el nuevo método de Requests para descargar y guardar el JSON
                         bool downloadSuccess = await _requests.DownloadJsonContentAsync(fullUrl, newFilePath);
 
                         if (downloadSuccess)
@@ -264,41 +235,40 @@ namespace PBE_AssetsDownloader.Services
                                 string historyFilePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, historyFileName);
                                 File.Copy(oldFilePath, historyFilePath, true);
 
-                                var historyEntry = new JsonDiffHistoryEntry
+                                _appSettings.DiffHistory.Add(new JsonDiffHistoryEntry
                                 {
                                     FileName = key,
                                     OldFilePath = historyFilePath,
                                     NewFilePath = newFilePath,
                                     Timestamp = DateTime.Now
-                                };
-                                _appSettings.DiffHistory.Add(historyEntry);
+                                });
                             }
 
                             _logService.LogDebug($"Saved new JSON content to {newFilePath}");
-                            // Log interactive message
                             _logService.LogInteractive(
-                                message,
+                                $"Updated: {key} ({serverDate:yyyy-MMM-dd HH:mm})",
                                 "View Diff",
                                 () =>
                                 {
                                     string oldContent = File.Exists(oldFilePath) ? File.ReadAllText(oldFilePath) : "";
                                     string newContent = File.Exists(newFilePath) ? File.ReadAllText(newFilePath) : "";
-                                    var diffWindow = new JsonDiffWindow(oldContent, newContent);
+                                    var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
+                                    diffWindow.LoadDiff(oldContent, newContent);
                                     diffWindow.Show();
                                 }
                             );
                         }
                         else
                         {
-                            // Si la descarga falla, loguear el error y no marcar como actualizado
-                            _logService.LogError($"Failed to download and save JSON content for {fullUrl}. Check logs for details.");
-                            wasUpdated = false; // No se actualizó correctamente
+                            _logService.LogError($"Failed to download and save JSON content for {fullUrl}.");
+                            wasUpdated = false;
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError(ex, $"Error processing JSON content for {fullUrl}");
-                        wasUpdated = false; // Hubo un error, no se actualizó correctamente
+                        _logService.LogError($"Error processing JSON content for {fullUrl}. See application_errors.log for details.");
+                        _logService.LogCritical(ex, $"JsonDataService.CheckJsonDataUpdates Exception for URL: {fullUrl}");
+                        wasUpdated = false;
                     }
                 }
             }
@@ -307,20 +277,18 @@ namespace PBE_AssetsDownloader.Services
             {
                 _appSettings.JsonDataModificationDates = localJsonDataDates;
                 AppSettings.SaveSettings(_appSettings);
-                _logService.LogSuccess("Local game data dates updated.");
+                if (!silent) _logService.LogSuccess("Local game data dates updated.");
             }
             else
             {
-                _logService.Log("JSON files are up-to-date.");
+                if (!silent) _logService.Log("JSON files are up-to-date.");
             }
             return wasUpdated;
         }
 
         private bool ParseDate(string dateStr, out DateTime date)
         {
-            // Example format: 2025-Jul-29 21:18
-            string format = "yyyy-MMM-dd HH:mm";
-            return DateTime.TryParseExact(dateStr, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+            return DateTime.TryParseExact(dateStr, "yyyy-MMM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
         }
     }
 }

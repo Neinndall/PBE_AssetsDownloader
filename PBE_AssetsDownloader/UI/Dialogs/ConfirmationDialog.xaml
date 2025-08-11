@@ -32,7 +32,7 @@
                 </Grid>
             </Border>
 
-            <TextBlock x:Name="textBlockMessage" Grid.Row="1" TextWrapping="Wrap" Margin="15,20" Foreground="{StaticResource TextSecondary}"/>
+            <TextBlock x:Name="textBlockMessage" Grid.Row="1" TextWrapping="Wrap" Margin="15,20" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold"/>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="15">
                 <StackPanel x:Name="YesNoButtons" Orientation="Horizontal">

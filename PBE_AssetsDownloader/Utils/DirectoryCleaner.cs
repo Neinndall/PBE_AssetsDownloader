@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using PBE_AssetsDownloader.Services; // Añadimos el using para LogService
+using PBE_AssetsDownloader.Services;
 
 namespace PBE_AssetsDownloader.Utils
 {
@@ -62,7 +62,8 @@ namespace PBE_AssetsDownloader.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogWarning($"The folder could not be processed: {directory}. Error: {ex.Message}");
+                _logService.LogError($"The folder could not be processed: {directory}. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"DirectoryCleaner.DeleteEmptyDirectoriesRecursively Exception for directory: {directory}");
             }
         }
     }

@@ -11,13 +11,17 @@ namespace PBE_AssetsDownloader.UI.Dialogs
             set { textBoxInput.Text = value; }
         }
 
-        public InputDialog(string title, string question, string defaultAnswer = "")
+        public InputDialog()
         {
             InitializeComponent();
+            textBoxInput.Focus();
+        }
+
+        public void Initialize(string title, string question, string defaultAnswer = "")
+        {
             Title = title;
             textBlockQuestion.Text = question;
             InputText = defaultAnswer;
-            textBoxInput.Focus();
         }
 
         private void btnOk_Click(object sender, RoutedEventArgs e)

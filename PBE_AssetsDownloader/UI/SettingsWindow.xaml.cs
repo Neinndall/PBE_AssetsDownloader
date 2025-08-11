@@ -1,17 +1,11 @@
 using System;
-using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.UI.Dialogs;
-using PBE_AssetsDownloader.UI.Views.SettingsViews;
+using PBE_AssetsDownloader.UI.Views.Settings;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -24,59 +18,59 @@ namespace PBE_AssetsDownloader.UI
     {
         private readonly LogService _logService;
         private readonly AppSettings _appSettings;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly CustomMessageBoxService _customMessageBoxService;
 
         public event EventHandler<SettingsChangedEventArgs> SettingsChanged;
 
-        private readonly GeneralSettingsView _generalSettingsView;
-        private readonly HashPathsSettingsView _hashPathsSettingsView;
-        private readonly AdvancedSettingsView _advancedSettingsView;
-        private readonly LogsSettingsView _logsSettingsView;
-
         public SettingsWindow(
-            HttpClient httpClient,
-            DirectoriesCreator directoriesCreator,
-            Requests requests,
-            Status status,
-            AppSettings appSettings)
+            AppSettings appSettings,
+            IServiceProvider serviceProvider,
+            CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
 
-            _logService = new LogService(); // Nueva instancia aislada
             _appSettings = appSettings;
+            _serviceProvider = serviceProvider;
+            _customMessageBoxService = customMessageBoxService;
 
-            _generalSettingsView = new GeneralSettingsView();
-            _generalSettingsView.ApplySettingsToUI(_appSettings);
+            // Create a local LogService for this window and assign it to our field
+            var logger = _serviceProvider.GetRequiredService<ILogger>();
+            _logService = new LogService(logger);
 
-            _hashPathsSettingsView = new HashPathsSettingsView();
-            _hashPathsSettingsView.ApplySettingsToUI(_appSettings, _logService);
+            SetupNavigation();
+            NavigateToView(_serviceProvider.GetRequiredService<GeneralSettingsView>());
+        }
 
-            _advancedSettingsView = new AdvancedSettingsView();
-            _advancedSettingsView.ApplySettingsToUI(_appSettings, _logService);
-
-            _logsSettingsView = new LogsSettingsView();
-            _logsSettingsView.ApplySettingsToUI(_logService);
-
-            NavGeneral.Checked += (s, e) => NavigateToView(_generalSettingsView);
-            NavHashes.Checked += (s, e) => NavigateToView(_hashPathsSettingsView);
-            NavAdvanced.Checked += (s, e) => NavigateToView(_advancedSettingsView);
-            NavLogs.Checked += (s, e) => NavigateToView(_logsSettingsView);
-
-            NavigateToView(_generalSettingsView);
+        private void SetupNavigation()
+        {
+            NavGeneral.Checked += (s, e) => NavigateToView(_serviceProvider.GetRequiredService<GeneralSettingsView>());
+            NavHashes.Checked += (s, e) => NavigateToView(_serviceProvider.GetRequiredService<HashPathsSettingsView>());
+            NavAdvanced.Checked += (s, e) => NavigateToView(_serviceProvider.GetRequiredService<AdvancedSettingsView>());
+            NavLogs.Checked += (s, e) => 
+            {
+                var logsView = _serviceProvider.GetRequiredService<LogsSettingsView>();
+                logsView.SetLogService(_logService);
+                NavigateToView(logsView);
+            };
         }
 
         private void NavigateToView(object view)
         {
+            if (view is ISettingsView settingsView)
+            {
+                settingsView.ApplySettingsToUI(_appSettings);
+            }
             SettingsContentArea.Content = view;
         }
 
         private void BtnResetDefaults_Click(object sender, RoutedEventArgs e)
         {
-            bool? result = CustomMessageBox.ShowYesNo("Confirm Reset", "Are you sure you want to reset all settings to default values?", this, CustomMessageBoxIcon.Warning); 
+            bool? result = _customMessageBoxService.ShowYesNo("Confirm Reset", "Are you sure you want to reset all settings to default values?", this, CustomMessageBoxIcon.Warning);
 
             if (result == true)
             {
                 var defaultSettings = AppSettings.GetDefaultSettings();
-                
                 _appSettings.SyncHashesWithCDTB = defaultSettings.SyncHashesWithCDTB;
                 _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
                 _appSettings.AutoCopyHashes = defaultSettings.AutoCopyHashes;
@@ -87,17 +81,17 @@ namespace PBE_AssetsDownloader.UI
                 _appSettings.EnableDiffHistory = defaultSettings.EnableDiffHistory;
                 _appSettings.EnableBackgroundUpdates = defaultSettings.EnableBackgroundUpdates;
                 _appSettings.BackgroundUpdateFrequency = defaultSettings.BackgroundUpdateFrequency;
-                
-                _appSettings.MonitoredJsonDirectories = new List<string>(defaultSettings.MonitoredJsonDirectories);
-                _appSettings.MonitoredJsonFiles = new List<string>(defaultSettings.MonitoredJsonFiles);
-                _appSettings.DiffHistory = new List<JsonDiffHistoryEntry>(defaultSettings.DiffHistory);
+                _appSettings.MonitoredJsonDirectories = new(defaultSettings.MonitoredJsonDirectories);
+                _appSettings.MonitoredJsonFiles = new(defaultSettings.MonitoredJsonFiles);
+                _appSettings.DiffHistory = new(defaultSettings.DiffHistory);
 
                 AppSettings.SaveSettings(_appSettings);
-                CustomMessageBox.ShowInfo("Reset Successful", "Settings have been reset to default values.", this, CustomMessageBoxIcon.Info);  
+                _customMessageBoxService.ShowInfo("Reset Successful", "Settings have been reset to default values.", this, CustomMessageBoxIcon.Info);
 
-                _generalSettingsView.ApplySettingsToUI(_appSettings);
-                _hashPathsSettingsView.ApplySettingsToUI(_appSettings, _logService);
-                _advancedSettingsView.ApplySettingsToUI(_appSettings, _logService);
+                if (SettingsContentArea.Content is ISettingsView currentView)
+                {
+                    currentView.ApplySettingsToUI(_appSettings);
+                }
 
                 SettingsChanged?.Invoke(this, new SettingsChangedEventArgs { WasResetToDefaults = true });
             }
@@ -105,14 +99,15 @@ namespace PBE_AssetsDownloader.UI
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            _generalSettingsView.SaveSettings();
-            _hashPathsSettingsView.SaveSettings();
-            _advancedSettingsView.SaveSettings();
-
             AppSettings.SaveSettings(_appSettings);
             _logService.LogSuccess("Settings updated.");
 
             SettingsChanged?.Invoke(this, new SettingsChangedEventArgs { WasResetToDefaults = false });
         }
+    }
+
+    public interface ISettingsView
+    {
+        void ApplySettingsToUI(AppSettings appSettings);
     }
 }

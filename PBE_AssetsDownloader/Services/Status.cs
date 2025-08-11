@@ -1,16 +1,7 @@
-// PBE_AssetsDownloader/Services/Status.cs
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using PBE_AssetsDownloader.Utils;
-using Serilog;
-using PBE_AssetsDownloader.Services;
-using PBE_AssetsDownloader.UI; // Added for JsonDiffWindow
 
 namespace PBE_AssetsDownloader.Services
 {
@@ -19,64 +10,54 @@ namespace PBE_AssetsDownloader.Services
     private const string GAME_HASHES_FILENAME = "hashes.game.txt";
     private const string LCPU_HASHES_FILENAME = "hashes.lcu.txt";
 
-    public string CurrentStatus { get; private set; }
-
-    // Campos para las dependencias inyectadas
     private readonly LogService _logService;
-    private readonly HttpClient _httpClient;
     private readonly Requests _requests;
     private readonly AppSettings _appSettings;
     private readonly JsonDataService _jsonDataService;
 
     public Status(
         LogService logService,
-        HttpClient httpClient,
         Requests requests,
         AppSettings appSettings,
         JsonDataService jsonDataService)
     {
       _logService = logService;
-      _httpClient = httpClient;
       _requests = requests;
       _appSettings = appSettings;
       _jsonDataService = jsonDataService;
     }
 
-    // Handles whether to update hashes from the server
-    public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB)
+    public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB, bool silent = false)
     {
-      bool isUpdated = await IsUpdatedAsync();
+      bool isUpdated = await IsUpdatedAsync(silent);
       if (isUpdated)
       {
-        _logService.Log("Server updated. Starting hash synchronization...");
+        if (!silent) _logService.Log("Server updated. Starting hash synchronization...");
         await _requests.SyncHashesIfEnabledAsync(syncHashesWithCDTB);
-        _logService.LogSuccess("Synchronization completed.");
+        if (!silent) _logService.LogSuccess("Synchronization completed.");
         return true;
       }
       else
       {
-        // This method is now handled by JsonDataService or is no longer needed.
-        _logService.Log("No server updates found. Local hashes are up-to-date.");
+        if (!silent) _logService.Log("No server updates found. Local hashes are up-to-date.");
         return false;
       }
     }
 
-    public async Task<bool> IsUpdatedAsync()
+    public async Task<bool> IsUpdatedAsync(bool silent = false)
     {
       try
       {
-        _logService.Log("Getting update sizes from server...");
+        if (!silent) _logService.Log("Getting update sizes from server...");
         var serverSizes = await _jsonDataService.GetRemoteHashesSizesAsync();
 
         if (serverSizes == null || serverSizes.Count == 0)
         {
           _logService.LogWarning("Could not retrieve remote hash sizes or received an empty list. Skipping update check.");
-          return false; // No podemos determinar si hay actualización sin tamaños remotos
+          return false;
         }
 
-        // Usamos la instancia inyectada de AppSettings
         var localSizes = _appSettings.HashesSizes ?? new Dictionary<string, long>();
-
         bool updated = false;
 
         updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, GAME_HASHES_FILENAME);
@@ -84,20 +65,20 @@ namespace PBE_AssetsDownloader.Services
 
         if (updated)
         {
-          // Actualizamos la instancia de AppSettings y la guardamos ---
-          _appSettings.HashesSizes = localSizes; // Asigna los tamaños actualizados al objeto cargado
-          AppSettings.SaveSettings(_appSettings); // Guarda el objeto AppSettings completo
+          _appSettings.HashesSizes = localSizes;
+          AppSettings.SaveSettings(_appSettings);
           return true;
         }
         else
         {
-          return false; // No hay actualización necesaria
+          return false;
         }
       }
       catch (Exception ex)
       {
-        _logService.LogError(ex, "Error checking for updates.");
-        return false; // Hubo un error, no está actualizado
+        _logService.LogError("Error checking for updates. See application_errors.log for details.");
+        _logService.LogCritical(ex, "Status.IsUpdatedAsync Exception");
+        return false;
       }
     }
 
@@ -108,8 +89,8 @@ namespace PBE_AssetsDownloader.Services
 
       if (serverSize != localSize)
       {
-        localSizes[filename] = serverSize; // Actualiza el diccionario 'localSizes'
-        return true; // Indica que se encontró una diferencia y se actualizó
+        localSizes[filename] = serverSize;
+        return true;
       }
       return false;
     }

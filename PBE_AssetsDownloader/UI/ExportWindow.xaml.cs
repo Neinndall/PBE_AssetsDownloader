@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.WindowsAPICodePack.Dialogs;
-
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
-using PBE_AssetsDownloader.Info;
-using PBE_AssetsDownloader.UI.Helpers; 
 using PBE_AssetsDownloader.UI.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -22,12 +20,17 @@ namespace PBE_AssetsDownloader.UI
     private readonly HttpClient _httpClient;
     private readonly DirectoriesCreator _directoriesCreator;
     private readonly AssetDownloader _assetDownloader;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly CustomMessageBoxService _customMessageBoxService;
+    private readonly CheckBox[] _individualCheckboxes;
 
     public ExportWindow(
         LogService logService,
         HttpClient httpClient,
         DirectoriesCreator directoriesCreator,
-        AssetDownloader assetDownloader)
+        AssetDownloader assetDownloader,
+        IServiceProvider serviceProvider,
+        CustomMessageBoxService customMessageBoxService)
     {
       InitializeComponent();
 
@@ -35,7 +38,10 @@ namespace PBE_AssetsDownloader.UI
       _httpClient = httpClient;
       _directoriesCreator = directoriesCreator;
       _assetDownloader = assetDownloader;
+      _serviceProvider = serviceProvider;
+      _customMessageBoxService = customMessageBoxService;
 
+      _individualCheckboxes = new[] { chkImages, chkAudios, chkPlugins, chkGame };
       SetupCheckboxEvents();
     }
 
@@ -44,8 +50,7 @@ namespace PBE_AssetsDownloader.UI
       chkAll.Checked += ChkAll_Checked;
       chkAll.Unchecked += ChkAll_Unchecked;
 
-      var individualCheckboxes = new[] { chkImages, chkAudios, chkPlugins, chkGame };
-      foreach (var checkbox in individualCheckboxes)
+      foreach (var checkbox in _individualCheckboxes)
       {
         checkbox.Checked += IndividualCheckBox_Changed;
         checkbox.Unchecked += IndividualCheckBox_Changed;
@@ -77,45 +82,34 @@ namespace PBE_AssetsDownloader.UI
 
     private void SetIndividualCheckboxes(bool value)
     {
-      chkImages.IsChecked = value;
-      chkAudios.IsChecked = value;
-      chkPlugins.IsChecked = value;
-      chkGame.IsChecked = value;
+        foreach (var checkbox in _individualCheckboxes)
+        {
+            checkbox.IsChecked = value;
+        }
     }
 
     private bool HasAnyIndividualCheckboxSelected()
     {
-      return chkImages.IsChecked.GetValueOrDefault() ||
-             chkAudios.IsChecked.GetValueOrDefault() ||
-             chkPlugins.IsChecked.GetValueOrDefault() ||
-             chkGame.IsChecked.GetValueOrDefault();
+        return _individualCheckboxes.Any(cb => cb.IsChecked.GetValueOrDefault());
     }
 
     private List<string> GetSelectedAssetTypes()
     {
-      var selectedTypes = new List<string>();
+        var selectedTypes = new List<string>();
 
-      if (chkAll.IsChecked.GetValueOrDefault())
-      {
-        selectedTypes.Add("All");
-      }
-      else
-      {
-        var typeMap = new Dictionary<CheckBox, string>
-                {
-                    { chkImages, "Images" },
-                    { chkAudios, "Audios" },
-                    { chkPlugins, "Plugins" },
-                    { chkGame, "Game" }
-                };
+        if (chkAll.IsChecked.GetValueOrDefault())
+        {
+            selectedTypes.Add("All");
+        }
+        else
+        {
+            selectedTypes.AddRange(
+                _individualCheckboxes.Where(cb => cb.IsChecked.GetValueOrDefault())
+                                     .Select(cb => cb.Tag as string)
+            );
+        }
 
-        selectedTypes.AddRange(
-            typeMap.Where(kvp => kvp.Key.IsChecked.GetValueOrDefault())
-                   .Select(kvp => kvp.Value)
-        );
-      }
-
-      return selectedTypes;
+        return selectedTypes;
     }
 
     private void btnPreviewAssets_Click(object sender, RoutedEventArgs e)
@@ -131,15 +125,8 @@ namespace PBE_AssetsDownloader.UI
         return;
       }
 
-      var previewWindow = new PreviewAssetsWindow(
-          txtDifferencesPath.Text,
-          selectedAssetTypes,
-          FilterAssetsByType,
-          _httpClient,
-          _directoriesCreator,
-          _logService,
-          _assetDownloader
-      );
+      var previewWindow = _serviceProvider.GetRequiredService<PreviewAssetsWindow>();
+      previewWindow.InitializeData(txtDifferencesPath.Text, selectedAssetTypes, FilterAssetsByType);
       previewWindow.ShowDialog();
     }
 
@@ -189,7 +176,7 @@ namespace PBE_AssetsDownloader.UI
     private void ShowWarning(string message, string title)
     {
       _logService.LogWarning(message);
-      CustomMessageBox.ShowInfo(title, message, Window.GetWindow(this), CustomMessageBoxIcon.Warning);   
+      _customMessageBoxService.ShowInfo(title, message, Window.GetWindow(this), CustomMessageBoxIcon.Warning);   
     }
 
     private void LogSelectedTypes(List<string> selectedAssetTypes)
@@ -213,8 +200,6 @@ namespace PBE_AssetsDownloader.UI
 
     private async Task DownloadAssets(string[] gameLines, string[] lcuLines, List<string> selectedAssetTypes)
     {
-      _logService.Log("Starting download of assets ...");
-
       var notFoundAssets = new List<string>();
       var gameAssetsList = FilterAssetsByType(gameLines, selectedAssetTypes);
       var lcuAssetsList = FilterAssetsByType(lcuLines, selectedAssetTypes);
@@ -253,7 +238,7 @@ namespace PBE_AssetsDownloader.UI
       else
       {
         _logService.LogSuccess("Download completed successfully!");
-        CustomMessageBox.ShowInfo("Success", "Download completed successfully!", Window.GetWindow(this), CustomMessageBoxIcon.Info);
+        _customMessageBoxService.ShowInfo("Success", "Download completed successfully!", Window.GetWindow(this), CustomMessageBoxIcon.Info);
       }
     }
 

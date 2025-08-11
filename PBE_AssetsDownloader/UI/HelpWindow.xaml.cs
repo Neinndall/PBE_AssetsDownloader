@@ -1,50 +1,30 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Media;
-using Material.Icons;
-using PBE_AssetsDownloader.Services;
-using PBE_AssetsDownloader.Utils;
-using PBE_AssetsDownloader.UI.Views.HelpViews;
+using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsDownloader.UI.Views.Help;
 
 namespace PBE_AssetsDownloader.UI
 {
     public partial class HelpWindow : Window
     {
-        private readonly LogService _logService;
+        private readonly IServiceProvider _serviceProvider;
 
-        private readonly AboutView _aboutView;
-        private readonly ChangelogsView _changelogsView;
-        private readonly BugReportsView _bugReportsView;
-        private readonly UpdatesView _updatesView;
-
-        public HelpWindow(LogService logService)
+        public HelpWindow(IServiceProvider serviceProvider)
         {
             InitializeComponent();
-            _logService = logService ?? throw new ArgumentNullException(nameof(logService));
+            _serviceProvider = serviceProvider;
 
-            _aboutView = new AboutView();
-            _changelogsView = new ChangelogsView();
-            _bugReportsView = new BugReportsView();
-            _updatesView = new UpdatesView();
-
-            NavAbout.Checked += (s, e) => NavigateToView(_aboutView);
-            NavChangelogs.Checked += (s, e) => NavigateToView(_changelogsView);
-            NavBugsReport.Checked += (s, e) => NavigateToView(_bugReportsView);
-            NavUpdates.Checked += (s, e) => NavigateToView(_updatesView);
-
+            SetupNavigation();
             // Load initial view
-            NavigateToView(_aboutView);
+            NavigateToView(_serviceProvider.GetRequiredService<AboutView>());
+        }
 
-            // Initialize views that need dependencies
-            _changelogsView.ApplySettingsToUI(_logService);
+        private void SetupNavigation()
+        {
+            NavAbout.Checked += (s, e) => NavigateToView(_serviceProvider.GetRequiredService<AboutView>());
+            NavChangelogs.Checked += (s, e) => NavigateToView(_serviceProvider.GetRequiredService<ChangelogsView>());
+            NavBugsReport.Checked += (s, e) => NavigateToView(_serviceProvider.GetRequiredService<BugReportsView>());
+            NavUpdates.Checked += (s, e) => NavigateToView(_serviceProvider.GetRequiredService<UpdatesView>());
         }
 
         private void NavigateToView(object view)

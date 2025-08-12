@@ -1,18 +1,35 @@
 using System.Windows.Controls;
 using PBE_AssetsDownloader.Services;
+using PBE_AssetsDownloader.Utils;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
 {
-    public partial class LogsSettingsView : UserControl
+    public partial class LogsSettingsView : UserControl, ISettingsView
     {
+        private LogService _logService;
+
         public LogsSettingsView()
         {
             InitializeComponent();
         }
 
-        public void ApplySettingsToUI(LogService logService)
+        public void SetLogService(LogService logService)
         {
-            logService.SetLogOutput(richTextBoxLogs);
+            _logService = logService;
+            // Set the output here, as this method is called after the service is available
+            // and before the control is necessarily loaded.
+            _logService.SetLogOutput(richTextBoxLogs);
+        }
+
+        public void ApplySettingsToUI(AppSettings appSettings)
+        {
+            // This view doesn't depend on AppSettings, but it needs to implement the interface.
+            // We set the log output when the control is loaded instead.
+        }
+
+        private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            _logService.SetLogOutput(richTextBoxLogs);
         }
     }
 }

@@ -19,6 +19,14 @@ namespace PBE_AssetsDownloader.Utils
         public string SubAssetsDownloadedPath { get; private set; }
         public string BackUpOldHashesPath { get; private set; }
 
+        public string AppDirectory { get; private set; }
+        public string CurrentConfigFilePath { get; private set; }
+        public string UpdateCachePath { get; private set; }
+        public string UpdateTempExtractionPath { get; private set; }
+        public string UpdateBatchFilePath { get; private set; }
+        public string UpdateLogFilePath { get; private set; }
+        public string UpdateTempBackupConfigFilePath { get; private set; }
+
         public DirectoriesCreator(LogService logService)
         {
             _logService = logService;
@@ -38,6 +46,15 @@ namespace PBE_AssetsDownloader.Utils
             JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
             JsonCacheHistoryPath = Path.Combine(appFolderPath, "json_cache", "history");
             BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
+
+            // New paths for updater
+            AppDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            CurrentConfigFilePath = Path.Combine(AppDirectory, "config.json");
+            UpdateCachePath = Path.Combine(appFolderPath, "update_cache");
+            UpdateTempExtractionPath = Path.Combine(UpdateCachePath, "extracted");
+            UpdateBatchFilePath = Path.Combine(UpdateCachePath, "update_script.bat");
+            UpdateLogFilePath = Path.Combine(UpdateCachePath, "update_log.txt");
+            UpdateTempBackupConfigFilePath = Path.Combine(UpdateCachePath, "config.backup.json");
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);
@@ -101,10 +118,11 @@ namespace PBE_AssetsDownloader.Utils
                     _logService.Log($"Directory created successfully at: {path}");
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 // Usar interpolación de cadenas para el mensaje
-                _logService.LogError(e, $"Error during directory creation for path: {path}");
+                _logService.LogError($"Error during directory creation for path: {path}. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"Error during directory creation for path: {path}");
             }
 
             return Task.CompletedTask;

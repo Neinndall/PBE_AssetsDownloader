@@ -1,45 +1,31 @@
-// PBE_AssetsDownloader/UI/HomeWindow.xaml.cs
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.WindowsAPICodePack.Dialogs; // Para el explorador de carpetas
-using PBE_AssetsDownloader.Info;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
- using PBE_AssetsDownloader.UI.Helpers;    
- using PBE_AssetsDownloader.UI.Dialogs;
+using PBE_AssetsDownloader.UI.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsDownloader.UI
 {
     public partial class HomeWindow : UserControl
     {
         private readonly LogService _logService;
-        private readonly HttpClient _httpClient;
-        private readonly DirectoriesCreator _directoriesCreator;
-        private readonly Requests _requests;
-        private readonly Status _status;
-        private readonly AssetDownloader _assetDownloader;
+        private readonly ExtractionService _extractionService;
+        private readonly CustomMessageBoxService _customMessageBoxService;
         private AppSettings _appSettings;
 
         public HomeWindow(
             LogService logService,
-            HttpClient httpClient,
-            DirectoriesCreator directoriesCreator,
-            Requests requests,
-            Status status,
-            AssetDownloader assetDownloader,
-            AppSettings appSettings)
+            ExtractionService extractionService,
+            AppSettings appSettings,
+            CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
             _logService = logService;
-            _httpClient = httpClient;
-            _directoriesCreator = directoriesCreator;
-            _requests = requests;
-            _status = status;
-            _assetDownloader = assetDownloader;
+            _extractionService = extractionService;
             _appSettings = appSettings;
+            _customMessageBoxService = customMessageBoxService;
 
             // Initialize paths from saved settings
             newHashesTextBox.Text = _appSettings.NewHashesPath ?? "";
@@ -50,10 +36,6 @@ namespace PBE_AssetsDownloader.UI
             oldHashesTextBox.Tag = oldHashesTextBox.Text;
         }
 
-        /// <summary>
-        /// Updates the UI and session paths when settings are saved from the SettingsWindow.
-        /// This logic respects user input in the current session by comparing Text with Tag.
-        /// </summary>
         public void UpdateSettings(AppSettings newSettings, bool wasResetToDefaults)
         {
             _appSettings = newSettings;
@@ -62,25 +44,15 @@ namespace PBE_AssetsDownloader.UI
             UpdatePathTextBox(oldHashesTextBox, _appSettings.OldHashesPath, wasResetToDefaults);
         }
 
-        /// <summary>
-        /// Helper method to update a single path TextBox and its associated session variable.
-        /// </summary>
         private void UpdatePathTextBox(TextBox textBox, string newSettingPath, bool wasResetToDefaults)
         {
-            // Determina si la ruta ha sido modificada por el usuario durante la sesión actual.
-            // Compara el texto actual (.Text) con el valor original que se cargó al inicio (almacenado en .Tag).
             bool isPathChangedInSession = (textBox.Text != (textBox.Tag as string));
 
-            // Si se han reseteado los ajustes a sus valores por defecto,
-            // O si es un guardado normal y el usuario NO ha modificado la ruta en esta sesión:
             if (wasResetToDefaults || !isPathChangedInSession)
             {
-                // Actualiza el texto del TextBox y el Tag con el nuevo valor de la configuración.
                 textBox.Text = newSettingPath ?? "";
                 textBox.Tag = textBox.Text;
             }
-            // else: Si es un guardado normal Y el usuario SÍ ha modificado la ruta manualmente,
-            // no hacemos nada, respetando la entrada del usuario en el TextBox.
         }
 
         private void btnSelectNewHashesDirectory_Click(object sender, RoutedEventArgs e)
@@ -116,24 +88,15 @@ namespace PBE_AssetsDownloader.UI
             if (string.IsNullOrEmpty(oldHashesTextBox.Text) || string.IsNullOrEmpty(newHashesTextBox.Text))
             {
                 _logService.LogWarning("Please select both hash directories.");
-                CustomMessageBox.ShowInfo("Warning", "Please select both hash directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowInfo("Warning", "Please select both hash directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
                 return;
             }
             
-            await App.RunExtraction(
-                _logService,
-                _httpClient,
-                _directoriesCreator,
-                _assetDownloader,
-                _requests,
-                newHashesTextBox.Text, // Usar Text directamente
-                oldHashesTextBox.Text, // Usar Text directamente
-                _appSettings.SyncHashesWithCDTB,
-                _appSettings.AutoCopyHashes,
-                _appSettings.CreateBackUpOldHashes,
-                _appSettings.OnlyCheckDifferences,
-                _appSettings.CheckJsonDataUpdates
-            );
+            // Update settings before running extraction
+            _appSettings.NewHashesPath = newHashesTextBox.Text;
+            _appSettings.OldHashesPath = oldHashesTextBox.Text;
+            
+            await _extractionService.ExecuteAsync();
         }
     }
 }

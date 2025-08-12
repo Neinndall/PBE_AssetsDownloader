@@ -31,88 +31,73 @@ namespace PBE_AssetsDownloader.Utils
 
     public static AppSettings LoadSettings()
     {
-        try
+        if (!File.Exists(ConfigFilePath))
         {
-            if (!File.Exists(ConfigFilePath))
+            var defaultSettings = GetDefaultSettings();
+            SaveSettings(defaultSettings);
+            return defaultSettings;
+        }
+
+        var json = File.ReadAllText(ConfigFilePath);
+        var jObject = Newtonsoft.Json.Linq.JObject.Parse(json);
+
+        if (jObject.TryGetValue("JsonFiles", out var jsonFilesToken) && jsonFilesToken is Newtonsoft.Json.Linq.JArray jsonFilesArray)
+        {
+            var monitoredDirectories = (jObject["MonitoredJsonDirectories"] as Newtonsoft.Json.Linq.JArray) ?? new Newtonsoft.Json.Linq.JArray();
+            var monitoredFiles = (jObject["MonitoredJsonFiles"] as Newtonsoft.Json.Linq.JArray) ?? new Newtonsoft.Json.Linq.JArray();
+
+            foreach (var urlToken in jsonFilesArray)
             {
-                var defaultSettings = GetDefaultSettings();
-                SaveSettings(defaultSettings);
-                return defaultSettings;
-            }
-
-            var json = File.ReadAllText(ConfigFilePath);
-            var jObject = Newtonsoft.Json.Linq.JObject.Parse(json);
-
-            // Backward compatibility: Migrate from old "JsonFiles" to new lists
-            if (jObject.TryGetValue("JsonFiles", out var jsonFilesToken) && jsonFilesToken is Newtonsoft.Json.Linq.JArray jsonFilesArray)
-            {
-                var monitoredDirectories = (jObject["MonitoredJsonDirectories"] as Newtonsoft.Json.Linq.JArray) ?? new Newtonsoft.Json.Linq.JArray();
-                var monitoredFiles = (jObject["MonitoredJsonFiles"] as Newtonsoft.Json.Linq.JArray) ?? new Newtonsoft.Json.Linq.JArray();
-
-                foreach (var urlToken in jsonFilesArray)
+                string url = urlToken.ToString();
+                if (!string.IsNullOrEmpty(url))
                 {
-                    string url = urlToken.ToString(); // Correct way to get the string value
-                    if (!string.IsNullOrEmpty(url))
+                    if (url.EndsWith("/"))
                     {
-                        if (url.EndsWith("/"))
-                        {
-                            if (!monitoredDirectories.Any(x => x.ToString() == url)) monitoredDirectories.Add(url);
-                        }
-                        else
-                        {
-                            if (!monitoredFiles.Any(x => x.ToString() == url)) monitoredFiles.Add(url);
-                        }
+                        if (!monitoredDirectories.Any(x => x.ToString() == url)) monitoredDirectories.Add(url);
+                    }
+                    else
+                    {
+                        if (!monitoredFiles.Any(x => x.ToString() == url)) monitoredFiles.Add(url);
                     }
                 }
-
-                jObject["MonitoredJsonDirectories"] = monitoredDirectories;
-                jObject["MonitoredJsonFiles"] = monitoredFiles;
-                jObject.Remove("JsonFiles");
             }
 
-            var settings = jObject.ToObject<AppSettings>();
-
-            if (settings == null)
-            {
-                Serilog.Log.Error("Error: Configuration file is invalid, loading default settings.");
-                return GetDefaultSettings();
-            }
-
-            // Ensure lists are not null if they are missing from the JSON
-            if (settings.MonitoredJsonDirectories == null) settings.MonitoredJsonDirectories = new List<string>();
-            if (settings.MonitoredJsonFiles == null) settings.MonitoredJsonFiles = new List<string>();
-            if (settings.DiffHistory == null) settings.DiffHistory = new List<JsonDiffHistoryEntry>();
-
-            // Handle backward compatibility for JsonDataSizes (old format with full URLs as keys)
-            if (jObject.TryGetValue("JsonDataSizes", out var jsonDataSizesToken) && jsonDataSizesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
-            {
-                var oldSizes = jsonDataSizesToken.ToObject<Dictionary<string, long>>();
-                if (oldSizes != null)
-                {
-                    settings.JsonDataModificationDates = oldSizes.ToDictionary(kvp => Path.GetFileName(kvp.Key), kvp => DateTime.MinValue); // Convert old sizes to default DateTime
-                }
-            }
-            // Handle loading JsonDataModificationDates (new format with filenames as keys)
-            else if (jObject.TryGetValue("JsonDataModificationDates", out var jsonDataDatesToken) && jsonDataDatesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
-            {
-                settings.JsonDataModificationDates = jsonDataDatesToken.ToObject<Dictionary<string, DateTime>>();
-            }
-            else
-            {
-                settings.JsonDataModificationDates = new Dictionary<string, DateTime>();
-            }
-
-            return settings;
+            jObject["MonitoredJsonDirectories"] = monitoredDirectories;
+            jObject["MonitoredJsonFiles"] = monitoredFiles;
+            jObject.Remove("JsonFiles");
         }
-        catch (Exception ex)
+
+        var settings = jObject.ToObject<AppSettings>();
+
+        if (settings == null)
         {
-            Serilog.Log.Error(ex, "Error loading settings.");
+            return GetDefaultSettings();
         }
 
-        return GetDefaultSettings();
+        if (settings.MonitoredJsonDirectories == null) settings.MonitoredJsonDirectories = new List<string>();
+        if (settings.MonitoredJsonFiles == null) settings.MonitoredJsonFiles = new List<string>();
+        if (settings.DiffHistory == null) settings.DiffHistory = new List<JsonDiffHistoryEntry>();
+
+        if (jObject.TryGetValue("JsonDataSizes", out var jsonDataSizesToken) && jsonDataSizesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
+        {
+            var oldSizes = jsonDataSizesToken.ToObject<Dictionary<string, long>>();
+            if (oldSizes != null)
+            {
+                settings.JsonDataModificationDates = oldSizes.ToDictionary(kvp => Path.GetFileName(kvp.Key), kvp => DateTime.MinValue);
+            }
+        }
+        else if (jObject.TryGetValue("JsonDataModificationDates", out var jsonDataDatesToken) && jsonDataDatesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
+        {
+            settings.JsonDataModificationDates = jsonDataDatesToken.ToObject<Dictionary<string, DateTime>>();
+        }
+        else
+        {
+            settings.JsonDataModificationDates = new Dictionary<string, DateTime>();
+        }
+
+        return settings;
     }
 
-    // Obtener valores predeterminados
     public static AppSettings GetDefaultSettings()
     {
       return new AppSettings
@@ -124,7 +109,7 @@ namespace PBE_AssetsDownloader.Utils
         CheckJsonDataUpdates = false,
         EnableDiffHistory = false,
         EnableBackgroundUpdates = false,
-        BackgroundUpdateFrequency = 10, // Default to 10 minutes
+        BackgroundUpdateFrequency = 10,
         
         NewHashesPath = null,
         OldHashesPath = null,
@@ -137,19 +122,10 @@ namespace PBE_AssetsDownloader.Utils
       };
     }
 
-    // Guardar configuración en el archivo
     public static void SaveSettings(AppSettings settings)
     {
-      try
-      {
         var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
         File.WriteAllText(ConfigFilePath, json);
-      }
-      catch (Exception ex)
-      {
-        // Maneja el error de guardado si es necesario
-        Serilog.Log.Error(ex, "Error al guardar la configuración.");
-      }
     }
   }
 }

@@ -13,8 +13,7 @@
         MinHeight="730" MinWidth="950"
         WindowStartupLocation="CenterScreen"
         Background="#FF1E1E1E" 
-        FontFamily="Consolas, Courier New"
-        PreviewMouseLeftButtonDown="Window_PreviewMouseLeftButtonDown">
+        FontFamily="Consolas, Courier New">
 
     <Grid>
         <!-- Main Layout Grid -->
@@ -113,7 +112,7 @@
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
                                     Margin="0,0,30,39"
-                                    ToolTip="Updates have been detected. Click to dismiss."
+                                    ToolTip=""
                                     Visibility="Collapsed"
                                     MouseLeftButtonDown="UpdateNotificationIcon_MouseLeftButtonDown">
             <materialIcons:MaterialIcon.Effect>

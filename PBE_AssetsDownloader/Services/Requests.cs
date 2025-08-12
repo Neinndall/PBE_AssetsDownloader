@@ -1,4 +1,3 @@
-// PBE_AssetsDownloader/Services/Requests.cs
 using System;
 using System.IO;
 using System.Net.Http;
@@ -33,7 +32,6 @@ namespace PBE_AssetsDownloader.Services
         {
           await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
           await response.Content.CopyToAsync(fileStream);
-          _logService.Log($"Download: {fileName}");
         }
         else
         {
@@ -42,7 +40,8 @@ namespace PBE_AssetsDownloader.Services
       }
       catch (Exception ex)
       {
-        _logService.LogError($"Exception downloading {fileName}: {ex.Message}");
+        _logService.LogError($"Exception downloading {fileName}. See application_errors.log for details.");
+        _logService.LogCritical(ex, $"Requests.DownloadHashesAsync Exception for file: {fileName}");
       }
     }
 
@@ -56,7 +55,6 @@ namespace PBE_AssetsDownloader.Services
     {
       if (syncHashesWithCDTB)
       {
-        // Llamamos al directorio de Hashes New
         var downloadDirectory = _directoriesCreator.HashesNewPath;
         await DownloadHashesFilesAsync(downloadDirectory);
       }
@@ -81,7 +79,8 @@ namespace PBE_AssetsDownloader.Services
         }
         catch (Exception ex)
         {
-            _logService.LogError(ex, $"Error downloading JSON from {url}");
+            _logService.LogError($"Error downloading JSON from {url}. See application_errors.log for details.");
+            _logService.LogCritical(ex, $"Requests.DownloadJsonContentAsync Exception for URL: {url}");
             return false;
         }
     }

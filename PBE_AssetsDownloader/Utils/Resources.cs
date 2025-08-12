@@ -66,7 +66,8 @@ namespace PBE_AssetsDownloader.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Error processing difference files in Resources: {ex.Message}");
+                _logService.LogError($"Error processing difference files in Resources. See application_errors.log for details.");
+                _logService.LogCritical(ex, "Resources.GetResourcesFiles Exception");
                 _assetDownloader.NotifyDownloadCompleted(); // Ensure completion is notified even on error
                 throw;
             }
@@ -100,7 +101,8 @@ namespace PBE_AssetsDownloader.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Error saving NotFounds.txt: {ex.Message}");
+                _logService.LogError($"Error saving NotFounds.txt. See application_errors.log for details.");
+                _logService.LogCritical(ex, "Resources.SaveNotFoundAssets Exception");
                 throw;
             }
         }

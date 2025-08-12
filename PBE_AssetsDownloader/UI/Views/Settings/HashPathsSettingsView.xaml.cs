@@ -5,26 +5,27 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
 {
-    public partial class HashPathsSettingsView : UserControl
+    public partial class HashPathsSettingsView : UserControl, ISettingsView
     {
         private AppSettings _appSettings;
-        private LogService _logService;
+        private readonly LogService _logService;
 
-        public HashPathsSettingsView() 
+        public HashPathsSettingsView(LogService logService) 
         {
             InitializeComponent();
+            _logService = logService;
         }
 
-        public void ApplySettingsToUI(AppSettings appSettings, LogService logService)
+        public void ApplySettingsToUI(AppSettings appSettings)
         {
             _appSettings = appSettings;
-            _logService = logService;
             textBoxNewHashPath.Text = _appSettings.NewHashesPath;
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
         }
 
         public void SaveSettings()
         {
+            if (_appSettings == null) return;
             _appSettings.NewHashesPath = textBoxNewHashPath.Text;
             _appSettings.OldHashesPath = textBoxOldHashPath.Text;
         }
@@ -55,6 +56,11 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
                     textBoxOldHashPath.Text = folderBrowserDialog.FileName;
                 }
             }
+        }
+        
+        private void UserControl_Unloaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            SaveSettings();
         }
     }
 }

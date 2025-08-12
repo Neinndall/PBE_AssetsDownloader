@@ -22,9 +22,13 @@ namespace PBE_AssetsDownloader.UI.Dialogs
 
     public partial class ConfirmationDialog : Window
     {
-        public ConfirmationDialog(string title, string message, CustomMessageBoxButtons buttons = CustomMessageBoxButtons.YesNo, CustomMessageBoxIcon icon = CustomMessageBoxIcon.None)
+        public ConfirmationDialog()
         {
             InitializeComponent();
+        }
+
+        public void Initialize(string title, string message, CustomMessageBoxButtons buttons = CustomMessageBoxButtons.YesNo, CustomMessageBoxIcon icon = CustomMessageBoxIcon.None)
+        {
             Title = title;
             textBlockMessage.Text = message;
 

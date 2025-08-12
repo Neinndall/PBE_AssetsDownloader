@@ -1,308 +1,235 @@
 using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
-using PBE_AssetsDownloader.UI.Controls;
-using PBE_AssetsDownloader.Info;
+using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.Services;
-using Material.Icons;
-using Serilog; // Added Serilog using directive
 using System.Timers;
+using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 
 namespace PBE_AssetsDownloader.UI
 {
-  public partial class MainWindow : Window
-  {
-    private readonly LogService _logService;
-    private readonly HttpClient _httpClient;
-    private readonly DirectoriesCreator _directoriesCreator;
-    private readonly Requests _requests;
-    private readonly Status _status;
-    private readonly AssetDownloader _assetDownloader;
-    private readonly AppSettings _appSettings;
-    private readonly JsonDataService _jsonDataService;
-    private System.Timers.Timer _updateTimer;
-    private Storyboard _spinningIconAnimationStoryboard;
-
-    private HomeWindow _homeViewInstance;
-    private ExportWindow _exportViewInstance;
-
-    private ProgressDetailsWindow _progressDetailsWindow;
-    
-    public MainWindow(
-        LogService logService,
-        HttpClient httpClient,
-        DirectoriesCreator directoriesCreator,
-        Requests requests,
-        Status status,
-        AssetDownloader assetDownloader,
-        AppSettings appSettings,
-        JsonDataService jsonDataService)
-
+    public partial class MainWindow : Window
     {
-      InitializeComponent();
+        private readonly LogService _logService;
+        private readonly AppSettings _appSettings;
+        private readonly Status _status;
+        private readonly JsonDataService _jsonDataService;
+        private readonly UpdateManager _updateManager;
+        private readonly AssetDownloader _assetDownloader;
+        private readonly IServiceProvider _serviceProvider;
 
-      _logService = logService;
+        private Timer _updateTimer;
+        private Storyboard _spinningIconAnimationStoryboard;
+        private ProgressDetailsWindow _progressDetailsWindow;
+        private string _latestAppVersionAvailable;
 
-      // LOG PARA EXCLUSIVAMENTE MAINWINDOW (EXPORT Y HOME)
-      _logService.SetLogOutput(LogView.richTextBoxLogs);
-
-      _httpClient = httpClient;
-      _directoriesCreator = directoriesCreator;
-      _requests = requests;
-      _status = status; // Asignamos la instancia de Status que ya recibimos
-      _assetDownloader = assetDownloader;
-      _appSettings = appSettings; // Asignamos la instancia inyectada
-      _jsonDataService = jsonDataService; // Asignamos la instancia inyectada
-
-      _homeViewInstance = new HomeWindow(
-          _logService,
-          _httpClient,
-          _directoriesCreator,
-          _requests,
-          _status,
-          _assetDownloader,
-          _appSettings
-      );
-
-      _exportViewInstance = new ExportWindow(
-          _logService,
-          _httpClient,
-          _directoriesCreator,
-          _assetDownloader
-      );
-
-      // Conectar eventos de progreso del AssetDownloader
-      _assetDownloader.DownloadStarted += OnDownloadStarted;
-      _assetDownloader.DownloadProgressChanged += OnDownloadProgressChanged;
-      _assetDownloader.DownloadCompleted += OnDownloadCompleted;
-      
-      // Conectar el evento de navegación del Sidebar
-      Sidebar.NavigationRequested += OnSidebarNavigationRequested;
-      LoadHomeView();
-
-      var configLogs = new (bool enabled, string message)[]
-      {
-        (_appSettings.SyncHashesWithCDTB, "Sync enabled on startup."),
-        (_appSettings.AutoCopyHashes, "Automatically replace old hashes enabled."),
-        (_appSettings.CreateBackUpOldHashes, "Backup old hashes enabled."),
-        (_appSettings.OnlyCheckDifferences, "Check only differences enabled."),
-        (_appSettings.CheckJsonDataUpdates, "Check json files enabled."),
-        (_appSettings.EnableDiffHistory, "Enable difference history enabled.")
-      };
-
-      foreach (var (enabled, message) in configLogs)
-      {
-        if (enabled) _logService.Log(message);
-      }
-
-      SetupUpdateTimer();
-
-      // Initial check on startup
-      _ = CheckForAllUpdatesAsync();
-
-      _ = UpdateManager.CheckForUpdatesAsync(this, false);
-    }
-
-    private void SetupUpdateTimer()
-    {
-        if (_appSettings.EnableBackgroundUpdates)
+        public MainWindow(
+            LogService logService,
+            AppSettings appSettings,
+            Status status,
+            JsonDataService jsonDataService,
+            UpdateManager updateManager,
+            AssetDownloader assetDownloader,
+            IServiceProvider serviceProvider)
         {
-            if (_updateTimer == null)
+            InitializeComponent();
+
+            _logService = logService;
+            _appSettings = appSettings;
+            _status = status;
+            _jsonDataService = jsonDataService;
+            _updateManager = updateManager;
+            _assetDownloader = assetDownloader;
+            _serviceProvider = serviceProvider;
+
+            // LOG PARA EXCLUSIVAMENTE MAINWINDOW (EXPORT Y HOME)
+            _logService.SetLogOutput(LogView.richTextBoxLogs);
+
+            _assetDownloader.DownloadStarted += OnDownloadStarted;
+            _assetDownloader.DownloadProgressChanged += OnDownloadProgressChanged;
+            _assetDownloader.DownloadCompleted += OnDownloadCompleted;
+
+            Sidebar.NavigationRequested += OnSidebarNavigationRequested;
+            LoadHomeView();
+
+            if (IsAnySettingActive())
             {
-                _updateTimer = new System.Timers.Timer();
-                _updateTimer.Elapsed += async (sender, e) => await CheckForAllUpdatesAsync();
-                _updateTimer.AutoReset = true;
+                _logService.Log("Settings configured on startup.");
             }
-            // Update interval from settings (convert minutes to milliseconds)
-            _updateTimer.Interval = _appSettings.BackgroundUpdateFrequency * 60 * 1000;
-            _updateTimer.Enabled = true;
-            _logService.Log($"Background update timer started. Frequency: {_appSettings.BackgroundUpdateFrequency} minutes.");
+
+            SetupUpdateTimer();
+            _ = CheckForAllUpdatesAsync();
         }
-        else
+
+        private bool IsAnySettingActive()
         {
-            if (_updateTimer != null)
+            return _appSettings.SyncHashesWithCDTB ||
+                   _appSettings.AutoCopyHashes ||
+                   _appSettings.CreateBackUpOldHashes ||
+                   _appSettings.OnlyCheckDifferences ||
+                   _appSettings.CheckJsonDataUpdates ||
+                   _appSettings.EnableDiffHistory ||
+                   _appSettings.EnableBackgroundUpdates;
+        }
+
+        private void SetupUpdateTimer()
+        {
+            if (_appSettings.EnableBackgroundUpdates)
+            {
+                if (_updateTimer == null)
+                {
+                    _updateTimer = new Timer();
+                    _updateTimer.Elapsed += async (sender, e) => await CheckForAllUpdatesAsync(true);
+                    _updateTimer.AutoReset = true;
+                }
+                _updateTimer.Interval = _appSettings.BackgroundUpdateFrequency * 60 * 1000;
+                _updateTimer.Enabled = true;
+                _logService.LogDebug($"Background update timer started. Frequency: {_appSettings.BackgroundUpdateFrequency} minutes.");
+            }
+            else if (_updateTimer != null)
             {
                 _updateTimer.Enabled = false;
                 _logService.Log("Background update timer stopped.");
             }
         }
-    }
 
-    public async Task CheckForAllUpdatesAsync()
-    {
-        bool hashesUpdated = false;
-        if (_appSettings.SyncHashesWithCDTB)
+        public async Task CheckForAllUpdatesAsync(bool silent = false)
         {
-            hashesUpdated = await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB);
-        }
+            bool hashesUpdated = _appSettings.SyncHashesWithCDTB && await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB, silent);
+            bool jsonUpdated = _appSettings.CheckJsonDataUpdates && await _jsonDataService.CheckJsonDataUpdatesAsync(silent);
+            var (appUpdateAvailable, newVersion) = await _updateManager.IsNewVersionAvailableAsync();
 
-        bool jsonUpdated = false;
-        if (_appSettings.CheckJsonDataUpdates)
-        {
-            jsonUpdated = await _jsonDataService.CheckJsonDataUpdatesAsync();
-        }
-
-        if (hashesUpdated || jsonUpdated)
-        {
-            ShowNotification(true);
-        }
-    }
-
-    public void ShowNotification(bool show)
-    {
-        Dispatcher.Invoke(() =>
-        {
-            UpdateNotificationIcon.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        });
-    }
-
-    private void UpdateNotificationIcon_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        ShowNotification(false);
-        e.Handled = true; // Consume the event to prevent it from bubbling up to the window
-    }
-
-    private void Window_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (UpdateNotificationIcon.IsVisible)
-        {
-            ShowNotification(false);
-        }
-    }
-
-    private void OnDownloadStarted(int totalFiles)
-    {
-        ProgressSummaryButton.Visibility = Visibility.Visible;
-        
-        // Initialize and start animation
-        if (_spinningIconAnimationStoryboard == null)
-        {
-            var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
-            if (originalStoryboard != null)
+            if (appUpdateAvailable)
             {
-                _spinningIconAnimationStoryboard = originalStoryboard.Clone();
-                Storyboard.SetTarget(_spinningIconAnimationStoryboard, ProgressIcon);
+                _latestAppVersionAvailable = newVersion;
+            }
+
+            if (appUpdateAvailable || jsonUpdated || (hashesUpdated && silent))
+            {
+                var messages = new System.Collections.Generic.List<string>();
+                if (appUpdateAvailable) messages.Add($"Version {_latestAppVersionAvailable} is available!");
+                if (hashesUpdated && silent) messages.Add("New hashes are available.");
+                if (jsonUpdated) messages.Add("JSON files have been updated.");
+                if (messages.Count > 0) { ShowNotification(true, string.Join(" | ", messages));
+                }
             }
         }
-        _spinningIconAnimationStoryboard?.Begin();
 
-        // Initialize ProgressDetailsWindow here
-        _progressDetailsWindow = new ProgressDetailsWindow(_logService);
-        _progressDetailsWindow.Owner = this;
-        _progressDetailsWindow.Closed += ProgressDetailsWindow_Closed; // Subscribe to Closed event
-        _progressDetailsWindow.UpdateProgress(0, totalFiles, "Iniciando...", true, null); // Initialize with 0 completed
-    }
-
-    private void ProgressDetailsWindow_Closed(object sender, EventArgs e)
-    {
-        // Hide the window instead of setting the reference to null
-        _progressDetailsWindow?.Hide();
-    }
-
-    private void OnDownloadProgressChanged(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
-    {
-        _progressDetailsWindow?.UpdateProgress(completedFiles, totalFiles, currentFileName, isSuccess, errorMessage);
-    }
-
-    private void OnDownloadCompleted()
-    {
-        ProgressSummaryButton.Visibility = Visibility.Collapsed;
-        _spinningIconAnimationStoryboard?.Stop();
-        _spinningIconAnimationStoryboard = null;
-
-        _progressDetailsWindow?.Close();
-        _progressDetailsWindow = null;
-        Serilog.Log.Information("Descarga de activos completada."); // Log to file only
-    }
-
-    private void ProgressSummaryButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_progressDetailsWindow != null && !_progressDetailsWindow.IsVisible)
+        public void ShowNotification(bool show, string message = "Updates have been detected. Click to dismiss.")
         {
-            _progressDetailsWindow.Show();
+            Dispatcher.Invoke(() =>
+            {
+                UpdateNotificationIcon.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+                if (show) UpdateNotificationIcon.ToolTip = message;
+            });
         }
-        else if (_progressDetailsWindow == null)
+
+        private async void UpdateNotificationIcon_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // If download completed and window was closed, but user clicks again
-            _logService.Log("No hay una descarga activa para mostrar detalles.");
+            ShowNotification(false);
+            if (!string.IsNullOrEmpty(_latestAppVersionAvailable))
+            {
+                await _updateManager.CheckForUpdatesAsync(this, true);
+                _latestAppVersionAvailable = null;
+            }
+            e.Handled = true;
+        }
+
+        private void OnDownloadStarted(int totalFiles)
+        {
+            ProgressSummaryButton.Visibility = Visibility.Visible;
+
+            if (_spinningIconAnimationStoryboard == null)
+            {
+                var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
+                _spinningIconAnimationStoryboard = originalStoryboard?.Clone();
+                if (_spinningIconAnimationStoryboard != null) Storyboard.SetTarget(_spinningIconAnimationStoryboard, ProgressIcon);
+            }
+            _spinningIconAnimationStoryboard?.Begin();
+
+            _progressDetailsWindow = _serviceProvider.GetRequiredService<ProgressDetailsWindow>();
+            _progressDetailsWindow.Owner = this;
+            _progressDetailsWindow.Closed += (s, e) => _progressDetailsWindow = null;
+            _progressDetailsWindow.UpdateProgress(0, totalFiles, "Initializing...", true, null);
+        }
+
+        private void OnDownloadProgressChanged(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
+        {
+            _progressDetailsWindow?.UpdateProgress(completedFiles, totalFiles, currentFileName, isSuccess, errorMessage);
+        }
+
+        private void OnDownloadCompleted()
+        {
+            ProgressSummaryButton.Visibility = Visibility.Collapsed;
+            _spinningIconAnimationStoryboard?.Stop();
+            _spinningIconAnimationStoryboard = null;
+
+            _progressDetailsWindow?.Close();
+        }
+
+        private void ProgressSummaryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_progressDetailsWindow != null)
+            {
+                if (!_progressDetailsWindow.IsVisible) _progressDetailsWindow.Show();
+                _progressDetailsWindow.Activate();
+            }
+            else
+            {
+                _logService.Log("No active download to show details for.");
+            }
+        }
+
+        private void OnSidebarNavigationRequested(string viewTag)
+        {
+            switch (viewTag)
+            {
+                case "Home": LoadHomeView(); break;
+                case "Export": LoadExportView(); break;
+                case "Explorer": LoadExplorerView(); break;
+                case "Settings": btnSettings_Click(null, null); break;
+                case "Help": btnHelp_Click(null, null); break;
+            }
+        }
+
+        private void LoadHomeView()
+        {
+            MainContentArea.Content = _serviceProvider.GetRequiredService<HomeWindow>();
+        }
+
+        private void LoadExplorerView()
+        {
+            MainContentArea.Content = _serviceProvider.GetRequiredService<ExplorerWindow>();
+        }
+
+        private void LoadExportView()
+        {
+            MainContentArea.Content = _serviceProvider.GetRequiredService<ExportWindow>();
+        }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            var helpWindow = _serviceProvider.GetRequiredService<HelpWindow>();
+            helpWindow.ShowDialog();
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = _serviceProvider.GetRequiredService<SettingsWindow>();
+            settingsWindow.SettingsChanged += OnSettingsChanged;
+            settingsWindow.ShowDialog();
+        }
+
+        private void OnSettingsChanged(object sender, SettingsChangedEventArgs e)
+        {
+            if (MainContentArea.Content is HomeWindow homeView)
+            {
+                homeView.UpdateSettings(_appSettings, e.WasResetToDefaults);
+            }
+            SetupUpdateTimer();
         }
     }
-    
-    // Método que maneja la navegación desde el Sidebar
-    private void OnSidebarNavigationRequested(string viewTag)
-    {
-      switch (viewTag)
-      {
-        case "Home":
-          LoadHomeView();
-          break;
-        case "Export":
-          LoadExportView();
-          break;
-        case "Settings":
-          btnSettings_Click(null, null);
-          break;
-        case "Help":
-          btnHelp_Click(null, null);
-          break;
-        default:
-          break;
-      }
-    }
-
-    // Por si tengo otros botones que usen este método
-    private void MenuButton_Click(object sender, RoutedEventArgs e)
-    {
-      // El 'sender' del evento que nos llega es el botón original que se pulsó.
-      var button = e.OriginalSource as Button;
-      if (button == null) return;
-
-      string viewTag = button.Tag as string;
-      OnSidebarNavigationRequested(viewTag);
-    }
-
-    private void LoadHomeView()
-    {
-      MainContentArea.Content = _homeViewInstance;
-    }
-
-    private void LoadExportView()
-    {
-      MainContentArea.Content = _exportViewInstance;
-    }
-
-    private void btnHelp_Click(object sender, RoutedEventArgs e)
-    {
-      var helpWindow = new HelpWindow(_logService);
-      helpWindow.ShowDialog();
-    }
-
-private void btnSettings_Click(object sender, RoutedEventArgs e)
-    {
-      var settingsWindow = new SettingsWindow(
-          new LogService(), // Añadimos nuevo sistema de LogService para que los logs de Settings no se registren en el MainLog
-          _httpClient,
-          _directoriesCreator,
-          _requests,
-          _status,
-          _appSettings
-      );
-
-      settingsWindow.SettingsChanged += OnSettingsChanged;
-      settingsWindow.ShowDialog();
-    }
-
-    // Metodo para actualizar en Home las rutas de hashes predeterminadas
-    private void OnSettingsChanged(object sender, SettingsChangedEventArgs e)
-    {
-      _homeViewInstance?.UpdateSettings(_appSettings, e.WasResetToDefaults);
-      SetupUpdateTimer(); // Start or stop the timer based on the new settings
-    }
-  }
 }

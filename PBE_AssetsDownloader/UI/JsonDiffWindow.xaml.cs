@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using PBE_AssetsDownloader.UI.Helpers;
 using PBE_AssetsDownloader.UI.Dialogs;
+using PBE_AssetsDownloader.Services;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -26,17 +27,20 @@ namespace PBE_AssetsDownloader.UI
         private SideBySideDiffModel _diffModel;
         private DiffPanelNavigation _diffPanelNavigation;
         private bool _isWordLevelDiff = false;
-        private string _oldJson, _newJson;
+        private readonly CustomMessageBoxService _customMessageBoxService;
 
-        public JsonDiffWindow(string oldJson, string newJson)
+        public JsonDiffWindow(CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
-            _oldJson = oldJson;
-            _newJson = newJson;
+            _customMessageBoxService = customMessageBoxService;
             ConfigureEditors();
             LoadJsonSyntaxHighlighting();
-            _ = DisplayDiffAsync();
             SetupScrollSync();
+        }
+
+        public void LoadDiff(string oldJson, string newJson)
+        {
+            _ = DisplayDiffAsync(oldJson, newJson);
         }
 
         private void ConfigureEditors()
@@ -83,10 +87,10 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
-        private async Task DisplayDiffAsync()
+        private async Task DisplayDiffAsync(string oldJson, string newJson)
         {
-            var formattedOldJson = JsonDiffHelper.FormatJson(_oldJson);
-            var formattedNewJson = JsonDiffHelper.FormatJson(_newJson);
+            var formattedOldJson = JsonDiffHelper.FormatJson(oldJson);
+            var formattedNewJson = JsonDiffHelper.FormatJson(newJson);
 
             await Task.Run(() =>
             {
@@ -94,13 +98,12 @@ namespace PBE_AssetsDownloader.UI
                 _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson, true);
             });
 
-            // Check if there are any differences
             if (_diffModel.OldText.Lines.All(l => l.Type == ChangeType.Unchanged) && 
                 _diffModel.NewText.Lines.All(l => l.Type == ChangeType.Unchanged))
             {
                 Dispatcher.Invoke(() =>
                 {
-                    CustomMessageBox.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
+                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
                     Close();
                 });
                 return;
@@ -112,7 +115,6 @@ namespace PBE_AssetsDownloader.UI
             OldJsonContent.Text = normalizedOld.Text;
             NewJsonContent.Text = normalizedNew.Text;
 
-            // Force the layout to be calculated immediately
             OldJsonContent.UpdateLayout();
             NewJsonContent.UpdateLayout();
 
@@ -122,7 +124,6 @@ namespace PBE_AssetsDownloader.UI
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
 
-            // Automatically scroll to the first difference on load
             if (_diffPanelNavigation != null)
             {
                 _diffPanelNavigation.NavigateToNextDifference(0);
@@ -145,11 +146,9 @@ namespace PBE_AssetsDownloader.UI
 
             try
             {
-                // Scroll both editors to the target line
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
 
-                // Move the caret to the target line and focus the editor
                 NewJsonContent.TextArea.Caret.Line = lineNumber;
                 NewJsonContent.TextArea.Caret.Column = 1;
                 NewJsonContent.Focus();

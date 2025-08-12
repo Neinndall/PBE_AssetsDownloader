@@ -1,0 +1,179 @@
+<UserControl x:Class="PBE_AssetsDownloader.UI.ExplorerWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:models="clr-namespace:PBE_AssetsDownloader.UI.Models"
+             xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance models:FileSystemNodeModel}">
+    <UserControl.Resources>
+        <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal" Margin="5,4,0,4">
+                <materialIcons:MaterialIcon Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,4,0">
+                    <materialIcons:MaterialIcon.Style>
+                        <Style TargetType="materialIcons:MaterialIcon">
+                            <Setter Property="Kind" Value="FileOutline" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDirectory}" Value="True">
+                                    <Setter Property="Kind" Value="FolderOutline" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Extension}" Value=".png">
+                                    <Setter Property="Kind" Value="ImageOutline" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Extension}" Value=".jpg">
+                                    <Setter Property="Kind" Value="ImageOutline" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Extension}" Value=".dds">
+                                    <Setter Property="Kind" Value="FileImageOutline" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Extension}" Value=".json">
+                                    <Setter Property="Kind" Value="CodeJson" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Extension}" Value=".txt">
+                                    <Setter Property="Kind" Value="FileDocumentOutline" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Extension}" Value=".lua">
+                                    <Setter Property="Kind" Value="LanguageLua" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialIcons:MaterialIcon.Style>
+                </materialIcons:MaterialIcon>
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+            </StackPanel>
+        </HierarchicalDataTemplate>
+    </UserControl.Resources>
+        <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- CABECERA -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Padding="32,24">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <materialIcons:MaterialIcon Kind="FolderSearchOutline"
+                                             Height="58"
+                                             Width="58"
+                                             Margin="0,0,10,0"
+                                             VerticalAlignment="Center"
+                                             Foreground="{StaticResource AccentBlue}"
+                                             Grid.Column="0"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="EXPLORER" 
+                               FontSize="26" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBlue}"
+                               Margin="0,2,0,0"/>
+                    <TextBlock Text="Explore and manage your downloaded assets" 
+                               FontSize="12" 
+                               Foreground="{StaticResource TextMuted}"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- CUERPO -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250" MinWidth="150"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <TreeView x:Name="FileTreeView" 
+                          Margin="5,10,5,5" 
+                          ItemsSource="{Binding RootNodes}"
+                          SelectedItemChanged="FileTreeView_SelectedItemChanged"
+                          Style="{StaticResource ModernTreeView}">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="Show Info" Tag="Info"/>
+                                        <MenuItem Header="Delete" Tag="Delete"/>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+                <TextBlock x:Name="NoDirectoryMessage"
+                           Text="The 'AssetsDownloaded' folder does not exist. Perform a download to explore the files."
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="10"
+                           Foreground="{StaticResource TextSecondary}"
+                           Visibility="Collapsed"/>
+            </Grid>
+
+            <Border Grid.Column="1" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,0" Margin="0,10" />
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent"/>
+
+            <Grid Grid.Column="2" x:Name="PreviewContainer" Margin="5">
+                <StackPanel x:Name="PreviewPlaceholder"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="Visible">
+                    <materialIcons:MaterialIcon Kind="FileEyeOutline"
+                                                Width="48" Height="48"
+                                                HorizontalAlignment="Center"
+                                                Foreground="{StaticResource TextMuted}"
+                                                Opacity="0.5"/>
+                    <TextBlock x:Name="SelectFileMessage"
+                               Text="SELECT A FILE"
+                               FontSize="18" 
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,16,0,0"/>
+                    <TextBlock x:Name="SelectFileSubMessage"
+                               Text="Select a file from the tree to preview its content"
+                               FontSize="14"
+                               Foreground="{StaticResource TextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,0"
+                               Opacity="0.7"/> 
+                    <TextBlock x:Name="UnsupportedFileMessage"
+                               Text="Preview not available for this file type"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,0"
+                               Visibility="Collapsed"/>
+                </StackPanel>
+                <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
+                <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+                <Grid x:Name="MediaPreviewGrid" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <vlc:VideoView x:Name="VideoView" Grid.Row="0" />
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                        <Button x:Name="PlayButton" Content="Play" Click="PlayButton_Click" Style="{StaticResource ModernButton}"/>
+                        <Button x:Name="PauseButton" Content="Pause" Click="PauseButton_Click" Style="{StaticResource ModernButton}" Margin="5,0"/>
+                        <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" Style="{StaticResource ModernButton}"/>
+                        <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" Value="50" Width="100" ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

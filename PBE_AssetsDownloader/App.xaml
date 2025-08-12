@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="/Themes/Styles.xaml"/>
                 <ResourceDictionary Source="/Themes/Animations.xaml"/> 
                 <ResourceDictionary Source="/Themes/CustomScrollbarStyles.xaml"/> 
+                <ResourceDictionary Source="/Themes/TreeViewStyles.xaml"/> 
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

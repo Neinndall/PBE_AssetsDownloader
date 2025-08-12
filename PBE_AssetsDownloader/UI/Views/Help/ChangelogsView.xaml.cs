@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,15 +26,11 @@ namespace PBE_AssetsDownloader.UI.Views.Help
 
     public partial class ChangelogsView : UserControl
     {
-        private LogService _logService;
+        private readonly LogService _logService;
 
-        public ChangelogsView()
+        public ChangelogsView(LogService logService)
         {
             InitializeComponent();
-        }
-
-        public void ApplySettingsToUI(LogService logService)
-        {
             _logService = logService;
             LoadChangelogs();
         }
@@ -50,7 +45,8 @@ namespace PBE_AssetsDownloader.UI.Views.Help
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to load or parse changelog.txt: {ex.Message}");
+                _logService.LogError("Failed to load or parse changelog.txt. See application_errors.log for details.");
+                _logService.LogCritical(ex, "ChangelogsView.LoadChangelogs Exception");
             }
         }
 

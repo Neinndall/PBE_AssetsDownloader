@@ -64,14 +64,14 @@
                 <CheckBox x:Name="checkBoxCheckJsonData" 
                         Content="Check for files updates" 
                         Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Check for updates to JSON files and their differences."
+                <TextBlock Text="Check for updates to JSON files and their differences"
                          Foreground="{StaticResource TextMuted}" 
                          FontSize="12" 
                          Margin="30,0,0,8" 
                          TextWrapping="Wrap"/>
 
                 <CheckBox x:Name="checkBoxEnableBackgroundUpdates" 
-                        Content="Enable background updates" 
+                        Content="Background updates" 
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Periodically check for updates while the application is running."
                          Foreground="{StaticResource TextMuted}" 
@@ -80,7 +80,7 @@
                          TextWrapping="Wrap"/>
 
                 <!-- Frequency Selector - Visible only when background updates are enabled -->
-                <StackPanel Margin="30,5,0,0">
+                <StackPanel Margin="30,5,0,8">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -103,8 +103,7 @@
                 </StackPanel>
 
                 <CheckBox x:Name="checkBoxEnableDiffHistory"
-                          Content="Enable Difference History"
-                          Margin="0,15,0,0"
+                          Content="Keep a history of file changes"
                           Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Save a history of all JSON file differences detected during updates."
                          Foreground="{StaticResource TextMuted}"

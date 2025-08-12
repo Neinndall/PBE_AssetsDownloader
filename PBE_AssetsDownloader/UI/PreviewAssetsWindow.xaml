@@ -4,12 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PBE_AssetsDownloader.UI"
+        xmlns:info="clr-namespace:PBE_AssetsDownloader.Info"
+        xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Assets Preview"
         Height="860" Width="1400" MinHeight="860" MinWidth="1400"
         Background="#FF1E1E1E"
         FontFamily="Consolas, Courier New"
-        Loaded="LoadAndDisplayAssets_Loaded" 
         Closed="PreviewAssetsWindow_Closed">
 
     <Window.Resources>
@@ -110,6 +112,7 @@
                             BorderThickness="1"
                             CornerRadius="6">
                         <ListBox x:Name="listBoxAssets"
+                                 ItemsSource="{Binding DisplayedAssets}"
                                  Background="Transparent"
                                  BorderThickness="0"
                                  Padding="8"
@@ -117,6 +120,14 @@
                                  FontFamily="Consolas, Courier New" 
                                  FontSize="13"
                                  Foreground="{StaticResource TextPrimary}">
+                            <ListBox.Resources>
+                                <DataTemplate DataType="{x:Type info:AssetInfo}">
+                                    <TextBlock Text="{Binding Name, StringFormat='  {0}'}" Margin="0,2"/>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type sys:String}">
+                                    <TextBlock Text="{Binding}" FontWeight="Bold" Margin="0,4,0,2"/>
+                                </DataTemplate>
+                            </ListBox.Resources>
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="Background" Value="Transparent"/>
@@ -146,6 +157,11 @@
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </ListBox.ItemContainerStyle>
                         </ListBox>
@@ -207,11 +223,14 @@
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Visibility="Visible">
-                                <TextBlock Text="📂" 
-                                          FontSize="48" 
-                                          HorizontalAlignment="Center"
-                                          Margin="0,0,0,16"
-                                          Opacity="0.5"/>
+                            <!-- Icono de carpeta amarillo usando Material.Icons.WPF -->
+                            <materialIcons:MaterialIcon Kind="Folder"
+                                                        Width="48"
+                                                        Height="48"
+                                                        Foreground="Gold"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="0,0,0,16"
+                                                        Opacity="0.5"/>
                                 <TextBlock x:Name="textBlockNoData"
                                           Text="NO ASSET SELECTED"
                                           FontFamily="Consolas, Courier New"

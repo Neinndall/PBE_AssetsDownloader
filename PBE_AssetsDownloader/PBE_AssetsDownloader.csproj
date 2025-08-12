@@ -8,10 +8,9 @@
     <AssemblyVersion>2.1.2.0</AssemblyVersion>
     <FileVersion>2.1.2.0</FileVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
-    <!-- Evita que LibVLC copie sus DLLs al output -->
-    <VlcDoNotCopyNativeLibraries>true</VlcDoNotCopyNativeLibraries>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -20,30 +19,21 @@
     <Company>Neinndall</Company>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
     <PackageReference Include="DiffPlex" Version="1.8.0" />
-    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.9.4" />
+    <PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="SharpCompress" Version="0.40.0" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" IncludeAssets="compile" />
     <PackageReference Include="WindowsAPICodePack" Version="8.0.6" />
     <PackageReference Include="WindowsAPICodePackShell" Version="8.0.6" />
-    <PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
-    <PackageReference Include="SharpCompress" Version="0.40.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="LibVLCSharp.WPF" Version="3.9.4" />
-    <!-- Incluimos solo para compilación -->
-    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" IncludeAssets="compile" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,10 +48,14 @@
     <EmbeddedResource Include="Resources\JsonSyntaxHighlighting.xshd" />
   </ItemGroup>
 
-<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-  <Copy 
-    SourceFiles="$(NuGetPackageRoot)\videolan.libvlc.windows\3.0.21\build\x64\**\*.*" 
-    DestinationFolder="$(LocalAppData)\PBE_AssetsDownloader\libvlc\%(RecursiveDir)" 
-    SkipUnchangedFiles="true" />
-</Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="Exists('$(NuGetPackageRoot)videolan.libvlc.windows\3.0.21\build\x64\')">
+    <ItemGroup>
+      <VlcFiles Include="$(NuGetPackageRoot)videolan.libvlc.windows\3.0.21\build\x64\**\*.*" />
+    </ItemGroup>
+    <Copy 
+      SourceFiles="@(VlcFiles)" 
+      DestinationFolder="$(LocalAppData)\PBE_AssetsDownloader\libvlc\%(VlcFiles.RecursiveDir)" 
+      SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

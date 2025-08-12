@@ -79,7 +79,7 @@
                                Margin="0,2,0,0"/>
                     <TextBlock Text="Explore and manage your downloaded assets" 
                                FontSize="12" 
-                               Foreground="{StaticResource TextSecondary}"
+                               Foreground="{StaticResource TextMuted}"
                                Margin="0,2,0,0"/>
                 </StackPanel>
             </Grid>

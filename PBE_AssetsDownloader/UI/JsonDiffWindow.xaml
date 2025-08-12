@@ -38,7 +38,7 @@
                                    Foreground="{StaticResource AccentBlue}"/>
                         <TextBlock Text="Compare old and new JSON file versions"
                                    FontSize="14"
-                                   Foreground="{StaticResource TextSecondary}"/>
+                                   Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -111,7 +111,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock Text="Content of the previous file"
                                      FontSize="12"
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -161,7 +161,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock Text="Content of the updated file"
                                      FontSize="12"
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
 

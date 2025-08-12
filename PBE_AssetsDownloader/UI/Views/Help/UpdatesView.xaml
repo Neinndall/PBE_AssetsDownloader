@@ -16,7 +16,7 @@
                          Margin="0,4,0,0"/>
             <TextBlock Text="Keep your application up to date with the latest features" 
                          FontSize="14" 
-                         Foreground="{StaticResource TextSecondary}"
+                         Foreground="{StaticResource TextMuted}"
                          Margin="0,2,0,0"/>
         </StackPanel>
 
@@ -36,7 +36,7 @@
                                      Foreground="{StaticResource AccentGreen}"/>
                         <TextBlock Text="Check for the latest version and download updates" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
                 
@@ -72,7 +72,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="About automatic updates and release cycle" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
 

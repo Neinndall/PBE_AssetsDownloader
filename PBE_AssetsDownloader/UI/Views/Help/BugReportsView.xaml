@@ -16,7 +16,7 @@
                          Margin="0,4,0,0"/>
             <TextBlock Text="Report issues and help improve the application" 
                          FontSize="14" 
-                         Foreground="{StaticResource TextSecondary}"
+                         Foreground="{StaticResource TextMuted}"
                          Margin="0,2,0,0"/>
         </StackPanel>
 
@@ -36,7 +36,7 @@
                                      Foreground="{StaticResource AccentOrange}"/>
                         <TextBlock Text="Help us improve by reporting bugs and issues" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
                 
@@ -72,7 +72,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="How to write effective bug reports" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
 

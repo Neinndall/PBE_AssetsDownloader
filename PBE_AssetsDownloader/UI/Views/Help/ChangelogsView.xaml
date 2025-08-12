@@ -16,7 +16,7 @@
                        Margin="0,4,0,0"/>
             <TextBlock Text="Version history and feature updates"
                        FontSize="14"
-                       Foreground="{StaticResource TextSecondary}"
+                       Foreground="{StaticResource TextMuted}"
                        Margin="0,2,0,0"/>
         </StackPanel>
 

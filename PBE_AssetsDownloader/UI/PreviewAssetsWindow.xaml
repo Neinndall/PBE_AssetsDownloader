@@ -43,7 +43,7 @@
                                Foreground="{StaticResource AccentBlue}"/>
                     <TextBlock Text="Browse and preview available assets" 
                                FontSize="14" 
-                               Foreground="{StaticResource TextSecondary}"/>
+                               Foreground="{StaticResource TextMuted}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -75,7 +75,7 @@
                                          Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Select an asset to preview" 
                                          FontSize="12" 
-                                         Foreground="{StaticResource TextSecondary}"/>
+                                         Foreground="{StaticResource TextMuted}"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -97,7 +97,7 @@
                             <TextBlock Text="🔍 Search an asset..."
                                        x:Name="txtSearchPlaceholder"
                                        IsHitTestVisible="False"
-                                       Foreground="{StaticResource TextSecondary}"
+                                       Foreground="{StaticResource TextMuted}"
                                        FontSize="14"
                                        VerticalAlignment="Center"
                                        Margin="12,0,0,0">
@@ -187,7 +187,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock Text="Preview of the selected asset" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
 

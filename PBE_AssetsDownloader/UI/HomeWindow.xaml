@@ -48,7 +48,7 @@
                                    Margin="0,2,0,0"/>
                         <TextBlock Text="Configure directories and start the download process" 
                                    FontSize="12" 
-                                   Foreground="{StaticResource TextSecondary}"
+                                   Foreground="{StaticResource TextMuted}"
                                    Margin="0,2,0,0"/>
                     </StackPanel>
                 </Grid>
@@ -88,7 +88,7 @@
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Configure source and destination directories" 
                                            FontSize="12" 
-                                           Foreground="{StaticResource TextSecondary}"/>
+                                           Foreground="{StaticResource TextMuted}"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -113,7 +113,7 @@
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Select the directory containing new hash files" 
                                            FontSize="12" 
-                                           Foreground="{StaticResource TextSecondary}"
+                                           Foreground="{StaticResource TextMuted}"
                                            Margin="0,2,0,0"/>
                             </StackPanel>
                             <!-- Cuadro alineado -->
@@ -160,7 +160,7 @@
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Select the directory containing old hash files" 
                                            FontSize="12" 
-                                           Foreground="{StaticResource TextSecondary}"
+                                           Foreground="{StaticResource TextMuted}"
                                            Margin="0,2,0,0"/>
                             </StackPanel>
                             <!-- Cuadro alineado -->

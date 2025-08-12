@@ -16,7 +16,7 @@
                        Margin="0,4,0,0"/>
             <TextBlock Text="Information about the application"
                        FontSize="14"
-                       Foreground="{StaticResource TextSecondary}"
+                       Foreground="{StaticResource TextMuted}"
                        Margin="0,2,0,0"/>
         </StackPanel>
 
@@ -36,7 +36,7 @@
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="General information about the application" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
                 <TextBlock Text="This app is designed to automatically download and manage new assets from League of Legends PBE server updates. It helps content creators and developers stay up-to-date with the latest changes and additions to the game."
@@ -62,7 +62,7 @@
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Discover the main functionalities of the application" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextSecondary}"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
 

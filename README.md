@@ -8,8 +8,11 @@ I decided to create this section to provide reliability to the tool I've been de
 GitHub includes a **SHA-256** security code linked to the .rar package. You can find this **SHA-256** number in the [releases of the tool](https://github.com/Neinndall/PBE_AssetsDownloader/releases) section, in the **ASSETS** section. It gives you the option to copy it and verify it with the **VIRUSTOTAL** link I will provide with each version release.
 
 If both the **SHA-256** from **GitHub** and **VIRUSTOTAL** match, it means that the .rar package that was scanned by virustotal has not been modified at any point, so you can confidently verify that the scan was performed on the .rar package of the latest version. With each release, I will provide you with the URL of each virustotal scan with its details and the package name for the version that will appear just above with its details. Most importantly, **SHA-256**, don't forget to check every detail.
+https://www.virustotal.com/gui/file/ece9be08b2c8cb69749c95bdfd357f10decca3a51e028745fb672283fae105e1/details
 
-
+*   **Latest Version v2.1.2.0_hotfix:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/ece9be08b2c8cb69749c95bdfd357f10decca3a51e028745fb672283fae105e1/details)** 
+     *   `(Github: sha256:ece9be08b2c8cb69749c95bdfd357f10decca3a51e028745fb672283fae105e1)` 
+     *   `(VirusTotal: SHA-256 ece9be08b2c8cb69749c95bdfd357f10decca3a51e028745fb672283fae105e1)`
 *   **Latest Version v2.1.2.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/2af31bc328d2077993d69e69c579b1d896b14f8cff67bc78b125a0d4f80a031e/details)** 
      *   `(Github: sha256:2af31bc328d2077993d69e69c579b1d896b14f8cff67bc78b125a0d4f80a031e)` 
      *   `(VirusTotal: SHA-256 2af31bc328d2077993d69e69c579b1d896b14f8cff67bc78b125a0d4f80a031e)`

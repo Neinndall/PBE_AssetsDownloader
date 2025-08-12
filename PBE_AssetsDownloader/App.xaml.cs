@@ -2,6 +2,7 @@ using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
 using Serilog;
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +34,7 @@ namespace PBE_AssetsDownloader
                 .MinimumLevel.Debug()
                 .WriteTo.Debug()
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByExcluding(e => e.Level == LogEventLevel.Fatal) // Exclude only Fatal
+                    .MinimumLevel.Information() // Set minimum level for this sink to Information
                     .WriteTo.File("logs/application.log", rollingInterval: RollingInterval.Day))
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal) // Include only Fatal
@@ -96,6 +97,10 @@ namespace PBE_AssetsDownloader
 
             var logService = ServiceProvider.GetRequiredService<LogService>();
             var customMessageBoxService = ServiceProvider.GetRequiredService<CustomMessageBoxService>();
+
+            // Initialize LibVLC using the centralized manager at application startup
+            VlcManager.Initialize(logService);
+
             SetupGlobalExceptionHandling(logService, customMessageBoxService);
 
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();

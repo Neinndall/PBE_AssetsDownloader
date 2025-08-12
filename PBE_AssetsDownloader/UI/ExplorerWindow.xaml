@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:models="clr-namespace:PBE_AssetsDownloader.UI.Models"
+             xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance models:FileSystemNodeModel}">
@@ -78,7 +79,7 @@
                                Margin="0,2,0,0"/>
                     <TextBlock Text="Explore and manage your downloaded assets" 
                                FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"
+                               Foreground="{StaticResource TextSecondary}"
                                Margin="0,2,0,0"/>
                 </StackPanel>
             </Grid>
@@ -134,21 +135,44 @@
                                                 HorizontalAlignment="Center"
                                                 Foreground="{StaticResource TextMuted}"
                                                 Opacity="0.5"/>
-                    <TextBlock Text="SELECT A FILE"
+                    <TextBlock x:Name="SelectFileMessage"
+                               Text="SELECT A FILE"
                                FontSize="18" 
                                FontWeight="SemiBold"
                                Foreground="{StaticResource TextMuted}"
                                HorizontalAlignment="Center"
                                Margin="0,16,0,0"/>
-                    <TextBlock Text="Select a file from the tree to preview its content"
+                    <TextBlock x:Name="SelectFileSubMessage"
+                               Text="Select a file from the tree to preview its content"
                                FontSize="14"
                                Foreground="{StaticResource TextMuted}"
                                HorizontalAlignment="Center"
                                Margin="0,8,0,0"
-                               Opacity="0.7"/>
+                               Opacity="0.7"/> 
+                    <TextBlock x:Name="UnsupportedFileMessage"
+                               Text="Preview not available for this file type"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,0"
+                               Visibility="Collapsed"/>
                 </StackPanel>
                 <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
                 <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+                <Grid x:Name="MediaPreviewGrid" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <vlc:VideoView x:Name="VideoView" Grid.Row="0" />
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                        <Button x:Name="PlayButton" Content="Play" Click="PlayButton_Click" Style="{StaticResource ModernButton}"/>
+                        <Button x:Name="PauseButton" Content="Pause" Click="PauseButton_Click" Style="{StaticResource ModernButton}" Margin="5,0"/>
+                        <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" Style="{StaticResource ModernButton}"/>
+                        <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" Value="50" Width="100" ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

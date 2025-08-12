@@ -10,6 +10,8 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
+    <!-- Evita que LibVLC copie sus DLLs al output -->
+    <VlcDoNotCopyNativeLibraries>true</VlcDoNotCopyNativeLibraries>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -39,8 +41,9 @@
     <PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
     <PackageReference Include="SharpCompress" Version="0.40.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="LibVLCSharp.WPF" Version="3.8.4" />
-    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.9.4" />
+    <!-- Incluimos solo para compilación -->
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" IncludeAssets="compile" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,4 +58,10 @@
     <EmbeddedResource Include="Resources\JsonSyntaxHighlighting.xshd" />
   </ItemGroup>
 
+<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Copy 
+    SourceFiles="$(NuGetPackageRoot)\videolan.libvlc.windows\3.0.21\build\x64\**\*.*" 
+    DestinationFolder="$(LocalAppData)\PBE_AssetsDownloader\libvlc\%(RecursiveDir)" 
+    SkipUnchangedFiles="true" />
+</Target>
 </Project>

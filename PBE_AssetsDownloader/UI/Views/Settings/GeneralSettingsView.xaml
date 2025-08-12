@@ -28,7 +28,7 @@
                          Margin="0,4,0,0"/>
             <TextBlock Text="Configure basic application behavior and synchronization options" 
                          FontSize="14" 
-                         Foreground="{StaticResource TextMuted}"
+                         Foreground="{StaticResource TextSecondary}"
                          Margin="0,2,0,0"/>
         </StackPanel>
 
@@ -48,7 +48,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Manage automatic hash database updates" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
                 </StackPanel>
                 
@@ -56,7 +56,7 @@
                         Content="Synchronization with CDTB" 
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
-                         Foreground="{StaticResource TextMuted}" 
+                         Foreground="{StaticResource TextSecondary}" 
                          FontSize="12" 
                          Margin="30,0,0,8" 
                          TextWrapping="Wrap"/>
@@ -64,8 +64,8 @@
                 <CheckBox x:Name="checkBoxCheckJsonData" 
                         Content="Check for files updates" 
                         Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Check for updates to JSON files and their differences."
-                         Foreground="{StaticResource TextMuted}" 
+                <TextBlock Text="Check for updates to JSON files and their differences"
+                         Foreground="{StaticResource TextSecondary}" 
                          FontSize="12" 
                          Margin="30,0,0,8" 
                          TextWrapping="Wrap"/>
@@ -74,7 +74,7 @@
                         Content="Check for updates automatically" 
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Periodically check for updates while the application is running."
-                         Foreground="{StaticResource TextMuted}" 
+                         Foreground="{StaticResource TextSecondary}" 
                          FontSize="12" 
                          Margin="30,0,0,8" 
                          TextWrapping="Wrap"/>
@@ -106,7 +106,7 @@
                           Content="Keep a history of file changes"
                           Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Save a history of all JSON file differences detected during updates."
-                         Foreground="{StaticResource TextMuted}"
+                         Foreground="{StaticResource TextSecondary}"
                          FontSize="12"
                          Margin="30,0,0,8"
                          TextWrapping="Wrap"/>
@@ -129,7 +129,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Control how hash files are handled during updates" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
                 </StackPanel>
                 
@@ -137,7 +137,7 @@
                         Content="Auto-replace outdated hashes" 
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Automatically replace old hash files with newer versions"
-                         Foreground="{StaticResource TextMuted}" 
+                         Foreground="{StaticResource TextSecondary}" 
                          FontSize="12" 
                          Margin="30,0,0,8" 
                          TextWrapping="Wrap"/>
@@ -146,7 +146,7 @@
                         Content="Create backups before replacing" 
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Backup existing files to prevent data loss during updates"
-                         Foreground="{StaticResource TextMuted}" 
+                         Foreground="{StaticResource TextSecondary}" 
                          FontSize="12" 
                          Margin="30,0,0,8" 
                          TextWrapping="Wrap"/>
@@ -169,7 +169,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Configure scanning behavior" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
                 </StackPanel>
                 
@@ -177,7 +177,7 @@
                         Content="Scan-only mode (no downloads)" 
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Only identify differences without downloading or modifying files"
-                         Foreground="{StaticResource TextMuted}" 
+                         Foreground="{StaticResource TextSecondary}" 
                          FontSize="12" 
                          Margin="30,0,0,0" 
                          TextWrapping="Wrap"/>

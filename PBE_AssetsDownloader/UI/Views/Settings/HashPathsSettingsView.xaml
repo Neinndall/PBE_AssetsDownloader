@@ -16,7 +16,7 @@
                          Margin="0,4,0,0"/>
             <TextBlock Text="Configure default directories for hash file storage" 
                          FontSize="14" 
-                         Foreground="{StaticResource TextMuted}"
+                         Foreground="{StaticResource TextSecondary}"
                          Margin="0,2,0,0"/>
         </StackPanel>
 
@@ -36,7 +36,7 @@
                                      Foreground="{StaticResource AccentGreen}"/>
                         <TextBlock Text="Location where new hash files will be stored" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
                 </StackPanel>
                 
@@ -80,7 +80,7 @@
                                      Foreground="{StaticResource AccentOrange}"/>
                         <TextBlock Text="Location where existing hash files are located" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
                 </StackPanel>
                 

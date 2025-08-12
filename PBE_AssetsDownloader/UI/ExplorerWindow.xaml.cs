@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using PBE_AssetsDownloader.UI.Dialogs;
+using LibVLCSharp.Shared;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -16,6 +17,8 @@ namespace PBE_AssetsDownloader.UI
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly LibVLC _libVLC;
+        private readonly MediaPlayer _mediaPlayer;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
 
@@ -26,9 +29,27 @@ namespace PBE_AssetsDownloader.UI
             _logService = logService;
             _customMessageBoxService = customMessageBoxService;
             RootNodes = new ObservableCollection<FileSystemNodeModel>();
+
+            _libVLC = new LibVLC();
+            _libVLC.Log += (sender, e) => {
+                // Log VLC messages to our log file for debugging purposes
+                _logService.LogDebug($"[LibVLC] {e.Level}: {e.Message} ({e.Module}:{e.SourceFile})");
+            };
+
+            _mediaPlayer = new MediaPlayer(_libVLC);
+            VideoView.MediaPlayer = _mediaPlayer;
+
             DataContext = this;
             LoadDirectory();
             FileTreeView.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Click));
+            this.Unloaded += ExplorerWindow_Unloaded;
+        }
+
+        private void ExplorerWindow_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayer.Stop();
+            _mediaPlayer.Dispose();
+            _libVLC.Dispose();
         }
 
         private void LoadDirectory()
@@ -76,9 +97,13 @@ namespace PBE_AssetsDownloader.UI
                 {
                     ShowTextPreview(selectedNode.FullPath);
                 }
+                else if (IsVideoExtension(selectedNode.Extension) || IsAudioExtension(selectedNode.Extension))
+                {
+                    ShowMediaPreview(selectedNode.FullPath);
+                }
                 else
                 {
-                    ResetPreview();
+                    ShowUnsupportedPreview(selectedNode.Extension);
                 }
             }
             catch (Exception ex)
@@ -91,9 +116,9 @@ namespace PBE_AssetsDownloader.UI
 
         private void ShowImagePreview(string path)
         {
-            TextPreview.Visibility = Visibility.Collapsed;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+            ResetPreview();
             ImagePreview.Visibility = Visibility.Visible;
+            PreviewPlaceholder.Visibility = Visibility.Collapsed;
 
             var bitmap = new BitmapImage();
             bitmap.BeginInit();
@@ -105,18 +130,48 @@ namespace PBE_AssetsDownloader.UI
 
         private void ShowTextPreview(string path)
         {
-            ImagePreview.Visibility = Visibility.Collapsed;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+            ResetPreview();
             TextPreview.Visibility = Visibility.Visible;
-
+            PreviewPlaceholder.Visibility = Visibility.Collapsed;
             TextPreview.Text = File.ReadAllText(path);
+        }
+
+        private void ShowMediaPreview(string path)
+        {
+            ResetPreview();
+            MediaPreviewGrid.Visibility = Visibility.Visible;
+            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+
+            var media = new Media(_libVLC, path, FromType.FromPath);
+            _mediaPlayer.Play(media);
+            media.Dispose(); // Dispose of the media object after it's been loaded
+        }
+
+        private void ShowUnsupportedPreview(string extension)
+        {
+            ResetPreview();
+            PreviewPlaceholder.Visibility = Visibility.Visible;
+            SelectFileMessage.Visibility = Visibility.Collapsed;
+            SelectFileSubMessage.Visibility = Visibility.Collapsed;
+            UnsupportedFileMessage.Visibility = Visibility.Visible;
+            UnsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
         }
 
         private void ResetPreview()
         {
+            PreviewPlaceholder.Visibility = Visibility.Visible;
+            SelectFileMessage.Visibility = Visibility.Visible;
+            SelectFileSubMessage.Visibility = Visibility.Visible;
+            UnsupportedFileMessage.Visibility = Visibility.Collapsed;
+
             ImagePreview.Visibility = Visibility.Collapsed;
             TextPreview.Visibility = Visibility.Collapsed;
-            PreviewPlaceholder.Visibility = Visibility.Visible;
+            MediaPreviewGrid.Visibility = Visibility.Collapsed;
+            
+            if (_mediaPlayer.IsPlaying)
+            {
+                _mediaPlayer.Stop();
+            }
         }
 
         private bool IsImageExtension(string extension)
@@ -127,6 +182,39 @@ namespace PBE_AssetsDownloader.UI
         private bool IsTextExtension(string extension)
         {
             return extension == ".txt" || extension == ".json" || extension == ".lua" || extension == ".log";
+        }
+
+        private bool IsAudioExtension(string extension)
+        {
+            return extension == ".wav" || extension == ".mp3" || extension == ".ogg";
+        }
+
+        private bool IsVideoExtension(string extension)
+        {
+            return extension == ".mp4" || extension == ".webm";
+        }
+
+        private void PlayButton_Click(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayer.Play();
+        }
+
+        private void PauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayer.Pause();
+        }
+
+        private void StopButton_Click(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayer.Stop();
+        }
+
+        private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_mediaPlayer != null)
+            {
+                _mediaPlayer.Volume = (int)e.NewValue;
+            }
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -168,8 +256,6 @@ namespace PBE_AssetsDownloader.UI
                     {
                         File.Delete(node.FullPath);
                     }
-                    // This is tricky, need to find the parent and remove it from the collection
-                    // For now, just reload the whole tree
                     RootNodes.Clear();
                     LoadDirectory();
                     _logService.Log($"Deleted: {node.FullPath}");

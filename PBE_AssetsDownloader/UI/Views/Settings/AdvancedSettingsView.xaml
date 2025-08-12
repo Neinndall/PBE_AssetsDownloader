@@ -16,7 +16,7 @@
                          Margin="0,4,0,0"/>
             <TextBlock Text="Performance and advanced configuration options" 
                          FontSize="14" 
-                         Foreground="{StaticResource TextMuted}"
+                         Foreground="{StaticResource TextSecondary}"
                          Margin="0,2,0,0"/>
         </StackPanel>
 
@@ -36,7 +36,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Manage the list of JSON files and directories to monitor for updates" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -100,7 +100,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Review past JSON file comparisons"
                                      FontSize="12"
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
                 </StackPanel>
 

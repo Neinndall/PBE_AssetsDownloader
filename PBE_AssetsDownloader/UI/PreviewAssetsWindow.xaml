@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PBE_AssetsDownloader.UI"
         xmlns:info="clr-namespace:PBE_AssetsDownloader.Info"
+        xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Assets Preview"
@@ -42,7 +43,7 @@
                                Foreground="{StaticResource AccentBlue}"/>
                     <TextBlock Text="Browse and preview available assets" 
                                FontSize="14" 
-                               Foreground="{StaticResource TextMuted}"/>
+                               Foreground="{StaticResource TextSecondary}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -74,7 +75,7 @@
                                          Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Select an asset to preview" 
                                          FontSize="12" 
-                                         Foreground="{StaticResource TextMuted}"/>
+                                         Foreground="{StaticResource TextSecondary}"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -96,7 +97,7 @@
                             <TextBlock Text="🔍 Search an asset..."
                                        x:Name="txtSearchPlaceholder"
                                        IsHitTestVisible="False"
-                                       Foreground="{StaticResource TextMuted}"
+                                       Foreground="{StaticResource TextSecondary}"
                                        FontSize="14"
                                        VerticalAlignment="Center"
                                        Margin="12,0,0,0">
@@ -186,7 +187,7 @@
                                      Foreground="{StaticResource TextPrimary}"/>
                             <TextBlock Text="Preview of the selected asset" 
                                      FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
+                                     Foreground="{StaticResource TextSecondary}"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -222,11 +223,14 @@
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Visibility="Visible">
-                                <TextBlock Text="📂" 
-                                          FontSize="48" 
-                                          HorizontalAlignment="Center"
-                                          Margin="0,0,0,16"
-                                          Opacity="0.5"/>
+                            <!-- Icono de carpeta amarillo usando Material.Icons.WPF -->
+                            <materialIcons:MaterialIcon Kind="Folder"
+                                                        Width="48"
+                                                        Height="48"
+                                                        Foreground="Gold"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="0,0,0,16"
+                                                        Opacity="0.5"/>
                                 <TextBlock x:Name="textBlockNoData"
                                           Text="NO ASSET SELECTED"
                                           FontFamily="Consolas, Courier New"

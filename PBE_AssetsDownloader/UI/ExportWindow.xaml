@@ -51,7 +51,7 @@
                                    Margin="0,2,0,0"/>
                         <TextBlock Text="Configure export settings and download assets manually" 
                                    FontSize="12" 
-                                   Foreground="{StaticResource TextMuted}"
+                                   Foreground="{StaticResource TextSecondary}"
                                    Margin="0,2,0,0"/>
                     </StackPanel>
                 </Grid>
@@ -81,7 +81,7 @@
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Set up your source and destination folders" 
                                            FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"/>
+                                           Foreground="{StaticResource TextSecondary}"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -107,7 +107,7 @@
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Select the directory containing differences files" 
                                            FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"
+                                           Foreground="{StaticResource TextSecondary}"
                                            Margin="0,2,0,0"/>
                             </StackPanel>
 
@@ -157,7 +157,7 @@
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Select the directory where assets will be downloaded" 
                                            FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"
+                                           Foreground="{StaticResource TextSecondary}"
                                            Margin="0,2,0,0"/>
                             </StackPanel>
 
@@ -204,7 +204,7 @@
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Choose which asset types to include" 
                                            FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"/>
+                                           Foreground="{StaticResource TextSecondary}"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -232,7 +232,7 @@
                                                Foreground="{StaticResource TextPrimary}"/>
                                     <TextBlock Text="Choose which asset types should be included in the export"
                                                FontSize="12"
-                                               Foreground="{StaticResource TextMuted}"
+                                               Foreground="{StaticResource TextSecondary}"
                                                Margin="0,2,0,0"/>
                                 </StackPanel>
 
@@ -304,7 +304,7 @@
                                                Foreground="{StaticResource TextPrimary}"/>
                                     <TextBlock Text="Preview or download the selected assets" 
                                                FontSize="12" 
-                                               Foreground="{StaticResource TextMuted}"/>
+                                               Foreground="{StaticResource TextSecondary}"/>
                                 </StackPanel>
                                 
                                 <StackPanel Orientation="Horizontal" 

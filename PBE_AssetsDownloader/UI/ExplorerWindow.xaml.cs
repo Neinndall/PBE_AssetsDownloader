@@ -40,9 +40,14 @@ namespace PBE_AssetsDownloader.UI
             VideoView.MediaPlayer = _mediaPlayer;
 
             DataContext = this;
-            LoadDirectory();
+            this.Loaded += ExplorerWindow_Loaded;
             FileTreeView.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Click));
             this.Unloaded += ExplorerWindow_Unloaded;
+        }
+
+        private void ExplorerWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            LoadDirectory();
         }
 
         private void ExplorerWindow_Unloaded(object sender, RoutedEventArgs e)

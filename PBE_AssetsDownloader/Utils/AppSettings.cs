@@ -48,7 +48,7 @@ namespace PBE_AssetsDownloader.Utils
 
             foreach (var urlToken in jsonFilesArray)
             {
-                string url = urlToken.ToString();
+                string url = urlToken.ToString(); // Correct way to get the string value
                 if (!string.IsNullOrEmpty(url))
                 {
                     if (url.EndsWith("/"))
@@ -73,11 +73,13 @@ namespace PBE_AssetsDownloader.Utils
         {
             return GetDefaultSettings();
         }
-
+        
+        // Ensure lists are not null if they are missing from the JSON
         if (settings.MonitoredJsonDirectories == null) settings.MonitoredJsonDirectories = new List<string>();
         if (settings.MonitoredJsonFiles == null) settings.MonitoredJsonFiles = new List<string>();
         if (settings.DiffHistory == null) settings.DiffHistory = new List<JsonDiffHistoryEntry>();
 
+        // Handle backward compatibility for JsonDataSizes (old format with full URLs as keys)
         if (jObject.TryGetValue("JsonDataSizes", out var jsonDataSizesToken) && jsonDataSizesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
         {
             var oldSizes = jsonDataSizesToken.ToObject<Dictionary<string, long>>();
@@ -86,6 +88,7 @@ namespace PBE_AssetsDownloader.Utils
                 settings.JsonDataModificationDates = oldSizes.ToDictionary(kvp => Path.GetFileName(kvp.Key), kvp => DateTime.MinValue);
             }
         }
+        // Handle loading JsonDataModificationDates (new format with filenames as keys)
         else if (jObject.TryGetValue("JsonDataModificationDates", out var jsonDataDatesToken) && jsonDataDatesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
         {
             settings.JsonDataModificationDates = jsonDataDatesToken.ToObject<Dictionary<string, DateTime>>();
@@ -109,7 +112,7 @@ namespace PBE_AssetsDownloader.Utils
         CheckJsonDataUpdates = false,
         EnableDiffHistory = false,
         EnableBackgroundUpdates = false,
-        BackgroundUpdateFrequency = 10,
+        BackgroundUpdateFrequency = 10, // Default to 10 minutes
         
         NewHashesPath = null,
         OldHashesPath = null,

@@ -5,7 +5,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
 {
-    public partial class HashPathsSettingsView : UserControl, ISettingsView
+    public partial class HashPathsSettingsView : UserControl
     {
         private AppSettings _appSettings;
         private readonly LogService _logService;
@@ -58,9 +58,6 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
         }
         
-        private void UserControl_Unloaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            SaveSettings();
-        }
+        
     }
 }

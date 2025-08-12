@@ -219,6 +219,7 @@ namespace PBE_AssetsDownloader.UI
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
             var settingsWindow = _serviceProvider.GetRequiredService<SettingsWindow>();
+            settingsWindow.Owner = this;
             settingsWindow.SettingsChanged += OnSettingsChanged;
             settingsWindow.ShowDialog();
         }

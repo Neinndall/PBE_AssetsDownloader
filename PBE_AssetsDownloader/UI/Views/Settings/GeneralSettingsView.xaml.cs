@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
 {
-    public partial class GeneralSettingsView : UserControl, ISettingsView
+    public partial class GeneralSettingsView : UserControl
     {
         private AppSettings _appSettings;
 
@@ -43,17 +43,6 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
         }
 
-        private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (_appSettings != null)
-            {
-                ApplySettingsToUI(_appSettings);
-            }
-        }
-
-        private void UserControl_Unloaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            SaveSettings();
-        }
+        
     }
 }

@@ -4,7 +4,7 @@ using PBE_AssetsDownloader.Utils;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
 {
-    public partial class LogsSettingsView : UserControl, ISettingsView
+    public partial class LogsSettingsView : UserControl
     {
         private LogService _logService;
 
@@ -27,9 +27,11 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             // We set the log output when the control is loaded instead.
         }
 
-        private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        public void SaveSettings()
         {
-            _logService.SetLogOutput(richTextBoxLogs);
+            // This view doesn't save any settings, but it needs to implement the interface.
         }
+
+        
     }
 }

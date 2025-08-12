@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
 {
-    public partial class AdvancedSettingsView : UserControl, ISettingsView
+    public partial class AdvancedSettingsView : UserControl
     {
         private AppSettings _appSettings;
         private readonly LogService _logService;
@@ -65,10 +65,7 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
         }
         
-        private void UserControl_Unloaded(object sender, RoutedEventArgs e)
-        {
-            SaveSettings();
-        }
+        
 
         private void btnAddJsonFile_Click(object sender, RoutedEventArgs e)
         {

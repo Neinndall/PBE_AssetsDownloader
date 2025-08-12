@@ -4,9 +4,9 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <ApplicationIcon>Resources\img\logo.ico</ApplicationIcon>
-    <Version>2.1.1.1</Version>
-    <AssemblyVersion>2.1.1.1</AssemblyVersion>
-    <FileVersion>2.1.1.1</FileVersion>
+    <Version>2.1.2.0</Version>
+    <AssemblyVersion>2.1.2.0</AssemblyVersion>
+    <FileVersion>2.1.2.0</FileVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
@@ -39,6 +39,8 @@
     <PackageReference Include="Material.Icons.WPF" Version="2.4.1" />
     <PackageReference Include="SharpCompress" Version="0.40.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.8.4" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
   </ItemGroup>
 
   <ItemGroup>

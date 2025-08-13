@@ -41,14 +41,29 @@
                 </StackPanel>
 
                 <ListBox x:Name="JsonFilesListBox"
-                         Background="{StaticResource DarkBackground}"
-                         BorderBrush="{StaticResource BorderColor}"
-                         BorderThickness="1"
-                         Foreground="{StaticResource TextPrimary}"
                          Height="250"
                          Margin="0,0,0,12"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.Style>
+                        <Style TargetType="ListBox">
+                            <Setter Property="Background" Value="{StaticResource SidebarBackground}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBox">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                            <ScrollViewer Focusable="false" Padding="{TemplateBinding Padding}" Background="Transparent">
+                                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.Style>
                     <ListBox.Resources>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="Background" Value="Transparent"/>

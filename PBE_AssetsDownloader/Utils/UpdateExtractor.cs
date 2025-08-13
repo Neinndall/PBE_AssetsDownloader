@@ -78,10 +78,12 @@ namespace PBE_AssetsDownloader.Utils
                 sb.AppendLine("echo Copying new files... >> %LOGFILE%");
                 sb.AppendLine($"xcopy \"{_directoriesCreator.UpdateTempExtractionPath}\" \"{_directoriesCreator.AppDirectory}\" /E /Y /I >> %LOGFILE% 2>&1");
 
-                if (preserveConfig && File.Exists(_directoriesCreator.UpdateTempBackupConfigFilePath))
+                if (preserveConfig)
                 {
-                    sb.AppendLine("echo Restoring config.json from backup... >> %LOGFILE%");
-                    sb.AppendLine($"move \"{_directoriesCreator.UpdateTempBackupConfigFilePath}\" \"{_directoriesCreator.CurrentConfigFilePath}\" >> %LOGFILE% 2>&1");
+                    sb.AppendLine($"if exist \"{_directoriesCreator.UpdateTempBackupConfigFilePath}\" (");
+                    sb.AppendLine("  echo Restoring config.json from backup... >> %LOGFILE%");
+                    sb.AppendLine($"  move \"{_directoriesCreator.UpdateTempBackupConfigFilePath}\" \"{_directoriesCreator.CurrentConfigFilePath}\" >> %LOGFILE% 2>&1");
+                    sb.AppendLine(" ) ");
                 }
 
                 sb.AppendLine("echo Cleaning up temporary folder... >> %LOGFILE%");

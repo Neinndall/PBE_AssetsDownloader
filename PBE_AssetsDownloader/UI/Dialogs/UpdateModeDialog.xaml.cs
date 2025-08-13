@@ -5,8 +5,8 @@ namespace PBE_AssetsDownloader.UI.Dialogs
     public enum UpdateMode
     {
         None,
-        Clean,
-        Replace
+        CleanWithoutSaving,
+        CleanWithSaving
     }
 
     public partial class UpdateModeDialog : Window
@@ -18,15 +18,15 @@ namespace PBE_AssetsDownloader.UI.Dialogs
             InitializeComponent();
         }
 
-        private void CleanInstallButton_Click(object sender, RoutedEventArgs e)
+        private void CleanUpdateNoSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            SelectedMode = UpdateMode.Clean;
+            SelectedMode = UpdateMode.CleanWithoutSaving;
             DialogResult = true;
         }
 
-        private void ReplaceInstallButton_Click(object sender, RoutedEventArgs e)
+        private void CleanUpdateWithSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            SelectedMode = UpdateMode.Replace;
+            SelectedMode = UpdateMode.CleanWithSaving;
             DialogResult = true;
         }
 

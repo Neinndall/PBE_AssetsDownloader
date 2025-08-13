@@ -31,18 +31,20 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="15,20">
+            <StackPanel Grid.Row="1" Margin="15,20">
                 <TextBlock Text="Choose Update Method" Foreground="{StaticResource TextPrimary}" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
-                <Button x:Name="CleanInstallButton" Style="{StaticResource ModernButton}" Margin="0,5" Click="CleanInstallButton_Click">
+                
+                <Button x:Name="CleanUpdateWithSaveButton" Style="{StaticResource ModernButton}" Margin="0,5" Click="CleanUpdateWithSaveButton_Click" Height="65" HorizontalContentAlignment="Left" Padding="15,0">
                     <StackPanel>
-                        <TextBlock Text="Clean Update (Recommended)" FontWeight="Bold"/>
-                        <TextBlock Text="Ensures no conflicts by performing a clean installation. Your settings will be saved and restored." TextWrapping="Wrap" FontSize="12"/>
+                        <TextBlock Text="Clean Update (Save Settings)" FontWeight="Bold"/>
+                        <TextBlock Text="This installation method is useful if the update is a hotfix; it ensures you don't lose your app settings. Your settings will be saved." TextWrapping="Wrap" FontSize="12"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="ReplaceInstallButton" Style="{StaticResource SecondaryButton}" Margin="0,10,0,5" Click="ReplaceInstallButton_Click">
+                
+                <Button x:Name="CleanUpdateNoSaveButton" Style="{StaticResource SecondaryButton}" Margin="0,10,0,5" Click="CleanUpdateNoSaveButton_Click" Height="65" HorizontalContentAlignment="Left" Padding="15,0">
                     <StackPanel>
-                        <TextBlock Text="Quick Update" FontWeight="Bold"/>
-                        <TextBlock Text="Replaces application files. Faster, but may leave behind obsolete files." TextWrapping="Wrap" FontSize="12"/>
+                        <TextBlock Text="Quick Update (Not Save Settings)" FontWeight="Bold"/>
+                        <TextBlock Text="This installation method is useful if the update is a big update; it's recommended to use this option. Your settings will not be saved." TextWrapping="Wrap" FontSize="12"/>
                     </StackPanel>
                 </Button>
             </StackPanel>

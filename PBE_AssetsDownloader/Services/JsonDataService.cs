@@ -229,7 +229,7 @@ namespace PBE_AssetsDownloader.Services
 
                         if (downloadSuccess)
                         {
-                            if (_appSettings.EnableDiffHistory && File.Exists(oldFilePath))
+                            if (_appSettings.SaveDiffHistory && File.Exists(oldFilePath))
                             {
                                 string historyFileName = $"{Path.GetFileNameWithoutExtension(key)}_{DateTime.Now:yyyyMMddHHmmss}.json";
                                 string historyFilePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, historyFileName);

@@ -87,9 +87,9 @@ namespace PBE_AssetsDownloader.UI
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
                 _appSettings.NewHashesPath = defaultSettings.NewHashesPath;
                 _appSettings.OldHashesPath = defaultSettings.OldHashesPath;
-                _appSettings.EnableDiffHistory = defaultSettings.EnableDiffHistory;
-                _appSettings.EnableBackgroundUpdates = defaultSettings.EnableBackgroundUpdates;
-                _appSettings.BackgroundUpdateFrequency = defaultSettings.BackgroundUpdateFrequency;
+                _appSettings.SaveDiffHistory = defaultSettings.SaveDiffHistory;
+                _appSettings.BackgroundUpdates = defaultSettings.BackgroundUpdates;
+                _appSettings.UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
                 _appSettings.MonitoredJsonDirectories = new(defaultSettings.MonitoredJsonDirectories);
                 _appSettings.MonitoredJsonFiles = new(defaultSettings.MonitoredJsonFiles);
                 _appSettings.DiffHistory = new(defaultSettings.DiffHistory);

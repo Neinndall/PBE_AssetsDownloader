@@ -70,7 +70,7 @@
                          Margin="30,0,0,8" 
                          TextWrapping="Wrap"/>
 
-                <CheckBox x:Name="checkBoxEnableBackgroundUpdates" 
+                <CheckBox x:Name="checkBoxBackgroundUpdates" 
                         Content="Background updates" 
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Periodically check for updates while the application is running."
@@ -85,7 +85,7 @@
                         <Style TargetType="StackPanel">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=checkBoxEnableBackgroundUpdates}" Value="True">
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=checkBoxBackgroundUpdates}" Value="True">
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
                             </Style.Triggers>
@@ -102,9 +102,9 @@
                               ItemsSource="{StaticResource UpdateFrequencies}"/>
                 </StackPanel>
 
-                <CheckBox x:Name="checkBoxEnableDiffHistory"
-                          Content="Keep a history of file changes"
-                          Style="{StaticResource ModernCheckBox}"/>
+                <CheckBox x:Name="checkBoxSaveDiffHistory" 
+                        Content="Keep a history of file changes"
+                        Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Save a history of all JSON file differences detected during updates."
                          Foreground="{StaticResource TextMuted}"
                          FontSize="12"

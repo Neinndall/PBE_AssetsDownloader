@@ -131,13 +131,13 @@ namespace PBE_AssetsDownloader.Utils
 
                             if (dialogResult == true)
                             {
-                                if (dialog.SelectedMode == UpdateMode.Clean)
-                                {
-                                    _updateExtractor.ExtractAndRestart(downloadPath, false);
-                                }
-                                else if (dialog.SelectedMode == UpdateMode.Replace)
+                                if (dialog.SelectedMode == UpdateMode.CleanWithSaving)
                                 {
                                     _updateExtractor.ExtractAndRestart(downloadPath, true);
+                                }
+                                else if (dialog.SelectedMode == UpdateMode.CleanWithoutSaving)
+                                {
+                                    _updateExtractor.ExtractAndRestart(downloadPath, false);
                                 }
                             }
                             else

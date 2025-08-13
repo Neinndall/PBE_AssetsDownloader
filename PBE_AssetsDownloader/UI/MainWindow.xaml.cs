@@ -71,13 +71,13 @@ namespace PBE_AssetsDownloader.UI
                    _appSettings.CreateBackUpOldHashes ||
                    _appSettings.OnlyCheckDifferences ||
                    _appSettings.CheckJsonDataUpdates ||
-                   _appSettings.EnableDiffHistory ||
-                   _appSettings.EnableBackgroundUpdates;
+                   _appSettings.SaveDiffHistory ||
+                   _appSettings.BackgroundUpdates;
         }
 
         private void SetupUpdateTimer()
         {
-            if (_appSettings.EnableBackgroundUpdates)
+            if (_appSettings.BackgroundUpdates)
             {
                 if (_updateTimer == null)
                 {
@@ -85,9 +85,9 @@ namespace PBE_AssetsDownloader.UI
                     _updateTimer.Elapsed += async (sender, e) => await CheckForAllUpdatesAsync(true);
                     _updateTimer.AutoReset = true;
                 }
-                _updateTimer.Interval = _appSettings.BackgroundUpdateFrequency * 60 * 1000;
+                _updateTimer.Interval = _appSettings.UpdateCheckFrequency * 60 * 1000;
                 _updateTimer.Enabled = true;
-                _logService.LogDebug($"Background update timer started. Frequency: {_appSettings.BackgroundUpdateFrequency} minutes.");
+                _logService.LogDebug($"Background update timer started. Frequency: {_appSettings.UpdateCheckFrequency} minutes.");
             }
             else if (_updateTimer != null)
             {

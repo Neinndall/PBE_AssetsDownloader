@@ -1,4 +1,5 @@
 using PBE_AssetsDownloader.Utils;
+using System.Linq;
 using System.Windows.Controls;
 
 namespace PBE_AssetsDownloader.UI.Views.Settings
@@ -21,9 +22,9 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             checkBoxAutoCopy.IsChecked = _appSettings.AutoCopyHashes;
             checkBoxCreateBackUp.IsChecked = _appSettings.CreateBackUpOldHashes;
             checkBoxOnlyCheckDifferences.IsChecked = _appSettings.OnlyCheckDifferences;
-            checkBoxEnableDiffHistory.IsChecked = _appSettings.EnableDiffHistory;
-            checkBoxEnableBackgroundUpdates.IsChecked = _appSettings.EnableBackgroundUpdates;
-            comboBoxUpdateFrequency.SelectedItem = _appSettings.BackgroundUpdateFrequency;
+            checkBoxSaveDiffHistory.IsChecked = _appSettings.SaveDiffHistory;
+            checkBoxBackgroundUpdates.IsChecked = _appSettings.BackgroundUpdates;
+            comboBoxUpdateFrequency.SelectedItem = _appSettings.UpdateCheckFrequency;
         }
 
         public void SaveSettings()
@@ -35,14 +36,9 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             _appSettings.AutoCopyHashes = checkBoxAutoCopy.IsChecked ?? false;
             _appSettings.CreateBackUpOldHashes = checkBoxCreateBackUp.IsChecked ?? false;
             _appSettings.OnlyCheckDifferences = checkBoxOnlyCheckDifferences.IsChecked ?? false;
-            _appSettings.EnableDiffHistory = checkBoxEnableDiffHistory.IsChecked ?? false;
-            _appSettings.EnableBackgroundUpdates = checkBoxEnableBackgroundUpdates.IsChecked ?? false;
-            if (comboBoxUpdateFrequency.SelectedItem is ComboBoxItem item)
-            {
-                _appSettings.BackgroundUpdateFrequency = int.Parse(item.Content.ToString());
-            }
+            _appSettings.SaveDiffHistory = checkBoxSaveDiffHistory.IsChecked ?? false;
+            _appSettings.BackgroundUpdates = checkBoxBackgroundUpdates.IsChecked ?? false;
+            _appSettings.UpdateCheckFrequency = (int)(comboBoxUpdateFrequency.SelectedItem ?? 10);
         }
-
-        
     }
 }

@@ -8,8 +8,8 @@
     
     <!-- Modern Dark Theme Colors -->
     <SolidColorBrush x:Key="DarkBackground" Color="#FF1E1E1E"/>
-    <SolidColorBrush x:Key="CardBackground" Color="#FF2D2D30"/>
-    <SolidColorBrush x:Key="SidebarBackground" Color="#FF252526"/>
+    <SolidColorBrush x:Key="CardBackground" Color="#FF2D2D30"/>     <!-- Este color lo usaremos para cuando tengamos una seleccion encima del raton -->
+    <SolidColorBrush x:Key="SidebarBackground" Color="#FF252526"/>  <!-- Este color lo usaremos para fondos -->
     <SolidColorBrush x:Key="AccentBlue" Color="#FF007ACC"/>
     <SolidColorBrush x:Key="AccentGreen" Color="#FF16825D"/>
     <SolidColorBrush x:Key="AccentPurple" Color="#9370DB"/>

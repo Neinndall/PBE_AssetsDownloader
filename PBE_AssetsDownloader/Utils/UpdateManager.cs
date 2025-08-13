@@ -42,6 +42,7 @@ namespace PBE_AssetsDownloader.Utils
 
             try
             {
+                // Llamamos a _directoriesCreator para crear la carpeta de update cache
                 Directory.CreateDirectory(_directoriesCreator.UpdateCachePath);
 
                 var response = await _httpClient.GetStringAsync(apiUrl);

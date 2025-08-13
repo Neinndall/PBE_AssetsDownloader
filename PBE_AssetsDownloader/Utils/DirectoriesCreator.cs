@@ -63,7 +63,6 @@ namespace PBE_AssetsDownloader.Utils
         public Task CreatePreviewAssetsAsync() => CreateFoldersAsync(PreviewAssetsPath);
         public Task CreateDirJsonCacheNewAsync() => CreateFoldersAsync(JsonCacheNewPath);
         public Task CreateDirJsonCacheOldAsync() => CreateFoldersAsync(JsonCacheOldPath);
-        public Task CreateDirJsonCacheHistoryAsync() => CreateFoldersAsync(JsonCacheHistoryPath);
 
         public async Task CreateAllDirectoriesAsync()
         {

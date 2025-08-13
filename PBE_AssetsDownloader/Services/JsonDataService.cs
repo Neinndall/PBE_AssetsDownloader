@@ -233,6 +233,8 @@ namespace PBE_AssetsDownloader.Services
                             {
                                 string historyFileName = $"{Path.GetFileNameWithoutExtension(key)}_{DateTime.Now:yyyyMMddHHmmss}.json";
                                 string historyFilePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, historyFileName);
+                                // Llamamos a _directoriesCreator para crear la carpeta de history save json files diff
+                                Directory.CreateDirectory(Path.GetDirectoryName(historyFilePath));
                                 File.Copy(oldFilePath, historyFilePath, true);
 
                                 _appSettings.DiffHistory.Add(new JsonDiffHistoryEntry

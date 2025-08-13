@@ -34,7 +34,7 @@ namespace PBE_AssetsDownloader
                 .MinimumLevel.Debug()
                 .WriteTo.Debug()
                 .WriteTo.Logger(lc => lc
-                    .MinimumLevel.Information() // Set minimum level for this sink to Information
+                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Information) // Filter to include only Information level and above
                     .WriteTo.File("logs/application.log", rollingInterval: RollingInterval.Day))
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal) // Include only Fatal

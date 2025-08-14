@@ -11,6 +11,7 @@ using PBE_AssetsDownloader.UI.Dialogs;
 using Microsoft.Web.WebView2.Core;
 using System.Linq;
 using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -39,7 +40,7 @@ namespace PBE_AssetsDownloader.UI
 
         private void Info_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem menuItem && menuItem.DataContext is FileSystemNodeModel node)
+            if (FileTreeView.SelectedItem is FileSystemNodeModel node)
             {
                 ShowFileInfo(node.FullPath);
             }
@@ -47,10 +48,29 @@ namespace PBE_AssetsDownloader.UI
 
         private void Delete_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem menuItem && menuItem.DataContext is FileSystemNodeModel node)
+            if (FileTreeView.SelectedItem is FileSystemNodeModel node)
             {
                 DeletePath(node);
             }
+        }
+
+        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.IsSelected = true;
+                e.Handled = true;
+            }
+        }
+
+        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+                source = VisualTreeHelper.GetParent(source);
+
+            return source as TreeViewItem;
         }
 
         private async void InitializeWebView2()

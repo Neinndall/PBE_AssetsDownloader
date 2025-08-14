@@ -98,8 +98,7 @@ namespace PBE_AssetsDownloader
             var logService = ServiceProvider.GetRequiredService<LogService>();
             var customMessageBoxService = ServiceProvider.GetRequiredService<CustomMessageBoxService>();
 
-            // Initialize LibVLC using the centralized manager at application startup
-            VlcManager.Initialize(logService);
+            
 
             SetupGlobalExceptionHandling(logService, customMessageBoxService);
 

@@ -5,13 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:models="clr-namespace:PBE_AssetsDownloader.UI.Models"
-             xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance models:FileSystemNodeModel}">
     <UserControl.Resources>
         <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
             <StackPanel Orientation="Horizontal" Margin="5,4,0,4">
+                <StackPanel.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Show Info" Click="Info_MenuItem_Click"/>
+                        <MenuItem Header="Delete" Click="Delete_MenuItem_Click"/>
+                    </ContextMenu>
+                </StackPanel.ContextMenu>
                 <materialIcons:MaterialIcon Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,4,0">
                     <materialIcons:MaterialIcon.Style>
                         <Style TargetType="materialIcons:MaterialIcon">
@@ -101,14 +107,7 @@
                           Style="{StaticResource ModernTreeView}">
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
-                            <Setter Property="ContextMenu">
-                                <Setter.Value>
-                                    <ContextMenu>
-                                        <MenuItem Header="Show Info" Tag="Info"/>
-                                        <MenuItem Header="Delete" Tag="Delete"/>
-                                    </ContextMenu>
-                                </Setter.Value>
-                            </Setter>
+                            <!-- The old, problematic ContextMenu has been removed from here -->
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
@@ -160,19 +159,7 @@
                 </StackPanel>
                 <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
                 <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
-                <Grid x:Name="MediaPreviewGrid" Visibility="Collapsed">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <vlc:VideoView x:Name="VideoView" Grid.Row="0" />
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
-                        <Button x:Name="PlayButton" Content="Play" Click="PlayButton_Click" Style="{StaticResource ModernButton}"/>
-                        <Button x:Name="PauseButton" Content="Pause" Click="PauseButton_Click" Style="{StaticResource ModernButton}" Margin="5,0"/>
-                        <Button x:Name="StopButton" Content="Stop" Click="StopButton_Click" Style="{StaticResource ModernButton}"/>
-                        <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" Value="50" Width="100" ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                    </StackPanel>
-                </Grid>
+                <wv2:WebView2 x:Name="WebView2Preview" Visibility="Collapsed"/>
             </Grid>
         </Grid>
     </Grid>

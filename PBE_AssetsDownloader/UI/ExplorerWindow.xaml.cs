@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using PBE_AssetsDownloader.UI.Dialogs;
-using LibVLCSharp.Shared;
+using Microsoft.Web.WebView2.Core;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -17,8 +17,6 @@ namespace PBE_AssetsDownloader.UI
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
         private readonly CustomMessageBoxService _customMessageBoxService;
-        private readonly LibVLC _libVLC;
-        private readonly MediaPlayer _mediaPlayer;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
 
@@ -30,19 +28,44 @@ namespace PBE_AssetsDownloader.UI
             _customMessageBoxService = customMessageBoxService;
             RootNodes = new ObservableCollection<FileSystemNodeModel>();
 
-            _libVLC = new LibVLC();
-            _libVLC.Log += (sender, e) => {
-                // Log VLC messages to our log file for debugging purposes
-                _logService.LogDebug($"[LibVLC] {e.Level}: {e.Message} ({e.Module}:{e.SourceFile})");
-            };
-
-            _mediaPlayer = new MediaPlayer(_libVLC);
-            VideoView.MediaPlayer = _mediaPlayer;
-
             DataContext = this;
             this.Loaded += ExplorerWindow_Loaded;
-            FileTreeView.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Click));
             this.Unloaded += ExplorerWindow_Unloaded;
+            InitializeWebView2();
+        }
+
+        // START: New, simple implementation for the Context Menu
+        private void Info_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.DataContext is FileSystemNodeModel node)
+            {
+                ShowFileInfo(node.FullPath);
+            }
+        }
+
+        private void Delete_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.DataContext is FileSystemNodeModel node)
+            {
+                DeletePath(node);
+            }
+        }
+        // END: New, simple implementation
+
+        private async void InitializeWebView2()
+        {
+            try
+            {
+                var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PBE_AssetsDownloader", "WebView2Data");
+                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: appDataPath);
+                await WebView2Preview.EnsureCoreWebView2Async(environment);
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError("WebView2 initialization failed. Previews will be affected. See application_errors.log for details.");
+                _logService.LogCritical(ex, "WebView2 Initialization Failed");
+                _customMessageBoxService.ShowError("Error", "Could not initialize content viewer. Some previews may not work correctly.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+            }
         }
 
         private void ExplorerWindow_Loaded(object sender, RoutedEventArgs e)
@@ -52,9 +75,8 @@ namespace PBE_AssetsDownloader.UI
 
         private void ExplorerWindow_Unloaded(object sender, RoutedEventArgs e)
         {
-            _mediaPlayer.Stop();
-            _mediaPlayer.Dispose();
-            _libVLC.Dispose();
+            // Stop any media playback when leaving the view
+            WebView2Preview.CoreWebView2?.Navigate("about:blank");
         }
 
         private void LoadDirectory()
@@ -94,17 +116,15 @@ namespace PBE_AssetsDownloader.UI
 
             try
             {
+                // For WebView2, we can attempt to display most file types directly.
+                // We'll still handle images separately for better performance and control.
                 if (IsImageExtension(selectedNode.Extension))
                 {
                     ShowImagePreview(selectedNode.FullPath);
                 }
-                else if (IsTextExtension(selectedNode.Extension))
+                else if (IsPreviewableInWebView(selectedNode.Extension))
                 {
-                    ShowTextPreview(selectedNode.FullPath);
-                }
-                else if (IsVideoExtension(selectedNode.Extension) || IsAudioExtension(selectedNode.Extension))
-                {
-                    ShowMediaPreview(selectedNode.FullPath);
+                    ShowWebViewPreview(selectedNode.FullPath);
                 }
                 else
                 {
@@ -133,23 +153,12 @@ namespace PBE_AssetsDownloader.UI
             ImagePreview.Source = bitmap;
         }
 
-        private void ShowTextPreview(string path)
+        private void ShowWebViewPreview(string path)
         {
             ResetPreview();
-            TextPreview.Visibility = Visibility.Visible;
+            WebView2Preview.Visibility = Visibility.Visible;
             PreviewPlaceholder.Visibility = Visibility.Collapsed;
-            TextPreview.Text = File.ReadAllText(path);
-        }
-
-        private void ShowMediaPreview(string path)
-        {
-            ResetPreview();
-            MediaPreviewGrid.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
-
-            var media = new Media(_libVLC, path, FromType.FromPath);
-            _mediaPlayer.Play(media);
-            media.Dispose(); // Dispose of the media object after it's been loaded
+            WebView2Preview.CoreWebView2.Navigate(new Uri(path).AbsoluteUri);
         }
 
         private void ShowUnsupportedPreview(string extension)
@@ -170,82 +179,36 @@ namespace PBE_AssetsDownloader.UI
             UnsupportedFileMessage.Visibility = Visibility.Collapsed;
 
             ImagePreview.Visibility = Visibility.Collapsed;
-            TextPreview.Visibility = Visibility.Collapsed;
-            MediaPreviewGrid.Visibility = Visibility.Collapsed;
+            TextPreview.Visibility = Visibility.Collapsed; // TextPreview is no longer used
+            WebView2Preview.Visibility = Visibility.Collapsed;
             
-            if (_mediaPlayer.IsPlaying)
+            // Navigate to a blank page to stop any ongoing media playback
+            if (WebView2Preview != null && WebView2Preview.CoreWebView2 != null)
             {
-                _mediaPlayer.Stop();
+                WebView2Preview.CoreWebView2.Navigate("about:blank");
             }
         }
 
         private bool IsImageExtension(string extension)
         {
+            // SVG is better handled by WebView2
             return extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
         }
 
-        private bool IsTextExtension(string extension)
+        private bool IsPreviewableInWebView(string extension)
         {
-            return extension == ".txt" || extension == ".json" || extension == ".lua" || extension == ".log";
-        }
-
-        private bool IsAudioExtension(string extension)
-        {
-            return extension == ".wav" || extension == ".mp3" || extension == ".ogg";
-        }
-
-        private bool IsVideoExtension(string extension)
-        {
-            return extension == ".mp4" || extension == ".webm";
-        }
-
-        private void PlayButton_Click(object sender, RoutedEventArgs e)
-        {
-            _mediaPlayer.Play();
-        }
-
-        private void PauseButton_Click(object sender, RoutedEventArgs e)
-        {
-            _mediaPlayer.Pause();
-        }
-
-        private void StopButton_Click(object sender, RoutedEventArgs e)
-        {
-            _mediaPlayer.Stop();
-        }
-
-        private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (_mediaPlayer != null)
-            {
-                _mediaPlayer.Volume = (int)e.NewValue;
-            }
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var menuItem = e.OriginalSource as MenuItem;
-            if (menuItem == null) return;
-
-            var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
-            if (selectedNode == null) return;
-
-            var tag = menuItem.Tag as string;
-            if (tag == "Delete")
-            {
-                DeletePath(selectedNode);
-            }
-            else if (tag == "Info")
-            {
-                ShowFileInfo(selectedNode.FullPath);
-            }
+            // List of extensions WebView2 can handle well
+            return extension == ".svg" ||
+                   extension == ".txt" || extension == ".json" || extension == ".log" ||
+                   extension == ".webm" || extension == ".ogg" || extension == ".mp4" ||
+                   extension == ".mp3" || extension == ".wav";
         }
 
         private void DeletePath(FileSystemNodeModel node)
         {
             var message = node.IsDirectory
                 ? $"Are you sure you want to delete the directory '{node.Name}' and all its contents?"
-                : $"Are you sure you want to delete the file '{node.Name}'?";
+                : $"Are you sure you want to delete the file '{node.Name}'";
 
             var result = _customMessageBoxService.ShowYesNo("Confirm Deletion", message, Window.GetWindow(this), CustomMessageBoxIcon.Warning);
 

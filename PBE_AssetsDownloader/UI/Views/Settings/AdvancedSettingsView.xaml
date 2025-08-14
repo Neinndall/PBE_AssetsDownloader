@@ -184,7 +184,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnViewDiff" Content="View Diff" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,8,0" Click="btnViewDiff_Click"/>
-                    <Button x:Name="btnRemoveSelected" Content="Remove" Style="{StaticResource DestructiveButton}" Width="100" Click="btnRemoveSelected_Click"/>
+                    <Button x:Name="btnRemoveSelected" Content="Remove" Style="{StaticResource DestructiveButton}" Width="80" Click="btnRemoveSelected_Click"/>
                 </StackPanel>
             </StackPanel>
         </Border>

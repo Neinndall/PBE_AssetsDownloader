@@ -235,7 +235,8 @@ namespace PBE_AssetsDownloader.Services
                                 
                                 // 1. Create a unique directory for this specific change based on timestamp
                                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                                string fileHistoryBasePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, key);
+                                string historyKey = key.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ? key.Substring(0, key.Length - 5) : key;
+                                string fileHistoryBasePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, historyKey);
                                 string changeInstancePath = Path.Combine(fileHistoryBasePath, timestamp);
                                 Directory.CreateDirectory(changeInstancePath);
 
@@ -248,7 +249,7 @@ namespace PBE_AssetsDownloader.Services
                                 File.Copy(newFilePath, historyNewFilePath, true);
 
                                 // 4. Add an entry to the history pointing to these static, immutable files
-                                _appSettings.DiffHistory.Add(new JsonDiffHistoryEntry
+                                _appSettings.DiffHistory.Insert(0, new JsonDiffHistoryEntry
                                 {
                                     FileName = key, // The key is the unique relative path
                                     OldFilePath = historyOldFilePath,

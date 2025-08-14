@@ -103,7 +103,7 @@
                 </StackPanel>
 
                 <CheckBox x:Name="checkBoxSaveDiffHistory" 
-                        Content="Keep a history of file changes"
+                        Content="Save differences history"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Save a history of all JSON file differences detected during updates."
                          Foreground="{StaticResource TextMuted}"

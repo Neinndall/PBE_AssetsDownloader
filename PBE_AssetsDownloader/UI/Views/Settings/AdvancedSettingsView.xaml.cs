@@ -65,8 +65,6 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
         }
         
-        
-
         private void btnAddJsonFile_Click(object sender, RoutedEventArgs e)
         {
             var inputDialog = _serviceProvider.GetRequiredService<InputDialog>();

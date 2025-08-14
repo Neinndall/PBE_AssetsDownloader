@@ -86,7 +86,6 @@ namespace PBE_AssetsDownloader.UI
                 var rootDirectory = Path.Combine(_directoriesCreator.AppDirectory, "AssetsDownloaded");
                 if (!Directory.Exists(rootDirectory))
                 {
-                    _logService.LogWarning($"The directory '{rootDirectory}' does not exist. No assets to explore.");
                     FileTreeView.Visibility = Visibility.Collapsed;
                     NoDirectoryMessage.Visibility = Visibility.Visible;
                     return;

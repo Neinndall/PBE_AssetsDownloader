@@ -216,8 +216,8 @@ namespace PBE_AssetsDownloader.UI
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to preview file '{{selectedNode.FullPath}}'. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Failed to preview file '{{selectedNode.FullPath}}'.");
+                _logService.LogError($"Failed to preview file '{selectedNode.FullPath}'. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"Failed to preview file '{selectedNode.FullPath}'.");
                 ResetPreview();
             }
         }
@@ -251,7 +251,7 @@ namespace PBE_AssetsDownloader.UI
             SelectFileMessage.Visibility = Visibility.Collapsed;
             SelectFileSubMessage.Visibility = Visibility.Collapsed;
             UnsupportedFileMessage.Visibility = Visibility.Visible;
-            UnsupportedFileMessage.Text = $"Preview not available for '{{extension}}' files.";
+            UnsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
         }
 
         private void ResetPreview()
@@ -305,12 +305,12 @@ namespace PBE_AssetsDownloader.UI
                         File.Delete(node.FullPath);
                     }
                     LoadDirectory();
-                    _logService.Log($"Deleted: {{node.FullPath}}");
+                    _logService.Log($"Deleted: {node.FullPath}");
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogError($"Failed to delete '{{node.FullPath}}'. See application_errors.log for details.");
-                    _logService.LogCritical(ex, $"Failed to delete '{{node.FullPath}}'.");
+                    _logService.LogError($"Failed to delete '{node.FullPath}'. See application_errors.log for details.");
+                    _logService.LogCritical(ex, $"Failed to delete '{node.FullPath}'.");
                     _customMessageBoxService.ShowError("Error", $"Could not delete '{node.Name}'.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
                 }
             }
@@ -323,25 +323,25 @@ namespace PBE_AssetsDownloader.UI
                 if (File.Exists(path))
                 {
                     var fileInfo = new FileInfo(path);
-                    var message = $"File: {{fileInfo.Name}}\n" +
-                                  $"Size: {{fileInfo.Length / 1024:N0}} KB\n" +
-                                  $"Created: {{fileInfo.CreationTime}}\n" +
-                                  $"Modified: {{fileInfo.LastWriteTime}}";
+                    var message = $"File: {fileInfo.Name}\n" +
+                                  $"Size: {fileInfo.Length / 1024:N0} KB\n" +
+                                  $"Created: {fileInfo.CreationTime}\n" +
+                                  $"Modified: {fileInfo.LastWriteTime}";
                     _customMessageBoxService.ShowInfo("File Information", message, Window.GetWindow(this), CustomMessageBoxIcon.Info);
                 }
                 else if (Directory.Exists(path))
                 {
                     var dirInfo = new DirectoryInfo(path);
-                    var message = $"Directory: {{dirInfo.Name}}\n" +
-                                  $"Created: {{dirInfo.CreationTime}}\n" +
-                                  $"Last Modified: {{dirInfo.LastWriteTime}}";
+                    var message = $"Directory: {dirInfo.Name}\n" +
+                                  $"Created: {dirInfo.CreationTime}\n" +
+                                  $"Last Modified: {dirInfo.LastWriteTime}";
                     _customMessageBoxService.ShowInfo("Directory Information", message, Window.GetWindow(this), CustomMessageBoxIcon.Info);
                 }
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to get info for '{{path}}'. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Failed to get info for '{{path}}'.");
+                _logService.LogError($"Failed to get info for '{path}'. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"Failed to get info for '{path}'.");
                 _customMessageBoxService.ShowError("Error", $"Could not get information for '{Path.GetFileName(path)}'.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
             }
         }

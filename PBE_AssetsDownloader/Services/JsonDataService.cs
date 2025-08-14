@@ -231,19 +231,32 @@ namespace PBE_AssetsDownloader.Services
                         {
                             if (_appSettings.SaveDiffHistory && File.Exists(oldFilePath))
                             {
-                                string historyFileName = $"{Path.GetFileNameWithoutExtension(key)}_{DateTime.Now:yyyyMMddHHmmss}.json";
-                                string historyFilePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, historyFileName);
-                                // Llamamos a _directoriesCreator para crear la carpeta de history save json files diff
-                                Directory.CreateDirectory(Path.GetDirectoryName(historyFilePath));
-                                File.Copy(oldFilePath, historyFilePath, true);
+                                // --- START: New robust history saving logic ---
+                                
+                                // 1. Create a unique directory for this specific change based on timestamp
+                                string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+                                string fileHistoryBasePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, key);
+                                string changeInstancePath = Path.Combine(fileHistoryBasePath, timestamp);
+                                Directory.CreateDirectory(changeInstancePath);
 
+                                // 2. Define static paths for the old and new versions inside the unique directory
+                                string historyOldFilePath = Path.Combine(changeInstancePath, $"old_{Path.GetFileName(key)}");
+                                string historyNewFilePath = Path.Combine(changeInstancePath, $"new_{Path.GetFileName(key)}");
+
+                                // 3. Copy both files to the new location to make them immutable
+                                File.Copy(oldFilePath, historyOldFilePath, true);
+                                File.Copy(newFilePath, historyNewFilePath, true);
+
+                                // 4. Add an entry to the history pointing to these static, immutable files
                                 _appSettings.DiffHistory.Add(new JsonDiffHistoryEntry
                                 {
-                                    FileName = key,
-                                    OldFilePath = historyFilePath,
-                                    NewFilePath = newFilePath,
+                                    FileName = key, // The key is the unique relative path
+                                    OldFilePath = historyOldFilePath,
+                                    NewFilePath = historyNewFilePath,
                                     Timestamp = DateTime.Now
                                 });
+                                
+                                // --- END: New robust history saving logic ---
                             }
 
                             _logService.LogDebug($"Saved new JSON content to {newFilePath}");

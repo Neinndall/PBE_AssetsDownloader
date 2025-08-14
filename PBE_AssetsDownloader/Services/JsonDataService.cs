@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.UI;
 using PBE_AssetsDownloader.Utils;
+using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader.Services
 {
@@ -220,44 +221,45 @@ namespace PBE_AssetsDownloader.Services
 
                     try
                     {
-                        if (File.Exists(newFilePath))
+                        bool isUpdate = File.Exists(newFilePath);
+                        if (isUpdate)
                         {
                             File.Copy(newFilePath, oldFilePath, true);
                         }
 
-                        bool downloadSuccess = await _requests.DownloadJsonContentAsync(fullUrl, newFilePath);
+                        string jsonContent = await _requests.DownloadJsonContentAsync(fullUrl);
 
-                        if (downloadSuccess)
+                        if (!string.IsNullOrEmpty(jsonContent))
                         {
-                            if (_appSettings.SaveDiffHistory && File.Exists(oldFilePath))
+                            string contentToSave = jsonContent;
+                            // Heuristic: If the content doesn't contain newlines, it's likely unformatted.
+                            if (!jsonContent.Contains('\n'))
                             {
-                                // --- START: New robust history saving logic ---
-                                
-                                // 1. Create a unique directory for this specific change based on timestamp
+                                contentToSave = JsonDiffHelper.FormatJson(jsonContent);
+                            }
+
+                            await File.WriteAllTextAsync(newFilePath, contentToSave);
+                            if (_appSettings.SaveDiffHistory && isUpdate)
+                            {
                                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                                 string historyKey = key.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ? key.Substring(0, key.Length - 5) : key;
                                 string fileHistoryBasePath = Path.Combine(_directoriesCreator.JsonCacheHistoryPath, historyKey);
                                 string changeInstancePath = Path.Combine(fileHistoryBasePath, timestamp);
                                 Directory.CreateDirectory(changeInstancePath);
 
-                                // 2. Define static paths for the old and new versions inside the unique directory
                                 string historyOldFilePath = Path.Combine(changeInstancePath, $"old_{Path.GetFileName(key)}");
                                 string historyNewFilePath = Path.Combine(changeInstancePath, $"new_{Path.GetFileName(key)}");
 
-                                // 3. Copy both files to the new location to make them immutable
-                                File.Copy(oldFilePath, historyOldFilePath, true);
                                 File.Copy(newFilePath, historyNewFilePath, true);
+                                File.Copy(oldFilePath, historyOldFilePath, true);
 
-                                // 4. Add an entry to the history pointing to these static, immutable files
                                 _appSettings.DiffHistory.Insert(0, new JsonDiffHistoryEntry
                                 {
-                                    FileName = key, // The key is the unique relative path
+                                    FileName = key,
                                     OldFilePath = historyOldFilePath,
                                     NewFilePath = historyNewFilePath,
                                     Timestamp = DateTime.Now
                                 });
-                                
-                                // --- END: New robust history saving logic ---
                             }
 
                             _logService.LogDebug($"Saved new JSON content to {newFilePath}");
@@ -266,10 +268,8 @@ namespace PBE_AssetsDownloader.Services
                                 "View Diff",
                                 () =>
                                 {
-                                    string oldContent = File.Exists(oldFilePath) ? File.ReadAllText(oldFilePath) : "";
-                                    string newContent = File.Exists(newFilePath) ? File.ReadAllText(newFilePath) : "";
                                     var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                                    diffWindow.LoadDiff(oldContent, newContent);
+                                    diffWindow.LoadDiff(oldFilePath, newFilePath);
                                     diffWindow.Show();
                                 }
                             );

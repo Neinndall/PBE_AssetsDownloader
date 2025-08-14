@@ -120,6 +120,10 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _oldPanel.Children.Clear();
             _newPanel.Children.Clear();
 
+            // Set a default background for clarity, especially for empty panels
+            _oldPanel.Background = new SolidColorBrush(DiffColorsHelper.Background.Imaginary);
+            _newPanel.Background = new SolidColorBrush(DiffColorsHelper.Background.Imaginary);
+
             if (_diffModel?.OldText?.Lines == null) return;
 
             var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;

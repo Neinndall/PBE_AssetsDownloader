@@ -134,11 +134,8 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             {
                 try
                 {
-                    string oldContent = File.Exists(selectedEntry.OldFilePath) ? File.ReadAllText(selectedEntry.OldFilePath) : "";
-                    string newContent = File.Exists(selectedEntry.NewFilePath) ? File.ReadAllText(selectedEntry.NewFilePath) : "";
-
                     var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                    diffWindow.LoadDiff(oldContent, newContent);
+                    diffWindow.LoadDiff(selectedEntry.OldFilePath, selectedEntry.NewFilePath);
                     diffWindow.Show();
                 }
                 catch (Exception ex)
@@ -169,7 +166,6 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
                         if (!string.IsNullOrEmpty(historyDirectoryPath) && Directory.Exists(historyDirectoryPath))
                         {
                             Directory.Delete(historyDirectoryPath, true);
-                            _logService.Log($"Deleted history directory: {historyDirectoryPath}");
                         }
 
                         // Remove from settings and refresh UI

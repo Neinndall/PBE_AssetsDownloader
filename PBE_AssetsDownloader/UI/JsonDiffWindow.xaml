@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:icons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
         Title="JSON Diff Viewer" Height="960" Width="1500" MinHeight="960" MinWidth="1500"
         WindowStartupLocation="CenterScreen"
@@ -85,147 +86,171 @@
 
         <!-- Main Content -->
         <Grid Grid.Row="1" Margin="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="60"/>
-            </Grid.ColumnDefinitions>
+            <!-- Diff Grid -->
+            <Grid x:Name="DiffGrid" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="60"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Old JSON Card -->
-            <Border Grid.Column="0" Style="{StaticResource SettingsCard}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                <!-- Old JSON Card -->
+                <Border Grid.Column="0" Style="{StaticResource SettingsCard}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <!-- Header -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-                        <TextBlock Text="📜" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
-                        <StackPanel>
-                            <TextBlock Text="Old Version"
-                                     FontSize="16"
-                                     FontWeight="SemiBold"
-                                     Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Content of the previous file"
-                                     FontSize="12"
-                                     Foreground="{StaticResource TextMuted}"/>
+                        <!-- Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+                            <TextBlock Text="📜" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                            <StackPanel>
+                                <TextBlock Text="Old Version"
+                                         FontSize="16"
+                                         FontWeight="SemiBold"
+                                         Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Content of the previous file"
+                                         FontSize="12"
+                                         Foreground="{StaticResource TextMuted}"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
 
-                    <!-- Content -->
-                    <Border Grid.Row="1"
-                            Background="{StaticResource DarkBackground}"
-                            BorderBrush="{StaticResource BorderColor}"
-                            BorderThickness="1"
-                            CornerRadius="6">
-                        <avalonEdit:TextEditor x:Name="OldJsonContent"
-                                             IsReadOnly="True"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             Foreground="{StaticResource TextPrimary}"
-                                             Padding="0,8"
-                                             ShowLineNumbers="True"
-                                             WordWrap="False"
-                                             HorizontalScrollBarVisibility="Auto"
-                                             VerticalScrollBarVisibility="Auto"/>
-                    </Border>
-                </Grid>
-            </Border>
+                        <!-- Content -->
+                        <Border Grid.Row="1"
+                                Background="{StaticResource DarkBackground}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                            <avalonEdit:TextEditor x:Name="OldJsonContent"
+                                                 IsReadOnly="True"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 Padding="0,8"
+                                                 ShowLineNumbers="True"
+                                                 WordWrap="False"
+                                                 HorizontalScrollBarVisibility="Auto"
+                                                 VerticalScrollBarVisibility="Auto"/>
+                        </Border>
+                    </Grid>
+                </Border>
 
-            <!-- Grid Splitter -->
-            <GridSplitter Grid.Column="1"
-                          Width="12"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Stretch"
-                          Background="Transparent"
-                          ResizeBehavior="PreviousAndNext"/>
+                <!-- Grid Splitter -->
+                <GridSplitter Grid.Column="1"
+                              Width="12"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Stretch"
+                              Background="Transparent"
+                              ResizeBehavior="PreviousAndNext"/>
 
-            <!-- New JSON Card -->
-            <Border Grid.Column="2" Style="{StaticResource SettingsCard}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                <!-- New JSON Card -->
+                <Border Grid.Column="2" Style="{StaticResource SettingsCard}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <!-- Header -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-                        <TextBlock Text="✨" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
-                        <StackPanel>
-                            <TextBlock Text="New Version"
-                                     FontSize="16"
-                                     FontWeight="SemiBold"
-                                     Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Content of the updated file"
-                                     FontSize="12"
-                                     Foreground="{StaticResource TextMuted}"/>
+                        <!-- Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+                            <TextBlock Text="✨" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                            <StackPanel>
+                                <TextBlock Text="New Version"
+                                         FontSize="16"
+                                         FontWeight="SemiBold"
+                                         Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Content of the updated file"
+                                         FontSize="12"
+                                         Foreground="{StaticResource TextMuted}"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
 
-                    <!-- Content -->
-                    <Border Grid.Row="1"
-                            Background="{StaticResource DarkBackground}"
-                            BorderBrush="{StaticResource BorderColor}"
-                            BorderThickness="1"
-                            CornerRadius="6">
-                        <avalonEdit:TextEditor x:Name="NewJsonContent"
-                                             IsReadOnly="True"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             Foreground="{StaticResource TextPrimary}"
-                                             Padding="0,8"
-                                             ShowLineNumbers="True"
-                                             WordWrap="False"
-                                             HorizontalScrollBarVisibility="Auto"
-                                             VerticalScrollBarVisibility="Auto"/>
-                    </Border>
-                </Grid>
-            </Border>
+                        <!-- Content -->
+                        <Border Grid.Row="1"
+                                Background="{StaticResource DarkBackground}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                            <avalonEdit:TextEditor x:Name="NewJsonContent"
+                                                 IsReadOnly="True"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 Padding="0,8"
+                                                 ShowLineNumbers="True"
+                                                 WordWrap="False"/>
+                        </Border>
+                    </Grid>
+                </Border>
 
-            <!-- Grid Splitter for Navigation Panel -->
-            <GridSplitter Grid.Column="3"
-                          Width="12"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Stretch"
-                          Background="Transparent"
-                          ResizeBehavior="PreviousAndNext"/>
+                <!-- Grid Splitter for Navigation Panel -->
+                <GridSplitter Grid.Column="3"
+                              Width="12"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Stretch"
+                              Background="Transparent"
+                              ResizeBehavior="PreviousAndNext"/>
 
-            <!-- Navigation Panel -->
-            <Border Grid.Column="4" Style="{StaticResource SettingsCard}" Padding="8">
-                <Grid x:Name="NavigationGrid">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                <!-- Navigation Panel -->
+                <Border Grid.Column="4" Style="{StaticResource SettingsCard}" Padding="8">
+                    <Grid x:Name="NavigationGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Old Diff Navigation -->
-                    <Canvas x:Name="OldNavigationPanel" Grid.Column="0" Background="{StaticResource DarkBackground}" ClipToBounds="True">
-                        <Canvas.ToolTip>
-                            <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
-                                <StackPanel>
-                                    <TextBlock Text="Old Version Navigation" FontWeight="Bold"/>
-                                    <TextBlock Text="Click or drag to scroll"/>
-                                </StackPanel>
-                            </ToolTip>
-                        </Canvas.ToolTip>
-                    </Canvas>
+                        <!-- Old Diff Navigation -->
+                        <Canvas x:Name="OldNavigationPanel" Grid.Column="0" Background="{StaticResource DarkBackground}" ClipToBounds="True">
+                            <Canvas.ToolTip>
+                                <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
+                                    <StackPanel>
+                                        <TextBlock Text="Old Version Navigation" FontWeight="Bold"/>
+                                        <TextBlock Text="Click or drag to scroll"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Canvas.ToolTip>
+                        </Canvas>
 
-                    <!-- New Diff Navigation -->
-                    <Canvas x:Name="NewNavigationPanel" Grid.Column="1" Background="{StaticResource DarkBackground}" ClipToBounds="True">
-                        <Canvas.ToolTip>
-                            <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
-                                <StackPanel>
-                                    <TextBlock Text="New Version Navigation" FontWeight="Bold"/>
-                                    <TextBlock Text="Click or drag to scroll"/>
-                                </StackPanel>
-                            </ToolTip>
-                        </Canvas.ToolTip>
-                    </Canvas>
-                </Grid>
-            </Border>
+                        <!-- New Diff Navigation -->
+                        <Canvas x:Name="NewNavigationPanel" Grid.Column="1" Background="{StaticResource DarkBackground}" ClipToBounds="True">
+                            <Canvas.ToolTip>
+                                <ToolTip Background="{StaticResource CardBackground}" Foreground="{StaticResource TextPrimary}">
+                                    <StackPanel>
+                                        <TextBlock Text="New Version Navigation" FontWeight="Bold"/>
+                                        <TextBlock Text="Click or drag to scroll"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Canvas.ToolTip>
+                        </Canvas>
+                    </Grid>
+                </Border>
+            </Grid>
+            
+            <!-- Loading Overlay -->
+            <Grid x:Name="LoadingOverlay" Background="#AA1E1E1E">
+                <Grid.Resources>
+                    <Storyboard x:Key="SpinningAnimation" Storyboard.TargetName="LoadingIconElement" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
+                        <DoubleAnimation From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
+                    </Storyboard>
+                </Grid.Resources>
+                <!-- Centering StackPanel -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <icons:MaterialIcon x:Name="LoadingIconElement" Kind="Sync" Foreground="{StaticResource AccentBlue}" Width="48" Height="48" RenderTransformOrigin="0.5,0.5">
+                        <icons:MaterialIcon.RenderTransform>
+                            <RotateTransform/>
+                        </icons:MaterialIcon.RenderTransform>
+                    </icons:MaterialIcon>
+
+                    <TextBlock Text="Please wait while the files are being processed" 
+                               Foreground="{StaticResource TextMuted}" 
+                               FontSize="18" 
+                               VerticalAlignment="Center"
+                               Margin="16,0,0,0"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

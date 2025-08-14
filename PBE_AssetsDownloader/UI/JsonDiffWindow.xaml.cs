@@ -19,6 +19,8 @@ using System.Linq;
 using PBE_AssetsDownloader.UI.Helpers;
 using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Services;
+using System.Windows.Media.Animation;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -28,6 +30,7 @@ namespace PBE_AssetsDownloader.UI
         private DiffPanelNavigation _diffPanelNavigation;
         private bool _isWordLevelDiff = false;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly Storyboard _loadingAnimation;
 
         public JsonDiffWindow(CustomMessageBoxService customMessageBoxService)
         {
@@ -36,11 +39,14 @@ namespace PBE_AssetsDownloader.UI
             ConfigureEditors();
             LoadJsonSyntaxHighlighting();
             SetupScrollSync();
+
+            _loadingAnimation = (Storyboard)LoadingOverlay.Resources["SpinningAnimation"];
+            _loadingAnimation.Begin();
         }
 
-        public void LoadDiff(string oldJson, string newJson)
+        public void LoadDiff(string oldFilePath, string newFilePath)
         {
-            _ = DisplayDiffAsync(oldJson, newJson);
+            _ = DisplayDiffAsync(oldFilePath, newFilePath);
         }
 
         private void ConfigureEditors()
@@ -87,46 +93,88 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
-        private async Task DisplayDiffAsync(string oldJson, string newJson)
+        private async Task DisplayDiffAsync(string oldFilePath, string newFilePath)
         {
-            var formattedOldJson = JsonDiffHelper.FormatJson(oldJson);
-            var formattedNewJson = JsonDiffHelper.FormatJson(newJson);
-
-            await Task.Run(() =>
+            try
             {
-                var diffBuilder = new SideBySideDiffBuilder(new Differ());
-                _diffModel = diffBuilder.BuildDiffModel(formattedOldJson, formattedNewJson, true);
-            });
+                var result = await Task.Run(() =>
+                {
+                    if (!File.Exists(oldFilePath))
+                    {
+                        // Optimization: If old file doesn't exist, build the model manually.
+                        string newJson = File.Exists(newFilePath) ? File.ReadAllText(newFilePath) : "";
+                        var newLines = newJson.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
-            if (_diffModel.OldText.Lines.All(l => l.Type == ChangeType.Unchanged) && 
-                _diffModel.NewText.Lines.All(l => l.Type == ChangeType.Unchanged))
+                        var diffModel = new SideBySideDiffModel();
+                        
+                        for (int i = 0; i < newLines.Length; i++)
+                        {
+                            diffModel.NewText.Lines.Add(new DiffPiece(newLines[i], ChangeType.Inserted, i + 1));
+                        }
+                        
+                        return new { diffModel, OldText = "", NewText = newJson };
+                    }
+                    else
+                    {
+                        // Original path for actual comparisons
+                        string oldJson = File.ReadAllText(oldFilePath);
+                        string newJson = File.Exists(newFilePath) ? File.ReadAllText(newFilePath) : "";
+
+                        var diffBuilder = new SideBySideDiffBuilder(new Differ());
+                        var diffModel = diffBuilder.BuildDiffModel(oldJson, newJson, false);
+
+                        var normalizedOld = JsonDiffHelper.NormalizeTextForAlignment(diffModel.OldText);
+                        var normalizedNew = JsonDiffHelper.NormalizeTextForAlignment(diffModel.NewText);
+
+                        return new { diffModel, OldText = normalizedOld.Text, NewText = normalizedNew.Text };
+                    }
+                });
+
+                _diffModel = result.diffModel;
+
+                // This part runs on the UI thread and will freeze on large files.
+                OldJsonContent.Document = new TextDocument(result.OldText);
+                NewJsonContent.Document = new TextDocument(result.NewText);
+
+                // Hide loading and show diff
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+                _loadingAnimation.Stop();
+                DiffGrid.Visibility = Visibility.Visible;
+
+                bool hasChanges = _diffModel.OldText.Lines.Any(l => l.Type == ChangeType.Deleted || l.Type == ChangeType.Modified) ||
+                                  _diffModel.NewText.Lines.Any(l => l.Type == ChangeType.Inserted || l.Type == ChangeType.Modified);
+
+                if (!hasChanges)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
+                        Close();
+                    });
+                    return;
+                }
+
+                OldJsonContent.UpdateLayout();
+                NewJsonContent.UpdateLayout();
+
+                ApplyDiffHighlighting();
+
+                _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
+                _diffPanelNavigation.ScrollRequested += ScrollToLine;
+                _diffPanelNavigation.DrawPanels();
+
+                if (_diffPanelNavigation != null)
+                {
+                    _diffPanelNavigation.NavigateToNextDifference(0);
+                }
+            }
+            catch (Exception ex)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
+                    _customMessageBoxService.ShowInfo("Error", $"Failed to load comparison: {ex.Message}. Check logs for details.", this, CustomMessageBoxIcon.Error);
                     Close();
                 });
-                return;
-            }
-
-            var normalizedOld = JsonDiffHelper.NormalizeTextForAlignment(_diffModel.OldText);
-            var normalizedNew = JsonDiffHelper.NormalizeTextForAlignment(_diffModel.NewText);
-
-            OldJsonContent.Text = normalizedOld.Text;
-            NewJsonContent.Text = normalizedNew.Text;
-
-            OldJsonContent.UpdateLayout();
-            NewJsonContent.UpdateLayout();
-
-            ApplyDiffHighlighting();
-            
-            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, _diffModel);
-            _diffPanelNavigation.ScrollRequested += ScrollToLine;
-            _diffPanelNavigation.DrawPanels();
-
-            if (_diffPanelNavigation != null)
-            {
-                _diffPanelNavigation.NavigateToNextDifference(0);
             }
         }
 

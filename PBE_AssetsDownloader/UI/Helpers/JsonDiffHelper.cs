@@ -24,6 +24,9 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (string.IsNullOrWhiteSpace(json)) return string.Empty;
 
+            // Temporarily removed heuristic for debugging.
+            // This will force all JSON to be formatted.
+
             try
             {
                 var parsed = JsonConvert.DeserializeObject(json);
@@ -31,6 +34,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
             }
             catch
             {
+                // In case of an error (e.g., invalid JSON), return the original string.
                 return json;
             }
         }

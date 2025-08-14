@@ -9,6 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using PBE_AssetsDownloader.UI.Dialogs;
 using Microsoft.Web.WebView2.Core;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -19,6 +21,7 @@ namespace PBE_AssetsDownloader.UI
         private readonly CustomMessageBoxService _customMessageBoxService;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
+        private readonly List<FileSystemNodeModel> _fullTree = new List<FileSystemNodeModel>();
 
         public ExplorerWindow(DirectoriesCreator directoriesCreator, LogService logService, CustomMessageBoxService customMessageBoxService)
         {
@@ -34,7 +37,6 @@ namespace PBE_AssetsDownloader.UI
             InitializeWebView2();
         }
 
-        // START: New, simple implementation for the Context Menu
         private void Info_MenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (sender is MenuItem menuItem && menuItem.DataContext is FileSystemNodeModel node)
@@ -50,7 +52,6 @@ namespace PBE_AssetsDownloader.UI
                 DeletePath(node);
             }
         }
-        // END: New, simple implementation
 
         private async void InitializeWebView2()
         {
@@ -75,7 +76,6 @@ namespace PBE_AssetsDownloader.UI
 
         private void ExplorerWindow_Unloaded(object sender, RoutedEventArgs e)
         {
-            // Stop any media playback when leaving the view
             WebView2Preview.CoreWebView2?.Navigate("about:blank");
         }
 
@@ -94,13 +94,99 @@ namespace PBE_AssetsDownloader.UI
                 FileTreeView.Visibility = Visibility.Visible;
                 NoDirectoryMessage.Visibility = Visibility.Collapsed;
 
+                _fullTree.Clear();
+                RootNodes.Clear();
+
                 var rootNode = new FileSystemNodeModel(rootDirectory);
-                RootNodes.Add(rootNode);
+                _fullTree.Add(rootNode);
+
+                foreach (var node in _fullTree)
+                {
+                    RootNodes.Add(node);
+                }
             }
             catch (Exception ex)
             {
                 _logService.LogError($"Failed to load asset directory. See application_errors.log for details.");
                 _logService.LogCritical(ex, "Failed to load asset directory.");
+            }
+        }
+
+        private void txtSearchExplorer_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = txtSearchExplorer.Text;
+            txtSearchExplorerPlaceholder.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Visible : Visibility.Collapsed;
+
+            RootNodes.Clear();
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                foreach (var node in _fullTree)
+                {
+                    RootNodes.Add(node);
+                }
+            }
+            else
+            {
+                foreach (var rootNode in _fullTree)
+                {
+                    var filteredNode = FilterNode(rootNode, searchText);
+                    if (filteredNode != null)
+                    {
+                        RootNodes.Add(filteredNode);
+                    }
+                }
+            }
+        }
+
+        private FileSystemNodeModel FilterNode(FileSystemNodeModel node, string searchText)
+        {
+            bool selfMatches = node.Name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+
+            if (node.IsDirectory)
+            {
+                if (selfMatches)
+                {
+                    var fullNode = new FileSystemNodeModel(node.FullPath);
+                    fullNode.IsExpanded = true;
+                    return fullNode;
+                }
+
+                var filteredChildren = new ObservableCollection<FileSystemNodeModel>();
+                foreach (var child in node.Children)
+                {
+                    var filteredChild = FilterNode(child, searchText);
+                    if (filteredChild != null)
+                    {
+                        filteredChildren.Add(filteredChild);
+                    }
+                }
+
+                if (filteredChildren.Any())
+                {
+                    var newNode = new FileSystemNodeModel(node.FullPath, isDirectory: true, children: filteredChildren);
+                    newNode.IsExpanded = true;
+                    return newNode;
+                }
+            }
+            else if (selfMatches)
+            {
+                return new FileSystemNodeModel(node.FullPath, isDirectory: false);
+            }
+
+            return null;
+        }
+
+        private void txtSearchExplorer_GotFocus(object sender, RoutedEventArgs e)
+        {
+            txtSearchExplorerPlaceholder.Visibility = Visibility.Collapsed;
+        }
+
+        private void txtSearchExplorer_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtSearchExplorer.Text))
+            {
+                txtSearchExplorerPlaceholder.Visibility = Visibility.Visible;
             }
         }
 
@@ -115,8 +201,6 @@ namespace PBE_AssetsDownloader.UI
 
             try
             {
-                // For WebView2, we can attempt to display most file types directly.
-                // We'll still handle images separately for better performance and control.
                 if (IsImageExtension(selectedNode.Extension))
                 {
                     ShowImagePreview(selectedNode.FullPath);
@@ -132,8 +216,8 @@ namespace PBE_AssetsDownloader.UI
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to preview file '{selectedNode.FullPath}'. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Failed to preview file '{selectedNode.FullPath}'.");
+                _logService.LogError($"Failed to preview file '{{selectedNode.FullPath}}'. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"Failed to preview file '{{selectedNode.FullPath}}'.");
                 ResetPreview();
             }
         }
@@ -167,7 +251,7 @@ namespace PBE_AssetsDownloader.UI
             SelectFileMessage.Visibility = Visibility.Collapsed;
             SelectFileSubMessage.Visibility = Visibility.Collapsed;
             UnsupportedFileMessage.Visibility = Visibility.Visible;
-            UnsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
+            UnsupportedFileMessage.Text = $"Preview not available for '{{extension}}' files.";
         }
 
         private void ResetPreview()
@@ -178,10 +262,9 @@ namespace PBE_AssetsDownloader.UI
             UnsupportedFileMessage.Visibility = Visibility.Collapsed;
 
             ImagePreview.Visibility = Visibility.Collapsed;
-            TextPreview.Visibility = Visibility.Collapsed; // TextPreview is no longer used
+            TextPreview.Visibility = Visibility.Collapsed;
             WebView2Preview.Visibility = Visibility.Collapsed;
             
-            // Navigate to a blank page to stop any ongoing media playback
             if (WebView2Preview != null && WebView2Preview.CoreWebView2 != null)
             {
                 WebView2Preview.CoreWebView2.Navigate("about:blank");
@@ -190,13 +273,11 @@ namespace PBE_AssetsDownloader.UI
 
         private bool IsImageExtension(string extension)
         {
-            // SVG is better handled by WebView2
             return extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
         }
 
         private bool IsPreviewableInWebView(string extension)
         {
-            // List of extensions WebView2 can handle well
             return extension == ".svg" ||
                    extension == ".txt" || extension == ".json" || extension == ".log" ||
                    extension == ".webm" || extension == ".ogg" || extension == ".mp4" ||
@@ -223,14 +304,13 @@ namespace PBE_AssetsDownloader.UI
                     {
                         File.Delete(node.FullPath);
                     }
-                    RootNodes.Clear();
                     LoadDirectory();
-                    _logService.Log($"Deleted: {node.FullPath}");
+                    _logService.Log($"Deleted: {{node.FullPath}}");
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogError($"Failed to delete '{node.FullPath}'. See application_errors.log for details.");
-                    _logService.LogCritical(ex, $"Failed to delete '{node.FullPath}'.");
+                    _logService.LogError($"Failed to delete '{{node.FullPath}}'. See application_errors.log for details.");
+                    _logService.LogCritical(ex, $"Failed to delete '{{node.FullPath}}'.");
                     _customMessageBoxService.ShowError("Error", $"Could not delete '{node.Name}'.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
                 }
             }
@@ -243,25 +323,25 @@ namespace PBE_AssetsDownloader.UI
                 if (File.Exists(path))
                 {
                     var fileInfo = new FileInfo(path);
-                    var message = $"File: {fileInfo.Name}\n" +
-                                  $"Size: {fileInfo.Length / 1024:N0} KB\n" +
-                                  $"Created: {fileInfo.CreationTime}\n" +
-                                  $"Modified: {fileInfo.LastWriteTime}";
+                    var message = $"File: {{fileInfo.Name}}\n" +
+                                  $"Size: {{fileInfo.Length / 1024:N0}} KB\n" +
+                                  $"Created: {{fileInfo.CreationTime}}\n" +
+                                  $"Modified: {{fileInfo.LastWriteTime}}";
                     _customMessageBoxService.ShowInfo("File Information", message, Window.GetWindow(this), CustomMessageBoxIcon.Info);
                 }
                 else if (Directory.Exists(path))
                 {
                     var dirInfo = new DirectoryInfo(path);
-                    var message = $"Directory: {dirInfo.Name}\n" +
-                                  $"Created: {dirInfo.CreationTime}\n" +
-                                  $"Last Modified: {dirInfo.LastWriteTime}";
+                    var message = $"Directory: {{dirInfo.Name}}\n" +
+                                  $"Created: {{dirInfo.CreationTime}}\n" +
+                                  $"Last Modified: {{dirInfo.LastWriteTime}}";
                     _customMessageBoxService.ShowInfo("Directory Information", message, Window.GetWindow(this), CustomMessageBoxIcon.Info);
                 }
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to get info for '{path}'. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Failed to get info for '{path}'.");
+                _logService.LogError($"Failed to get info for '{{path}}'. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"Failed to get info for '{{path}}'.");
                 _customMessageBoxService.ShowError("Error", $"Could not get information for '{Path.GetFileName(path)}'.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
             }
         }

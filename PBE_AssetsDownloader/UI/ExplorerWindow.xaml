@@ -94,31 +94,66 @@
         <!-- CUERPO -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250" MinWidth="150"/>
+                <ColumnDefinition Width="*" MinWidth="150"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <TreeView x:Name="FileTreeView" 
-                          Margin="5,10,5,5" 
-                          ItemsSource="{Binding RootNodes}"
-                          SelectedItemChanged="FileTreeView_SelectedItemChanged"
-                          Style="{StaticResource ModernTreeView}">
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
-                            <!-- The old, problematic ContextMenu has been removed from here -->
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                </TreeView>
-                <TextBlock x:Name="NoDirectoryMessage"
-                           Text="The 'AssetsDownloaded' folder does not exist. Perform a download to explore the files."
-                           TextWrapping="Wrap"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Margin="10"
-                           Foreground="{StaticResource TextSecondary}"
-                           Visibility="Collapsed"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Search Box -->
+                <Grid Grid.Row="0" Margin="5,10,5,0">
+                    <Border Background="{StaticResource DarkBackground}"
+                            BorderBrush="{StaticResource BorderColor}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True"/>
+                    <TextBox x:Name="txtSearchExplorer"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="12,8"
+                             Margin="2"
+                             Foreground="{StaticResource TextPrimary}"
+                             FontSize="14"
+                             CaretBrush="Transparent"
+                             TextChanged="txtSearchExplorer_TextChanged"
+                             GotFocus="txtSearchExplorer_GotFocus"
+                             LostFocus="txtSearchExplorer_LostFocus"/>
+                    <TextBlock Text="🔍 Search files..."
+                               x:Name="txtSearchExplorerPlaceholder"
+                               IsHitTestVisible="False"
+                               Foreground="{StaticResource TextMuted}"
+                               FontSize="14"
+                               VerticalAlignment="Center"
+                               Margin="14,0,0,0">
+                    </TextBlock>
+                </Grid>
+                
+                <Grid Grid.Row="1">
+                    <TreeView x:Name="FileTreeView" 
+                              Margin="5,0,5,5" 
+                              ItemsSource="{Binding RootNodes}"
+                              SelectedItemChanged="FileTreeView_SelectedItemChanged"
+                              Style="{StaticResource ModernTreeView}">
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                    </TreeView>
+                    <TextBlock x:Name="NoDirectoryMessage"
+                               Text="The 'AssetsDownloaded' folder does not exist. Perform a download to explore the files."
+                               TextWrapping="Wrap"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="10"
+                               Foreground="{StaticResource TextSecondary}"
+                               Visibility="Collapsed"/>
+                </Grid>
             </Grid>
 
             <Border Grid.Column="1" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,0" Margin="0,10" />

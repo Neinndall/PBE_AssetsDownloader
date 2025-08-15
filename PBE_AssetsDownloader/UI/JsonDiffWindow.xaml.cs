@@ -135,12 +135,20 @@ namespace PBE_AssetsDownloader.UI
             OldJsonContent.Document = new TextDocument(normalizedOld.Text);
             NewJsonContent.Document = new TextDocument(normalizedNew.Text);
 
+            OldJsonContent.UpdateLayout();
+            NewJsonContent.UpdateLayout();
+            
             ApplyDiffHighlighting(modelToShow);
 
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, modelToShow);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
 
+            if (_diffPanelNavigation != null)
+            {
+                _diffPanelNavigation.NavigateToNextDifference(0);
+            }
+            
             if (_hideUnchangedLines)
             {
                 _diffPanelNavigation?.NavigateToNextDifference(0);

@@ -79,6 +79,15 @@
                                 <ToolTip Content="Toggle word-level diff"/>
                             </ToggleButton.ToolTip>
                         </ToggleButton>
+                        <ToggleButton x:Name="HideUnchangedButton"
+                                      Margin="5,0,0,0"
+                                      Click="HideUnchangedButton_Click"
+                                      Style="{StaticResource NavigationToggleButton}"
+                                      Content="FilterVariant">
+                            <ToggleButton.ToolTip>
+                                <ToolTip Content="Show/Hide unchanged lines"/>
+                            </ToggleButton.ToolTip>
+                        </ToggleButton>
                     </StackPanel>
                 </Border>
             </Grid>

@@ -40,4 +40,6 @@
     <Color x:Key="DiffNavigationModified">#A6FFD93D</Color>
     <Color x:Key="BackgroundPanelNavigation">#28808080</Color>
 
+    <!-- Temporary guide line for dragging -->
+    <SolidColorBrush x:Key="ViewportNavigation" Color="#66CCCCCC"/>
 </ResourceDictionary>

@@ -134,16 +134,20 @@ namespace PBE_AssetsDownloader.UI
 
             OldJsonContent.Document = new TextDocument(normalizedOld.Text);
             NewJsonContent.Document = new TextDocument(normalizedNew.Text);
+            OldJsonContent.UpdateLayout();
+            NewJsonContent.UpdateLayout();
 
             ApplyDiffHighlighting(modelToShow);
 
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, modelToShow);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
+            _diffPanelNavigation.UpdateScroll(NewJsonContent.VerticalOffset, NewJsonContent.ExtentHeight, NewJsonContent.ViewportHeight);
 
-            if (_hideUnchangedLines)
+            // Scroll to the first difference automatically on load.
+            if (_diffPanelNavigation != null)
             {
-                _diffPanelNavigation?.NavigateToNextDifference(0);
+                _diffPanelNavigation.NavigateToNextDifference(0);
             }
         }
 
@@ -215,6 +219,8 @@ namespace PBE_AssetsDownloader.UI
                 var newHorizontalOffset = Math.Min(sourceView.HorizontalOffset, NewJsonContent.ExtentWidth - NewJsonContent.ViewportWidth);
                 NewJsonContent.ScrollToVerticalOffset(newVerticalOffset);
                 NewJsonContent.ScrollToHorizontalOffset(newHorizontalOffset);
+
+                _diffPanelNavigation?.UpdateScroll(newVerticalOffset, OldJsonContent.ExtentHeight, OldJsonContent.ViewportHeight);
             }
             finally
             {
@@ -232,6 +238,8 @@ namespace PBE_AssetsDownloader.UI
                 var newHorizontalOffset = Math.Min(sourceView.HorizontalOffset, OldJsonContent.ExtentWidth - OldJsonContent.ViewportWidth);
                 OldJsonContent.ScrollToVerticalOffset(newVerticalOffset);
                 OldJsonContent.ScrollToHorizontalOffset(newHorizontalOffset);
+
+                _diffPanelNavigation?.UpdateScroll(newVerticalOffset, NewJsonContent.ExtentHeight, NewJsonContent.ViewportHeight);
             }
             finally
             {

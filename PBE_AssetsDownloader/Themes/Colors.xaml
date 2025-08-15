@@ -29,4 +29,15 @@
     <SolidColorBrush x:Key="ScrollBarArrowColor" Color="#BBBBBB" />
     <SolidColorBrush x:Key="ScrollBarArrowHoverColor" Color="White" />
 
+    <!-- Diff Viewer -->
+    <!-- Background colors for the text editor lines -->
+    <Color x:Key="DiffTextBackgroundRemoved">#58FF6B6B</Color>
+    <Color x:Key="DiffTextBackgroundAdded">#586BCF7F</Color>
+    <Color x:Key="DiffTextBackgroundModified">#58FFD93D</Color>
+    <!-- Solid colors for the side navigation panel -->
+    <Color x:Key="DiffNavigationRemoved">#A6FF6B6B</Color>
+    <Color x:Key="DiffNavigationAdded">#A66BCF7F</Color>
+    <Color x:Key="DiffNavigationModified">#A6FFD93D</Color>
+    <Color x:Key="BackgroundPanelNavigation">#28808080</Color>
+
 </ResourceDictionary>

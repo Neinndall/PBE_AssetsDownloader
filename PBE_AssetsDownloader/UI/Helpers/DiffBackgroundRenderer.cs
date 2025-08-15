@@ -1,6 +1,5 @@
 using DiffPlex.DiffBuilder.Model;
 using ICSharpCode.AvalonEdit.Rendering;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Document;
@@ -13,11 +12,23 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly bool _isWordLevel;
         private readonly bool _isOldEditor;
 
+        private readonly SolidColorBrush _removedBrush;
+        private readonly SolidColorBrush _addedBrush;
+        private readonly SolidColorBrush _modifiedBrush;
+
         public DiffBackgroundRenderer(SideBySideDiffModel diffModel, bool isWordLevel, bool isOldEditor)
         {
             _diffModel = diffModel;
             _isWordLevel = isWordLevel;
             _isOldEditor = isOldEditor;
+
+            // Cache brushes for performance
+            _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffTextBackgroundRemoved"));
+            _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffTextBackgroundAdded"));
+            _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffTextBackgroundModified"));
+            _removedBrush.Freeze();
+            _addedBrush.Freeze();
+            _modifiedBrush.Freeze();
         }
 
         public KnownLayer Layer => KnownLayer.Background;
@@ -36,25 +47,24 @@ namespace PBE_AssetsDownloader.UI.Helpers
                 var diffLine = diffLines[lineNumber];
                 if (diffLine.Type == ChangeType.Unchanged && !_isWordLevel) continue;
 
-                var lineBackgroundColor = DiffColorsHelper.GetBackgroundColor(diffLine.Type);
-                if (lineBackgroundColor != Colors.Transparent)
+                var backgroundBrush = GetBrushForChangeType(diffLine.Type);
+                if (backgroundBrush != null)
                 {
-                    var backgroundBrush = new SolidColorBrush(lineBackgroundColor) { Opacity = 0.2 };
                     var rect = new Rect(0, line.VisualTop - textView.ScrollOffset.Y, textView.ActualWidth, line.Height);
                     drawingContext.DrawRectangle(backgroundBrush, null, rect);
                 }
 
                 if (_isWordLevel && diffLine.Type != ChangeType.Unchanged)
                 {
-                    var wordHighlightColor = DiffColorsHelper.GetWordHighlightColor(diffLine.Type);
-                    var wordHighlightBrush = new SolidColorBrush(wordHighlightColor) { Opacity = 0.4 };
+                    var wordHighlightBrush = GetBrushForChangeType(diffLine.Type, useOpacity: true);
+                    if (wordHighlightBrush == null) continue;
 
                     if (diffLine.SubPieces != null)
                     {
                         int startOffset = line.FirstDocumentLine.Offset;
                         foreach (var piece in diffLine.SubPieces)
                         {
-                            if (piece.Text == null) continue; // Defensive check
+                            if (string.IsNullOrEmpty(piece.Text)) continue;
 
                             if (piece.Type == ChangeType.Unchanged)
                             {
@@ -75,6 +85,27 @@ namespace PBE_AssetsDownloader.UI.Helpers
                     }
                 }
             }
+        }
+
+        private SolidColorBrush GetBrushForChangeType(ChangeType changeType, bool useOpacity = false)
+        {
+            SolidColorBrush brush = changeType switch
+            {
+                ChangeType.Deleted => _removedBrush,
+                ChangeType.Inserted => _addedBrush,
+                ChangeType.Modified => _modifiedBrush,
+                _ => null
+            };
+
+            if (brush != null && useOpacity)
+            {
+                var clonedBrush = brush.Clone();
+                clonedBrush.Opacity = 0.4;
+                clonedBrush.Freeze();
+                return clonedBrush;
+            }
+
+            return brush;
         }
     }
 }

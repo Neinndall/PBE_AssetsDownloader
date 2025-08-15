@@ -61,8 +61,8 @@ namespace PBE_AssetsDownloader.UI
                 editor.Options.ShowTabs = false;
                 editor.Options.ConvertTabsToSpaces = true;
                 editor.Options.IndentationSize = 2;
-                editor.FontFamily = DiffColorsHelper.VisualSettings.EditorFontFamily;
-                editor.FontSize = DiffColorsHelper.VisualSettings.EditorFontSize;
+                editor.FontFamily = new FontFamily("Consolas, Courier New, monospace");
+                editor.FontSize = 13;
                 editor.ShowLineNumbers = true;
                 editor.WordWrap = false;
             }

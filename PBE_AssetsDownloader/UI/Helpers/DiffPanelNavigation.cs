@@ -20,6 +20,14 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private bool _wasActuallyDragged;
         private readonly List<int> _diffLines;
 
+        // Brush for the overall background of the navigation panels
+        private readonly SolidColorBrush _backgroundPanelBrush;
+
+        // Brushes for the diff markers WITHIN the navigation panels
+        private readonly SolidColorBrush _removedBrush;
+        private readonly SolidColorBrush _addedBrush;
+        private readonly SolidColorBrush _modifiedBrush;
+
         public event Action<int> ScrollRequested;
 
         public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, SideBySideDiffModel diffModel)
@@ -28,6 +36,19 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _newPanel = newPanel;
             _diffModel = diffModel;
             _diffLines = new List<int>();
+
+            // Cache brushes for performance
+            _backgroundPanelBrush = new SolidColorBrush((Color)Application.Current.FindResource("BackgroundPanelNavigation"));
+
+            _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
+            _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
+            _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
+            
+            _backgroundPanelBrush.Freeze();
+            _removedBrush.Freeze();
+            _addedBrush.Freeze();
+            _modifiedBrush.Freeze();
+
             SetupEvents();
             FindDiffLines();
         }
@@ -49,32 +70,23 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (_diffModel == null) return;
 
-            // Track the last change type to group consecutive changes
             ChangeType lastChangeType = ChangeType.Unchanged;
-
-            // Iterate through the new text lines to find the start of each diff block
             for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
             {
                 var currentLine = _diffModel.NewText.Lines[i];
-
-                // If the current line is a change (inserted, deleted, modified)
-                // and it's different from the last change type, or it's the very first line
-                // then it marks the beginning of a new diff block.
                 if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
                 {
-                    _diffLines.Add(i + 1); // Add 1 because line numbers are 1-based
+                    _diffLines.Add(i + 1);
                 }
                 lastChangeType = currentLine.Type;
             }
 
-            // Also consider changes in the old text for navigation, especially for deletions
             lastChangeType = ChangeType.Unchanged;
             for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
             {
                 var currentLine = _diffModel.OldText.Lines[i];
                 if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
                 {
-                    // Add to diffLines if not already present (e.g., for deletions that don't have a corresponding new line)
                     if (!_diffLines.Contains(i + 1))
                     {
                         _diffLines.Add(i + 1);
@@ -83,30 +95,22 @@ namespace PBE_AssetsDownloader.UI.Helpers
                 lastChangeType = currentLine.Type;
             }
 
-            _diffLines.Sort(); // Ensure lines are in ascending order
+            _diffLines.Sort();
         }
 
         public void NavigateToNextDifference(int currentLine)
         {
             if (_diffLines.Count == 0) return;
-
             var nextDiffLine = _diffLines.FirstOrDefault(line => line > currentLine);
-            if (nextDiffLine == 0) // Wrap around
-            {
-                nextDiffLine = _diffLines[0];
-            }
+            if (nextDiffLine == 0) nextDiffLine = _diffLines[0];
             ScrollToLine(nextDiffLine);
         }
 
         public void NavigateToPreviousDifference(int currentLine)
         {
             if (_diffLines.Count == 0) return;
-
             var previousDiffLine = _diffLines.LastOrDefault(line => line < currentLine);
-            if (previousDiffLine == 0) // Wrap around
-            {
-                previousDiffLine = _diffLines.Last();
-            }
+            if (previousDiffLine == 0) previousDiffLine = _diffLines.Last();
             ScrollToLine(previousDiffLine);
         }
 
@@ -120,9 +124,8 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _oldPanel.Children.Clear();
             _newPanel.Children.Clear();
 
-            // Set a default background for clarity, especially for empty panels
-            _oldPanel.Background = new SolidColorBrush(DiffColorsHelper.Background.Imaginary);
-            _newPanel.Background = new SolidColorBrush(DiffColorsHelper.Background.Imaginary);
+            _oldPanel.Background = _backgroundPanelBrush;
+            _newPanel.Background = _backgroundPanelBrush;
 
             if (_diffModel?.OldText?.Lines == null) return;
 
@@ -131,43 +134,39 @@ namespace PBE_AssetsDownloader.UI.Helpers
             if (totalLines == 0) return;
             var lineHeight = panelHeight / totalLines;
 
-            // Draw for Old Panel
-            for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
+            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
+            DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
+        }
+
+        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
+        {
+            for (int i = 0; i < lines.Count; i++)
             {
-                var changeType = _diffModel.OldText.Lines[i].Type;
-                var color = DiffColorsHelper.GetNavigationColor(changeType);
-                if (color == Colors.Transparent) continue;
+                var brush = GetBrushForChangeType(lines[i].Type);
+                if (brush == null) continue;
 
                 var rect = new Rectangle
                 {
-                    Width = _oldPanel.ActualWidth,
-                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
-                    Fill = new SolidColorBrush(color),
-                    IsHitTestVisible = false // Make rectangles non-interactive
+                    Width = panel.ActualWidth,
+                    Height = Math.Max(2.0, lineHeight),
+                    Fill = brush,
+                    IsHitTestVisible = false
                 };
 
                 Canvas.SetTop(rect, i * lineHeight);
-                _oldPanel.Children.Add(rect);
+                panel.Children.Add(rect);
             }
+        }
 
-            // Draw for New Panel
-            for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
+        private SolidColorBrush GetBrushForChangeType(ChangeType changeType)
+        {
+            return changeType switch
             {
-                var changeType = _diffModel.NewText.Lines[i].Type;
-                var color = DiffColorsHelper.GetNavigationColor(changeType);
-                if (color == Colors.Transparent) continue;
-
-                var rect = new Rectangle
-                {
-                    Width = _newPanel.ActualWidth,
-                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
-                    Fill = new SolidColorBrush(color),
-                    IsHitTestVisible = false // Make rectangles non-interactive
-                };
-                
-                Canvas.SetTop(rect, i * lineHeight);
-                _newPanel.Children.Add(rect);
-            }
+                ChangeType.Deleted => _removedBrush,
+                ChangeType.Inserted => _addedBrush,
+                ChangeType.Modified => _modifiedBrush,
+                _ => null
+            };
         }
 
         private void NavigationPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -205,13 +204,11 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private void NavigationPanel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDragging && sender is Canvas panel)
-
             {
                 if (!_wasActuallyDragged)
                 {
                     NavigateToClosestDifference(panel, e.GetPosition(panel).Y);
                 }
-
                 _isDragging = false;
                 panel.ReleaseMouseCapture();
             }
@@ -226,10 +223,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
             if (panelHeight <= 0) return;
 
             var clickedLine = (int)((y / panelHeight) * totalLines) + 1;
-
-            // Find the difference line that is numerically closest to the clicked line
             var closestDiffLine = _diffLines.OrderBy(diffLine => Math.Abs(diffLine - clickedLine)).First();
-
             ScrollToLine(closestDiffLine);
         }
 

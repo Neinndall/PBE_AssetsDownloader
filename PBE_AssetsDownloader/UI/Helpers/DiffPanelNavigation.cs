@@ -15,21 +15,18 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly Canvas _oldPanel;
         private readonly Canvas _newPanel;
         private readonly SideBySideDiffModel _diffModel;
+        private bool _isDragging;
+        private Point _dragStartPoint;
+        private bool _wasActuallyDragged;
         private readonly List<int> _diffLines;
 
-        // Interaction state
-        private bool _isDragging;
-
-        // Visual Elements & Transforms
-        private readonly TranslateTransform _scrollTransform;
-        private double _totalDrawingHeight;
+        // Brush for the overall background of the navigation panels
         private readonly SolidColorBrush _backgroundPanelBrush;
+
+        // Brushes for the diff markers WITHIN the navigation panels
         private readonly SolidColorBrush _removedBrush;
         private readonly SolidColorBrush _addedBrush;
         private readonly SolidColorBrush _modifiedBrush;
-        private readonly SolidColorBrush _guideBrush;
-        private Rectangle _oldViewportRect;
-        private Rectangle _newViewportRect;
 
         public event Action<int> ScrollRequested;
 
@@ -40,21 +37,17 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _diffModel = diffModel;
             _diffLines = new List<int>();
 
-            _scrollTransform = new TranslateTransform();
-
-            // Load Brushes
+            // Cache brushes for performance
             _backgroundPanelBrush = new SolidColorBrush((Color)Application.Current.FindResource("BackgroundPanelNavigation"));
+
             _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
             _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
             _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
-            _guideBrush = (SolidColorBrush)Application.Current.FindResource("ViewportNavigation");
-
-            // Freeze for performance
+            
             _backgroundPanelBrush.Freeze();
             _removedBrush.Freeze();
             _addedBrush.Freeze();
             _modifiedBrush.Freeze();
-            _guideBrush.Freeze();
 
             SetupEvents();
             FindDiffLines();
@@ -62,97 +55,69 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
         private void SetupEvents()
         {
-            _oldPanel.MouseLeftButtonDown += Panel_MouseLeftButtonDown;
-            _oldPanel.MouseMove += Panel_MouseMove;
-            _oldPanel.MouseLeftButtonUp += Panel_MouseLeftButtonUp;
-            _oldPanel.MouseLeave += Panel_MouseLeave; // Clean up if mouse leaves panel
+            _oldPanel.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
+            _oldPanel.MouseMove += NavigationPanel_MouseMove;
+            _oldPanel.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
             _oldPanel.SizeChanged += (s, e) => DrawPanels();
 
-            _newPanel.MouseLeftButtonDown += Panel_MouseLeftButtonDown;
-            _newPanel.MouseMove += Panel_MouseMove;
-            _newPanel.MouseLeftButtonUp += Panel_MouseLeftButtonUp;
-            _newPanel.MouseLeave += Panel_MouseLeave; // Clean up if mouse leaves panel
+            _newPanel.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
+            _newPanel.MouseMove += NavigationPanel_MouseMove;
+            _newPanel.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
             _newPanel.SizeChanged += (s, e) => DrawPanels();
         }
 
         private void FindDiffLines()
         {
             if (_diffModel == null) return;
-            var diffBlockStartLines = new HashSet<int>();
-            bool inDiffBlock = false;
+
+            ChangeType lastChangeType = ChangeType.Unchanged;
             for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
             {
-                bool isLineChanged = _diffModel.OldText.Lines[i].Type != ChangeType.Unchanged || _diffModel.NewText.Lines[i].Type != ChangeType.Unchanged;
-                if (isLineChanged && !inDiffBlock)
+                var currentLine = _diffModel.NewText.Lines[i];
+                if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
                 {
-                    diffBlockStartLines.Add(i + 1);
-                    inDiffBlock = true;
+                    _diffLines.Add(i + 1);
                 }
-                else if (!isLineChanged)
-                {
-                    inDiffBlock = false;
-                }
+                lastChangeType = currentLine.Type;
             }
-            _diffLines.Clear();
-            _diffLines.AddRange(diffBlockStartLines);
+
+            lastChangeType = ChangeType.Unchanged;
+            for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
+            {
+                var currentLine = _diffModel.OldText.Lines[i];
+                if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
+                {
+                    if (!_diffLines.Contains(i + 1))
+                    {
+                        _diffLines.Add(i + 1);
+                    }
+                }
+                lastChangeType = currentLine.Type;
+            }
+
             _diffLines.Sort();
         }
 
-        public void UpdateScroll(double verticalOffset, double extentHeight, double viewportHeight)
+        public void NavigateToNextDifference(int currentLine)
         {
-            // Update viewport rectangle first
-            if (_oldViewportRect != null && _newViewportRect != null && extentHeight > viewportHeight)
-            {
-                var panelHeight = _oldPanel.ActualHeight;
-
-                // Calculate viewport size and position relative to the panel
-                var rectHeight = (viewportHeight / extentHeight) * panelHeight;
-                var rectY = (verticalOffset / extentHeight) * panelHeight;
-
-                // Ensure values are within bounds
-                rectHeight = Math.Max(2, rectHeight); // Ensure it's at least visible
-                rectY = Math.Max(0, Math.Min(rectY, panelHeight - rectHeight));
-
-                _oldViewportRect.Height = rectHeight;
-                _oldViewportRect.Width = _oldPanel.ActualWidth;
-                Canvas.SetTop(_oldViewportRect, rectY);
-                _oldViewportRect.Visibility = Visibility.Visible;
-
-                _newViewportRect.Height = rectHeight;
-                _newViewportRect.Width = _newPanel.ActualWidth;
-                Canvas.SetTop(_newViewportRect, rectY);
-                _newViewportRect.Visibility = Visibility.Visible;
-            }
-            else if (_oldViewportRect != null && _newViewportRect != null)
-            {
-                // Hide viewport if not needed (content fits in editor)
-                _oldViewportRect.Visibility = Visibility.Collapsed;
-                _newViewportRect.Visibility = Visibility.Collapsed;
-            }
-
-            // Then, update the scroll transform for the markers
-            if (_totalDrawingHeight <= _oldPanel.ActualHeight || extentHeight <= viewportHeight)
-            {
-                _scrollTransform.Y = 0;
-                return;
-            }
-
-            var scrollableRange = _totalDrawingHeight - _oldPanel.ActualHeight;
-            var scrollableEditorRange = extentHeight - viewportHeight;
-
-            // Avoid division by zero if the editor range is not scrollable
-            if (scrollableEditorRange <= 0)
-            {
-                _scrollTransform.Y = 0;
-                return;
-            }
-
-            var ratio = verticalOffset / scrollableEditorRange;
-            var transformY = -1 * ratio * scrollableRange;
-
-            _scrollTransform.Y = transformY;
+            if (_diffLines.Count == 0) return;
+            var nextDiffLine = _diffLines.FirstOrDefault(line => line > currentLine);
+            if (nextDiffLine == 0) nextDiffLine = _diffLines[0];
+            ScrollToLine(nextDiffLine);
         }
 
+        public void NavigateToPreviousDifference(int currentLine)
+        {
+            if (_diffLines.Count == 0) return;
+            var previousDiffLine = _diffLines.LastOrDefault(line => line < currentLine);
+            if (previousDiffLine == 0) previousDiffLine = _diffLines.Last();
+            ScrollToLine(previousDiffLine);
+        }
+
+        private void ScrollToLine(int lineNumber)
+        {
+            ScrollRequested?.Invoke(lineNumber);
+        }
 
         public void DrawPanels()
         {
@@ -162,123 +127,35 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _oldPanel.Background = _backgroundPanelBrush;
             _newPanel.Background = _backgroundPanelBrush;
 
-            if (_diffModel?.OldText?.Lines == null || _oldPanel.ActualHeight <= 0) return;
+            if (_diffModel?.OldText?.Lines == null) return;
 
-            _totalDrawingHeight = _oldPanel.ActualHeight * 3;
-
-            // Draw the markers (scrolling canvas)
-            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines);
-            DrawPanelContent(_newPanel, _diffModel.NewText.Lines);
-
-            // Create and add the viewport rectangle, which will be positioned by UpdateScroll
-            _oldViewportRect = new Rectangle { Fill = _guideBrush, IsHitTestVisible = false };
-            _newViewportRect = new Rectangle { Fill = _guideBrush, IsHitTestVisible = false };
-            _oldPanel.Children.Add(_oldViewportRect);
-            _newPanel.Children.Add(_newViewportRect);
-        }
-
-
-        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines)
-        {
+            var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
             if (totalLines == 0) return;
+            var lineHeight = panelHeight / totalLines;
 
-            var innerCanvas = new Canvas();
+            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
+            DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
+        }
 
+        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
+        {
             for (int i = 0; i < lines.Count; i++)
             {
                 var brush = GetBrushForChangeType(lines[i].Type);
                 if (brush == null) continue;
 
-                var y = ((double)i / totalLines) * _totalDrawingHeight;
-
                 var rect = new Rectangle
                 {
                     Width = panel.ActualWidth,
-                    Height = 2,
+                    Height = Math.Max(2.0, lineHeight),
                     Fill = brush,
                     IsHitTestVisible = false
                 };
 
-                Canvas.SetTop(rect, y);
-                innerCanvas.Children.Add(rect);
+                Canvas.SetTop(rect, i * lineHeight);
+                panel.Children.Add(rect);
             }
-            innerCanvas.RenderTransform = _scrollTransform;
-            panel.Children.Add(innerCanvas);
-        }
-
-        private void Panel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            _isDragging = true;
-            var panel = (Canvas)sender;
-            panel.CaptureMouse();
-
-            var position = e.GetPosition(panel);
-            HandleNavigation(panel, position.Y);
-        }
-
-        private void Panel_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isDragging)
-            {
-                var panel = (Canvas)sender;
-                var position = e.GetPosition(panel);
-                HandleNavigation(panel, position.Y);
-            }
-        }
-
-        private void Panel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            CleanUpDrag((Canvas)sender);
-        }
-
-        private void Panel_MouseLeave(object sender, MouseEventArgs e)
-        {
-            CleanUpDrag((Canvas)sender);
-        }
-
-        private void CleanUpDrag(Canvas panel)
-        {
-            if (_isDragging)
-            {
-                _isDragging = false;
-                panel.ReleaseMouseCapture();
-            }
-        }
-
-        private void HandleNavigation(Canvas panel, double y)
-        {
-            var panelHeight = panel.ActualHeight;
-            if (panelHeight <= 0) return;
-
-            var yOnVirtualRibbon = y - _scrollTransform.Y;
-            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-            if (_totalDrawingHeight <= 0 || totalLines == 0) return;
-
-            var targetLine = (int)((yOnVirtualRibbon / _totalDrawingHeight) * totalLines);
-
-            ScrollRequested?.Invoke(targetLine);
-        }
-        
-        public void NavigateToNextDifference(int currentLine)
-        {
-            if (_diffLines.Count == 0) return;
-            var nextDiffLine = _diffLines.FirstOrDefault(line => line > currentLine);
-            if (nextDiffLine == 0) nextDiffLine = _diffLines[0];
-            ScrollRequested?.Invoke(nextDiffLine);
-        }
-
-        public void NavigateToPreviousDifference(int currentLine)
-        {
-            if (_diffLines.Count == 0) return;
-            var previousDiffLine = _diffLines.LastOrDefault(line => line < currentLine);
-            if (previousDiffLine == 0) previousDiffLine = _diffLines.Last();
-            ScrollRequested?.Invoke(previousDiffLine);
-        }
-
-        public int GetFirstDiffLine()
-        {
-            return _diffLines.Count > 0 ? _diffLines[0] : -1;
         }
 
         private SolidColorBrush GetBrushForChangeType(ChangeType changeType)
@@ -291,6 +168,72 @@ namespace PBE_AssetsDownloader.UI.Helpers
                 _ => null
             };
         }
+
+        private void NavigationPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Canvas panel)
+            {
+                _isDragging = true;
+                _wasActuallyDragged = false;
+                _dragStartPoint = e.GetPosition(panel);
+                panel.CaptureMouse();
+            }
+        }
+
+        private void NavigationPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDragging && sender is Canvas panel)
+            {
+                var currentPosition = e.GetPosition(panel);
+                var dragVector = _dragStartPoint - currentPosition;
+
+                if (!_wasActuallyDragged &&
+                    (Math.Abs(dragVector.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                     Math.Abs(dragVector.Y) > SystemParameters.MinimumVerticalDragDistance))
+                {
+                    _wasActuallyDragged = true;
+                }
+
+                if (_wasActuallyDragged)
+                {
+                    HandleNavigation(panel, currentPosition.Y);
+                }
+            }
+        }
+
+        private void NavigationPanel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDragging && sender is Canvas panel)
+            {
+                if (!_wasActuallyDragged)
+                {
+                    NavigateToClosestDifference(panel, e.GetPosition(panel).Y);
+                }
+                _isDragging = false;
+                panel.ReleaseMouseCapture();
+            }
+        }
+
+        private void NavigateToClosestDifference(Canvas panel, double y)
+        {
+            if (!_diffLines.Any()) return;
+
+            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            var panelHeight = panel.ActualHeight;
+            if (panelHeight <= 0) return;
+
+            var clickedLine = (int)((y / panelHeight) * totalLines) + 1;
+            var closestDiffLine = _diffLines.OrderBy(diffLine => Math.Abs(diffLine - clickedLine)).First();
+            ScrollToLine(closestDiffLine);
+        }
+
+        private void HandleNavigation(Canvas panel, double y)
+        {
+            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            var panelHeight = panel.ActualHeight;
+            if (panelHeight <= 0) return;
+            var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
+            ScrollRequested?.Invoke(lineNumber);
+        }
     }
 }
-

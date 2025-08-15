@@ -100,7 +100,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
             if (brush != null && useOpacity)
             {
                 var clonedBrush = brush.Clone();
-                clonedBrush.Opacity = 0.4;
+                clonedBrush.Opacity = 0.6;
                 clonedBrush.Freeze();
                 return clonedBrush;
             }

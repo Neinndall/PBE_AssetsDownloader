@@ -31,9 +31,9 @@
 
     <!-- Diff Viewer -->
     <!-- Background colors for the text editor lines -->
-    <Color x:Key="DiffTextBackgroundRemoved">#58FF6B6B</Color>
-    <Color x:Key="DiffTextBackgroundAdded">#586BCF7F</Color>
-    <Color x:Key="DiffTextBackgroundModified">#58FFD93D</Color>
+    <Color x:Key="DiffTextBackgroundRemoved">#56FF6B6B</Color>
+    <Color x:Key="DiffTextBackgroundAdded">#566BCF7F</Color>
+    <Color x:Key="DiffTextBackgroundModified">#56FFD93D</Color>
     <!-- Solid colors for the side navigation panel -->
     <Color x:Key="DiffNavigationRemoved">#A6FF6B6B</Color>
     <Color x:Key="DiffNavigationAdded">#A66BCF7F</Color>

@@ -144,15 +144,14 @@ namespace PBE_AssetsDownloader.UI
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
 
-            if (_diffPanelNavigation != null)
+            // Use LayoutUpdated to ensure the editor is rendered before scrolling
+            EventHandler layoutUpdatedHandler = null;
+            layoutUpdatedHandler = (s, e) =>
             {
-                _diffPanelNavigation.NavigateToNextDifference(0);
-            }
-            
-            if (_hideUnchangedLines)
-            {
+                NewJsonContent.TextArea.TextView.LayoutUpdated -= layoutUpdatedHandler;
                 _diffPanelNavigation?.NavigateToNextDifference(0);
-            }
+            };
+            NewJsonContent.TextArea.TextView.LayoutUpdated += layoutUpdatedHandler;
         }
 
         private SideBySideDiffModel FilterDiffModel(SideBySideDiffModel originalModel)

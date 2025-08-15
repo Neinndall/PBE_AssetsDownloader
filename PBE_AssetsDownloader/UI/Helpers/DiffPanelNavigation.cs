@@ -27,6 +27,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly SolidColorBrush _removedBrush;
         private readonly SolidColorBrush _addedBrush;
         private readonly SolidColorBrush _modifiedBrush;
+        private readonly SolidColorBrush _emptyBrush;
 
         public event Action<int> ScrollRequested;
 
@@ -43,11 +44,13 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
             _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
             _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
-            
+            _emptyBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationEmpty"));
+
             _backgroundPanelBrush.Freeze();
             _removedBrush.Freeze();
             _addedBrush.Freeze();
             _modifiedBrush.Freeze();
+            _emptyBrush.Freeze();
 
             SetupEvents();
             FindDiffLines();
@@ -127,46 +130,79 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _oldPanel.Background = _backgroundPanelBrush;
             _newPanel.Background = _backgroundPanelBrush;
 
-            if (_diffModel?.OldText?.Lines == null) return;
+            if (_diffModel?.OldText?.Lines == null || _diffModel.NewText?.Lines == null) return;
 
-            var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
+            var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600; // Default height as a fallback
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
             if (totalLines == 0) return;
+
             var lineHeight = panelHeight / totalLines;
 
-            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
-            DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
-        }
+            var oldLines = _diffModel.OldText.Lines;
+            var newLines = _diffModel.NewText.Lines;
 
-        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
-        {
-            for (int i = 0; i < lines.Count; i++)
+            for (int i = 0; i < totalLines; i++)
             {
-                var brush = GetBrushForChangeType(lines[i].Type);
-                if (brush == null) continue;
+                var oldLine = i < oldLines.Count ? oldLines[i] : null;
+                var newLine = i < newLines.Count ? newLines[i] : null;
 
-                var rect = new Rectangle
+                if (oldLine == null || newLine == null) continue;
+
+                // Determine brush for the old panel
+                Brush oldBrush = null;
+                switch (oldLine.Type)
                 {
-                    Width = panel.ActualWidth,
-                    Height = Math.Max(2.0, lineHeight),
-                    Fill = brush,
-                    IsHitTestVisible = false
-                };
+                    case ChangeType.Deleted:
+                        oldBrush = _removedBrush;
+                        break;
+                    case ChangeType.Modified:
+                        oldBrush = _modifiedBrush;
+                        break;
+                    case ChangeType.Imaginary:
+                        oldBrush = _emptyBrush;
+                        break;
+                }
 
-                Canvas.SetTop(rect, i * lineHeight);
-                panel.Children.Add(rect);
+                // Determine brush for the new panel
+                Brush newBrush = null;
+                switch (newLine.Type)
+                {
+                    case ChangeType.Inserted:
+                        newBrush = _addedBrush;
+                        break;
+                    case ChangeType.Modified:
+                        newBrush = _modifiedBrush;
+                        break;
+                    case ChangeType.Imaginary:
+                        newBrush = _emptyBrush;
+                        break;
+                }
+
+                // Draw rectangles if a brush was assigned
+                if (oldBrush != null)
+                {
+                    DrawRectangle(_oldPanel, oldBrush, i * lineHeight, lineHeight);
+                }
+
+                if (newBrush != null)
+                {
+                    DrawRectangle(_newPanel, newBrush, i * lineHeight, lineHeight);
+                }
             }
         }
 
-        private SolidColorBrush GetBrushForChangeType(ChangeType changeType)
+        private void DrawRectangle(Canvas panel, Brush brush, double top, double height)
         {
-            return changeType switch
+            var rect = new Rectangle
             {
-                ChangeType.Deleted => _removedBrush,
-                ChangeType.Inserted => _addedBrush,
-                ChangeType.Modified => _modifiedBrush,
-                _ => null
+                Width = panel.ActualWidth,
+                Height = Math.Max(2.0, height), // Ensure a minimum height to be visible
+                Fill = brush,
+                IsHitTestVisible = false
             };
+
+            Canvas.SetTop(rect, top);
+            panel.Children.Add(rect);
         }
 
         private void NavigationPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

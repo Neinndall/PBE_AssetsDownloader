@@ -27,14 +27,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly SolidColorBrush _removedBrush;
         private readonly SolidColorBrush _addedBrush;
         private readonly SolidColorBrush _modifiedBrush;
-        private readonly SolidColorBrush _imaginaryBrush;
-
-        private readonly Canvas _oldMarkerContainer;
-        private readonly Canvas _newMarkerContainer;
-        private readonly TranslateTransform _oldTransform = new TranslateTransform();
-        private readonly TranslateTransform _newTransform = new TranslateTransform();
-        private double _virtualHeight;
-        private const double MarkerHeight = 3.0;
+        private readonly SolidColorBrush _imaginaryBrush; 
 
         public event Action<int> ScrollRequested;
 
@@ -45,19 +38,14 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _diffModel = diffModel;
             _diffLines = new List<int>();
 
-            // Initialize containers and transforms
-            _oldMarkerContainer = new Canvas { RenderTransform = _oldTransform };
-            _newMarkerContainer = new Canvas { RenderTransform = _newTransform };
-            _oldPanel.Children.Add(_oldMarkerContainer);
-            _newPanel.Children.Add(_newMarkerContainer);
-
             // Cache brushes for performance
             _backgroundPanelBrush = new SolidColorBrush((Color)Application.Current.FindResource("BackgroundPanelNavigation"));
+
             _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
             _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
             _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
             _imaginaryBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationImaginary"));
-
+ 
             _backgroundPanelBrush.Freeze();
             _removedBrush.Freeze();
             _addedBrush.Freeze();
@@ -79,17 +67,6 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _newPanel.MouseMove += NavigationPanel_MouseMove;
             _newPanel.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
             _newPanel.SizeChanged += (s, e) => DrawPanels();
-        }
-
-        public void UpdateViewScroll(double verticalOffset, double scrollableHeight, double viewportHeight)
-        {
-            if (_virtualHeight <= _oldPanel.ActualHeight) return;
-
-            var scrollRatio = verticalOffset / scrollableHeight;
-            var newY = -scrollRatio * (_virtualHeight - _oldPanel.ActualHeight);
-
-            _oldTransform.Y = newY;
-            _newTransform.Y = newY;
         }
 
         private void FindDiffLines()
@@ -147,24 +124,24 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
         public void DrawPanels()
         {
-            _oldMarkerContainer.Children.Clear();
-            _newMarkerContainer.Children.Clear();
+            _oldPanel.Children.Clear();
+            _newPanel.Children.Clear();
 
             _oldPanel.Background = _backgroundPanelBrush;
             _newPanel.Background = _backgroundPanelBrush;
 
             if (_diffModel?.OldText?.Lines == null) return;
 
+            var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
             if (totalLines == 0) return;
+            var lineHeight = panelHeight / totalLines;
 
-            _virtualHeight = totalLines * MarkerHeight;
-
-            DrawPanelContent(_oldMarkerContainer, _diffModel.OldText.Lines);
-            DrawPanelContent(_newMarkerContainer, _diffModel.NewText.Lines);
+            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
+            DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
         }
 
-        private void DrawPanelContent(Canvas container, IReadOnlyList<DiffPiece> lines)
+        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
         {
             for (int i = 0; i < lines.Count; i++)
             {
@@ -173,14 +150,14 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
                 var rect = new Rectangle
                 {
-                    Width = _oldPanel.ActualWidth, // Use panel width
-                    Height = MarkerHeight,
+                    Width = panel.ActualWidth,
+                    Height = Math.Max(2.0, lineHeight),
                     Fill = brush,
                     IsHitTestVisible = false
                 };
 
-                Canvas.SetTop(rect, i * MarkerHeight);
-                container.Children.Add(rect);
+                Canvas.SetTop(rect, i * lineHeight);
+                panel.Children.Add(rect);
             }
         }
 
@@ -209,31 +186,22 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
         private void NavigationPanel_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!_isDragging || !(sender is Canvas panel)) return;
-
-            var currentPosition = e.GetPosition(panel);
-            var dragVector = currentPosition - _dragStartPoint;
-
-            if (!_wasActuallyDragged &&
-                (Math.Abs(dragVector.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                 Math.Abs(dragVector.Y) > SystemParameters.MinimumVerticalDragDistance))
+            if (_isDragging && sender is Canvas panel)
             {
-                _wasActuallyDragged = true;
-            }
+                var currentPosition = e.GetPosition(panel);
+                var dragVector = _dragStartPoint - currentPosition;
 
-            if (_wasActuallyDragged)
-            {
-                // This is the new logic for dragging
-                if (_virtualHeight <= panel.ActualHeight) return;
+                if (!_wasActuallyDragged &&
+                    (Math.Abs(dragVector.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                     Math.Abs(dragVector.Y) > SystemParameters.MinimumVerticalDragDistance))
+                {
+                    _wasActuallyDragged = true;
+                }
 
-                var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-                if (totalLines == 0) return;
-
-                // Calculate the scroll ratio based on the mouse position within the panel
-                var scrollRatio = Math.Clamp(currentPosition.Y / panel.ActualHeight, 0.0, 1.0);
-                var targetLine = (int)(scrollRatio * totalLines);
-                
-                ScrollToLine(targetLine);
+                if (_wasActuallyDragged)
+                {
+                    HandleNavigation(panel, currentPosition.Y);
+                }
             }
         }
 
@@ -243,7 +211,6 @@ namespace PBE_AssetsDownloader.UI.Helpers
             {
                 if (!_wasActuallyDragged)
                 {
-                    // This is for a simple click, not a drag
                     NavigateToClosestDifference(panel, e.GetPosition(panel).Y);
                 }
                 _isDragging = false;
@@ -255,14 +222,22 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (!_diffLines.Any()) return;
 
-            // Translate clicked Y to a position on the virtual, scrolling canvas
-            var virtualY = y - _oldTransform.Y;
-            var clickedLine = (int)(virtualY / MarkerHeight) + 1;
+            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            var panelHeight = panel.ActualHeight;
+            if (panelHeight <= 0) return;
 
-            var closestDiffLine = _diffLines.OrderBy(diffLine => Math.Abs(diffLine - clickedLine)).FirstOrDefault();
-            if (closestDiffLine == 0 && _diffLines.Any()) closestDiffLine = _diffLines.First();
-
+            var clickedLine = (int)((y / panelHeight) * totalLines) + 1;
+            var closestDiffLine = _diffLines.OrderBy(diffLine => Math.Abs(diffLine - clickedLine)).First();
             ScrollToLine(closestDiffLine);
+        }
+
+        private void HandleNavigation(Canvas panel, double y)
+        {
+            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            var panelHeight = panel.ActualHeight;
+            if (panelHeight <= 0) return;
+            var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
+            ScrollRequested?.Invoke(lineNumber);
         }
     }
 }

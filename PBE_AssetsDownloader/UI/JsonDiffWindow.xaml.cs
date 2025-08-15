@@ -135,30 +135,12 @@ namespace PBE_AssetsDownloader.UI
             OldJsonContent.Document = new TextDocument(normalizedOld.Text);
             NewJsonContent.Document = new TextDocument(normalizedNew.Text);
 
-            // Para que el salto a la primera linea de diferencias no sea brusca
-            OldJsonContent.UpdateLayout();
-            NewJsonContent.UpdateLayout();
-            
             ApplyDiffHighlighting(modelToShow);
-
-            // Clean up previous instance before creating a new one
-            if (_diffPanelNavigation != null)
-            {
-                _diffPanelNavigation.ScrollRequested -= ScrollToLine;
-            }
-            OldNavigationPanel.Children.Clear();
-            NewNavigationPanel.Children.Clear();
 
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, modelToShow);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
             _diffPanelNavigation.DrawPanels();
 
-            // Scroll to the first difference automatically on load.
-            if (_diffPanelNavigation != null)
-            {
-                _diffPanelNavigation.NavigateToNextDifference(0);
-            }
-            
             if (_hideUnchangedLines)
             {
                 _diffPanelNavigation?.NavigateToNextDifference(0);
@@ -223,7 +205,7 @@ namespace PBE_AssetsDownloader.UI
             NewJsonContent.TextArea.TextView.ScrollOffsetChanged += NewEditor_ScrollChanged;
         }
 
-                private void OldEditor_ScrollChanged(object sender, EventArgs e)
+        private void OldEditor_ScrollChanged(object sender, EventArgs e)
         {
             NewJsonContent.TextArea.TextView.ScrollOffsetChanged -= NewEditor_ScrollChanged;
             try
@@ -238,11 +220,6 @@ namespace PBE_AssetsDownloader.UI
             {
                 NewJsonContent.TextArea.TextView.ScrollOffsetChanged += NewEditor_ScrollChanged;
             }
-
-            _diffPanelNavigation?.UpdateViewScroll(
-                OldJsonContent.VerticalOffset,
-                OldJsonContent.ExtentHeight - OldJsonContent.ViewportHeight,
-                OldJsonContent.ViewportHeight);
         }
 
         private void NewEditor_ScrollChanged(object sender, EventArgs e)
@@ -260,11 +237,6 @@ namespace PBE_AssetsDownloader.UI
             {
                 OldJsonContent.TextArea.TextView.ScrollOffsetChanged += OldEditor_ScrollChanged;
             }
-
-            _diffPanelNavigation?.UpdateViewScroll(
-                NewJsonContent.VerticalOffset,
-                NewJsonContent.ExtentHeight - NewJsonContent.ViewportHeight,
-                NewJsonContent.ViewportHeight);
         }
 
         private void NextDiffButton_Click(object sender, RoutedEventArgs e)

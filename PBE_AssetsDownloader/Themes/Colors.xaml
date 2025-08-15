@@ -41,4 +41,5 @@
     <Color x:Key="DiffNavigationImaginary">#FF1E1E1E</Color>
     <Color x:Key="BackgroundPanelNavigation">#28808080</Color>
 
+
 </ResourceDictionary>

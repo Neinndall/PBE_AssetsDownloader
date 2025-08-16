@@ -41,7 +41,9 @@ namespace PBE_AssetsDownloader.UI
             LoadJsonSyntaxHighlighting();
             SetupScrollSync();
 
-            _loadingAnimation = (Storyboard)LoadingOverlay.Resources["SpinningAnimation"];
+            var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
+            _loadingAnimation = originalStoryboard.Clone();
+            Storyboard.SetTarget(_loadingAnimation, ProgressIcon);
             _loadingAnimation.Begin();
         }
 

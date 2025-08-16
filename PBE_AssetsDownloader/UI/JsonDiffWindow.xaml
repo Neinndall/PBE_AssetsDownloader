@@ -243,19 +243,6 @@
                   Background="#E61E1E1E" 
                   IsHitTestVisible="True"
                   Panel.ZIndex="999">
-                <Grid.Resources>
-                    <Storyboard x:Key="SpinningAnimation" 
-                                Storyboard.TargetName="LoadingIconElement" 
-                                Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
-                        <DoubleAnimation From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
-                    </Storyboard>
-                    
-                    <!-- Estilo para cuando está oculto -->
-                    <Style x:Key="HiddenOverlayStyle" TargetType="Grid">
-                        <Setter Property="IsHitTestVisible" Value="False"/>
-                        <Setter Property="Opacity" Value="0"/>
-                    </Style>
-                </Grid.Resources>
                 
                 <!-- Fondo que bloquea interacciones -->
                 <Rectangle Fill="Transparent" />
@@ -271,7 +258,7 @@
                     
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <!-- Icono de loading -->
-                        <icons:MaterialIcon x:Name="LoadingIconElement" 
+                        <icons:MaterialIcon x:Name="ProgressIcon" 
                                             Kind="Sync" 
                                             Foreground="{StaticResource AccentBlue}" 
                                             Width="48" 

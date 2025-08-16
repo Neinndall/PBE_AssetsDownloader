@@ -238,27 +238,66 @@
                 </Border>
             </Grid>
             
-            <!-- Loading Overlay -->
-            <Grid x:Name="LoadingOverlay" Background="#AA1E1E1E">
+            <!-- Loading Overlay MEJORADO -->
+            <Grid x:Name="LoadingOverlay" 
+                  Background="#E61E1E1E" 
+                  IsHitTestVisible="True"
+                  Panel.ZIndex="999">
                 <Grid.Resources>
-                    <Storyboard x:Key="SpinningAnimation" Storyboard.TargetName="LoadingIconElement" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
+                    <Storyboard x:Key="SpinningAnimation" 
+                                Storyboard.TargetName="LoadingIconElement" 
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
                         <DoubleAnimation From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
                     </Storyboard>
+                    
+                    <!-- Estilo para cuando está oculto -->
+                    <Style x:Key="HiddenOverlayStyle" TargetType="Grid">
+                        <Setter Property="IsHitTestVisible" Value="False"/>
+                        <Setter Property="Opacity" Value="0"/>
+                    </Style>
                 </Grid.Resources>
-                <!-- Centering StackPanel -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <icons:MaterialIcon x:Name="LoadingIconElement" Kind="Sync" Foreground="{StaticResource AccentBlue}" Width="48" Height="48" RenderTransformOrigin="0.5,0.5">
-                        <icons:MaterialIcon.RenderTransform>
-                            <RotateTransform/>
-                        </icons:MaterialIcon.RenderTransform>
-                    </icons:MaterialIcon>
+                
+                <!-- Fondo que bloquea interacciones -->
+                <Rectangle Fill="Transparent" />
+                
+                <!-- Centering StackPanel con mejor styling -->
+                <Border Background="{StaticResource CardBackground}" 
+                        BorderBrush="{StaticResource BorderColor}" 
+                        BorderThickness="1" 
+                        CornerRadius="12" 
+                        Padding="40,30" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center">
+                    
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                        <!-- Icono de loading -->
+                        <icons:MaterialIcon x:Name="LoadingIconElement" 
+                                            Kind="Sync" 
+                                            Foreground="{StaticResource AccentBlue}" 
+                                            Width="48" 
+                                            Height="48" 
+                                            RenderTransformOrigin="0.5,0.5"
+                                            HorizontalAlignment="Center"
+                                            Margin="0,0,0,20">
+                            <icons:MaterialIcon.RenderTransform>
+                                <RotateTransform/>
+                            </icons:MaterialIcon.RenderTransform>
+                        </icons:MaterialIcon>
 
-                    <TextBlock Text="Please wait while the files are being processed" 
-                               Foreground="{StaticResource TextMuted}" 
-                               FontSize="18" 
-                               VerticalAlignment="Center"
-                               Margin="16,0,0,0"/>
-                </StackPanel>
+                        <!-- Texto de loading -->
+                        <TextBlock Text="Processing files..." 
+                                   Foreground="{StaticResource TextPrimary}" 
+                                   FontSize="16" 
+                                   FontWeight="Medium"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,8"/>
+                                   
+                        <TextBlock Text="Please wait while the comparison is being prepared" 
+                                   Foreground="{StaticResource TextMuted}" 
+                                   FontSize="12" 
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Grid>
     </Grid>

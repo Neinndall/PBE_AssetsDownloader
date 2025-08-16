@@ -98,20 +98,48 @@ namespace PBE_AssetsDownloader.UI
         {
             try
             {
+                string oldJson = File.Exists(oldFilePath) ? await File.ReadAllTextAsync(oldFilePath) : "";
+                string newJson = File.Exists(newFilePath) ? await File.ReadAllTextAsync(newFilePath) : "";
+
+                // Si el archivo antiguo está vacío, no hay comparación que hacer.
+                if (string.IsNullOrEmpty(oldJson))
+                {
+                    LoadingOverlay.Visibility = Visibility.Collapsed;
+                    _loadingAnimation.Stop();
+                    DiffGrid.Visibility = Visibility.Visible;
+
+                    OldJsonContent.Document = new TextDocument("");
+                    NewJsonContent.Document = new TextDocument(newJson);
+
+                    NextDiffButton.IsEnabled = false;
+                    PreviousDiffButton.IsEnabled = false;
+                    WordLevelDiffButton.IsEnabled = false;
+                    HideUnchangedButton.IsEnabled = false;
+                    OldNavigationPanel.Visibility = Visibility.Collapsed;
+                    NewNavigationPanel.Visibility = Visibility.Collapsed;
+
+                    return; 
+                }
+
                 _originalDiffModel = await Task.Run(() =>
                 {
-                    string oldJson = File.Exists(oldFilePath) ? File.ReadAllText(oldFilePath) : "";
-                    string newJson = File.Exists(newFilePath) ? File.ReadAllText(newFilePath) : "";
                     var diffBuilder = new SideBySideDiffBuilder(new Differ());
                     return diffBuilder.BuildDiffModel(oldJson, newJson, false);
                 });
 
-                // Hide loading and show diff
                 LoadingOverlay.Visibility = Visibility.Collapsed;
                 _loadingAnimation.Stop();
                 DiffGrid.Visibility = Visibility.Visible;
-
+                
                 UpdateDiffView();
+
+                if (_originalDiffModel.OldText.Lines.All(l => l.Type == ChangeType.Unchanged) &&
+                    _originalDiffModel.NewText.Lines.All(l => l.Type == ChangeType.Unchanged))
+                {
+                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
+                    Close();
+                    return;
+                }
             }
             catch (Exception ex)
             {
@@ -123,7 +151,7 @@ namespace PBE_AssetsDownloader.UI
             }
         }
 
-        private void UpdateDiffView()
+        private void UpdateDiffView(int? diffIndexToRestore = null)
         {
             if (_originalDiffModel == null) return;
 
@@ -134,9 +162,6 @@ namespace PBE_AssetsDownloader.UI
 
             OldJsonContent.Document = new TextDocument(normalizedOld.Text);
             NewJsonContent.Document = new TextDocument(normalizedNew.Text);
-
-            OldJsonContent.UpdateLayout();
-            NewJsonContent.UpdateLayout();
             
             ApplyDiffHighlighting(modelToShow);
 
@@ -149,7 +174,14 @@ namespace PBE_AssetsDownloader.UI
             layoutUpdatedHandler = (s, e) =>
             {
                 NewJsonContent.TextArea.TextView.LayoutUpdated -= layoutUpdatedHandler;
-                _diffPanelNavigation?.NavigateToNextDifference(0);
+                if (diffIndexToRestore.HasValue && diffIndexToRestore.Value != -1)
+                {
+                    _diffPanelNavigation?.NavigateToDifferenceByIndex(diffIndexToRestore.Value);
+                }
+                else
+                {
+                    _diffPanelNavigation?.NavigateToNextDifference(0);
+                }
             };
             NewJsonContent.TextArea.TextView.LayoutUpdated += layoutUpdatedHandler;
         }
@@ -259,13 +291,19 @@ namespace PBE_AssetsDownloader.UI
         private void WordLevelDiffButton_Click(object sender, RoutedEventArgs e)
         {
             _isWordLevelDiff = WordLevelDiffButton.IsChecked ?? false;
-            UpdateDiffView();
+
+            var modelToShow = _hideUnchangedLines ? FilterDiffModel(_originalDiffModel) : _originalDiffModel;
+            ApplyDiffHighlighting(modelToShow);
+
+            OldJsonContent.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
+            NewJsonContent.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
         }
 
         private void HideUnchangedButton_Click(object sender, RoutedEventArgs e)
         {
             _hideUnchangedLines = HideUnchangedButton.IsChecked ?? false;
-            UpdateDiffView();
+            int currentDiffIndex = _diffPanelNavigation?.FindClosestDifferenceIndex(NewJsonContent.TextArea.Caret.Line) ?? -1;
+            UpdateDiffView(currentDiffIndex);
         }
     }
 }

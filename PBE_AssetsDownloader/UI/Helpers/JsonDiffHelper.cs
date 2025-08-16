@@ -24,8 +24,12 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (string.IsNullOrWhiteSpace(json)) return string.Empty;
 
-            // Temporarily removed heuristic for debugging.
-            // This will force all JSON to be formatted.
+            // Heuristic to avoid re-formatting if the JSON is already indented.
+            // This significantly improves performance on large, already-formatted files.
+            if (json.Contains("\n") && json.Contains("{"))
+            {
+                return json;
+            }
 
             try
             {

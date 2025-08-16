@@ -117,6 +117,35 @@ namespace PBE_AssetsDownloader.UI.Helpers
             ScrollToLine(previousDiffLine);
         }
 
+        public void NavigateToDifferenceByIndex(int index)
+        {
+            if (index >= 0 && index < _diffLines.Count)
+            {
+                var lineToScrollTo = _diffLines[index];
+                ScrollToLine(lineToScrollTo);
+            }
+            else if (_diffLines.Count > 0)
+            {
+                ScrollToLine(_diffLines[0]);
+            }
+        }
+
+        public int FindClosestDifferenceIndex(int currentLine)
+        {
+            if (_diffLines.Count == 0) return -1;
+
+            var nextDiffLine = _diffLines.FirstOrDefault(line => line >= currentLine);
+
+            if (nextDiffLine != 0)
+            {
+                return _diffLines.IndexOf(nextDiffLine);
+            }
+            else
+            {
+                return _diffLines.Count - 1;
+            }
+        }
+
         private void ScrollToLine(int lineNumber)
         {
             ScrollRequested?.Invoke(lineNumber);

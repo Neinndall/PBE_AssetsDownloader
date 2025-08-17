@@ -158,6 +158,7 @@ namespace PBE_AssetsDownloader.UI
             if (_originalDiffModel == null) return;
 
             var modelToShow = _hideUnchangedLines ? FilterDiffModel(_originalDiffModel) : _originalDiffModel;
+            var originalModelForNav = _hideUnchangedLines ? _originalDiffModel : null;
 
             var normalizedOld = JsonDiffHelper.NormalizeTextForAlignment(modelToShow.OldText);
             var normalizedNew = JsonDiffHelper.NormalizeTextForAlignment(modelToShow.NewText);
@@ -170,8 +171,9 @@ namespace PBE_AssetsDownloader.UI
 
             ApplyDiffHighlighting(modelToShow);
 
-            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, modelToShow);
+            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, modelToShow, originalModelForNav);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
+            _diffPanelNavigation.IsFilteredView = _hideUnchangedLines;
 
             // Use LayoutUpdated to ensure the editor is rendered before scrolling
             EventHandler layoutUpdatedHandler = null;
@@ -227,6 +229,8 @@ namespace PBE_AssetsDownloader.UI
             {
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
+
+                if (_diffPanelNavigation != null) _diffPanelNavigation.CurrentLine = lineNumber;
 
                 // Force the layout to update synchronously to ensure editor metrics are correct
                 UpdateLayout();

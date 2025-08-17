@@ -18,10 +18,13 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly TextEditor _oldEditor;
         private readonly TextEditor _newEditor;
         private readonly SideBySideDiffModel _diffModel;
+        private readonly SideBySideDiffModel _originalDiffModel;
         private bool _isDragging;
         private Point _dragStartPoint;
         private bool _wasActuallyDragged;
         private readonly List<int> _diffLines;
+        public bool IsFilteredView { get; set; }
+        public int CurrentLine { get; set; }
 
         // Brush for the overall background of the navigation panels
         private readonly SolidColorBrush _backgroundPanelBrush;
@@ -35,13 +38,14 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
         public event Action<int> ScrollRequested;
 
-        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, TextEditor oldEditor, TextEditor newEditor, SideBySideDiffModel diffModel)
+        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, TextEditor oldEditor, TextEditor newEditor, SideBySideDiffModel diffModel, SideBySideDiffModel originalDiffModel = null)
         {
             _oldPanel = oldPanel;
             _newPanel = newPanel;
             _oldEditor = oldEditor;
             _newEditor = newEditor;
             _diffModel = diffModel;
+            _originalDiffModel = originalDiffModel ?? diffModel;
             _diffLines = new List<int>();
 
             // Cache brushes for performance
@@ -177,38 +181,73 @@ namespace PBE_AssetsDownloader.UI.Helpers
             DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
             DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
 
-            // Draw the viewport guide across both panels to make it look unified
-            if (_newEditor.ExtentHeight > 0)
+            if (IsFilteredView)
             {
-                var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
-                var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
-
-                var viewportHeight = panelHeight * viewportRatio;
-                var viewportTop = panelHeight * offsetRatio;
-
-                // Create guide for the left panel
-                var oldViewportRect = new Rectangle
+                // In filtered view, draw a highlighter for the current line.
+                if (CurrentLine > 0)
                 {
-                    Width = _oldPanel.ActualWidth,
-                    Height = Math.Max(2.0, viewportHeight),
-                    Fill = _viewportBrush,
-                    IsHitTestVisible = false
-                };
+                    var lineIndex = CurrentLine - 1;
+                    if (lineIndex >= 0 && lineIndex < totalLines)
+                    {
+                        var highlighterTop = lineIndex * lineHeight;
 
-                // Create guide for the right panel
-                var newViewportRect = new Rectangle
+                        var oldHighlighterRect = new Rectangle
+                        {
+                            Width = _oldPanel.ActualWidth,
+                            Height = Math.Max(2.0, lineHeight),
+                            Fill = _viewportBrush,
+                            IsHitTestVisible = false
+                        };
+                        Canvas.SetTop(oldHighlighterRect, highlighterTop);
+                        _oldPanel.Children.Add(oldHighlighterRect);
+                
+                        var newHighlighterRect = new Rectangle
+                        {
+                            Width = _newPanel.ActualWidth,
+                            Height = Math.Max(2.0, lineHeight),
+                            Fill = _viewportBrush,
+                            IsHitTestVisible = false
+                        };
+                        Canvas.SetTop(newHighlighterRect, highlighterTop);
+                        _newPanel.Children.Add(newHighlighterRect);
+                    }
+                }
+            }
+            else
+            {
+                // In unfiltered view, draw the original viewport guide.
+                if (_newEditor.ExtentHeight > 0)
                 {
-                    Width = _newPanel.ActualWidth,
-                    Height = Math.Max(2.0, viewportHeight),
-                    Fill = _viewportBrush,
-                    IsHitTestVisible = false
-                };
+                    var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
+                    var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
 
-                Canvas.SetTop(oldViewportRect, viewportTop);
-                _oldPanel.Children.Add(oldViewportRect);
+                    var viewportHeight = panelHeight * viewportRatio;
+                    var viewportTop = panelHeight * offsetRatio;
 
-                Canvas.SetTop(newViewportRect, viewportTop);
-                _newPanel.Children.Add(newViewportRect);
+                    // Create guide for the left panel
+                    var oldViewportRect = new Rectangle
+                    {
+                        Width = _oldPanel.ActualWidth,
+                        Height = Math.Max(2.0, viewportHeight),
+                        Fill = _viewportBrush,
+                        IsHitTestVisible = false
+                    };
+
+                    // Create guide for the right panel
+                    var newViewportRect = new Rectangle
+                    {
+                        Width = _newPanel.ActualWidth,
+                        Height = Math.Max(2.0, viewportHeight),
+                        Fill = _viewportBrush,
+                        IsHitTestVisible = false
+                    };
+
+                    Canvas.SetTop(oldViewportRect, viewportTop);
+                    _oldPanel.Children.Add(oldViewportRect);
+
+                    Canvas.SetTop(newViewportRect, viewportTop);
+                    _newPanel.Children.Add(newViewportRect);
+                }
             }
         }
 

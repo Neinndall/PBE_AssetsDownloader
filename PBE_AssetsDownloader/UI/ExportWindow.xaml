@@ -5,8 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:PBE_AssetsDownloader.UI" 
              xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
-             mc:Ignorable="d"
-             Background="#FF1E1E1E" FontFamily="Consolas, Courier New">    
+             mc:Ignorable="d" FontFamily="Consolas, Courier New">    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -60,6 +59,7 @@
 
         <!-- CUERPO -->
         <ScrollViewer Grid.Row="1" 
+                      Background="Transparent"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="32,24,32,0">

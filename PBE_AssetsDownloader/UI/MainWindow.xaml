@@ -12,7 +12,7 @@
         Height="730" Width="950"
         MinHeight="730" MinWidth="950"
         WindowStartupLocation="CenterScreen"
-        Background="#FF1E1E1E" 
+        Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New">
 
     <Grid>
@@ -60,7 +60,7 @@
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0"
-                        Background="{StaticResource CardBackground}"
+                        Background="Transparent"
                         BorderBrush="{StaticResource BorderColor}"
                         BorderThickness="0,0,0,1"
                         Padding="0">

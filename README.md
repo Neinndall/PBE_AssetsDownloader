@@ -9,7 +9,7 @@ GitHub includes a **SHA-256** security code linked to the .rar package. You can 
 
 If both the **SHA-256** from **GitHub** and **VIRUSTOTAL** match, it means that the .rar package that was scanned by virustotal has not been modified at any point, so you can confidently verify that the scan was performed on the .rar package of the latest version. With each release, I will provide you with the URL of each virustotal scan with its details and the package name for the version that will appear just above with its details. Most importantly, **SHA-256**, don't forget to check every detail.
 
-*   **Latest Version v2.1.3.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/873b70e8bf3dcf151f017586fd8471f9c67b5abbe268c0d9d2cb408815bb369f/details)** 
+*   **Latest Version v2.1.3.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/b38c1f3825bf2a7c13636afd45863252ccf98c3b3bad4bed6b82b042b964bcf1/details)** 
      *   *GITHUB* --> You cant get the sha-256 [here](https://github.com/Neinndall/PBE_AssetsDownloader/releases)
      *   *VIRUSTOTAL* --> You cant get the sha-256 in `details` from the link of VirusTotal in details
 

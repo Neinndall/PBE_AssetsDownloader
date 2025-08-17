@@ -173,7 +173,6 @@ namespace PBE_AssetsDownloader.UI
 
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, modelToShow, originalModelForNav);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
-            _diffPanelNavigation.IsFilteredView = _hideUnchangedLines;
 
             // Use LayoutUpdated to ensure the editor is rendered before scrolling
             EventHandler layoutUpdatedHandler = null;

@@ -23,7 +23,6 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private Point _dragStartPoint;
         private bool _wasActuallyDragged;
         private readonly List<int> _diffLines;
-        public bool IsFilteredView { get; set; }
         public int CurrentLine { get; set; }
 
         // Brush for the overall background of the navigation panels
@@ -181,7 +180,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
             DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
             DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
 
-            if (IsFilteredView)
+            if (_originalDiffModel != _diffModel)
             {
                 // In filtered view, draw a highlighter for the current line.
                 if (CurrentLine > 0)

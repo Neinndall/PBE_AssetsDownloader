@@ -169,51 +169,47 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
             if (_diffModel?.OldText?.Lines == null) return;
 
-            // Draw the viewport guide first and send it to the back
-            DrawViewportGuide();
-
             var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
             if (totalLines == 0) return;
             var lineHeight = panelHeight / totalLines;
 
-            // Draw the diff markers on top of the viewport guide
             DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
             DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
-        }
 
-        private void DrawViewportGuide()
-        {
-            if (_newEditor.ExtentHeight <= 0) return;
-
-            var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
-            var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
-            var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
-
-            var viewportHeight = panelHeight * viewportRatio;
-            var viewportTop = panelHeight * offsetRatio;
-
-            var oldViewportRect = CreateViewportGuide(_oldPanel.ActualWidth, viewportHeight);
-            var newViewportRect = CreateViewportGuide(_newPanel.ActualWidth, viewportHeight);
-
-            Panel.SetZIndex(oldViewportRect, 0); // Draw behind diffs
-            Canvas.SetTop(oldViewportRect, viewportTop);
-            _oldPanel.Children.Add(oldViewportRect);
-
-            Panel.SetZIndex(newViewportRect, 0); // Draw behind diffs
-            Canvas.SetTop(newViewportRect, viewportTop);
-            _newPanel.Children.Add(newViewportRect);
-        }
-
-        private Rectangle CreateViewportGuide(double width, double height)
-        {
-            return new Rectangle
+            // Draw the viewport guide across both panels to make it look unified
+            if (_newEditor.ExtentHeight > 0)
             {
-                Width = width,
-                Height = Math.Max(2.0, height),
-                Fill = _viewportBrush,
-                IsHitTestVisible = false
-            };
+                var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
+                var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
+
+                var viewportHeight = panelHeight * viewportRatio;
+                var viewportTop = panelHeight * offsetRatio;
+
+                // Create guide for the left panel
+                var oldViewportRect = new Rectangle
+                {
+                    Width = _oldPanel.ActualWidth,
+                    Height = Math.Max(2.0, viewportHeight),
+                    Fill = _viewportBrush,
+                    IsHitTestVisible = false
+                };
+
+                // Create guide for the right panel
+                var newViewportRect = new Rectangle
+                {
+                    Width = _newPanel.ActualWidth,
+                    Height = Math.Max(2.0, viewportHeight),
+                    Fill = _viewportBrush,
+                    IsHitTestVisible = false
+                };
+
+                Canvas.SetTop(oldViewportRect, viewportTop);
+                _oldPanel.Children.Add(oldViewportRect);
+
+                Canvas.SetTop(newViewportRect, viewportTop);
+                _newPanel.Children.Add(newViewportRect);
+            }
         }
 
         private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
@@ -231,7 +227,6 @@ namespace PBE_AssetsDownloader.UI.Helpers
                     IsHitTestVisible = false
                 };
 
-                Panel.SetZIndex(rect, 1); // Draw on top of viewport
                 Canvas.SetTop(rect, i * lineHeight);
                 panel.Children.Add(rect);
             }

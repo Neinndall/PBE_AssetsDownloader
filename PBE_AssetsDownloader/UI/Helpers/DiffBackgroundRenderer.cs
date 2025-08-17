@@ -23,11 +23,11 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _isOldEditor = isOldEditor;
 
             // Cache brushes for performance
-            _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffTextBackgroundRemoved"));
             _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffTextBackgroundAdded"));
+            _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffTextBackgroundRemoved"));
             _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffTextBackgroundModified"));
-            _removedBrush.Freeze();
             _addedBrush.Freeze();
+            _removedBrush.Freeze();
             _modifiedBrush.Freeze();
         }
 
@@ -91,8 +91,8 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             SolidColorBrush brush = changeType switch
             {
-                ChangeType.Deleted => _removedBrush,
                 ChangeType.Inserted => _addedBrush,
+                ChangeType.Deleted => _removedBrush,
                 ChangeType.Modified => _modifiedBrush,
                 _ => null
             };
@@ -100,7 +100,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
             if (brush != null && useOpacity)
             {
                 var clonedBrush = brush.Clone();
-                clonedBrush.Opacity = 0.8;
+                clonedBrush.Opacity = 0.8; // Este valor es para la opcion de resaltado (high level word)
                 clonedBrush.Freeze();
                 return clonedBrush;
             }

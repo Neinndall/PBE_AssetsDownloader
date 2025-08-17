@@ -27,8 +27,8 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly SolidColorBrush _backgroundPanelBrush;
 
         // Brushes for the diff markers WITHIN the navigation panels
-        private readonly SolidColorBrush _removedBrush;
         private readonly SolidColorBrush _addedBrush;
+        private readonly SolidColorBrush _removedBrush;
         private readonly SolidColorBrush _modifiedBrush;
         private readonly SolidColorBrush _imaginaryBrush;
         private readonly SolidColorBrush _viewportBrush; 
@@ -47,15 +47,15 @@ namespace PBE_AssetsDownloader.UI.Helpers
             // Cache brushes for performance
             _backgroundPanelBrush = new SolidColorBrush((Color)Application.Current.FindResource("BackgroundPanelNavigation"));
 
-            _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
             _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
+            _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
             _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
             _imaginaryBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationImaginary"));
             _viewportBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationViewPort"));
  
             _backgroundPanelBrush.Freeze();
-            _removedBrush.Freeze();
             _addedBrush.Freeze();
+            _removedBrush.Freeze();
             _modifiedBrush.Freeze();
             _imaginaryBrush.Freeze();
             _viewportBrush.Freeze();
@@ -236,8 +236,8 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             return changeType switch
             {
-                ChangeType.Deleted => _removedBrush,
                 ChangeType.Inserted => _addedBrush,
+                ChangeType.Deleted => _removedBrush,
                 ChangeType.Modified => _modifiedBrush,
                 ChangeType.Imaginary => _imaginaryBrush,
                 _ => null

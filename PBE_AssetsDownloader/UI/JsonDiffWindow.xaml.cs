@@ -230,6 +230,9 @@ namespace PBE_AssetsDownloader.UI
 
                 // Force the layout to update synchronously to ensure editor metrics are correct
                 UpdateLayout();
+                
+                // Now that the layout is correct, redraw the navigation panels
+                _diffPanelNavigation?.DrawPanels();
 
                 NewJsonContent.TextArea.Caret.Line = lineNumber;
                 NewJsonContent.TextArea.Caret.Column = 1;

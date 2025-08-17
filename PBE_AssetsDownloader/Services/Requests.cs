@@ -60,28 +60,28 @@ namespace PBE_AssetsDownloader.Services
       }
     }
 
-    public async Task<bool> DownloadJsonContentAsync(string url, string filePath)
+    public async Task<string> DownloadJsonContentAsync(string url)
     {
         try
         {
             var response = await _httpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
-                await File.WriteAllTextAsync(filePath, await response.Content.ReadAsStringAsync());
-                _logService.LogDebug($"Downloaded and saved JSON from {url} to {filePath}");
-                return true;
+                string content = await response.Content.ReadAsStringAsync();
+                _logService.LogDebug($"Successfully downloaded JSON content from {url}.");
+                return content;
             }
             else
             {
                 _logService.LogError($"Failed to download JSON from {url}. Status: {response.StatusCode} - {response.ReasonPhrase}");
-                return false;
+                return null;
             }
         }
         catch (Exception ex)
         {
             _logService.LogError($"Error downloading JSON from {url}. See application_errors.log for details.");
             _logService.LogCritical(ex, $"Requests.DownloadJsonContentAsync Exception for URL: {url}");
-            return false;
+            return null;
         }
     }
   }

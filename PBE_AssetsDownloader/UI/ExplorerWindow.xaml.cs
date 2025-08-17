@@ -8,7 +8,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using PBE_AssetsDownloader.UI.Dialogs;
-using LibVLCSharp.Shared;
+using Microsoft.Web.WebView2.Core;
+using System.Linq;
+using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -17,10 +20,9 @@ namespace PBE_AssetsDownloader.UI
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
         private readonly CustomMessageBoxService _customMessageBoxService;
-        private readonly LibVLC _libVLC;
-        private readonly MediaPlayer _mediaPlayer;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
+        private readonly List<FileSystemNodeModel> _fullTree = new List<FileSystemNodeModel>();
 
         public ExplorerWindow(DirectoriesCreator directoriesCreator, LogService logService, CustomMessageBoxService customMessageBoxService)
         {
@@ -30,19 +32,61 @@ namespace PBE_AssetsDownloader.UI
             _customMessageBoxService = customMessageBoxService;
             RootNodes = new ObservableCollection<FileSystemNodeModel>();
 
-            _libVLC = new LibVLC();
-            _libVLC.Log += (sender, e) => {
-                // Log VLC messages to our log file for debugging purposes
-                _logService.LogDebug($"[LibVLC] {e.Level}: {e.Message} ({e.Module}:{e.SourceFile})");
-            };
-
-            _mediaPlayer = new MediaPlayer(_libVLC);
-            VideoView.MediaPlayer = _mediaPlayer;
-
             DataContext = this;
             this.Loaded += ExplorerWindow_Loaded;
-            FileTreeView.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Click));
             this.Unloaded += ExplorerWindow_Unloaded;
+            InitializeWebView2();
+        }
+
+        private void Info_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTreeView.SelectedItem is FileSystemNodeModel node)
+            {
+                ShowFileInfo(node.FullPath);
+            }
+        }
+
+        private void Delete_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTreeView.SelectedItem is FileSystemNodeModel node)
+            {
+                DeletePath(node);
+            }
+        }
+
+        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.IsSelected = true;
+                e.Handled = true;
+            }
+        }
+
+        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+                source = VisualTreeHelper.GetParent(source);
+
+            return source as TreeViewItem;
+        }
+
+        private async void InitializeWebView2()
+        {
+            try
+            {
+                var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PBE_AssetsDownloader", "WebView2Data");
+                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: appDataPath);
+                await WebView2Preview.EnsureCoreWebView2Async(environment);
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError("WebView2 initialization failed. Previews will be affected. See application_errors.log for details.");
+                _logService.LogCritical(ex, "WebView2 Initialization Failed");
+                _customMessageBoxService.ShowError("Error", "Could not initialize content viewer. Some previews may not work correctly.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+            }
         }
 
         private void ExplorerWindow_Loaded(object sender, RoutedEventArgs e)
@@ -52,9 +96,7 @@ namespace PBE_AssetsDownloader.UI
 
         private void ExplorerWindow_Unloaded(object sender, RoutedEventArgs e)
         {
-            _mediaPlayer.Stop();
-            _mediaPlayer.Dispose();
-            _libVLC.Dispose();
+            WebView2Preview.CoreWebView2?.Navigate("about:blank");
         }
 
         private void LoadDirectory()
@@ -64,7 +106,6 @@ namespace PBE_AssetsDownloader.UI
                 var rootDirectory = Path.Combine(_directoriesCreator.AppDirectory, "AssetsDownloaded");
                 if (!Directory.Exists(rootDirectory))
                 {
-                    _logService.LogWarning($"The directory '{rootDirectory}' does not exist. No assets to explore.");
                     FileTreeView.Visibility = Visibility.Collapsed;
                     NoDirectoryMessage.Visibility = Visibility.Visible;
                     return;
@@ -73,13 +114,99 @@ namespace PBE_AssetsDownloader.UI
                 FileTreeView.Visibility = Visibility.Visible;
                 NoDirectoryMessage.Visibility = Visibility.Collapsed;
 
+                _fullTree.Clear();
+                RootNodes.Clear();
+
                 var rootNode = new FileSystemNodeModel(rootDirectory);
-                RootNodes.Add(rootNode);
+                _fullTree.Add(rootNode);
+
+                foreach (var node in _fullTree)
+                {
+                    RootNodes.Add(node);
+                }
             }
             catch (Exception ex)
             {
                 _logService.LogError($"Failed to load asset directory. See application_errors.log for details.");
                 _logService.LogCritical(ex, "Failed to load asset directory.");
+            }
+        }
+
+        private void txtSearchExplorer_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = txtSearchExplorer.Text;
+            txtSearchExplorerPlaceholder.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Visible : Visibility.Collapsed;
+
+            RootNodes.Clear();
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                foreach (var node in _fullTree)
+                {
+                    RootNodes.Add(node);
+                }
+            }
+            else
+            {
+                foreach (var rootNode in _fullTree)
+                {
+                    var filteredNode = FilterNode(rootNode, searchText);
+                    if (filteredNode != null)
+                    {
+                        RootNodes.Add(filteredNode);
+                    }
+                }
+            }
+        }
+
+        private FileSystemNodeModel FilterNode(FileSystemNodeModel node, string searchText)
+        {
+            bool selfMatches = node.Name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+
+            if (node.IsDirectory)
+            {
+                if (selfMatches)
+                {
+                    var fullNode = new FileSystemNodeModel(node.FullPath);
+                    fullNode.IsExpanded = true;
+                    return fullNode;
+                }
+
+                var filteredChildren = new ObservableCollection<FileSystemNodeModel>();
+                foreach (var child in node.Children)
+                {
+                    var filteredChild = FilterNode(child, searchText);
+                    if (filteredChild != null)
+                    {
+                        filteredChildren.Add(filteredChild);
+                    }
+                }
+
+                if (filteredChildren.Any())
+                {
+                    var newNode = new FileSystemNodeModel(node.FullPath, isDirectory: true, children: filteredChildren);
+                    newNode.IsExpanded = true;
+                    return newNode;
+                }
+            }
+            else if (selfMatches)
+            {
+                return new FileSystemNodeModel(node.FullPath, isDirectory: false);
+            }
+
+            return null;
+        }
+
+        private void txtSearchExplorer_GotFocus(object sender, RoutedEventArgs e)
+        {
+            txtSearchExplorerPlaceholder.Visibility = Visibility.Collapsed;
+        }
+
+        private void txtSearchExplorer_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtSearchExplorer.Text))
+            {
+                txtSearchExplorerPlaceholder.Visibility = Visibility.Visible;
             }
         }
 
@@ -98,13 +225,9 @@ namespace PBE_AssetsDownloader.UI
                 {
                     ShowImagePreview(selectedNode.FullPath);
                 }
-                else if (IsTextExtension(selectedNode.Extension))
+                else if (IsPreviewableInWebView(selectedNode.Extension))
                 {
-                    ShowTextPreview(selectedNode.FullPath);
-                }
-                else if (IsVideoExtension(selectedNode.Extension) || IsAudioExtension(selectedNode.Extension))
-                {
-                    ShowMediaPreview(selectedNode.FullPath);
+                    ShowWebViewPreview(selectedNode.FullPath);
                 }
                 else
                 {
@@ -133,23 +256,12 @@ namespace PBE_AssetsDownloader.UI
             ImagePreview.Source = bitmap;
         }
 
-        private void ShowTextPreview(string path)
+        private void ShowWebViewPreview(string path)
         {
             ResetPreview();
-            TextPreview.Visibility = Visibility.Visible;
+            WebView2Preview.Visibility = Visibility.Visible;
             PreviewPlaceholder.Visibility = Visibility.Collapsed;
-            TextPreview.Text = File.ReadAllText(path);
-        }
-
-        private void ShowMediaPreview(string path)
-        {
-            ResetPreview();
-            MediaPreviewGrid.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
-
-            var media = new Media(_libVLC, path, FromType.FromPath);
-            _mediaPlayer.Play(media);
-            media.Dispose(); // Dispose of the media object after it's been loaded
+            WebView2Preview.CoreWebView2.Navigate(new Uri(path).AbsoluteUri);
         }
 
         private void ShowUnsupportedPreview(string extension)
@@ -171,11 +283,11 @@ namespace PBE_AssetsDownloader.UI
 
             ImagePreview.Visibility = Visibility.Collapsed;
             TextPreview.Visibility = Visibility.Collapsed;
-            MediaPreviewGrid.Visibility = Visibility.Collapsed;
+            WebView2Preview.Visibility = Visibility.Collapsed;
             
-            if (_mediaPlayer.IsPlaying)
+            if (WebView2Preview != null && WebView2Preview.CoreWebView2 != null)
             {
-                _mediaPlayer.Stop();
+                WebView2Preview.CoreWebView2.Navigate("about:blank");
             }
         }
 
@@ -184,68 +296,19 @@ namespace PBE_AssetsDownloader.UI
             return extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
         }
 
-        private bool IsTextExtension(string extension)
+        private bool IsPreviewableInWebView(string extension)
         {
-            return extension == ".txt" || extension == ".json" || extension == ".lua" || extension == ".log";
-        }
-
-        private bool IsAudioExtension(string extension)
-        {
-            return extension == ".wav" || extension == ".mp3" || extension == ".ogg";
-        }
-
-        private bool IsVideoExtension(string extension)
-        {
-            return extension == ".mp4" || extension == ".webm";
-        }
-
-        private void PlayButton_Click(object sender, RoutedEventArgs e)
-        {
-            _mediaPlayer.Play();
-        }
-
-        private void PauseButton_Click(object sender, RoutedEventArgs e)
-        {
-            _mediaPlayer.Pause();
-        }
-
-        private void StopButton_Click(object sender, RoutedEventArgs e)
-        {
-            _mediaPlayer.Stop();
-        }
-
-        private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (_mediaPlayer != null)
-            {
-                _mediaPlayer.Volume = (int)e.NewValue;
-            }
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var menuItem = e.OriginalSource as MenuItem;
-            if (menuItem == null) return;
-
-            var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
-            if (selectedNode == null) return;
-
-            var tag = menuItem.Tag as string;
-            if (tag == "Delete")
-            {
-                DeletePath(selectedNode);
-            }
-            else if (tag == "Info")
-            {
-                ShowFileInfo(selectedNode.FullPath);
-            }
+            return extension == ".svg" ||
+                   extension == ".txt" || extension == ".json" || extension == ".log" ||
+                   extension == ".webm" || extension == ".ogg" || extension == ".mp4" ||
+                   extension == ".mp3" || extension == ".wav";
         }
 
         private void DeletePath(FileSystemNodeModel node)
         {
             var message = node.IsDirectory
                 ? $"Are you sure you want to delete the directory '{node.Name}' and all its contents?"
-                : $"Are you sure you want to delete the file '{node.Name}'?";
+                : $"Are you sure you want to delete the file '{node.Name}'";
 
             var result = _customMessageBoxService.ShowYesNo("Confirm Deletion", message, Window.GetWindow(this), CustomMessageBoxIcon.Warning);
 
@@ -261,7 +324,6 @@ namespace PBE_AssetsDownloader.UI
                     {
                         File.Delete(node.FullPath);
                     }
-                    RootNodes.Clear();
                     LoadDirectory();
                     _logService.Log($"Deleted: {node.FullPath}");
                 }

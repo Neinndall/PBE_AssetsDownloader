@@ -92,7 +92,7 @@ namespace PBE_AssetsDownloader.UI
             else if (_updateTimer != null)
             {
                 _updateTimer.Enabled = false;
-                _logService.Log("Background update timer stopped.");
+                _logService.LogDebug("Background update timer stopped.");
             }
         }
 

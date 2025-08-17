@@ -14,6 +14,20 @@ namespace PBE_AssetsDownloader.UI.Models
         public string Extension { get; set; }
         public ObservableCollection<FileSystemNodeModel> Children { get; set; }
 
+        private bool _isExpanded;
+        public bool IsExpanded
+        {
+            get { return _isExpanded; }
+            set
+            {
+                if (_isExpanded != value)
+                {
+                    _isExpanded = value;
+                    OnPropertyChanged(nameof(IsExpanded));
+                }
+            }
+        }
+
         public FileSystemNodeModel(string path)
         {
             FullPath = path;
@@ -26,6 +40,15 @@ namespace PBE_AssetsDownloader.UI.Models
             {
                 LoadChildren();
             }
+        }
+
+        public FileSystemNodeModel(string path, bool isDirectory, ObservableCollection<FileSystemNodeModel> children = null)
+        {
+            FullPath = path;
+            Name = Path.GetFileName(path);
+            IsDirectory = isDirectory;
+            Extension = IsDirectory ? "" : Path.GetExtension(path).ToLowerInvariant();
+            Children = children ?? new ObservableCollection<FileSystemNodeModel>();
         }
 
         private void LoadChildren()

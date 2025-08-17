@@ -34,7 +34,7 @@ namespace PBE_AssetsDownloader
                 .MinimumLevel.Debug()
                 .WriteTo.Debug()
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Information) // Filter to include only Information level and above
+                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Information && e.Level < LogEventLevel.Fatal) // Filter to include Information, Warning, Error, but NOT Fatal
                     .WriteTo.File("logs/application.log", rollingInterval: RollingInterval.Day))
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal) // Include only Fatal
@@ -98,8 +98,7 @@ namespace PBE_AssetsDownloader
             var logService = ServiceProvider.GetRequiredService<LogService>();
             var customMessageBoxService = ServiceProvider.GetRequiredService<CustomMessageBoxService>();
 
-            // Initialize LibVLC using the centralized manager at application startup
-            VlcManager.Initialize(logService);
+            
 
             SetupGlobalExceptionHandling(logService, customMessageBoxService);
 

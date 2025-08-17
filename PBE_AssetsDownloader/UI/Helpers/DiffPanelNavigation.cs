@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using DiffPlex.DiffBuilder.Model;
+using ICSharpCode.AvalonEdit;
 
 namespace PBE_AssetsDownloader.UI.Helpers
 {
@@ -14,20 +15,51 @@ namespace PBE_AssetsDownloader.UI.Helpers
     {
         private readonly Canvas _oldPanel;
         private readonly Canvas _newPanel;
+        private readonly TextEditor _oldEditor;
+        private readonly TextEditor _newEditor;
         private readonly SideBySideDiffModel _diffModel;
         private bool _isDragging;
         private Point _dragStartPoint;
         private bool _wasActuallyDragged;
         private readonly List<int> _diffLines;
 
+        // Brush for the overall background of the navigation panels
+        private readonly SolidColorBrush _backgroundPanelBrush;
+
+        // Brushes for the diff markers WITHIN the navigation panels
+        private readonly SolidColorBrush _removedBrush;
+        private readonly SolidColorBrush _addedBrush;
+        private readonly SolidColorBrush _modifiedBrush;
+        private readonly SolidColorBrush _imaginaryBrush;
+        private readonly SolidColorBrush _viewportBrush; 
+
         public event Action<int> ScrollRequested;
 
-        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, SideBySideDiffModel diffModel)
+        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, TextEditor oldEditor, TextEditor newEditor, SideBySideDiffModel diffModel)
         {
             _oldPanel = oldPanel;
             _newPanel = newPanel;
+            _oldEditor = oldEditor;
+            _newEditor = newEditor;
             _diffModel = diffModel;
             _diffLines = new List<int>();
+
+            // Cache brushes for performance
+            _backgroundPanelBrush = new SolidColorBrush((Color)Application.Current.FindResource("BackgroundPanelNavigation"));
+
+            _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
+            _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
+            _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
+            _imaginaryBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationImaginary"));
+            _viewportBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationViewPort"));
+ 
+            _backgroundPanelBrush.Freeze();
+            _removedBrush.Freeze();
+            _addedBrush.Freeze();
+            _modifiedBrush.Freeze();
+            _imaginaryBrush.Freeze();
+            _viewportBrush.Freeze();
+
             SetupEvents();
             FindDiffLines();
         }
@@ -49,32 +81,23 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (_diffModel == null) return;
 
-            // Track the last change type to group consecutive changes
             ChangeType lastChangeType = ChangeType.Unchanged;
-
-            // Iterate through the new text lines to find the start of each diff block
             for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
             {
                 var currentLine = _diffModel.NewText.Lines[i];
-
-                // If the current line is a change (inserted, deleted, modified)
-                // and it's different from the last change type, or it's the very first line
-                // then it marks the beginning of a new diff block.
                 if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
                 {
-                    _diffLines.Add(i + 1); // Add 1 because line numbers are 1-based
+                    _diffLines.Add(i + 1);
                 }
                 lastChangeType = currentLine.Type;
             }
 
-            // Also consider changes in the old text for navigation, especially for deletions
             lastChangeType = ChangeType.Unchanged;
             for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
             {
                 var currentLine = _diffModel.OldText.Lines[i];
                 if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
                 {
-                    // Add to diffLines if not already present (e.g., for deletions that don't have a corresponding new line)
                     if (!_diffLines.Contains(i + 1))
                     {
                         _diffLines.Add(i + 1);
@@ -83,31 +106,52 @@ namespace PBE_AssetsDownloader.UI.Helpers
                 lastChangeType = currentLine.Type;
             }
 
-            _diffLines.Sort(); // Ensure lines are in ascending order
+            _diffLines.Sort();
         }
 
         public void NavigateToNextDifference(int currentLine)
         {
             if (_diffLines.Count == 0) return;
-
             var nextDiffLine = _diffLines.FirstOrDefault(line => line > currentLine);
-            if (nextDiffLine == 0) // Wrap around
-            {
-                nextDiffLine = _diffLines[0];
-            }
+            if (nextDiffLine == 0) nextDiffLine = _diffLines[0];
             ScrollToLine(nextDiffLine);
         }
 
         public void NavigateToPreviousDifference(int currentLine)
         {
             if (_diffLines.Count == 0) return;
-
             var previousDiffLine = _diffLines.LastOrDefault(line => line < currentLine);
-            if (previousDiffLine == 0) // Wrap around
-            {
-                previousDiffLine = _diffLines.Last();
-            }
+            if (previousDiffLine == 0) previousDiffLine = _diffLines.Last();
             ScrollToLine(previousDiffLine);
+        }
+
+        public void NavigateToDifferenceByIndex(int index)
+        {
+            if (index >= 0 && index < _diffLines.Count)
+            {
+                var lineToScrollTo = _diffLines[index];
+                ScrollToLine(lineToScrollTo);
+            }
+            else if (_diffLines.Count > 0)
+            {
+                ScrollToLine(_diffLines[0]);
+            }
+        }
+
+        public int FindClosestDifferenceIndex(int currentLine)
+        {
+            if (_diffLines.Count == 0) return -1;
+
+            var nextDiffLine = _diffLines.FirstOrDefault(line => line >= currentLine);
+
+            if (nextDiffLine != 0)
+            {
+                return _diffLines.IndexOf(nextDiffLine);
+            }
+            else
+            {
+                return _diffLines.Count - 1;
+            }
         }
 
         private void ScrollToLine(int lineNumber)
@@ -120,6 +164,9 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _oldPanel.Children.Clear();
             _newPanel.Children.Clear();
 
+            _oldPanel.Background = _backgroundPanelBrush;
+            _newPanel.Background = _backgroundPanelBrush;
+
             if (_diffModel?.OldText?.Lines == null) return;
 
             var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
@@ -127,43 +174,74 @@ namespace PBE_AssetsDownloader.UI.Helpers
             if (totalLines == 0) return;
             var lineHeight = panelHeight / totalLines;
 
-            // Draw for Old Panel
-            for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
-            {
-                var changeType = _diffModel.OldText.Lines[i].Type;
-                var color = DiffColorsHelper.GetNavigationColor(changeType);
-                if (color == Colors.Transparent) continue;
+            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
+            DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
 
-                var rect = new Rectangle
+            // Draw the viewport guide across both panels to make it look unified
+            if (_newEditor.ExtentHeight > 0)
+            {
+                var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
+                var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
+
+                var viewportHeight = panelHeight * viewportRatio;
+                var viewportTop = panelHeight * offsetRatio;
+
+                // Create guide for the left panel
+                var oldViewportRect = new Rectangle
                 {
                     Width = _oldPanel.ActualWidth,
-                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
-                    Fill = new SolidColorBrush(color),
-                    IsHitTestVisible = false // Make rectangles non-interactive
+                    Height = Math.Max(2.0, viewportHeight),
+                    Fill = _viewportBrush,
+                    IsHitTestVisible = false
                 };
 
-                Canvas.SetTop(rect, i * lineHeight);
-                _oldPanel.Children.Add(rect);
-            }
+                // Create guide for the right panel
+                var newViewportRect = new Rectangle
+                {
+                    Width = _newPanel.ActualWidth,
+                    Height = Math.Max(2.0, viewportHeight),
+                    Fill = _viewportBrush,
+                    IsHitTestVisible = false
+                };
 
-            // Draw for New Panel
-            for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
+                Canvas.SetTop(oldViewportRect, viewportTop);
+                _oldPanel.Children.Add(oldViewportRect);
+
+                Canvas.SetTop(newViewportRect, viewportTop);
+                _newPanel.Children.Add(newViewportRect);
+            }
+        }
+
+        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
+        {
+            for (int i = 0; i < lines.Count; i++)
             {
-                var changeType = _diffModel.NewText.Lines[i].Type;
-                var color = DiffColorsHelper.GetNavigationColor(changeType);
-                if (color == Colors.Transparent) continue;
+                var brush = GetBrushForChangeType(lines[i].Type);
+                if (brush == null) continue;
 
                 var rect = new Rectangle
                 {
-                    Width = _newPanel.ActualWidth,
-                    Height = Math.Max(DiffColorsHelper.VisualSettings.NavigationRectMinHeight, lineHeight),
-                    Fill = new SolidColorBrush(color),
-                    IsHitTestVisible = false // Make rectangles non-interactive
+                    Width = panel.ActualWidth,
+                    Height = Math.Max(2.0, lineHeight),
+                    Fill = brush,
+                    IsHitTestVisible = false
                 };
-                
+
                 Canvas.SetTop(rect, i * lineHeight);
-                _newPanel.Children.Add(rect);
+                panel.Children.Add(rect);
             }
+        }
+
+        private SolidColorBrush GetBrushForChangeType(ChangeType changeType)
+        {
+            return changeType switch
+            {
+                ChangeType.Deleted => _removedBrush,
+                ChangeType.Inserted => _addedBrush,
+                ChangeType.Modified => _modifiedBrush,
+                ChangeType.Imaginary => _imaginaryBrush,
+                _ => null
+            };
         }
 
         private void NavigationPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -201,13 +279,11 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private void NavigationPanel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDragging && sender is Canvas panel)
-
             {
                 if (!_wasActuallyDragged)
                 {
                     NavigateToClosestDifference(panel, e.GetPosition(panel).Y);
                 }
-
                 _isDragging = false;
                 panel.ReleaseMouseCapture();
             }
@@ -222,10 +298,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
             if (panelHeight <= 0) return;
 
             var clickedLine = (int)((y / panelHeight) * totalLines) + 1;
-
-            // Find the difference line that is numerically closest to the clicked line
             var closestDiffLine = _diffLines.OrderBy(diffLine => Math.Abs(diffLine - clickedLine)).First();
-
             ScrollToLine(closestDiffLine);
         }
 

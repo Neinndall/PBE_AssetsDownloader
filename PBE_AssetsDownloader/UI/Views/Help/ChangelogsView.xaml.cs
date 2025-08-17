@@ -91,6 +91,7 @@ namespace PBE_AssetsDownloader.UI.Views.Help
                             "NEW" => (MaterialIconKind.Star, new SolidColorBrush(Colors.Gold)),
                             "IMPROVEMENTS" => (MaterialIconKind.RocketLaunch, new SolidColorBrush(Colors.LightBlue)),
                             "BUG FIXES" => (MaterialIconKind.Bug, new SolidColorBrush(Colors.OrangeRed)),
+                            "CHANGES" => (MaterialIconKind.Palette, new SolidColorBrush(Colors.LightGreen)),
                             _ => (MaterialIconKind.Pencil, (SolidColorBrush)System.Windows.Application.Current.FindResource("TextSecondary"))
                         };
                     }

@@ -24,6 +24,13 @@ namespace PBE_AssetsDownloader.UI.Helpers
         {
             if (string.IsNullOrWhiteSpace(json)) return string.Empty;
 
+            // Heuristic to avoid re-formatting if the JSON is already indented.
+            // This significantly improves performance on large, already-formatted files.
+            if (json.Contains("\n") && json.Contains("{"))
+            {
+                return json;
+            }
+
             try
             {
                 var parsed = JsonConvert.DeserializeObject(json);
@@ -31,6 +38,7 @@ namespace PBE_AssetsDownloader.UI.Helpers
             }
             catch
             {
+                // In case of an error (e.g., invalid JSON), return the original string.
                 return json;
             }
         }

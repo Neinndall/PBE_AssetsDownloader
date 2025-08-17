@@ -65,8 +65,6 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
         }
         
-        
-
         private void btnAddJsonFile_Click(object sender, RoutedEventArgs e)
         {
             var inputDialog = _serviceProvider.GetRequiredService<InputDialog>();
@@ -136,11 +134,8 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             {
                 try
                 {
-                    string oldContent = File.Exists(selectedEntry.OldFilePath) ? File.ReadAllText(selectedEntry.OldFilePath) : "";
-                    string newContent = File.Exists(selectedEntry.NewFilePath) ? File.ReadAllText(selectedEntry.NewFilePath) : "";
-
                     var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                    diffWindow.LoadDiff(oldContent, newContent);
+                    diffWindow.LoadDiff(selectedEntry.OldFilePath, selectedEntry.NewFilePath);
                     diffWindow.Show();
                 }
                 catch (Exception ex)
@@ -156,12 +151,42 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
         }
 
-        private void btnClearHistory_Click(object sender, RoutedEventArgs e)
+        private void btnRemoveSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (_customMessageBoxService.ShowYesNo("Confirm Clear", "Are you sure you want to clear the entire difference history? This action cannot be undone.", Window.GetWindow(this), CustomMessageBoxIcon.Warning) == true)
+            if (DiffHistoryListView.SelectedItem is JsonDiffHistoryEntry selectedEntry)
             {
-                _appSettings.DiffHistory.Clear();
-                ApplySettingsToUI(_appSettings);
+                if (_customMessageBoxService.ShowYesNo("Confirm Deletion", $"Are you sure you want to delete the history entry for '{selectedEntry.FileName}' from {selectedEntry.Timestamp}? This will delete the backup files and cannot be undone.", Window.GetWindow(this), CustomMessageBoxIcon.Warning) == true)
+                {
+                    try
+                    {
+                        // Get the directory from one of the file paths
+                        string historyDirectoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
+
+                        // Delete the physical directory
+                        if (!string.IsNullOrEmpty(historyDirectoryPath) && Directory.Exists(historyDirectoryPath))
+                        {
+                            Directory.Delete(historyDirectoryPath, true);
+                        }
+
+                        // Remove from settings and refresh UI
+                        _appSettings.DiffHistory.Remove(selectedEntry);
+                        
+                        // We need to re-bind the list to make the UI update correctly after removal.
+                        DiffHistoryListView.ItemsSource = null;
+                        DiffHistoryListView.ItemsSource = _appSettings.DiffHistory;
+                    }
+                    catch (Exception ex)
+                    {
+                        string directoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
+                        _logService.LogError($"Error deleting history for {selectedEntry.FileName}. See application_errors.log for details.");
+                        _logService.LogCritical(ex, $"AdvancedSettingsView.btnDeleteSelected_Click Exception for directory: {directoryPath}");
+                        _customMessageBoxService.ShowInfo("Error", $"Could not delete history entry. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                _customMessageBoxService.ShowInfo("No Selection", "Please select a history entry to delete.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
             }
         }
     }

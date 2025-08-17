@@ -144,14 +144,15 @@
                                       Foreground="{StaticResource TextPrimary}"
                                       Height="250"
                                       Margin="0,0,0,12"
-                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListViewItem">
                                         <Border x:Name="Border" Background="Transparent" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Padding="5" SnapsToDevicePixels="true">
-                                            <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                            <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
@@ -167,22 +168,23 @@
                             </Setter>
                         </Style>
                     </ListView.ItemContainerStyle>
-                    <ListView.View>
-                        <GridView>
-                            <GridView.ColumnHeaderContainerStyle>
-                                <Style TargetType="GridViewColumnHeader">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </Style>
-                            </GridView.ColumnHeaderContainerStyle>
-                            <GridViewColumn Header="File Name" Width="320" DisplayMemberBinding="{Binding FileName}"/>
-                            <GridViewColumn Header="Timestamp" Width="320" DisplayMemberBinding="{Binding Timestamp}"/>
-                        </GridView>
-                    </ListView.View>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding FileName}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Timestamp}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
                 </ListView>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnViewDiff" Content="View Diff" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,8,0" Click="btnViewDiff_Click"/>
-                    <Button x:Name="btnClearHistory" Content="Clear History" Style="{StaticResource DestructiveButton}" Width="130" Click="btnClearHistory_Click"/>
+                    <Button x:Name="btnRemoveSelected" Content="Remove" Style="{StaticResource DestructiveButton}" Width="80" Click="btnRemoveSelected_Click"/>
                 </StackPanel>
             </StackPanel>
         </Border>

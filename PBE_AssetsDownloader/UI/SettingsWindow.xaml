@@ -81,7 +81,7 @@
                         HorizontalScrollBarVisibility="Disabled"
                         Padding="32,24">
 
-                <ContentControl x:Name="SettingsContentArea"/>
+                <ContentControl x:Name="SettingsContentArea" HorizontalAlignment="Stretch"/>
                 
             </ScrollViewer>
 

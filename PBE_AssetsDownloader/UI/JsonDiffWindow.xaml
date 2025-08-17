@@ -31,7 +31,11 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="↔️" FontSize="24" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                    <icons:MaterialIcon Kind="CompareHorizontal" 
+                                        Width="32" Height="32" 
+                                        Margin="0,0,12,0" 
+                                        VerticalAlignment="Center" 
+                                        Foreground="{StaticResource AccentBlue}"/>
                     <StackPanel>
                         <TextBlock Text="JSON DIFFERENCE"
                                    FontSize="24"
@@ -48,47 +52,71 @@
                         BorderBrush="{StaticResource BorderColor}"
                         BorderThickness="1"
                         CornerRadius="8"
-                        Padding="8"
+                        Padding="12,8"
                         HorizontalAlignment="Right" 
                         VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="PreviousDiffButton" 
-                                Click="PreviousDiffButton_Click" 
-                                Style="{StaticResource NavigationButton}"
-                                Content="ArrowUp">
-                            <Button.ToolTip>
-                                <ToolTip Content="Go to previous difference"/>
-                            </Button.ToolTip>
-                        </Button>
-                        <Button x:Name="NextDiffButton" 
-                                Margin="5,0,0,0"
-                                Click="NextDiffButton_Click" 
-                                Style="{StaticResource NavigationButton}"
-                                Content="ArrowDown">
-                            <Button.ToolTip>
-                                <ToolTip Content="Go to next difference"/>
-                            </Button.ToolTip>
-                        </Button>
-                        
-                        <ToggleButton x:Name="WordLevelDiffButton"
-                                      Margin="5,0,0,0"
-                                      Click="WordLevelDiffButton_Click"
-                                      Style="{StaticResource NavigationToggleButton}"
-                                      Content="Spellcheck">
-                            <ToggleButton.ToolTip>
-                                <ToolTip Content="Toggle word-level diff"/>
-                            </ToggleButton.ToolTip>
-                        </ToggleButton>
-                        <ToggleButton x:Name="HideUnchangedButton"
-                                      Margin="5,0,0,0"
-                                      Click="HideUnchangedButton_Click"
-                                      Style="{StaticResource NavigationToggleButton}"
-                                      Content="FilterVariant">
-                            <ToggleButton.ToolTip>
-                                <ToolTip Content="Show/Hide unchanged lines"/>
-                            </ToggleButton.ToolTip>
-                        </ToggleButton>
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                            <icons:MaterialIcon Kind="TuneVariant" Foreground="{StaticResource TextSecondary}" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="VIEW OPTIONS"
+                                       Foreground="{StaticResource TextSecondary}"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Orientation="Horizontal">
+                            <!-- Grupo de Navegación -->
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="PreviousDiffButton" 
+                                        Click="PreviousDiffButton_Click" 
+                                        Style="{StaticResource NavigationButton}"
+                                        Content="ArrowUp">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Go to previous difference"/>
+                                    </Button.ToolTip>
+                                </Button>
+                                <Button x:Name="NextDiffButton" 
+                                        Margin="5,0,0,0"
+                                        Click="NextDiffButton_Click" 
+                                        Style="{StaticResource NavigationButton}"
+                                        Content="ArrowDown">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="Go to next difference"/>
+                                    </Button.ToolTip>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Separador -->
+                            <Border Background="{StaticResource BorderColor}" Width="1" Margin="8,0" CornerRadius="1"/>
+
+                            <!-- Grupo de Opciones -->
+                            <StackPanel Orientation="Horizontal">
+                                <ToggleButton x:Name="WordLevelDiffButton"
+                                              Click="WordLevelDiffButton_Click"
+                                              Style="{StaticResource NavigationToggleButton}"
+                                              Content="Spellcheck">
+                                    <ToggleButton.ToolTip>
+                                        <ToolTip Content="Toggle word-level diff"/>
+                                    </ToggleButton.ToolTip>
+                                </ToggleButton>
+                                <ToggleButton x:Name="HideUnchangedButton"
+                                              Margin="5,0,0,0"
+                                              Click="HideUnchangedButton_Click"
+                                              Style="{StaticResource NavigationToggleButton}"
+                                              Content="FilterVariant">
+                                    <ToggleButton.ToolTip>
+                                        <ToolTip Content="Show/Hide unchanged lines"/>
+                                    </ToggleButton.ToolTip>
+                                </ToggleButton>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </Border>
             </Grid>
         </Border>

@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using DiffPlex.DiffBuilder.Model;
+using ICSharpCode.AvalonEdit;
 
 namespace PBE_AssetsDownloader.UI.Helpers
 {
@@ -14,6 +15,8 @@ namespace PBE_AssetsDownloader.UI.Helpers
     {
         private readonly Canvas _oldPanel;
         private readonly Canvas _newPanel;
+        private readonly TextEditor _oldEditor;
+        private readonly TextEditor _newEditor;
         private readonly SideBySideDiffModel _diffModel;
         private bool _isDragging;
         private Point _dragStartPoint;
@@ -27,14 +30,17 @@ namespace PBE_AssetsDownloader.UI.Helpers
         private readonly SolidColorBrush _removedBrush;
         private readonly SolidColorBrush _addedBrush;
         private readonly SolidColorBrush _modifiedBrush;
-        private readonly SolidColorBrush _imaginaryBrush; 
+        private readonly SolidColorBrush _imaginaryBrush;
+        private readonly SolidColorBrush _viewportBrush; 
 
         public event Action<int> ScrollRequested;
 
-        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, SideBySideDiffModel diffModel)
+        public DiffPanelNavigation(Canvas oldPanel, Canvas newPanel, TextEditor oldEditor, TextEditor newEditor, SideBySideDiffModel diffModel)
         {
             _oldPanel = oldPanel;
             _newPanel = newPanel;
+            _oldEditor = oldEditor;
+            _newEditor = newEditor;
             _diffModel = diffModel;
             _diffLines = new List<int>();
 
@@ -45,12 +51,14 @@ namespace PBE_AssetsDownloader.UI.Helpers
             _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
             _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
             _imaginaryBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationImaginary"));
+            _viewportBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationViewPort"));
  
             _backgroundPanelBrush.Freeze();
             _removedBrush.Freeze();
             _addedBrush.Freeze();
             _modifiedBrush.Freeze();
             _imaginaryBrush.Freeze();
+            _viewportBrush.Freeze();
 
             SetupEvents();
             FindDiffLines();
@@ -168,6 +176,40 @@ namespace PBE_AssetsDownloader.UI.Helpers
 
             DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
             DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
+
+            // Draw the viewport guide across both panels to make it look unified
+            if (_newEditor.ExtentHeight > 0)
+            {
+                var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
+                var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
+
+                var viewportHeight = panelHeight * viewportRatio;
+                var viewportTop = panelHeight * offsetRatio;
+
+                // Create guide for the left panel
+                var oldViewportRect = new Rectangle
+                {
+                    Width = _oldPanel.ActualWidth,
+                    Height = Math.Max(2.0, viewportHeight),
+                    Fill = _viewportBrush,
+                    IsHitTestVisible = false
+                };
+
+                // Create guide for the right panel
+                var newViewportRect = new Rectangle
+                {
+                    Width = _newPanel.ActualWidth,
+                    Height = Math.Max(2.0, viewportHeight),
+                    Fill = _viewportBrush,
+                    IsHitTestVisible = false
+                };
+
+                Canvas.SetTop(oldViewportRect, viewportTop);
+                _oldPanel.Children.Add(oldViewportRect);
+
+                Canvas.SetTop(newViewportRect, viewportTop);
+                _newPanel.Children.Add(newViewportRect);
+            }
         }
 
         private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)

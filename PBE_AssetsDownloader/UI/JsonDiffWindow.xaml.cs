@@ -167,15 +167,16 @@ namespace PBE_AssetsDownloader.UI
             
             ApplyDiffHighlighting(modelToShow);
 
-            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, modelToShow);
+            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, modelToShow);
             _diffPanelNavigation.ScrollRequested += ScrollToLine;
-            _diffPanelNavigation.DrawPanels();
 
             // Use LayoutUpdated to ensure the editor is rendered before scrolling
             EventHandler layoutUpdatedHandler = null;
             layoutUpdatedHandler = (s, e) =>
             {
                 NewJsonContent.TextArea.TextView.LayoutUpdated -= layoutUpdatedHandler;
+                // The scroll action below will trigger the DrawPanels via the ScrollOffsetChanged event,
+                // ensuring it has the correct dimensions.
                 if (diffIndexToRestore.HasValue && diffIndexToRestore.Value != -1)
                 {
                     _diffPanelNavigation?.NavigateToDifferenceByIndex(diffIndexToRestore.Value);
@@ -224,6 +225,11 @@ namespace PBE_AssetsDownloader.UI
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
 
+                // Force the layout to update synchronously to ensure editor metrics are correct
+                UpdateLayout();
+                // Now that the layout is correct, redraw the navigation panels
+                _diffPanelNavigation?.DrawPanels();
+
                 NewJsonContent.TextArea.Caret.Line = lineNumber;
                 NewJsonContent.TextArea.Caret.Column = 1;
                 NewJsonContent.Focus();
@@ -244,6 +250,9 @@ namespace PBE_AssetsDownloader.UI
         {
             OldJsonContent.TextArea.TextView.ScrollOffsetChanged += OldEditor_ScrollChanged;
             NewJsonContent.TextArea.TextView.ScrollOffsetChanged += NewEditor_ScrollChanged;
+
+            OldJsonContent.TextArea.TextView.ScrollOffsetChanged += (s, e) => _diffPanelNavigation?.DrawPanels();
+            NewJsonContent.TextArea.TextView.ScrollOffsetChanged += (s, e) => _diffPanelNavigation?.DrawPanels();
         }
 
         private void OldEditor_ScrollChanged(object sender, EventArgs e)

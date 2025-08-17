@@ -164,7 +164,10 @@ namespace PBE_AssetsDownloader.UI
 
             OldJsonContent.Document = new TextDocument(normalizedOld.Text);
             NewJsonContent.Document = new TextDocument(normalizedNew.Text);
-            
+
+            OldJsonContent.UpdateLayout();
+            NewJsonContent.UpdateLayout();
+
             ApplyDiffHighlighting(modelToShow);
 
             _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, modelToShow);
@@ -227,8 +230,6 @@ namespace PBE_AssetsDownloader.UI
 
                 // Force the layout to update synchronously to ensure editor metrics are correct
                 UpdateLayout();
-                // Now that the layout is correct, redraw the navigation panels
-                _diffPanelNavigation?.DrawPanels();
 
                 NewJsonContent.TextArea.Caret.Line = lineNumber;
                 NewJsonContent.TextArea.Caret.Column = 1;

@@ -15,15 +15,7 @@ namespace PBE_AssetsDownloader.Services
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
 
-        public List<string> ExcludedExtensions => _excludedExtensions;
-
-        private readonly List<string> _excludedExtensions = new()
-        {
-            ".luabin", ".luabin64", ".preload", ".scb",
-            ".sco", ".skl", ".mapgeo", ".subchunktoc", ".stringtable",
-            ".anm", ".dat", ".bnk", ".wpk",
-            ".cfg", ".cfgbin"
-        };
+        
 
         public event Action<int> DownloadStarted;
         public event Action<int, int, string, bool, string> DownloadProgressChanged;
@@ -106,7 +98,7 @@ namespace PBE_AssetsDownloader.Services
                 else
                 {
                     string errorMsg = $"Failed to download '{fileName}'. Reason: {response.StatusCode} - {response.ReasonPhrase}";
-                    Log.Warning(errorMsg); // Log to file only
+                    Log.Error(errorMsg); // Log to file only
                     return (false, errorMsg);
                 }
             }

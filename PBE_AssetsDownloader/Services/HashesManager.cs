@@ -13,7 +13,13 @@ namespace PBE_AssetsDownloader.Services
     private readonly AppSettings _appSettings;
     private readonly DirectoriesCreator _directoriesCreator;
     private readonly LogService _logService;
-    private readonly List<string> _excludedExtensions = new List<string> { ".bin", ".json" }; // Example
+    private readonly List<string> _excludedExtensions = new()
+    {
+        ".luabin", ".luabin64", ".preload", ".scb",
+        ".sco", ".skl", ".mapgeo", ".subchunktoc", ".stringtable",
+        ".anm", ".dat", ".bnk", ".wpk",
+        ".cfg", ".cfgbin", ".bin"
+    };
 
     public HashesManager(AppSettings appSettings, DirectoriesCreator directoriesCreator, LogService logService)
     {

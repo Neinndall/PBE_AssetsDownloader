@@ -13,6 +13,8 @@ namespace PBE_AssetsDownloader.UI.Dialogs
         private DateTime _startTime;
         private int _totalFiles;
 
+        public string OperationVerb { get; set; } = "Downloading";
+
         public ProgressDetailsWindow(LogService logService)
         {
             InitializeComponent();
@@ -25,7 +27,7 @@ namespace PBE_AssetsDownloader.UI.Dialogs
         public void UpdateProgress(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
         {
             _totalFiles = totalFiles; // Store total files for estimated time calculation
-            ProgressSummaryTextBlock.Text = $"Downloading: {completedFiles} of {totalFiles}";
+            ProgressSummaryTextBlock.Text = $"{OperationVerb}: {completedFiles} of {totalFiles}";
             CurrentFileTextBlock.Text = $"Current file: {currentFileName}";
             UpdateEstimatedTime(completedFiles, totalFiles);
         }

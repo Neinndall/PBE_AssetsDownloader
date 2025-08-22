@@ -5,31 +5,18 @@ using System.IO.Hashing;
 using System.Linq;
 using System.Threading.Tasks;
 using LeagueToolkit.Core.Wad;
+using PBE_AssetsDownloader.Info;
 
 namespace PBE_AssetsDownloader.Services
 {
-    public enum ChunkDiffType
-    {
-        New,
-        Removed,
-        Modified,
-        Renamed
-    }
-
-    public class ChunkDiff
-    {
-        public ChunkDiffType Type { get; set; }
-        public WadChunk OldChunk { get; set; }
-        public WadChunk NewChunk { get; set; }
-        public string OldPath { get; set; }
-        public string NewPath { get; set; }
-        public string SourceWadFile { get; set; }
-    }
-
     public class WadComparatorService
     {
         private readonly HashResolverService _hashResolverService;
         private readonly LogService _logService;
+
+        public event Action<int> ComparisonStarted;
+        public event Action<int, string> ComparisonProgressChanged;
+        public event Action<List<ChunkDiff>> ComparisonCompleted;
 
         public WadComparatorService(HashResolverService hashResolverService, LogService logService)
         {
@@ -37,29 +24,39 @@ namespace PBE_AssetsDownloader.Services
             _logService = logService;
         }
 
-        public async Task<List<ChunkDiff>> CompareWadsAsync(string oldPbeDir, string newPbeDir)
+        public async Task CompareWadsAsync(string oldPbeDir, string newPbeDir)
         {
-            _logService.Log("Starting WAD comparison...");
-
-            await _hashResolverService.LoadHashesAsync();
-
-            var oldGameWadDir = Path.Combine(oldPbeDir, "Game", "DATA", "FINAL");
-            var newGameWadDir = Path.Combine(newPbeDir, "Game", "DATA", "FINAL");
-
-            var oldPluginsWadDir = Path.Combine(oldPbeDir, "Plugins");
-            var newPluginsWadDir = Path.Combine(newPbeDir, "Plugins");
-
-            var allDiffs = new List<ChunkDiff>();
-
+            List<ChunkDiff> allDiffs = new List<ChunkDiff>();
             try
             {
-                var (gameWadDiffs, gameWadFilesCount) = await CompareWadDirectoriesAsync(oldGameWadDir, newGameWadDir, "*.wad.client");
-                allDiffs.AddRange(gameWadDiffs);
-                _logService.Log($"Processed {gameWadFilesCount} .wad.client files for GAME.");
+                _logService.Log("Starting WAD comparison...");
 
-                var (pluginsWadDiffs, pluginsWadFilesCount) = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir, "*.wad");
-                allDiffs.AddRange(pluginsWadDiffs);
-                _logService.Log($"Processed {pluginsWadFilesCount} .wad files for PLUGINS.");
+                await _hashResolverService.LoadHashesAsync();
+
+                var oldGameWadDir = Path.Combine(oldPbeDir, "Game", "DATA", "FINAL");
+                var newGameWadDir = Path.Combine(newPbeDir, "Game", "DATA", "FINAL");
+                var oldPluginsWadDir = Path.Combine(oldPbeDir, "Plugins");
+                var newPluginsWadDir = Path.Combine(newPbeDir, "Plugins");
+
+                var gameWadFiles = Directory.Exists(oldGameWadDir) ? Directory.GetFiles(oldGameWadDir, "*.wad.client", SearchOption.AllDirectories) : Array.Empty<string>();
+                var pluginsWadFiles = Directory.Exists(oldPluginsWadDir) ? Directory.GetFiles(oldPluginsWadDir, "*.wad", SearchOption.AllDirectories) : Array.Empty<string>();
+                int totalFiles = gameWadFiles.Length + pluginsWadFiles.Length;
+                int processedFiles = 0;
+
+                ComparisonStarted?.Invoke(totalFiles);
+
+                if (gameWadFiles.Any())
+                {
+                    var (gameWadDiffs, gameFilesProcessed) = await CompareWadDirectoriesAsync(oldGameWadDir, newGameWadDir, "*.wad.client", processedFiles);
+                    allDiffs.AddRange(gameWadDiffs);
+                    processedFiles += gameFilesProcessed;
+                }
+
+                if (pluginsWadFiles.Any())
+                {
+                    var (pluginsWadDiffs, pluginFilesProcessed) = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir, "*.wad", processedFiles);
+                    allDiffs.AddRange(pluginsWadDiffs);
+                }
 
                 _logService.Log($"WAD comparison finished. Found {allDiffs.Count} differences.");
             }
@@ -67,38 +64,33 @@ namespace PBE_AssetsDownloader.Services
             {
                 _logService.LogError($"An error occurred during WAD comparison: {ex.Message}");
             }
-
-            return allDiffs;
+            finally
+            {
+                ComparisonCompleted?.Invoke(allDiffs);
+                if (allDiffs != null)
+                {
+                    _logService.LogSuccess($"WAD comparison completed. Found {allDiffs.Count} differences.");
+                }
+                else
+                {
+                    _logService.LogError("WAD comparison completed with errors.");
+                }
+            }
         }
 
-        private async Task<(List<ChunkDiff> Diffs, int ProcessedFilesCount)> CompareWadDirectoriesAsync(string oldWadDir, string newWadDir, string searchPattern)
+        private async Task<(List<ChunkDiff> Diffs, int ProcessedCount)> CompareWadDirectoriesAsync(string oldWadDir, string newWadDir, string searchPattern, int completedOffset)
         {
             var allDiffs = new List<ChunkDiff>();
-            var processedFilesCount = 0;
-
-            if (!Directory.Exists(oldWadDir))
-            {
-                _logService.LogWarning($"Old WAD directory not found: {oldWadDir}");
-                return (allDiffs, processedFilesCount);
-            }
-
-            if (!Directory.Exists(newWadDir))
-            {
-                _logService.LogWarning($"New WAD directory not found: {newWadDir}");
-                return (allDiffs, processedFilesCount);
-            }
-
             var oldWadFiles = Directory.GetFiles(oldWadDir, searchPattern, SearchOption.AllDirectories);
-            var newWadFiles = Directory.GetFiles(newWadDir, searchPattern, SearchOption.AllDirectories);
-
-            processedFilesCount = oldWadFiles.Length;
+            int processedInThisBatch = 0;
 
             foreach (var oldWadFile in oldWadFiles)
             {
-                // Calculate the relative path of the old WAD file to its base directory
                 var relativePath = Path.GetRelativePath(oldWadDir, oldWadFile);
-                // Construct the full path for the new WAD file using the new base directory and the relative path
                 var newWadFileFullPath = Path.Combine(newWadDir, relativePath);
+
+                processedInThisBatch++;
+                ComparisonProgressChanged?.Invoke(completedOffset + processedInThisBatch, Path.GetFileName(relativePath));
 
                 if (File.Exists(newWadFileFullPath))
                 {
@@ -115,8 +107,7 @@ namespace PBE_AssetsDownloader.Services
                     _logService.LogWarning($"New WAD file not found: {newWadFileFullPath}. Skipping comparison for this file.");
                 }
             }
-
-            return (allDiffs, processedFilesCount);
+            return (allDiffs, processedInThisBatch);
         }
 
         private async Task<List<ChunkDiff>> CollectDiffsAsync(WadFile oldWad, WadFile newWad, string sourceWadFile)

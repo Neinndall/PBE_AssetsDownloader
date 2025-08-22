@@ -1,56 +1,65 @@
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsDownloader.Info;
+using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Utils;
-using PBE_AssetsDownloader.Services;
-using System.Timers;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 
 namespace PBE_AssetsDownloader.UI
 {
     public partial class MainWindow : Window
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly LogService _logService;
         private readonly AppSettings _appSettings;
         private readonly Status _status;
         private readonly JsonDataService _jsonDataService;
         private readonly UpdateManager _updateManager;
         private readonly AssetDownloader _assetDownloader;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly WadComparatorService _wadComparatorService;
 
         private Timer _updateTimer;
         private Storyboard _spinningIconAnimationStoryboard;
         private ProgressDetailsWindow _progressDetailsWindow;
         private string _latestAppVersionAvailable;
+        private int _totalFiles;
 
         public MainWindow(
+            IServiceProvider serviceProvider,
             LogService logService,
             AppSettings appSettings,
             Status status,
             JsonDataService jsonDataService,
             UpdateManager updateManager,
             AssetDownloader assetDownloader,
-            IServiceProvider serviceProvider)
+            WadComparatorService wadComparatorService)
         {
             InitializeComponent();
 
+            _serviceProvider = serviceProvider;
             _logService = logService;
             _appSettings = appSettings;
             _status = status;
             _jsonDataService = jsonDataService;
             _updateManager = updateManager;
             _assetDownloader = assetDownloader;
-            _serviceProvider = serviceProvider;
+            _wadComparatorService = wadComparatorService;
 
-            // LOG PARA EXCLUSIVAMENTE MAINWINDOW (EXPORT Y HOME)
             _logService.SetLogOutput(LogView.richTextBoxLogs);
 
             _assetDownloader.DownloadStarted += OnDownloadStarted;
             _assetDownloader.DownloadProgressChanged += OnDownloadProgressChanged;
             _assetDownloader.DownloadCompleted += OnDownloadCompleted;
+
+            _wadComparatorService.ComparisonStarted += OnComparisonStarted;
+            _wadComparatorService.ComparisonProgressChanged += OnComparisonProgressChanged;
+            _wadComparatorService.ComparisonCompleted += OnComparisonCompleted;
 
             Sidebar.NavigationRequested += OnSidebarNavigationRequested;
             LoadHomeView();
@@ -140,34 +149,94 @@ namespace PBE_AssetsDownloader.UI
 
         private void OnDownloadStarted(int totalFiles)
         {
-            ProgressSummaryButton.Visibility = Visibility.Visible;
-
-            if (_spinningIconAnimationStoryboard == null)
+            Dispatcher.Invoke(() => 
             {
-                var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
-                _spinningIconAnimationStoryboard = originalStoryboard?.Clone();
-                if (_spinningIconAnimationStoryboard != null) Storyboard.SetTarget(_spinningIconAnimationStoryboard, ProgressIcon);
-            }
-            _spinningIconAnimationStoryboard?.Begin();
+                _totalFiles = totalFiles;
+                ProgressSummaryButton.Visibility = Visibility.Visible;
 
-            _progressDetailsWindow = _serviceProvider.GetRequiredService<ProgressDetailsWindow>();
-            _progressDetailsWindow.Owner = this;
-            _progressDetailsWindow.Closed += (s, e) => _progressDetailsWindow = null;
-            _progressDetailsWindow.UpdateProgress(0, totalFiles, "Initializing...", true, null);
+                if (_spinningIconAnimationStoryboard == null)
+                {
+                    var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
+                    _spinningIconAnimationStoryboard = originalStoryboard?.Clone();
+                    if (_spinningIconAnimationStoryboard != null) Storyboard.SetTarget(_spinningIconAnimationStoryboard, ProgressIcon);
+                }
+                _spinningIconAnimationStoryboard?.Begin();
+
+                _progressDetailsWindow = _serviceProvider.GetRequiredService<ProgressDetailsWindow>();
+                _progressDetailsWindow.Owner = this;
+                _progressDetailsWindow.Closed += (s, e) => _progressDetailsWindow = null;
+                _progressDetailsWindow.UpdateProgress(0, totalFiles, "Initializing...", true, null);
+            });
         }
 
         private void OnDownloadProgressChanged(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
         {
-            _progressDetailsWindow?.UpdateProgress(completedFiles, totalFiles, currentFileName, isSuccess, errorMessage);
+            Dispatcher.Invoke(() => 
+            {
+                _progressDetailsWindow?.UpdateProgress(completedFiles, totalFiles, currentFileName, isSuccess, errorMessage);
+            });
         }
 
         private void OnDownloadCompleted()
         {
-            ProgressSummaryButton.Visibility = Visibility.Collapsed;
-            _spinningIconAnimationStoryboard?.Stop();
-            _spinningIconAnimationStoryboard = null;
+            Dispatcher.Invoke(() => 
+            {
+                ProgressSummaryButton.Visibility = Visibility.Collapsed;
+                _spinningIconAnimationStoryboard?.Stop();
+                _spinningIconAnimationStoryboard = null;
+                _progressDetailsWindow?.Close();
+            });
+        }
 
-            _progressDetailsWindow?.Close();
+        private void OnComparisonStarted(int totalFiles)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                _totalFiles = totalFiles;
+                _logService.SuppressUiLogs();
+                ProgressSummaryButton.Visibility = Visibility.Visible;
+
+                if (_spinningIconAnimationStoryboard == null)
+                {
+                    var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
+                    _spinningIconAnimationStoryboard = originalStoryboard?.Clone();
+                    if (_spinningIconAnimationStoryboard != null) Storyboard.SetTarget(_spinningIconAnimationStoryboard, ProgressIcon);
+                }
+                _spinningIconAnimationStoryboard?.Begin();
+
+                _progressDetailsWindow = _serviceProvider.GetRequiredService<ProgressDetailsWindow>();
+                _progressDetailsWindow.Owner = this;
+                _progressDetailsWindow.OperationVerb = "Comparing";
+                _progressDetailsWindow.Closed += (s, e) => _progressDetailsWindow = null;
+                _progressDetailsWindow.UpdateProgress(0, totalFiles, "Comparison starting...", true, null);
+            });
+        }
+
+        private void OnComparisonProgressChanged(int completedFiles, string currentFile)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                _progressDetailsWindow?.UpdateProgress(completedFiles, _totalFiles, currentFile, true, null);
+            });
+        }
+
+        private void OnComparisonCompleted(List<ChunkDiff> allDiffs)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                _logService.RestoreUiLogs();
+                ProgressSummaryButton.Visibility = Visibility.Collapsed;
+                _spinningIconAnimationStoryboard?.Stop();
+                _spinningIconAnimationStoryboard = null;
+                _progressDetailsWindow?.Close();
+
+                if (allDiffs != null)
+                {
+                    var resultWindow = new WadComparisonResultWindow(allDiffs);
+                    resultWindow.Owner = this;
+                    resultWindow.Show();
+                }
+            });
         }
 
         private void ProgressSummaryButton_Click(object sender, RoutedEventArgs e)
@@ -179,7 +248,7 @@ namespace PBE_AssetsDownloader.UI
             }
             else
             {
-                _logService.Log("No active download to show details for.");
+                _logService.Log("No active process to show details for.");
             }
         }
 

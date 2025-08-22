@@ -4,11 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using LeagueToolkit.Core.Wad;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Utils;
@@ -37,6 +39,8 @@ namespace PBE_AssetsDownloader.UI
             _customMessageBoxService = customMessageBoxService;
             _wadComparatorService = wadComparatorService;
 
+            _wadComparatorService.ComparisonCompleted += OnComparisonCompleted;
+
             // Initialize paths from saved settings
             newHashesTextBox.Text = _appSettings.NewHashesPath ?? "";
             oldHashesTextBox.Text = _appSettings.OldHashesPath ?? "";
@@ -44,6 +48,14 @@ namespace PBE_AssetsDownloader.UI
             // Store the initial loaded path in the Tag property for later comparison
             newHashesTextBox.Tag = newHashesTextBox.Text;
             oldHashesTextBox.Tag = oldHashesTextBox.Text;
+        }
+
+        private void OnComparisonCompleted(List<ChunkDiff> allDiffs)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                compareButton.IsEnabled = true;
+            });
         }
 
         public void UpdateSettings(AppSettings newSettings, bool wasResetToDefaults)
@@ -102,7 +114,6 @@ namespace PBE_AssetsDownloader.UI
                 return;
             }
             
-            // Update settings before running extraction
             _appSettings.NewHashesPath = newHashesTextBox.Text;
             _appSettings.OldHashesPath = oldHashesTextBox.Text;
             
@@ -141,15 +152,24 @@ namespace PBE_AssetsDownloader.UI
         {
             if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
             {
-                _logService.LogWarning("Please select both PBE directories.");
                 _customMessageBoxService.ShowInfo("Warning", "Please select both PBE directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
                 return;
             }
 
-            var allDiffs = await _wadComparatorService.CompareWadsAsync(oldPbeDirectoryTextBox.Text, newPbeDirectoryTextBox.Text);
+            string oldPbeDir = oldPbeDirectoryTextBox.Text;
+            string newPbeDir = newPbeDirectoryTextBox.Text;
 
-            var resultWindow = new WadComparisonResultWindow(allDiffs);
-            resultWindow.Show();
+            compareButton.IsEnabled = false;
+
+            try
+            {
+                await _wadComparatorService.CompareWadsAsync(oldPbeDir, newPbeDir);
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError($"An error occurred during comparison: {ex.Message}");
+                _customMessageBoxService.ShowInfo("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+            }
         }
 
         private void loadButton_Click(object sender, RoutedEventArgs e)

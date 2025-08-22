@@ -10,6 +10,7 @@ using System.Windows.Media;
 using LeagueToolkit.Core.Wad;
 using Microsoft.Win32;
 using PBE_AssetsDownloader.Services;
+using PBE_AssetsDownloader.Info;
 
 namespace PBE_AssetsDownloader.UI.Dialogs
 {

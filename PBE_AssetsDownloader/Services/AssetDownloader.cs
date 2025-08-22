@@ -48,6 +48,7 @@ namespace PBE_AssetsDownloader.Services
 
         public void NotifyDownloadCompleted()
         {
+            _logService.LogSuccess("Download of assets completed.");
             DownloadCompleted?.Invoke();
         }
 

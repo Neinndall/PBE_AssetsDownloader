@@ -14,6 +14,7 @@ namespace PBE_AssetsDownloader.Services
     private RichTextBox _outputRichTextBox;
     private readonly Dispatcher _dispatcher;
     private readonly ILogger _logger;
+    private bool _suppressUiOutput = false;
 
     private readonly Queue<LogEntry> _pendingLogs = new Queue<LogEntry>();
 
@@ -79,6 +80,9 @@ namespace PBE_AssetsDownloader.Services
       });
     }
 
+    public void SuppressUiLogs() { _suppressUiOutput = true; }
+    public void RestoreUiLogs() { _suppressUiOutput = false; }
+
     public void ClearLog()
     {
       _dispatcher.Invoke(() =>
@@ -129,7 +133,6 @@ namespace PBE_AssetsDownloader.Services
     public void LogCritical(Exception ex, string message)
     {
         _logger.Fatal(ex, message);
-        // This method now only logs to the fatal error file, not to the UI.
     }
 
     public void LogInteractive(string message, string linkText, Action linkAction, LogLevel level = LogLevel.Info)
@@ -147,7 +150,7 @@ namespace PBE_AssetsDownloader.Services
         return;
       }
 
-      if (logEntry.Level == LogLevel.Debug)
+      if (_suppressUiOutput || logEntry.Level == LogLevel.Debug)
       {
         return;
       }

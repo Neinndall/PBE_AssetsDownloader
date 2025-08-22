@@ -14,9 +14,6 @@ namespace PBE_AssetsDownloader.Services
         private readonly HttpClient _httpClient;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
-
-        
-
         public event Action<int> DownloadStarted;
         public event Action<int, int, string, bool, string> DownloadProgressChanged;
         public event Action DownloadCompleted;

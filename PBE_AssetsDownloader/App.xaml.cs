@@ -30,7 +30,7 @@ namespace PBE_AssetsDownloader
         private void ConfigureServices(IServiceCollection services)
         {
             // Logging
-            services.AddSingleton<ILogger>(sp => new LoggerConfiguration()
+            var logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Debug()
                 .WriteTo.Logger(lc => lc
@@ -39,11 +39,13 @@ namespace PBE_AssetsDownloader
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal) // Include only Fatal
                     .WriteTo.File("logs/application_errors.log", rollingInterval: RollingInterval.Day))
-                .CreateLogger());
+                .CreateLogger();
 
-            services.AddSingleton<LogService>();
-
+            Log.Logger = logger; // Assign the logger to the static Log.Logger
+            services.AddSingleton<ILogger>(logger);
+            
             // Core Services
+            services.AddSingleton<LogService>();
             services.AddSingleton<HttpClient>();
             services.AddSingleton<DirectoriesCreator>();
             services.AddSingleton(provider => AppSettings.LoadSettings());
@@ -59,7 +61,6 @@ namespace PBE_AssetsDownloader
             services.AddSingleton<DirectoryCleaner>();
             services.AddSingleton<HashBackUp>();
             services.AddSingleton<HashCopier>();
-
             services.AddSingleton<WadComparatorService>();
             services.AddSingleton<HashResolverService>();
 

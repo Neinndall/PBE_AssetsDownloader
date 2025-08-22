@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Hashing;
 using System.Linq;
+using Serilog;
 using System.Threading.Tasks;
 using LeagueToolkit.Core.Wad;
 using PBE_AssetsDownloader.Info;
@@ -110,19 +111,19 @@ namespace PBE_AssetsDownloader.Services
 
                 if (File.Exists(newWadFileFullPath))
                 {
-                    _logService.Log($"Comparing {relativePath}...");
+                    Log.Information($"Comparing {relativePath}...");
                     using var oldWad = new WadFile(oldWadFile);
                     using var newWad = new WadFile(newWadFileFullPath);
 
                     var diffs = await CollectDiffsAsync(oldWad, newWad, relativePath);
-                    _logService.Log($"Found {diffs.Count} differences in {relativePath}.");
+                    Log.Information($"Found {diffs.Count} differences in {relativePath}.");
                     allDiffs.AddRange(diffs);
                 }
                 else
                 {
                     success = false;
                     errorMessage = $"New WAD file not found: {newWadFileFullPath}.";
-                    _logService.LogWarning($"New WAD file not found: {newWadFileFullPath}. Skipping comparison for this file.");
+                    Log.Warning($"New WAD file not found: {newWadFileFullPath}. Skipping comparison for this file.");
                 }
                 NotifyComparisonProgressChanged(completedOffset + processedInThisBatch, Path.GetFileName(relativePath), success, errorMessage);
             }

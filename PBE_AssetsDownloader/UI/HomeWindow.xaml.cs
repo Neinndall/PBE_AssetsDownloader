@@ -5,6 +5,7 @@ using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.UI.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -13,19 +14,22 @@ namespace PBE_AssetsDownloader.UI
         private readonly LogService _logService;
         private readonly ExtractionService _extractionService;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly WadComparatorService _wadComparatorService;
         private AppSettings _appSettings;
 
         public HomeWindow(
             LogService logService,
             ExtractionService extractionService,
             AppSettings appSettings,
-            CustomMessageBoxService customMessageBoxService)
+            CustomMessageBoxService customMessageBoxService,
+            WadComparatorService wadComparatorService)
         {
             InitializeComponent();
             _logService = logService;
             _extractionService = extractionService;
             _appSettings = appSettings;
             _customMessageBoxService = customMessageBoxService;
+            _wadComparatorService = wadComparatorService;
 
             // Initialize paths from saved settings
             newHashesTextBox.Text = _appSettings.NewHashesPath ?? "";
@@ -97,6 +101,49 @@ namespace PBE_AssetsDownloader.UI
             _appSettings.OldHashesPath = oldHashesTextBox.Text;
             
             await _extractionService.ExecuteAsync();
+        }
+
+        private void btnSelectOldPbeDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            {
+                folderBrowserDialog.IsFolderPicker = true;
+                folderBrowserDialog.Title = "Select Old PBE Directory";
+                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    oldPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
+                    _logService.LogDebug($"Old PBE Directory selected: {folderBrowserDialog.FileName}");
+                }
+            }
+        }
+
+        private void btnSelectNewPbeDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            {
+                folderBrowserDialog.IsFolderPicker = true;
+                folderBrowserDialog.Title = "Select New PBE Directory";
+                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    newPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
+                    _logService.LogDebug($"New PBE Directory selected: {folderBrowserDialog.FileName}");
+                }
+            }
+        }
+
+        private async void compareButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
+            {
+                _logService.LogWarning("Please select both PBE directories.");
+                _customMessageBoxService.ShowInfo("Warning", "Please select both PBE directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                return;
+            }
+
+            var allDiffs = await _wadComparatorService.CompareWadsAsync(oldPbeDirectoryTextBox.Text, newPbeDirectoryTextBox.Text);
+
+            var resultWindow = new WadComparisonResultWindow(allDiffs);
+            resultWindow.Show();
         }
     }
 }

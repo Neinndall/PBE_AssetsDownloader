@@ -34,6 +34,7 @@
     <PackageReference Include="SharpCompress" Version="0.40.0" />
     <PackageReference Include="WindowsAPICodePack" Version="8.0.6" />
     <PackageReference Include="WindowsAPICodePackShell" Version="8.0.6" />
+    <PackageReference Include="LeagueToolkit" Version="4.0.0-beta.53" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,20 @@
+<Window x:Class="PBE_AssetsDownloader.UI.Dialogs.WadComparisonResultWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:PBE_AssetsDownloader.UI.Dialogs"
+        mc:Ignorable="d"
+        Title="WAD Comparison Results" Height="450" Width="800">
+    <Grid>
+        <DataGrid x:Name="resultsDataGrid" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
+                <DataGridTextColumn Header="Old Path" Binding="{Binding OldPath}" />
+                <DataGridTextColumn Header="New Path" Binding="{Binding NewPath}" />
+                <DataGridTextColumn Header="Old Size" Binding="{Binding OldChunk.UncompressedSize}" />
+                <DataGridTextColumn Header="New Size" Binding="{Binding NewChunk.UncompressedSize}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

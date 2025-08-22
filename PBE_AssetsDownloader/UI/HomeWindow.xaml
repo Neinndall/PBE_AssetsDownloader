@@ -187,6 +187,129 @@
                         </Grid>
                     </StackPanel>
                 </Border>
+
+                <!-- WADs Comparator Card -->
+                <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,24">
+                    <StackPanel>
+                        <!-- Header con icono y título -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
+                            <materialDesign:MaterialIcon Kind="Compare"
+                                                         FontSize="20"
+                                                         Margin="0,0,12,0"
+                                                         VerticalAlignment="Center"
+                                                         Foreground="{StaticResource AccentBlue}"/>
+                            <StackPanel>
+                                <TextBlock Text="WADs Comparator" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Compare WAD files to identify differences" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Old PBE Directory -->
+                        <Grid Margin="0,0,0,24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderClockOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentOrange}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="Old PBE Directory" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the old PBE directory" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <Grid Grid.Column="1" Margin="0,42,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="oldPbeDirectoryTextBox" 
+                                         Grid.Column="0"
+                                         Height="36"
+                                         IsReadOnly="True"
+                                         Style="{StaticResource ModernTextBox}"
+                                         ToolTip="Select the old PBE directory"/>
+                                <Button Grid.Column="2"
+                                        Content="Browse"
+                                        Width="80" 
+                                        Height="36"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Click="btnSelectOldPbeDirectory_Click"
+                                        ToolTip="Browse for directory"/>
+                            </Grid>
+                        </Grid>
+
+                        <!-- New PBE Directory -->
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderRefreshOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentGreen}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="New PBE Directory" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the new PBE directory" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <Grid Grid.Column="1" Margin="0,42,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="newPbeDirectoryTextBox" 
+                                         Grid.Column="0"
+                                         Height="36"
+                                         IsReadOnly="True"
+                                         Style="{StaticResource ModernTextBox}"
+                                         ToolTip="Select the new PBE directory"/>
+                                <Button Grid.Column="2"
+                                        Content="Browse"
+                                        Width="80" 
+                                        Height="36"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Click="btnSelectNewPbeDirectory_Click"
+                                        ToolTip="Browse for directory"/>
+                            </Grid>
+                        </Grid>
+                        
+                        <Button x:Name="compareButton" 
+                                Content="Compare" 
+                                Height="44"
+                                Width="160"
+                                Style="{StaticResource ModernButton}"
+                                Click="compareButton_Click"
+                                ToolTip="Compare WAD files"
+                                Margin="0,24,0,0"
+                                HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

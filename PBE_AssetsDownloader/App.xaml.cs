@@ -60,6 +60,9 @@ namespace PBE_AssetsDownloader
             services.AddSingleton<HashBackUp>();
             services.AddSingleton<HashCopier>();
 
+            services.AddSingleton<WadComparatorService>();
+            services.AddSingleton(sp => new HashResolverService(sp.GetRequiredService<DirectoriesCreator>()));
+
             // Main Application Logic Service
             services.AddTransient<ExtractionService>();
 

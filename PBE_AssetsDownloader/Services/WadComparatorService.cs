@@ -23,6 +23,7 @@ namespace PBE_AssetsDownloader.Services
         public WadChunk NewChunk { get; set; }
         public string OldPath { get; set; }
         public string NewPath { get; set; }
+        public string SourceWadFile { get; set; }
     }
 
     public class WadComparatorService
@@ -52,11 +53,13 @@ namespace PBE_AssetsDownloader.Services
 
             try
             {
-                var gameWadDiffs = await CompareWadDirectoriesAsync(oldGameWadDir, newGameWadDir);
+                var (gameWadDiffs, gameWadFilesCount) = await CompareWadDirectoriesAsync(oldGameWadDir, newGameWadDir, "*.wad.client");
                 allDiffs.AddRange(gameWadDiffs);
+                _logService.Log($"Processed {gameWadFilesCount} .wad.client files for GAME.");
 
-                var pluginsWadDiffs = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir);
+                var (pluginsWadDiffs, pluginsWadFilesCount) = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir, "*.wad");
                 allDiffs.AddRange(pluginsWadDiffs);
+                _logService.Log($"Processed {pluginsWadFilesCount} .wad files for PLUGINS.");
 
                 _logService.Log($"WAD comparison finished. Found {allDiffs.Count} differences.");
             }
@@ -68,24 +71,27 @@ namespace PBE_AssetsDownloader.Services
             return allDiffs;
         }
 
-        private async Task<List<ChunkDiff>> CompareWadDirectoriesAsync(string oldWadDir, string newWadDir)
+        private async Task<(List<ChunkDiff> Diffs, int ProcessedFilesCount)> CompareWadDirectoriesAsync(string oldWadDir, string newWadDir, string searchPattern)
         {
             var allDiffs = new List<ChunkDiff>();
+            var processedFilesCount = 0;
 
             if (!Directory.Exists(oldWadDir))
             {
                 _logService.LogWarning($"Old WAD directory not found: {oldWadDir}");
-                return allDiffs;
+                return (allDiffs, processedFilesCount);
             }
 
             if (!Directory.Exists(newWadDir))
             {
                 _logService.LogWarning($"New WAD directory not found: {newWadDir}");
-                return allDiffs;
+                return (allDiffs, processedFilesCount);
             }
 
-            var oldWadFiles = Directory.GetFiles(oldWadDir, "*.wad.client", SearchOption.AllDirectories);
-            var newWadFiles = Directory.GetFiles(newWadDir, "*.wad.client", SearchOption.AllDirectories);
+            var oldWadFiles = Directory.GetFiles(oldWadDir, searchPattern, SearchOption.AllDirectories);
+            var newWadFiles = Directory.GetFiles(newWadDir, searchPattern, SearchOption.AllDirectories);
+
+            processedFilesCount = oldWadFiles.Length;
 
             foreach (var oldWadFile in oldWadFiles)
             {
@@ -100,7 +106,7 @@ namespace PBE_AssetsDownloader.Services
                     using var oldWad = new WadFile(oldWadFile);
                     using var newWad = new WadFile(newWadFileFullPath);
 
-                    var diffs = await CollectDiffsAsync(oldWad, newWad);
+                    var diffs = await CollectDiffsAsync(oldWad, newWad, relativePath);
                     _logService.Log($"Found {diffs.Count} differences in {relativePath}.");
                     allDiffs.AddRange(diffs);
                 }
@@ -110,10 +116,10 @@ namespace PBE_AssetsDownloader.Services
                 }
             }
 
-            return allDiffs;
+            return (allDiffs, processedFilesCount);
         }
 
-        private async Task<List<ChunkDiff>> CollectDiffsAsync(WadFile oldWad, WadFile newWad)
+        private async Task<List<ChunkDiff>> CollectDiffsAsync(WadFile oldWad, WadFile newWad, string sourceWadFile)
         {
             var diffs = new List<ChunkDiff>();
 
@@ -129,7 +135,7 @@ namespace PBE_AssetsDownloader.Services
                 var oldPath = _hashResolverService.ResolveHash(oldChunk.PathHash);
                 if (!newChunks.ContainsKey(oldChunk.PathHash))
                 {
-                    diffs.Add(new ChunkDiff { Type = ChunkDiffType.Removed, OldChunk = oldChunk, OldPath = oldPath });
+                    diffs.Add(new ChunkDiff { Type = ChunkDiffType.Removed, OldChunk = oldChunk, OldPath = oldPath, SourceWadFile = sourceWadFile });
                 }
                 else
                 {
@@ -137,7 +143,7 @@ namespace PBE_AssetsDownloader.Services
                     if (oldChunkChecksums[oldChunk.PathHash] != newChunkChecksums[newChunk.PathHash])
                     {
                         var newPath = _hashResolverService.ResolveHash(newChunk.PathHash);
-                        diffs.Add(new ChunkDiff { Type = ChunkDiffType.Modified, OldChunk = oldChunk, NewChunk = newChunk, OldPath = oldPath, NewPath = newPath });
+                        diffs.Add(new ChunkDiff { Type = ChunkDiffType.Modified, OldChunk = oldChunk, NewChunk = newChunk, OldPath = oldPath, NewPath = newPath, SourceWadFile = sourceWadFile });
                     }
                 }
             }
@@ -152,11 +158,11 @@ namespace PBE_AssetsDownloader.Services
                     if (oldChecksum.Key != 0)
                     {
                         var oldPath = _hashResolverService.ResolveHash(oldChecksum.Key);
-                        diffs.Add(new ChunkDiff { Type = ChunkDiffType.Renamed, OldChunk = oldChunks[oldChecksum.Key], NewChunk = newChunk, OldPath = oldPath, NewPath = newPath });
+                        diffs.Add(new ChunkDiff { Type = ChunkDiffType.Renamed, OldChunk = oldChunks[oldChecksum.Key], NewChunk = newChunk, OldPath = oldPath, NewPath = newPath, SourceWadFile = sourceWadFile });
                     }
                     else
                     {
-                        diffs.Add(new ChunkDiff { Type = ChunkDiffType.New, NewChunk = newChunk, NewPath = newPath });
+                        diffs.Add(new ChunkDiff { Type = ChunkDiffType.New, NewChunk = newChunk, NewPath = newPath, SourceWadFile = sourceWadFile });
                     }
                 }
             }

@@ -1,11 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
+using LeagueToolkit.Core.Wad;
+using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsDownloader.Services;
-using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.UI.Dialogs;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
+using PBE_AssetsDownloader.Utils;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -144,6 +150,38 @@ namespace PBE_AssetsDownloader.UI
 
             var resultWindow = new WadComparisonResultWindow(allDiffs);
             resultWindow.Show();
+        }
+
+        private void loadButton_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+                Title = "Load Comparison Results"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var json = File.ReadAllText(openFileDialog.FileName);
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        Converters = { new JsonStringEnumConverter() }
+                    };
+                    var serializableDiffs = JsonSerializer.Deserialize<List<SerializableChunkDiff>>(json, options);
+
+                    var resultWindow = new WadComparisonResultWindow(serializableDiffs);
+                    resultWindow.Show();
+                    _logService.Log($"Successfully loaded {serializableDiffs.Count} differences from {openFileDialog.FileName}");
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError($"Failed to load comparison results: {ex.Message}");
+                    _customMessageBoxService.ShowInfo("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                }
+            }
         }
     }
 }

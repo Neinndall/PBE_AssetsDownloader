@@ -5,16 +5,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:PBE_AssetsDownloader.UI.Dialogs"
         mc:Ignorable="d"
-        Title="WAD Comparison Results" Height="450" Width="800">
-    <Grid>
-        <DataGrid x:Name="resultsDataGrid" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
-                <DataGridTextColumn Header="Old Path" Binding="{Binding OldPath}" />
-                <DataGridTextColumn Header="New Path" Binding="{Binding NewPath}" />
-                <DataGridTextColumn Header="Old Size" Binding="{Binding OldChunk.UncompressedSize}" />
-                <DataGridTextColumn Header="New Size" Binding="{Binding NewChunk.UncompressedSize}" />
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+        Title="WAD Comparison Results" Height="600" Width="900">
+    <DockPanel Margin="10">
+        <Button Content="Save Results..." DockPanel.Dock="Bottom" Margin="0,10,0,0" Click="SaveButton_Click"/>
+        <TreeView x:Name="resultsTreeView" Style="{StaticResource ModernTreeView}">
+            <!-- The TreeView will be populated from code-behind -->
+        </TreeView>
+    </DockPanel>
 </Window>
+

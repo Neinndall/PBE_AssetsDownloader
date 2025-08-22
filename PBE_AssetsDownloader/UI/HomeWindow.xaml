@@ -299,15 +299,23 @@
                             </Grid>
                         </Grid>
                         
-                        <Button x:Name="compareButton" 
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                            <Button x:Name="loadButton" 
+                                Content="Load Results"
+                                Height="44"
+                                Width="160"
+                                Style="{StaticResource SecondaryButton}"
+                                Click="loadButton_Click"
+                                ToolTip="Load previously saved WAD comparison results"
+                                Margin="0,0,12,0"/>
+                            <Button x:Name="compareButton" 
                                 Content="Compare" 
                                 Height="44"
                                 Width="160"
                                 Style="{StaticResource ModernButton}"
                                 Click="compareButton_Click"
-                                ToolTip="Compare WAD files"
-                                Margin="0,24,0,0"
-                                HorizontalAlignment="Right"/>
+                                ToolTip="Compare WAD files"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>

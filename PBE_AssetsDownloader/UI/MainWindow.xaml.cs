@@ -10,10 +10,12 @@ using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Utils;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace PBE_AssetsDownloader.UI
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly LogService _logService;
@@ -30,6 +32,13 @@ namespace PBE_AssetsDownloader.UI
         private string _latestAppVersionAvailable;
         private int _totalFiles;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
         public MainWindow(
             IServiceProvider serviceProvider,
             LogService logService,
@@ -41,6 +50,8 @@ namespace PBE_AssetsDownloader.UI
             WadComparatorService wadComparatorService)
         {
             InitializeComponent();
+
+            this.DataContext = this; // Set DataContext for bindings
 
             _serviceProvider = serviceProvider;
             _logService = logService;
@@ -153,6 +164,7 @@ namespace PBE_AssetsDownloader.UI
             {
                 _totalFiles = totalFiles;
                 ProgressSummaryButton.Visibility = Visibility.Visible;
+                ProgressSummaryButton.ToolTip = "Click to see download details";
 
                 if (_spinningIconAnimationStoryboard == null)
                 {
@@ -162,8 +174,10 @@ namespace PBE_AssetsDownloader.UI
                 }
                 _spinningIconAnimationStoryboard?.Begin();
 
-                _progressDetailsWindow = _serviceProvider.GetRequiredService<ProgressDetailsWindow>();
+                _progressDetailsWindow = new ProgressDetailsWindow(_logService, "Download Details");
                 _progressDetailsWindow.Owner = this;
+                _progressDetailsWindow.HeaderIconKind = "Download";
+                _progressDetailsWindow.HeaderText = "Download Details";
                 _progressDetailsWindow.Closed += (s, e) => _progressDetailsWindow = null;
                 _progressDetailsWindow.UpdateProgress(0, totalFiles, "Initializing...", true, null);
             });
@@ -193,8 +207,8 @@ namespace PBE_AssetsDownloader.UI
             Dispatcher.Invoke(() =>
             {
                 _totalFiles = totalFiles;
-                _logService.SuppressUiLogs();
                 ProgressSummaryButton.Visibility = Visibility.Visible;
+                ProgressSummaryButton.ToolTip = "Click to see comparison details";
 
                 if (_spinningIconAnimationStoryboard == null)
                 {
@@ -204,19 +218,21 @@ namespace PBE_AssetsDownloader.UI
                 }
                 _spinningIconAnimationStoryboard?.Begin();
 
-                _progressDetailsWindow = _serviceProvider.GetRequiredService<ProgressDetailsWindow>();
+                _progressDetailsWindow = new ProgressDetailsWindow(_logService, "Comparison Details");
                 _progressDetailsWindow.Owner = this;
                 _progressDetailsWindow.OperationVerb = "Comparing";
+                _progressDetailsWindow.HeaderIconKind = "Compare";
+                _progressDetailsWindow.HeaderText = "Comparison Details";
                 _progressDetailsWindow.Closed += (s, e) => _progressDetailsWindow = null;
                 _progressDetailsWindow.UpdateProgress(0, totalFiles, "Comparison starting...", true, null);
             });
         }
 
-        private void OnComparisonProgressChanged(int completedFiles, string currentFile)
+        private void OnComparisonProgressChanged(int completedFiles, string currentFile, bool isSuccess, string errorMessage)
         {
             Dispatcher.Invoke(() =>
             {
-                _progressDetailsWindow?.UpdateProgress(completedFiles, _totalFiles, currentFile, true, null);
+                _progressDetailsWindow?.UpdateProgress(completedFiles, _totalFiles, currentFile, isSuccess, errorMessage);
             });
         }
 
@@ -224,7 +240,6 @@ namespace PBE_AssetsDownloader.UI
         {
             Dispatcher.Invoke(() =>
             {
-                _logService.RestoreUiLogs();
                 ProgressSummaryButton.Visibility = Visibility.Collapsed;
                 _spinningIconAnimationStoryboard?.Stop();
                 _spinningIconAnimationStoryboard = null;

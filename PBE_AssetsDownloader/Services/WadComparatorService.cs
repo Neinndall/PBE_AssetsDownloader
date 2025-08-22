@@ -15,13 +15,28 @@ namespace PBE_AssetsDownloader.Services
         private readonly LogService _logService;
 
         public event Action<int> ComparisonStarted;
-        public event Action<int, string> ComparisonProgressChanged;
+        public event Action<int, string, bool, string> ComparisonProgressChanged;
         public event Action<List<ChunkDiff>> ComparisonCompleted;
 
         public WadComparatorService(HashResolverService hashResolverService, LogService logService)
         {
             _hashResolverService = hashResolverService;
             _logService = logService;
+        }
+
+        public void NotifyComparisonStarted(int totalFiles)
+        {
+            ComparisonStarted?.Invoke(totalFiles);
+        }
+
+        public void NotifyComparisonProgressChanged(int completedFiles, string currentWadFile, bool isSuccess, string errorMessage)
+        {
+            ComparisonProgressChanged?.Invoke(completedFiles, currentWadFile, isSuccess, errorMessage);
+        }
+
+        public void NotifyComparisonCompleted(List<ChunkDiff> allDiffs)
+        {
+            ComparisonCompleted?.Invoke(allDiffs);
         }
 
         public async Task CompareWadsAsync(string oldPbeDir, string newPbeDir)
@@ -43,7 +58,7 @@ namespace PBE_AssetsDownloader.Services
                 int totalFiles = gameWadFiles.Length + pluginsWadFiles.Length;
                 int processedFiles = 0;
 
-                ComparisonStarted?.Invoke(totalFiles);
+                NotifyComparisonStarted(totalFiles);
 
                 if (gameWadFiles.Any())
                 {
@@ -66,7 +81,7 @@ namespace PBE_AssetsDownloader.Services
             }
             finally
             {
-                ComparisonCompleted?.Invoke(allDiffs);
+                NotifyComparisonCompleted(allDiffs);
                 if (allDiffs != null)
                 {
                     _logService.LogSuccess($"WAD comparison completed. Found {allDiffs.Count} differences.");
@@ -90,7 +105,8 @@ namespace PBE_AssetsDownloader.Services
                 var newWadFileFullPath = Path.Combine(newWadDir, relativePath);
 
                 processedInThisBatch++;
-                ComparisonProgressChanged?.Invoke(completedOffset + processedInThisBatch, Path.GetFileName(relativePath));
+                bool success = true;
+                string errorMessage = null;
 
                 if (File.Exists(newWadFileFullPath))
                 {
@@ -104,8 +120,11 @@ namespace PBE_AssetsDownloader.Services
                 }
                 else
                 {
+                    success = false;
+                    errorMessage = $"New WAD file not found: {newWadFileFullPath}.";
                     _logService.LogWarning($"New WAD file not found: {newWadFileFullPath}. Skipping comparison for this file.");
                 }
+                NotifyComparisonProgressChanged(completedOffset + processedInThisBatch, Path.GetFileName(relativePath), success, errorMessage);
             }
             return (allDiffs, processedInThisBatch);
         }

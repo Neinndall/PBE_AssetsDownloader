@@ -14,12 +14,19 @@ namespace PBE_AssetsDownloader.UI.Dialogs
         private int _totalFiles;
 
         public string OperationVerb { get; set; } = "Downloading";
+        public string WindowTitle { get; set; } // No default value here
+        public string HeaderIconKind { get; set; } = "Download";
+        public string HeaderText { get; set; } = "Download Details";
 
-        public ProgressDetailsWindow(LogService logService)
+        public ProgressDetailsWindow(LogService logService, string windowTitle) // Add windowTitle parameter
         {
             InitializeComponent();
             _logService = logService;
             _startTime = DateTime.Now;
+
+            this.Title = windowTitle; // Set the window title from parameter
+            this.WindowTitle = windowTitle; // Also set the property for consistency
+            this.DataContext = this; // Set DataContext for binding
 
             DetailedLogsRichTextBox.Document.Blocks.Clear(); // Clear any default content
         }

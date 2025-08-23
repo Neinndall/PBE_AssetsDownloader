@@ -74,49 +74,6 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Original File -->
-                        <Grid Margin="0,0,0,24">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" 
-                                                         FontSize="20" 
-                                                         Margin="0,0,12,0" 
-                                                         VerticalAlignment="Top"
-                                                         Foreground="{StaticResource AccentOrange}"/>
-                            
-                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                                <TextBlock Text="Original File" 
-                                           FontWeight="Medium"
-                                           FontSize="14"
-                                           Foreground="{StaticResource TextPrimary}"/>
-                                <TextBlock Text="Select the base JSON file" 
-                                           FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"
-                                           Margin="0,2,0,0"/>
-                                <Grid Margin="0,12,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="12"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox x:Name="originalFileTextBox" 
-                                             Grid.Column="0"
-                                             Height="36"
-                                             IsReadOnly="True"
-                                             Style="{StaticResource ModernTextBox}"/>
-                                    <Button Grid.Column="2"
-                                            Content="Browse"
-                                            Width="80" 
-                                            Height="36"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Click="btnSelectOriginal_Click"/>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
-
                         <!-- New File -->
                         <Grid Margin="0,0,0,24">
                             <Grid.ColumnDefinitions>
@@ -135,7 +92,7 @@
                                            FontWeight="Medium"
                                            FontSize="14"
                                            Foreground="{StaticResource TextPrimary}"/>
-                                <TextBlock Text="Select the modified JSON file to compare against" 
+                                <TextBlock Text="Select the new JSON file to compare" 
                                            FontSize="12" 
                                            Foreground="{StaticResource TextMuted}"
                                            Margin="0,2,0,0"/>
@@ -156,6 +113,49 @@
                                             Height="36"
                                             Style="{StaticResource SecondaryButton}"
                                             Click="btnSelectNew_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Original File -->
+                        <Grid Margin="0,0,0,24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentOrange}"/>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="Old File" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the old JSON file to compare" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="originalFileTextBox" 
+                                             Grid.Column="0"
+                                             Height="36"
+                                             IsReadOnly="True"
+                                             Style="{StaticResource ModernTextBox}"/>
+                                    <Button Grid.Column="2"
+                                            Content="Browse"
+                                            Width="80" 
+                                            Height="36"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Click="btnSelectOriginal_Click"/>
                                 </Grid>
                             </StackPanel>
                         </Grid>
@@ -216,51 +216,6 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Old PBE Directory -->
-                        <Grid Margin="0,0,0,24">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderClockOutline" 
-                                                         FontSize="20" 
-                                                         Margin="0,0,12,0" 
-                                                         VerticalAlignment="Top"
-                                                         Foreground="{StaticResource AccentOrange}"/>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                                <TextBlock Text="Old PBE Directory" 
-                                           FontWeight="Medium"
-                                           FontSize="14"
-                                           Foreground="{StaticResource TextPrimary}"/>
-                                <TextBlock Text="Select the old PBE directory" 
-                                           FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"
-                                           Margin="0,2,0,0"/>
-                            </StackPanel>
-
-                            <Grid Grid.Column="1" Margin="0,42,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox x:Name="oldPbeDirectoryTextBox" 
-                                         Grid.Column="0"
-                                         Height="36"
-                                         IsReadOnly="True"
-                                         Style="{StaticResource ModernTextBox}"
-                                         ToolTip="Select the old PBE directory"/>
-                                <Button Grid.Column="2"
-                                        Content="Browse"
-                                        Width="80" 
-                                        Height="36"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Click="btnSelectOldPbeDirectory_Click"
-                                        ToolTip="Browse for directory"/>
-                            </Grid>
-                        </Grid>
-
                         <!-- New PBE Directory -->
                         <Grid Margin="0,0,0,24">
                             <Grid.ColumnDefinitions>
@@ -302,6 +257,51 @@
                                         Height="36"
                                         Style="{StaticResource SecondaryButton}"
                                         Click="btnSelectNewPbeDirectory_Click"
+                                        ToolTip="Browse for directory"/>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Old PBE Directory -->
+                        <Grid Margin="0,0,0,24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderClockOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentOrange}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="Old PBE Directory" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the old PBE directory" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <Grid Grid.Column="1" Margin="0,42,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="oldPbeDirectoryTextBox" 
+                                         Grid.Column="0"
+                                         Height="36"
+                                         IsReadOnly="True"
+                                         Style="{StaticResource ModernTextBox}"
+                                         ToolTip="Select the old PBE directory"/>
+                                <Button Grid.Column="2"
+                                        Content="Browse"
+                                        Width="80" 
+                                        Height="36"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Click="btnSelectOldPbeDirectory_Click"
                                         ToolTip="Browse for directory"/>
                             </Grid>
                         </Grid>

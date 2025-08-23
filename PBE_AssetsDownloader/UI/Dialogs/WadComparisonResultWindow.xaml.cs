@@ -108,19 +108,33 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                 noSelectionPanel.Visibility = Visibility.Collapsed;
                 detailsContentPanel.Visibility = Visibility.Visible;
 
+                // Reset visibility for all panels initially
+                renamedOldNamePanel.Visibility = Visibility.Collapsed;
+                renamedNewNamePanel.Visibility = Visibility.Collapsed;
+                genericFileNamePanel.Visibility = Visibility.Collapsed;
+                oldSizePanel.Visibility = Visibility.Visible;
+                newSizePanel.Visibility = Visibility.Visible;
+
+                string directoryPath;
+
                 if (diff.Type == ChunkDiffType.Renamed)
                 {
-                    oldPathPanel.Visibility = Visibility.Visible;
-                    oldFilePathTextBox.Text = diff.OldPath;
-                    pathLabel.Text = "New Path";
-                    filePathTextBox.Text = diff.NewPath;
+                    renamedOldNamePanel.Visibility = Visibility.Visible;
+                    renamedNewNamePanel.Visibility = Visibility.Visible;
+                    
+                    renamedOldNameTextBlock.Text = Path.GetFileName(diff.OldPath);
+                    renamedNewNameTextBlock.Text = Path.GetFileName(diff.NewPath);
+                    directoryPath = Path.GetDirectoryName(diff.NewPath);
                 }
                 else
                 {
-                    oldPathPanel.Visibility = Visibility.Collapsed;
-                    pathLabel.Text = "File Path";
-                    filePathTextBox.Text = diff.NewPath ?? diff.OldPath;
+                    genericFileNamePanel.Visibility = Visibility.Visible;
+                    string currentPath = diff.NewPath ?? diff.OldPath;
+                    genericFileNameTextBlock.Text = Path.GetFileName(currentPath);
+                    directoryPath = Path.GetDirectoryName(currentPath);
                 }
+
+                pathTextBlock.Text = string.IsNullOrEmpty(directoryPath) ? "N/A" : directoryPath;
 
                 changeTypeTextBlock.Text = diff.Type.ToString();
                 sourceWadTextBlock.Text = diff.SourceWadFile;
@@ -128,11 +142,22 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                 oldSizeTextBlock.Text = FormatSize(diff.OldUncompressedSize);
                 newSizeTextBlock.Text = FormatSize(diff.NewUncompressedSize);
 
-                if (diff.Type == ChunkDiffType.Modified)
+                if (diff.Type == ChunkDiffType.New)
+                {
+                    oldSizePanel.Visibility = Visibility.Collapsed;
+                }
+                else if (diff.Type == ChunkDiffType.Removed)
+                {
+                    newSizePanel.Visibility = Visibility.Collapsed;
+                }
+                else if (diff.Type == ChunkDiffType.Modified)
                 {
                     long sizeDiff = (long)(diff.NewUncompressedSize ?? 0) - (long)(diff.OldUncompressedSize ?? 0);
-                    string diffSign = sizeDiff > 0 ? "+" : "";
-                    newSizeTextBlock.Text += $" ({diffSign}{FormatSize((ulong)Math.Abs(sizeDiff))})";
+                    if (sizeDiff != 0)
+                    {
+                        string diffSign = sizeDiff > 0 ? "+" : "";
+                        newSizeTextBlock.Text += $" ({diffSign}{FormatSize((ulong)Math.Abs(sizeDiff))})";
+                    }
                 }
             }
             else

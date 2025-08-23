@@ -108,7 +108,20 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                 noSelectionPanel.Visibility = Visibility.Collapsed;
                 detailsContentPanel.Visibility = Visibility.Visible;
 
-                filePathTextBox.Text = diff.NewPath ?? diff.OldPath;
+                if (diff.Type == ChunkDiffType.Renamed)
+                {
+                    oldPathPanel.Visibility = Visibility.Visible;
+                    oldFilePathTextBox.Text = diff.OldPath;
+                    pathLabel.Text = "New Path";
+                    filePathTextBox.Text = diff.NewPath;
+                }
+                else
+                {
+                    oldPathPanel.Visibility = Visibility.Collapsed;
+                    pathLabel.Text = "File Path";
+                    filePathTextBox.Text = diff.NewPath ?? diff.OldPath;
+                }
+
                 changeTypeTextBlock.Text = diff.Type.ToString();
                 sourceWadTextBlock.Text = diff.SourceWadFile;
 

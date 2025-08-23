@@ -270,7 +270,7 @@ namespace PBE_AssetsDownloader.Services
                                 () =>
                                 {
                                     var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                                    diffWindow.LoadDiff(oldFilePath, newFilePath);
+                                    _ = diffWindow.LoadAndDisplayDiffAsync(oldFilePath, newFilePath);
                                     diffWindow.Show();
                                 }
                             );

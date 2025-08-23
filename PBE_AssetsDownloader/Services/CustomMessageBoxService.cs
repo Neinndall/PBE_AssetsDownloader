@@ -61,5 +61,17 @@ namespace PBE_AssetsDownloader.Services
             dialog.Owner = owner;
             dialog.ShowDialog();
         }
+
+        public void ShowWarning(
+            string title,
+            string message,
+            Window owner = null,
+            CustomMessageBoxIcon icon = CustomMessageBoxIcon.Warning)
+        {
+            var dialog = _serviceProvider.GetRequiredService<ConfirmationDialog>();
+            dialog.Initialize(title, message, CustomMessageBoxButtons.OK, icon);
+            dialog.Owner = owner;
+            dialog.ShowDialog();
+        }
     }
 }

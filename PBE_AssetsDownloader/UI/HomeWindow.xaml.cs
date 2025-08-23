@@ -88,7 +88,7 @@ namespace PBE_AssetsDownloader.UI
             if (string.IsNullOrEmpty(oldHashesTextBox.Text) || string.IsNullOrEmpty(newHashesTextBox.Text))
             {
                 _logService.LogWarning("Please select both hash directories.");
-                _customMessageBoxService.ShowInfo("Warning", "Please select both hash directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowWarning("Warning", "Please select both hash directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
                 return;
             }
             

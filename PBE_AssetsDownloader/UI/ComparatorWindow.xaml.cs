@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -62,13 +63,13 @@ namespace PBE_AssetsDownloader.UI
 
             if (string.IsNullOrWhiteSpace(originalPath) || string.IsNullOrWhiteSpace(newPath))
             {
-                _customMessageBoxService.ShowWarning("Files not selected", "Please select both an original and a new file.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowWarning("Warning", "Please select both an original and a new file.", Window.GetWindow(this));
                 return;
             }
 
             if (!File.Exists(originalPath) || !File.Exists(newPath))
             {
-                _customMessageBoxService.ShowError("File not found", "One or both of the selected files do not exist.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", "One or both of the selected files do not exist.", Window.GetWindow(this));
                 return;
             }
 
@@ -77,12 +78,13 @@ namespace PBE_AssetsDownloader.UI
                 string originalJson = File.ReadAllText(originalPath);
                 string newJson = File.ReadAllText(newPath);
 
-                var diffWindow = new JsonDiffWindow(originalJson, newJson, Path.GetFileName(originalPath), Path.GetFileName(newPath));
+                var diffWindow = App.ServiceProvider.GetRequiredService<JsonDiffWindow>();
+                _ = diffWindow.LoadAndDisplayDiffAsync(originalJson, newJson, Path.GetFileName(originalPath), Path.GetFileName(newPath));
                 diffWindow.Show();
             }
             catch (IOException ex)
             {
-                _customMessageBoxService.ShowError("File Read Error", $"Error reading files: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", $"Error reading files: {ex.Message}", Window.GetWindow(this));
             }
         }
 
@@ -128,7 +130,7 @@ namespace PBE_AssetsDownloader.UI
         {
             if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
             {
-                _customMessageBoxService.ShowWarning("Warning", "Please select both PBE directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowWarning("Warning", "Please select both PBE directories.", Window.GetWindow(this));
                 return;
             }
 
@@ -144,7 +146,7 @@ namespace PBE_AssetsDownloader.UI
             catch (Exception ex)
             {
                 _logService.LogError($"An error occurred during comparison: {ex.Message}");
-                _customMessageBoxService.ShowError("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this));
             }
         }
 
@@ -174,7 +176,7 @@ namespace PBE_AssetsDownloader.UI
                 catch (Exception ex)
                 {
                     _logService.LogError($"Failed to load comparison results: {ex.Message}");
-                    _customMessageBoxService.ShowError("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                    _customMessageBoxService.ShowError("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this));
                 }
             }
         }

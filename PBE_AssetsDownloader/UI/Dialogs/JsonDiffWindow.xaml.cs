@@ -6,11 +6,9 @@ using System.Windows.Input;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
-using Newtonsoft.Json;
 using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using System.Collections.Generic;
 using System.Xml;
 using System.IO;
 using System.Reflection;
@@ -20,7 +18,6 @@ using PBE_AssetsDownloader.UI.Helpers;
 using PBE_AssetsDownloader.Services;
 using System.Windows.Media.Animation;
 using ICSharpCode.AvalonEdit.Document;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsDownloader.UI.Dialogs
 {
@@ -33,7 +30,6 @@ namespace PBE_AssetsDownloader.UI.Dialogs
         private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly Storyboard _loadingAnimation;
 
-        // DI constructor
         public JsonDiffWindow(CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
@@ -48,28 +44,66 @@ namespace PBE_AssetsDownloader.UI.Dialogs
             _loadingAnimation.Begin();
         }
 
-        // Manual constructor
-        public JsonDiffWindow(string oldJson, string newJson, string oldFileName, string newFileName)
+        public async Task LoadAndDisplayDiffAsync(string oldJson, string newJson, string oldFileName, string newFileName)
         {
-            InitializeComponent();
-            // Get service from static service provider
-            _customMessageBoxService = App.ServiceProvider.GetRequiredService<CustomMessageBoxService>();
+            try
+            {
+                OldFileNameLabel.Text = oldFileName;
+                NewFileNameLabel.Text = newFileName;
 
-            ConfigureEditors();
-            LoadJsonSyntaxHighlighting();
-            SetupScrollSync();
+                if (string.IsNullOrEmpty(oldJson))
+                {
+                    HandleEmptyOldJson(newJson);
+                    return;
+                }
 
-            var originalStoryboard = (Storyboard)FindResource("SpinningIconAnimation");
-            _loadingAnimation = originalStoryboard.Clone();
-            Storyboard.SetTarget(_loadingAnimation, ProgressIcon);
-            _loadingAnimation.Begin();
+                _originalDiffModel = await Task.Run(() => new SideBySideDiffBuilder(new Differ()).BuildDiffModel(oldJson, newJson, false));
 
-            _ = LoadAndDisplayDiffFromStringAsync(oldJson, newJson, oldFileName, newFileName);
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+                _loadingAnimation.Stop();
+                DiffGrid.Visibility = Visibility.Visible;
+
+                UpdateDiffView();
+
+                if (AreFilesIdentical())
+                {
+                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
+                    Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                _customMessageBoxService.ShowInfo("Error", $"Failed to load comparison: {ex.Message}. Check logs for details.", this, CustomMessageBoxIcon.Error);
+                Close();
+            }
         }
 
-        public void LoadDiff(string oldFilePath, string newFilePath)
+        public async Task LoadAndDisplayDiffAsync(string oldFilePath, string newFilePath)
         {
-            _ = LoadAndDisplayDiffAsync(oldFilePath, newFilePath);
+            string oldJson = File.Exists(oldFilePath) ? await File.ReadAllTextAsync(oldFilePath) : "";
+            string newJson = File.Exists(newFilePath) ? await File.ReadAllTextAsync(newFilePath) : "";
+            await LoadAndDisplayDiffAsync(oldJson, newJson, Path.GetFileName(oldFilePath), Path.GetFileName(newFilePath));
+        }
+
+        private void HandleEmptyOldJson(string newJson)
+        {
+            LoadingOverlay.Visibility = Visibility.Collapsed;
+            _loadingAnimation.Stop();
+            DiffGrid.Visibility = Visibility.Visible;
+            OldJsonContent.Document = new TextDocument("");
+            NewJsonContent.Document = new TextDocument(newJson);
+            NextDiffButton.IsEnabled = false;
+            PreviousDiffButton.IsEnabled = false;
+            WordLevelDiffButton.IsEnabled = false;
+            HideUnchangedButton.IsEnabled = false;
+            OldNavigationPanel.Visibility = Visibility.Collapsed;
+            NewNavigationPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private bool AreFilesIdentical()
+        {
+            return _originalDiffModel.OldText.Lines.All(l => l.Type == ChangeType.Unchanged) &&
+                   _originalDiffModel.NewText.Lines.All(l => l.Type == ChangeType.Unchanged);
         }
 
         private void ConfigureEditors()
@@ -97,7 +131,7 @@ namespace PBE_AssetsDownloader.UI.Dialogs
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var resourceName = Array.Find(assembly.GetManifestResourceNames(), name => name.EndsWith("JsonSyntaxHighlighting.xshd"));
-                
+
                 if (resourceName != null)
                 {
                     using var stream = assembly.GetManifestResourceStream(resourceName);
@@ -113,102 +147,6 @@ namespace PBE_AssetsDownloader.UI.Dialogs
             catch
             {
                 // Silently continue
-            }
-        }
-
-        private async Task LoadAndDisplayDiffFromStringAsync(string oldJson, string newJson, string oldFileName, string newFileName)
-        {
-            try
-            {
-                OldFileNameLabel.Text = oldFileName;
-                NewFileNameLabel.Text = newFileName;
-
-                if (string.IsNullOrEmpty(oldJson))
-                {
-                    LoadingOverlay.Visibility = Visibility.Collapsed;
-                    _loadingAnimation.Stop();
-                    DiffGrid.Visibility = Visibility.Visible;
-                    OldJsonContent.Document = new TextDocument("");
-                    NewJsonContent.Document = new TextDocument(newJson);
-                    NextDiffButton.IsEnabled = false;
-                    PreviousDiffButton.IsEnabled = false;
-                    WordLevelDiffButton.IsEnabled = false;
-                    HideUnchangedButton.IsEnabled = false;
-                    OldNavigationPanel.Visibility = Visibility.Collapsed;
-                    NewNavigationPanel.Visibility = Visibility.Collapsed;
-                    return;
-                }
-
-                _originalDiffModel = await Task.Run(() => new SideBySideDiffBuilder(new Differ()).BuildDiffModel(oldJson, newJson, false));
-
-                LoadingOverlay.Visibility = Visibility.Collapsed;
-                _loadingAnimation.Stop();
-                DiffGrid.Visibility = Visibility.Visible;
-
-                UpdateDiffView();
-
-                if (_originalDiffModel.OldText.Lines.All(l => l.Type == ChangeType.Unchanged) &&
-                    _originalDiffModel.NewText.Lines.All(l => l.Type == ChangeType.Unchanged))
-                {
-                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
-                    Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                _customMessageBoxService.ShowInfo("Error", $"Failed to load comparison: {ex.Message}. Check logs for details.", this, CustomMessageBoxIcon.Error);
-                Close();
-            }
-        }
-
-        private async Task LoadAndDisplayDiffAsync(string oldFilePath, string newFilePath)
-        {
-            try
-            {
-                OldFileNameLabel.Text = Path.GetFileName(oldFilePath);
-                NewFileNameLabel.Text = Path.GetFileName(newFilePath);
-
-                string oldJson = File.Exists(oldFilePath) ? await File.ReadAllTextAsync(oldFilePath) : "";
-                string newJson = File.Exists(newFilePath) ? await File.ReadAllTextAsync(newFilePath) : "";
-
-                if (string.IsNullOrEmpty(oldJson))
-                {
-                    LoadingOverlay.Visibility = Visibility.Collapsed;
-                    _loadingAnimation.Stop();
-                    DiffGrid.Visibility = Visibility.Visible;
-                    OldJsonContent.Document = new TextDocument("");
-                    NewJsonContent.Document = new TextDocument(newJson);
-                    NextDiffButton.IsEnabled = false;
-                    PreviousDiffButton.IsEnabled = false;
-                    WordLevelDiffButton.IsEnabled = false;
-                    HideUnchangedButton.IsEnabled = false;
-                    OldNavigationPanel.Visibility = Visibility.Collapsed;
-                    NewNavigationPanel.Visibility = Visibility.Collapsed;
-                    return; 
-                }
-
-                _originalDiffModel = await Task.Run(() => new SideBySideDiffBuilder(new Differ()).BuildDiffModel(oldJson, newJson, false));
-
-                LoadingOverlay.Visibility = Visibility.Collapsed;
-                _loadingAnimation.Stop();
-                DiffGrid.Visibility = Visibility.Visible;
-                
-                UpdateDiffView();
-
-                if (_originalDiffModel.OldText.Lines.All(l => l.Type == ChangeType.Unchanged) &&
-                    _originalDiffModel.NewText.Lines.All(l => l.Type == ChangeType.Unchanged))
-                {
-                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
-                    Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    _customMessageBoxService.ShowInfo("Error", $"Failed to load comparison: {ex.Message}. Check logs for details.", this, CustomMessageBoxIcon.Error);
-                    Close();
-                });
             }
         }
 
@@ -288,7 +226,7 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                 if (_diffPanelNavigation != null) _diffPanelNavigation.CurrentLine = lineNumber;
 
                 UpdateLayout();
-                
+
                 _diffPanelNavigation?.DrawPanels();
 
                 NewJsonContent.TextArea.Caret.Line = lineNumber;

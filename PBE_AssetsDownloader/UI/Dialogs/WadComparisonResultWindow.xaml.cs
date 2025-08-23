@@ -149,11 +149,11 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                     };
                     var json = JsonSerializer.Serialize(_serializableDiffs, options);
                     File.WriteAllText(saveFileDialog.FileName, json);
-                    _customMessageBoxService.ShowInfo("Success", "Results saved successfully!", this, CustomMessageBoxIcon.Success);
+                    _customMessageBoxService.ShowSuccess("Success", "Results saved successfully!", this);
                 }
                 catch (Exception ex)
                 {
-                    _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this, CustomMessageBoxIcon.Error);
+                    _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this);
                 }
             }
         }

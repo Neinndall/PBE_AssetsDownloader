@@ -135,7 +135,7 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
                 try
                 {
                     var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                    diffWindow.LoadDiff(selectedEntry.OldFilePath, selectedEntry.NewFilePath);
+                    _ = diffWindow.LoadAndDisplayDiffAsync(selectedEntry.OldFilePath, selectedEntry.NewFilePath);
                     diffWindow.Show();
                 }
                 catch (Exception ex)

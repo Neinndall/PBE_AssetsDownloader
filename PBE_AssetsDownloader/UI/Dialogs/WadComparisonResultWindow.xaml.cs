@@ -6,14 +6,28 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using LeagueToolkit.Core.Wad;
 using Microsoft.Win32;
-using PBE_AssetsDownloader.Services;
 using PBE_AssetsDownloader.Info;
 
 namespace PBE_AssetsDownloader.UI.Dialogs
 {
+    #region ViewModel Classes
+    public class WadGroupViewModel
+    {
+        public string WadName { get; set; }
+        public int DiffCount { get; set; }
+        public string WadNameWithCount => $"{WadName} ({DiffCount})";
+        public List<DiffTypeGroupViewModel> Types { get; set; }
+    }
+
+    public class DiffTypeGroupViewModel
+    {
+        public ChunkDiffType Type { get; set; }
+        public int DiffCount { get; set; }
+        public string TypeNameWithCount => $"{Type} ({DiffCount})";
+        public List<SerializableChunkDiff> Diffs { get; set; }
+    }
+
     public class SerializableChunkDiff
     {
         public ChunkDiffType Type { get; set; }
@@ -22,7 +36,9 @@ namespace PBE_AssetsDownloader.UI.Dialogs
         public string SourceWadFile { get; set; }
         public ulong? OldUncompressedSize { get; set; }
         public ulong? NewUncompressedSize { get; set; }
+        public string FileName => System.IO.Path.GetFileName(NewPath ?? OldPath);
     }
+    #endregion
 
     public partial class WadComparisonResultWindow : Window
     {
@@ -37,8 +53,8 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                 OldPath = d.OldPath,
                 NewPath = d.NewPath,
                 SourceWadFile = d.SourceWadFile,
-                OldUncompressedSize = (d.Type == ChunkDiffType.New) ? (ulong?)null : (ulong?)d.OldChunk.UncompressedSize,
-                NewUncompressedSize = (d.Type == ChunkDiffType.Removed) ? (ulong?)null : (ulong?)d.NewChunk.UncompressedSize
+                OldUncompressedSize = (d.Type == ChunkDiffType.New) ? (ulong?)null : (ulong)d.OldChunk.UncompressedSize,
+                NewUncompressedSize = (d.Type == ChunkDiffType.Removed) ? (ulong?)null : (ulong)d.NewChunk.UncompressedSize
             }).ToList();
             PopulateResults(_serializableDiffs);
         }
@@ -52,78 +68,60 @@ namespace PBE_AssetsDownloader.UI.Dialogs
 
         private void PopulateResults(List<SerializableChunkDiff> diffs)
         {
-            resultsTreeView.Items.Clear();
-
             var groupedByWad = diffs.GroupBy(d => d.SourceWadFile)
                                     .OrderBy(g => g.Key);
 
-            foreach (var wadGroup in groupedByWad)
+            summaryTextBlock.Text = $"Found {diffs.Count} differences across {groupedByWad.Count()} WAD files.";
+
+            var wadGroups = groupedByWad.Select(wadGroup => new WadGroupViewModel
             {
-                var wadNode = new TreeViewItem
+                WadName = wadGroup.Key,
+                DiffCount = wadGroup.Count(),
+                Types = wadGroup.GroupBy(d => d.Type)
+                                .OrderBy(g => g.Key.ToString())
+                                .Select(typeGroup => new DiffTypeGroupViewModel
+                                {
+                                    Type = typeGroup.Key,
+                                    DiffCount = typeGroup.Count(),
+                                    Diffs = typeGroup.OrderBy(d => d.NewPath ?? d.OldPath).ToList()
+                                }).ToList()
+            }).ToList();
+
+            resultsTreeView.ItemsSource = wadGroups;
+        }
+
+        private string FormatSize(ulong? sizeInBytes)
+        {
+            if (sizeInBytes == null) return "N/A";
+            double sizeInKB = (double)sizeInBytes / 1024.0;
+            return $"{sizeInKB:F2} KB";
+        }
+
+        private void ResultsTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (e.NewValue is SerializableChunkDiff diff)
+            {
+                noSelectionPanel.Visibility = Visibility.Collapsed;
+                detailsContentPanel.Visibility = Visibility.Visible;
+
+                filePathTextBox.Text = diff.NewPath ?? diff.OldPath;
+                changeTypeTextBlock.Text = diff.Type.ToString();
+                sourceWadTextBlock.Text = diff.SourceWadFile;
+
+                oldSizeTextBlock.Text = FormatSize(diff.OldUncompressedSize);
+                newSizeTextBlock.Text = FormatSize(diff.NewUncompressedSize);
+
+                if (diff.Type == ChunkDiffType.Modified)
                 {
-                    Header = $"{wadGroup.Key} ({wadGroup.Count()})",
-                    IsExpanded = true,
-                    FontWeight = FontWeights.Bold
-                };
-                resultsTreeView.Items.Add(wadNode);
-
-                var groupedByType = wadGroup.GroupBy(d => d.Type)
-                                            .OrderBy(g => g.Key.ToString());
-
-                foreach (var typeGroup in groupedByType)
-                {
-                    var typeNode = new TreeViewItem
-                    {
-                        Header = $"{typeGroup.Key} ({typeGroup.Count()})",
-                        Foreground = GetBrushForDiffType(typeGroup.Key),
-                        IsExpanded = true
-                    };
-                    wadNode.Items.Add(typeNode);
-
-                    foreach (var diff in typeGroup.OrderBy(d => d.NewPath ?? d.OldPath))
-                    {
-                        var fileNode = new TreeViewItem();
-                        fileNode.Header = FormatDiffHeader(diff);
-                        typeNode.Items.Add(fileNode);
-                    }
+                    long sizeDiff = (long)(diff.NewUncompressedSize ?? 0) - (long)(diff.OldUncompressedSize ?? 0);
+                    string diffSign = sizeDiff > 0 ? "+" : "";
+                    newSizeTextBlock.Text += $" ({diffSign}{FormatSize((ulong)Math.Abs(sizeDiff))})";
                 }
             }
-        }
-
-        private string FormatDiffHeader(SerializableChunkDiff diff)
-        {
-            switch (diff.Type)
+            else
             {
-                case ChunkDiffType.New:
-                    return $"{diff.NewPath} (Size: {diff.NewUncompressedSize / 1024 ?? 0} KB)";
-                case ChunkDiffType.Removed:
-                    return $"{diff.OldPath} (Size: {diff.OldUncompressedSize / 1024 ?? 0} KB)";
-                case ChunkDiffType.Modified:
-                    var oldSize = diff.OldUncompressedSize / 1024 ?? 0;
-                    var newSize = diff.NewUncompressedSize / 1024 ?? 0;
-                    var sizeDiff = newSize - oldSize;
-                    return $"{diff.NewPath} (Size: {oldSize} KB -> {newSize} KB, Diff: {sizeDiff:+#;-#;0} KB)";
-                case ChunkDiffType.Renamed:
-                    return $"{diff.OldPath} -> {diff.NewPath}";
-                default:
-                    return "Unknown change";
-            }
-        }
-
-        private Brush GetBrushForDiffType(ChunkDiffType type)
-        {
-            switch (type)
-            {
-                case ChunkDiffType.New:
-                    return Brushes.Green;
-                case ChunkDiffType.Removed:
-                    return Brushes.Red;
-                case ChunkDiffType.Modified:
-                    return Brushes.Blue;
-                case ChunkDiffType.Renamed:
-                    return Brushes.Purple;
-                default:
-                    return Brushes.Black;
+                noSelectionPanel.Visibility = Visibility.Visible;
+                detailsContentPanel.Visibility = Visibility.Collapsed;
             }
         }
 

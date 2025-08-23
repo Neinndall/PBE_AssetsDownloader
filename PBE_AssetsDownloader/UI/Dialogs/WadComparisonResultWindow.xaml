@@ -4,13 +4,180 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:PBE_AssetsDownloader.UI.Dialogs"
+        xmlns:converters="clr-namespace:PBE_AssetsDownloader.UI.Converters"
+        xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
-        Title="WAD Comparison Results" Height="600" Width="900">
-    <DockPanel Margin="10">
-        <Button Content="Save Results..." DockPanel.Dock="Bottom" Margin="0,10,0,0" Click="SaveButton_Click"/>
-        <TreeView x:Name="resultsTreeView" Style="{StaticResource ModernTreeView}">
-            <!-- The TreeView will be populated from code-behind -->
-        </TreeView>
-    </DockPanel>
-</Window>
+        Title="WAD Comparison Results" Height="800" Width="1400"
+        FontFamily="Consolas, Courier New"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource SidebarBackground}">
 
+    <Window.Resources>
+        <converters:ChunkDiffTypeToIconConverter x:Key="DiffTypeToIconConverter"/>
+        <converters:ChunkDiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
+
+        <HierarchicalDataTemplate x:Key="DiffItemTemplate" ItemsSource="{Binding Files}">
+            <TextBlock Text="{Binding FileName}" />
+        </HierarchicalDataTemplate>
+
+        <HierarchicalDataTemplate x:Key="DiffTypeTemplate" ItemsSource="{Binding Diffs}" ItemTemplate="{StaticResource DiffItemTemplate}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:MaterialIcon Kind="{Binding Type, Converter={StaticResource DiffTypeToIconConverter}}" 
+                                             VerticalAlignment="Center" 
+                                             Margin="0,0,5,0" 
+                                             Foreground="{Binding Type, Converter={StaticResource DiffTypeToBrushConverter}}"/>
+                <TextBlock Text="{Binding TypeNameWithCount}" VerticalAlignment="Center" Foreground="{Binding Type, Converter={StaticResource DiffTypeToBrushConverter}}"/>
+            </StackPanel>
+        </HierarchicalDataTemplate>
+
+        <HierarchicalDataTemplate x:Key="WadGroupTemplate" ItemsSource="{Binding Types}" ItemTemplate="{StaticResource DiffTypeTemplate}">
+            <TextBlock Text="{Binding WadNameWithCount}" FontWeight="Bold"/>
+        </HierarchicalDataTemplate>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Section -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Padding="32,24">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:MaterialIcon Kind="Compare" FontSize="24" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource AccentBlue}"/>
+                    <StackPanel>
+                        <TextBlock Text="WAD COMPARISON RESULTS" 
+                                   FontSize="24" 
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource AccentBlue}"/>
+                        <TextBlock x:Name="summaryTextBlock"
+                                   Text="Loading results..." 
+                                   FontSize="14" 
+                                   Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
+                </StackPanel>
+                <Button x:Name="saveButton"
+                        Grid.Column="1"
+                        Content="Save Results" 
+                        Height="36"
+                        Width="150"
+                        Style="{StaticResource ModernButton}"
+                        Click="SaveButton_Click"
+                        ToolTip="Save the full list of differences to a JSON file"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Results TreeView Card -->
+            <Border Grid.Column="0" Style="{StaticResource SettingsCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="FormatListGroup" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Differences" 
+                                     FontSize="16" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                    </StackPanel>
+                    <Border Grid.Row="1"
+                            Background="{StaticResource DarkBackground}"
+                            BorderBrush="{StaticResource BorderColor}"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                        <TreeView x:Name="resultsTreeView" 
+                                  Style="{StaticResource ModernTreeView}"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  ItemTemplate="{StaticResource WadGroupTemplate}"
+                                  SelectedItemChanged="ResultsTreeView_SelectedItemChanged"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Details Panel Card -->
+            <Border Grid.Column="2" Style="{StaticResource SettingsCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+                        <materialDesign:MaterialIcon Kind="FileDocumentOutline" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Difference Details" 
+                                     FontSize="16" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                    </StackPanel>
+                    
+                    <Border Grid.Row="1" x:Name="detailsPanel"
+                            Background="{StaticResource DarkBackground}"
+                            BorderBrush="{StaticResource BorderColor}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="16"
+                            MinHeight="400">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- No Selection Message -->
+                            <StackPanel x:Name="noSelectionPanel" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">
+                                <materialDesign:MaterialIcon Kind="FileSearchOutline" Foreground="{StaticResource TextMuted}" Height="36" Width="36" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Select a difference from the list to view its details." Foreground="{StaticResource TextMuted}" Margin="0,10,0,0"/>
+                            </StackPanel>
+                            
+                            <!-- Details Content -->
+                            <StackPanel x:Name="detailsContentPanel" Visibility="Collapsed" VerticalAlignment="Top" Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="File Path" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
+                                <TextBox x:Name="filePathTextBox" 
+                                         Foreground="{StaticResource TextPrimary}"
+                                         Background="{StaticResource DarkBackground}"
+                                         BorderBrush="{StaticResource BorderColor}"
+                                         FontSize="14"
+                                         Margin="0,4,0,0"
+                                         Padding="8"
+                                         IsReadOnly="True"
+                                         BorderThickness="1"/>
+                                
+                                <TextBlock Text="Change Type" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                <TextBlock x:Name="changeTypeTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
+
+                                <TextBlock Text="Old Size" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                <TextBlock x:Name="oldSizeTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
+
+                                <TextBlock Text="New Size" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                <TextBlock x:Name="newSizeTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
+
+                                <TextBlock Text="Source WAD" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                <TextBlock x:Name="sourceWadTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

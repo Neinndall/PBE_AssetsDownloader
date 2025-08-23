@@ -247,7 +247,8 @@ namespace PBE_AssetsDownloader.UI
 
                 if (allDiffs != null)
                 {
-                    var resultWindow = new WadComparisonResultWindow(allDiffs);
+                    var customMessageBoxService = _serviceProvider.GetRequiredService<CustomMessageBoxService>();
+                    var resultWindow = new WadComparisonResultWindow(allDiffs, customMessageBoxService);
                     resultWindow.Owner = this;
                     resultWindow.Show();
                 }

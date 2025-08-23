@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using PBE_AssetsDownloader.Info;
+using PBE_AssetsDownloader.Services;
 
 namespace PBE_AssetsDownloader.UI.Dialogs
 {
@@ -43,10 +44,12 @@ namespace PBE_AssetsDownloader.UI.Dialogs
     public partial class WadComparisonResultWindow : Window
     {
         private readonly List<SerializableChunkDiff> _serializableDiffs;
+        private readonly CustomMessageBoxService _customMessageBoxService;
 
-        public WadComparisonResultWindow(List<ChunkDiff> diffs)
+        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
+            _customMessageBoxService = customMessageBoxService;
             _serializableDiffs = diffs.Select(d => new SerializableChunkDiff
             {
                 Type = d.Type,
@@ -59,9 +62,10 @@ namespace PBE_AssetsDownloader.UI.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
-        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs)
+        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
+            _customMessageBoxService = customMessageBoxService;
             _serializableDiffs = serializableDiffs;
             PopulateResults(_serializableDiffs);
         }
@@ -145,11 +149,11 @@ namespace PBE_AssetsDownloader.UI.Dialogs
                     };
                     var json = JsonSerializer.Serialize(_serializableDiffs, options);
                     File.WriteAllText(saveFileDialog.FileName, json);
-                    MessageBox.Show("Results saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _customMessageBoxService.ShowInfo("Success", "Results saved successfully!", this, CustomMessageBoxIcon.Success);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Failed to save results: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this, CustomMessageBoxIcon.Error);
                 }
             }
         }

@@ -62,13 +62,13 @@ namespace PBE_AssetsDownloader.UI
 
             if (string.IsNullOrWhiteSpace(originalPath) || string.IsNullOrWhiteSpace(newPath))
             {
-                MessageBox.Show("Please select both an original and a new file.", "Files not selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _customMessageBoxService.ShowWarning("Files not selected", "Please select both an original and a new file.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
                 return;
             }
 
             if (!File.Exists(originalPath) || !File.Exists(newPath))
             {
-                MessageBox.Show("One or both of the selected files do not exist.", "File not found", MessageBoxButton.OK, MessageBoxImage.Error);
+                _customMessageBoxService.ShowError("File not found", "One or both of the selected files do not exist.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
                 return;
             }
 
@@ -82,7 +82,7 @@ namespace PBE_AssetsDownloader.UI
             }
             catch (IOException ex)
             {
-                MessageBox.Show($"Error reading files: {ex.Message}", "File Read Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _customMessageBoxService.ShowError("File Read Error", $"Error reading files: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
             }
         }
 
@@ -91,6 +91,8 @@ namespace PBE_AssetsDownloader.UI
             Dispatcher.Invoke(() =>
             {
                 compareWadButton.IsEnabled = true;
+                var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService);
+                resultWindow.Show();
             });
         }
 
@@ -126,7 +128,7 @@ namespace PBE_AssetsDownloader.UI
         {
             if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
             {
-                _customMessageBoxService.ShowInfo("Warning", "Please select both PBE directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowWarning("Warning", "Please select both PBE directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
                 return;
             }
 
@@ -142,7 +144,7 @@ namespace PBE_AssetsDownloader.UI
             catch (Exception ex)
             {
                 _logService.LogError($"An error occurred during comparison: {ex.Message}");
-                _customMessageBoxService.ShowInfo("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
             }
         }
 
@@ -166,13 +168,13 @@ namespace PBE_AssetsDownloader.UI
                     };
                     var serializableDiffs = JsonSerializer.Deserialize<List<SerializableChunkDiff>>(json, options);
 
-                    var resultWindow = new WadComparisonResultWindow(serializableDiffs);
+                    var resultWindow = new WadComparisonResultWindow(serializableDiffs, _customMessageBoxService);
                     resultWindow.Show();
                 }
                 catch (Exception ex)
                 {
                     _logService.LogError($"Failed to load comparison results: {ex.Message}");
-                    _customMessageBoxService.ShowInfo("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                    _customMessageBoxService.ShowError("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
                 }
             }
         }

@@ -13,6 +13,10 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <Style x:Key="NoContextMenuTreeViewItem" TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
+            <Setter Property="ContextMenu" Value="{x:Null}"/>
+        </Style>
+
         <converters:ChunkDiffTypeToIconConverter x:Key="DiffTypeToIconConverter"/>
         <converters:ChunkDiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
 
@@ -110,7 +114,7 @@
                                   BorderThickness="0"
                                   ItemTemplate="{StaticResource WadGroupTemplate}"
                                   SelectedItemChanged="ResultsTreeView_SelectedItemChanged"
-                                  ContextMenu="{x:Null}"/>
+                                  ItemContainerStyle="{StaticResource NoContextMenuTreeViewItem}"/>
                     </Border>
                 </Grid>
             </Border>

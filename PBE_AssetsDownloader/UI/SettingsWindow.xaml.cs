@@ -75,7 +75,7 @@ namespace PBE_AssetsDownloader.UI
 
         private void BtnResetDefaults_Click(object sender, RoutedEventArgs e)
         {
-            bool? result = _customMessageBoxService.ShowYesNo("Confirm Reset", "Are you sure you want to reset all settings to default values?", this, CustomMessageBoxIcon.Warning);
+            bool? result = _customMessageBoxService.ShowYesNo("Confirm Reset", "Are you sure you want to reset all settings to default values?", this);
 
             if (result == true)
             {
@@ -95,7 +95,7 @@ namespace PBE_AssetsDownloader.UI
                 _appSettings.DiffHistory = new(defaultSettings.DiffHistory);
 
                 AppSettings.SaveSettings(_appSettings);
-                _customMessageBoxService.ShowInfo("Reset Successful", "Settings have been reset to default values.", this, CustomMessageBoxIcon.Info);
+                _customMessageBoxService.ShowInfo("Reset Successful", "Settings have been reset to default values.", this);
 
                 // Apply settings to all views
                 _generalSettingsView.ApplySettingsToUI(_appSettings);

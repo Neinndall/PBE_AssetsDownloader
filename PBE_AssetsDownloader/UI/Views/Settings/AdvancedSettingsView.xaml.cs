@@ -104,7 +104,7 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
             else
             {
-                _customMessageBoxService.ShowInfo("No Selection", "Please select a URL to edit.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowWarning("Warning", "Please select a URL to edit.", Window.GetWindow(this));
             }
         }
 
@@ -112,7 +112,7 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
         {
             if (JsonFilesListBox.SelectedItem is string selectedUrl)
             {
-                if (_customMessageBoxService.ShowYesNo("Confirm Removal", $"Are you sure you want to remove '{selectedUrl}'?", Window.GetWindow(this), CustomMessageBoxIcon.Warning) == true)
+                if (_customMessageBoxService.ShowYesNo("Confirm Removal", $"Are you sure you want to remove '{selectedUrl}'?", Window.GetWindow(this)) == true)
                 {
                     if (JsonFilesListBox.ItemsSource is List<string> currentItems)
                     {
@@ -124,7 +124,7 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
             }
             else
             {
-                _customMessageBoxService.ShowInfo("No Selection", "Please select a URL to remove.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowWarning("Warning", "Please select a URL to remove.", Window.GetWindow(this));
             }
         }
 
@@ -142,12 +142,12 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
                 {
                     _logService.LogError($"Error opening diff for {selectedEntry.FileName}. See application_errors.log for details.");
                     _logService.LogCritical(ex, $"AdvancedSettingsView.btnViewDiff_Click Exception for file: {selectedEntry.FileName}");
-                    _customMessageBoxService.ShowInfo("Error", $"Could not open diff view. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                    _customMessageBoxService.ShowError("Error", "Could not open diff view. Please check the logs for details.", Window.GetWindow(this));
                 }
             }
             else
             {
-                _customMessageBoxService.ShowInfo("No Selection", "Please select a history entry to view.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowWarning("Warning", "Please select a history entry to view.", Window.GetWindow(this));
             }
         }
 
@@ -155,7 +155,7 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
         {
             if (DiffHistoryListView.SelectedItem is JsonDiffHistoryEntry selectedEntry)
             {
-                if (_customMessageBoxService.ShowYesNo("Confirm Deletion", $"Are you sure you want to delete the history entry for '{selectedEntry.FileName}' from {selectedEntry.Timestamp}? This will delete the backup files and cannot be undone.", Window.GetWindow(this), CustomMessageBoxIcon.Warning) == true)
+                if (_customMessageBoxService.ShowYesNo("Confirm Deletion", $"Are you sure you want to delete the history entry for '{selectedEntry.FileName}' from {selectedEntry.Timestamp}? This will delete the backup files and cannot be undone.", Window.GetWindow(this)) == true)
                 {
                     try
                     {
@@ -180,7 +180,7 @@ namespace PBE_AssetsDownloader.UI.Views.Settings
                         string directoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
                         _logService.LogError($"Error deleting history for {selectedEntry.FileName}. See application_errors.log for details.");
                         _logService.LogCritical(ex, $"AdvancedSettingsView.btnDeleteSelected_Click Exception for directory: {directoryPath}");
-                        _customMessageBoxService.ShowInfo("Error", $"Could not delete history entry. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                        _customMessageBoxService.ShowInfo("Error", "Could not delete history entry. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
                     }
                 }
             }

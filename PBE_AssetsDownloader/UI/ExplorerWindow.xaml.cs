@@ -85,7 +85,7 @@ namespace PBE_AssetsDownloader.UI
             {
                 _logService.LogError("WebView2 initialization failed. Previews will be affected. See application_errors.log for details.");
                 _logService.LogCritical(ex, "WebView2 Initialization Failed");
-                _customMessageBoxService.ShowError("Error", "Could not initialize content viewer. Some previews may not work correctly.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", "Could not initialize content viewer. Some previews may not work correctly.", Window.GetWindow(this));
             }
         }
 
@@ -310,7 +310,7 @@ namespace PBE_AssetsDownloader.UI
                 ? $"Are you sure you want to delete the directory '{node.Name}' and all its contents?"
                 : $"Are you sure you want to delete the file '{node.Name}'";
 
-            var result = _customMessageBoxService.ShowYesNo("Confirm Deletion", message, Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+            var result = _customMessageBoxService.ShowYesNo("Confirm Deletion", message, Window.GetWindow(this));
 
             if (result == true)
             {
@@ -331,7 +331,7 @@ namespace PBE_AssetsDownloader.UI
                 {
                     _logService.LogError($"Failed to delete '{node.FullPath}'. See application_errors.log for details.");
                     _logService.LogCritical(ex, $"Failed to delete '{node.FullPath}'.");
-                    _customMessageBoxService.ShowError("Error", $"Could not delete '{node.Name}'.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                    _customMessageBoxService.ShowError("Error", $"Could not delete '{node.Name}'.", Window.GetWindow(this));
                 }
             }
         }
@@ -347,7 +347,7 @@ namespace PBE_AssetsDownloader.UI
                                   $"Size: {fileInfo.Length / 1024:N0} KB\n" +
                                   $"Created: {fileInfo.CreationTime}\n" +
                                   $"Modified: {fileInfo.LastWriteTime}";
-                    _customMessageBoxService.ShowInfo("File Information", message, Window.GetWindow(this), CustomMessageBoxIcon.Info);
+                    _customMessageBoxService.ShowInfo("File Information", message, Window.GetWindow(this));
                 }
                 else if (Directory.Exists(path))
                 {
@@ -355,14 +355,14 @@ namespace PBE_AssetsDownloader.UI
                     var message = $"Directory: {dirInfo.Name}\n" +
                                   $"Created: {dirInfo.CreationTime}\n" +
                                   $"Last Modified: {dirInfo.LastWriteTime}";
-                    _customMessageBoxService.ShowInfo("Directory Information", message, Window.GetWindow(this), CustomMessageBoxIcon.Info);
+                    _customMessageBoxService.ShowInfo("Directory Information", message, Window.GetWindow(this));
                 }
             }
             catch (Exception ex)
             {
                 _logService.LogError($"Failed to get info for '{path}'. See application_errors.log for details.");
                 _logService.LogCritical(ex, $"Failed to get info for '{path}'.");
-                _customMessageBoxService.ShowError("Error", $"Could not get information for '{Path.GetFileName(path)}'.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", $"Could not get information for '{Path.GetFileName(path)}'.", Window.GetWindow(this));
             }
         }
     }

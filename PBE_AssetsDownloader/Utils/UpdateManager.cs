@@ -57,7 +57,7 @@ namespace PBE_AssetsDownloader.Utils
 
                 if (string.IsNullOrEmpty(parsedCurrentVersion) || string.IsNullOrEmpty(parsedLatestVersion))
                 {
-                    _customMessageBoxService.ShowError("Error", "Could not parse version numbers.", owner, CustomMessageBoxIcon.Error);
+                    _customMessageBoxService.ShowError("Error", "Could not parse version numbers.", owner);
                     return;
                 }
 
@@ -142,21 +142,21 @@ namespace PBE_AssetsDownloader.Utils
                             }
                             else
                             {
-                                _customMessageBoxService.ShowInfo("Update Ready", $"Update downloaded to:\n{downloadPath}\n\nYou can install it manually later.", owner, CustomMessageBoxIcon.Info);
+                                _customMessageBoxService.ShowInfo("Update Ready", $"Update downloaded to:\n{downloadPath}\n\nYou can install it manually later.", owner);
                             }
                         }
                     }
                 }
                 else if (showNoUpdatesMessage)
                 {
-                    _customMessageBoxService.ShowInfo("Updates", "No updates available.", owner, CustomMessageBoxIcon.Info);
+                    _customMessageBoxService.ShowInfo("Updates", "No updates available.", owner);
                 }
             }
             catch (Exception ex)
             {
                 _logService.LogError("Error checking for updates in UpdateManager. See application_errors.log for details.");
                 _logService.LogCritical(ex, "UpdateManager.CheckForUpdatesAsync Exception");
-                _customMessageBoxService.ShowInfo("Error", "Error checking for updates:\n" + ex.Message, owner, CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", "Error checking for updates:\n" + ex.Message, owner);
             }
         }
 

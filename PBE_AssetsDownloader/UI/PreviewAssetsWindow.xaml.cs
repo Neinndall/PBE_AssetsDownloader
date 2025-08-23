@@ -136,7 +136,7 @@ namespace PBE_AssetsDownloader.UI
             {
                 _logService.LogError("A critical error occurred while trying to load assets for preview. See application_errors.log for details.");
                 _logService.LogCritical(ex, "PreviewAssetsWindow.LoadAndDisplayAssets Exception");
-                _customMessageBoxService.ShowError("Preview Error", "An unexpected error occurred while preparing the asset preview. Please check the logs for more details.", this, CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", "An unexpected error occurred while preparing the asset preview. Please check the logs for more details.", this);
             }
         }
 
@@ -249,7 +249,7 @@ namespace PBE_AssetsDownloader.UI
                     {
                         _logService.LogError($"Failed to save image to {saveFileDialog.FileName}. See application_errors.log for details.");
                         _logService.LogCritical(ex, $"PreviewAssetsWindow.MenuItem_Click_SaveAs Exception for file: {saveFileDialog.FileName}");
-                        _customMessageBoxService.ShowInfo("Error", "Failed to save image: {ex.Message}", this, CustomMessageBoxIcon.Error);
+                        _customMessageBoxService.ShowError("Error", "Failed to save image: {ex.Message}", this);
                     }
                 }
             }

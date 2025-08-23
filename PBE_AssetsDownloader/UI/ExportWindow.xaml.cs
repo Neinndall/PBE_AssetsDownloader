@@ -176,7 +176,7 @@ namespace PBE_AssetsDownloader.UI
     private void ShowWarning(string message, string title)
     {
       _logService.LogWarning(message);
-      _customMessageBoxService.ShowInfo(title, message, Window.GetWindow(this), CustomMessageBoxIcon.Warning);   
+      _customMessageBoxService.ShowWarning(title, message, Window.GetWindow(this));   
     }
 
     private void LogSelectedTypes(List<string> selectedAssetTypes)
@@ -238,7 +238,7 @@ namespace PBE_AssetsDownloader.UI
       else
       {
         _logService.LogSuccess("Download completed successfully!");
-        _customMessageBoxService.ShowInfo("Success", "Download completed successfully!", Window.GetWindow(this), CustomMessageBoxIcon.Info);
+        // _customMessageBoxService.ShowSucess("Success", "Download completed successfully!", Window.GetWindow(this));
       }
     }
 

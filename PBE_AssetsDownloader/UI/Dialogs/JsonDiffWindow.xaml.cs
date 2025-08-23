@@ -67,13 +67,13 @@ namespace PBE_AssetsDownloader.UI.Dialogs
 
                 if (AreFilesIdentical())
                 {
-                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this, CustomMessageBoxIcon.Info);
+                    _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this);
                     Close();
                 }
             }
             catch (Exception ex)
             {
-                _customMessageBoxService.ShowInfo("Error", $"Failed to load comparison: {ex.Message}. Check logs for details.", this, CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", $"Failed to load comparison: {ex.Message}. Check logs for details.", this);
                 Close();
             }
         }

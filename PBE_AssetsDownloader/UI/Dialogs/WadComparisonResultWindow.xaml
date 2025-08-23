@@ -8,9 +8,9 @@
         xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
         Title="WAD Comparison Results" Height="800" Width="1400"
+        Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New"
-        WindowStartupLocation="CenterScreen"
-        Background="{StaticResource SidebarBackground}">
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <converters:ChunkDiffTypeToIconConverter x:Key="DiffTypeToIconConverter"/>
@@ -109,7 +109,8 @@
                                   Background="Transparent"
                                   BorderThickness="0"
                                   ItemTemplate="{StaticResource WadGroupTemplate}"
-                                  SelectedItemChanged="ResultsTreeView_SelectedItemChanged"/>
+                                  SelectedItemChanged="ResultsTreeView_SelectedItemChanged"
+                                  ContextMenu="{x:Null}"/>
                     </Border>
                 </Grid>
             </Border>

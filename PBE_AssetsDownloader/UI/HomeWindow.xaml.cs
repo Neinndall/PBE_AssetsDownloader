@@ -194,7 +194,6 @@ namespace PBE_AssetsDownloader.UI
 
                     var resultWindow = new WadComparisonResultWindow(serializableDiffs);
                     resultWindow.Show();
-                    _logService.Log($"Successfully loaded {serializableDiffs.Count} differences from {openFileDialog.FileName}");
                 }
                 catch (Exception ex)
                 {

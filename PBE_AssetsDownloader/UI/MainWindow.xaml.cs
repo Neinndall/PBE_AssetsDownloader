@@ -73,7 +73,7 @@ namespace PBE_AssetsDownloader.UI
             _wadComparatorService.ComparisonCompleted += OnComparisonCompleted;
 
             Sidebar.NavigationRequested += OnSidebarNavigationRequested;
-            LoadHomeView();
+            LoadHomeWindow(); // Corrected initial call
 
             if (IsAnySettingActive())
             {
@@ -271,27 +271,33 @@ namespace PBE_AssetsDownloader.UI
         {
             switch (viewTag)
             {
-                case "Home": LoadHomeView(); break;
-                case "Export": LoadExportView(); break;
-                case "Explorer": LoadExplorerView(); break;
+                case "Home": LoadHomeWindow(); break;
+                case "Export": LoadExportWindow(); break;
+                case "Explorer": LoadExplorerWindow(); break;
+                case "Comparator": LoadComparatorWindow(); break;
                 case "Settings": btnSettings_Click(null, null); break;
                 case "Help": btnHelp_Click(null, null); break;
             }
         }
 
-        private void LoadHomeView()
+        private void LoadHomeWindow()
         {
             MainContentArea.Content = _serviceProvider.GetRequiredService<HomeWindow>();
         }
 
-        private void LoadExplorerView()
+        private void LoadExplorerWindow()
         {
             MainContentArea.Content = _serviceProvider.GetRequiredService<ExplorerWindow>();
         }
 
-        private void LoadExportView()
+        private void LoadExportWindow()
         {
             MainContentArea.Content = _serviceProvider.GetRequiredService<ExportWindow>();
+        }
+
+        private void LoadComparatorWindow()
+        {
+            MainContentArea.Content = _serviceProvider.GetRequiredService<ComparatorWindow>();
         }
 
         private void btnHelp_Click(object sender, RoutedEventArgs e)

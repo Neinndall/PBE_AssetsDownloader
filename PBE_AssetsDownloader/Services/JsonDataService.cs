@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.UI;
+using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Utils;
 using PBE_AssetsDownloader.UI.Helpers;
 

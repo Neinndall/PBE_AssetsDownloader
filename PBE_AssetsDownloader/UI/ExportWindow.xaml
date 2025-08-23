@@ -34,8 +34,8 @@
 
                     <!-- Icono grande -->
                     <materialDesign:MaterialIcon Kind="Export"
-                                                 Height="58"
-                                                 Width="58"
+                                                 Height="54"
+                                                 Width="54"
                                                  Margin="0,0,10,0"
                                                  VerticalAlignment="Center"
                                                  Foreground="{StaticResource AccentBlue}"

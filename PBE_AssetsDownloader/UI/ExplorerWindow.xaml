@@ -71,8 +71,8 @@
                 </Grid.ColumnDefinitions>
 
                 <materialIcons:MaterialIcon Kind="FolderSearchOutline"
-                                             Height="58"
-                                             Width="58"
+                                             Height="54"
+                                             Width="54"
                                              Margin="0,0,10,0"
                                              VerticalAlignment="Center"
                                              Foreground="{StaticResource AccentBlue}"

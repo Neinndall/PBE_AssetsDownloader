@@ -1,19 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using LeagueToolkit.Core.Wad;
-using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.Services;
-using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Utils;
+using PBE_AssetsDownloader.UI.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -22,24 +13,19 @@ namespace PBE_AssetsDownloader.UI
         private readonly LogService _logService;
         private readonly ExtractionService _extractionService;
         private readonly CustomMessageBoxService _customMessageBoxService;
-        private readonly WadComparatorService _wadComparatorService;
         private AppSettings _appSettings;
 
         public HomeWindow(
             LogService logService,
             ExtractionService extractionService,
             AppSettings appSettings,
-            CustomMessageBoxService customMessageBoxService,
-            WadComparatorService wadComparatorService)
+            CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
             _logService = logService;
             _extractionService = extractionService;
             _appSettings = appSettings;
             _customMessageBoxService = customMessageBoxService;
-            _wadComparatorService = wadComparatorService;
-
-            _wadComparatorService.ComparisonCompleted += OnComparisonCompleted;
 
             // Initialize paths from saved settings
             newHashesTextBox.Text = _appSettings.NewHashesPath ?? "";
@@ -48,14 +34,6 @@ namespace PBE_AssetsDownloader.UI
             // Store the initial loaded path in the Tag property for later comparison
             newHashesTextBox.Tag = newHashesTextBox.Text;
             oldHashesTextBox.Tag = oldHashesTextBox.Text;
-        }
-
-        private void OnComparisonCompleted(List<ChunkDiff> allDiffs)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                compareButton.IsEnabled = true;
-            });
         }
 
         public void UpdateSettings(AppSettings newSettings, bool wasResetToDefaults)
@@ -118,89 +96,6 @@ namespace PBE_AssetsDownloader.UI
             _appSettings.OldHashesPath = oldHashesTextBox.Text;
             
             await _extractionService.ExecuteAsync();
-        }
-
-        private void btnSelectOldPbeDirectory_Click(object sender, RoutedEventArgs e)
-        {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
-            {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select Old PBE Directory";
-                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
-                {
-                    oldPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
-                    _logService.LogDebug($"Old PBE Directory selected: {folderBrowserDialog.FileName}");
-                }
-            }
-        }
-
-        private void btnSelectNewPbeDirectory_Click(object sender, RoutedEventArgs e)
-        {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
-            {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select New PBE Directory";
-                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
-                {
-                    newPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
-                    _logService.LogDebug($"New PBE Directory selected: {folderBrowserDialog.FileName}");
-                }
-            }
-        }
-
-        private async void compareButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
-            {
-                _customMessageBoxService.ShowInfo("Warning", "Please select both PBE directories.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
-                return;
-            }
-
-            string oldPbeDir = oldPbeDirectoryTextBox.Text;
-            string newPbeDir = newPbeDirectoryTextBox.Text;
-
-            compareButton.IsEnabled = false;
-
-            try
-            {
-                await _wadComparatorService.CompareWadsAsync(oldPbeDir, newPbeDir);
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError($"An error occurred during comparison: {ex.Message}");
-                _customMessageBoxService.ShowInfo("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
-            }
-        }
-
-        private void loadButton_Click(object sender, RoutedEventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog
-            {
-                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
-                Title = "Load Comparison Results"
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                try
-                {
-                    var json = File.ReadAllText(openFileDialog.FileName);
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
-                    var serializableDiffs = JsonSerializer.Deserialize<List<SerializableChunkDiff>>(json, options);
-
-                    var resultWindow = new WadComparisonResultWindow(serializableDiffs);
-                    resultWindow.Show();
-                }
-                catch (Exception ex)
-                {
-                    _logService.LogError($"Failed to load comparison results: {ex.Message}");
-                    _customMessageBoxService.ShowInfo("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this), CustomMessageBoxIcon.Error);
-                }
-            }
         }
     }
 }

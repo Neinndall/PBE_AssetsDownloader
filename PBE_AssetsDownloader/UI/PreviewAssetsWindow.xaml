@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         Title="Assets Preview"
         Height="860" Width="1400" MinHeight="860" MinWidth="1400"
-        Background="{StaticResource CardBackground}"
+        Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New"
         Closed="PreviewAssetsWindow_Closed">
 

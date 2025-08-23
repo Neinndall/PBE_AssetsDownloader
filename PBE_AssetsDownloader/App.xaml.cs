@@ -72,6 +72,7 @@ namespace PBE_AssetsDownloader
             services.AddTransient<HomeWindow>();
             services.AddTransient<ExportWindow>();
             services.AddTransient<ExplorerWindow>();
+            services.AddTransient<ComparatorWindow>();
             services.AddTransient<HelpWindow>();
             services.AddTransient<JsonDiffWindow>();
             services.AddTransient<PreviewAssetsWindow>();

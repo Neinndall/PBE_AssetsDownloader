@@ -73,8 +73,6 @@ namespace PBE_AssetsDownloader.Services
                     var (pluginsWadDiffs, pluginFilesProcessed) = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir, "*.wad", processedFiles);
                     allDiffs.AddRange(pluginsWadDiffs);
                 }
-
-                _logService.Log($"WAD comparison finished. Found {allDiffs.Count} differences.");
             }
             catch (Exception ex)
             {

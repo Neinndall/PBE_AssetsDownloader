@@ -43,12 +43,12 @@
                                                              
                     <!-- Título + Subtítulo -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="ASSET EXPORT MANAGER" 
+                        <TextBlock Text="EXPORT" 
                                    FontSize="26" 
                                    FontWeight="Bold"
                                    Foreground="{StaticResource AccentBlue}"
                                    Margin="0,2,0,0"/>
-                        <TextBlock Text="Configure export settings and download assets manually" 
+                        <TextBlock Text="Filter and download specific assets from a differences file."
                                    FontSize="12" 
                                    Foreground="{StaticResource TextMuted}"
                                    Margin="0,2,0,0"/>

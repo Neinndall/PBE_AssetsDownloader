@@ -22,7 +22,6 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Icono + textos -->
@@ -40,26 +39,17 @@
                                                  Foreground="{StaticResource AccentBlue}"
                                                  Grid.Column="0"/>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="ASSETS DOWNLOADER" 
+                        <TextBlock Text="HOME" 
                                    FontSize="26" 
                                    FontWeight="Bold"
                                    Foreground="{StaticResource AccentBlue}"
                                    Margin="0,2,0,0"/>
-                        <TextBlock Text="Configure directories and start the download process" 
+                        <TextBlock Text="Download assets or compare WAD files."
                                    FontSize="12" 
                                    Foreground="{StaticResource TextMuted}"
                                    Margin="0,2,0,0"/>
                     </StackPanel>
                 </Grid>
-
-                <Button x:Name="startButton" 
-                        Grid.Column="1"
-                        Content="▶️ Start Download" 
-                        Height="44"
-                        Width="160"
-                        Style="{StaticResource ModernButton}"
-                        Click="startButton_Click"
-                        ToolTip="Start the download process"/>
             </Grid>
         </Border>
 
@@ -140,7 +130,7 @@
                         </Grid>
 
                         <!-- Old Hash Directory -->
-                        <Grid Margin="0,0,0,0">
+                        <Grid Margin="0,0,0,24">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -184,6 +174,41 @@
                                         Click="btnSelectOldHashesDirectory_Click"
                                         ToolTip="Browse for directory"/>
                             </Grid>
+                        </Grid>
+
+                        <!-- Actions -->
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentOrange}"/>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Actions" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Start the asset download process" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,12"/>
+                                
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="startButton" 
+                                        Content="▶️ Start Download" 
+                                        Height="36"
+                                        Width="150"
+                                        Style="{StaticResource ModernButton}"
+                                        Click="startButton_Click"
+                                        ToolTip="Start the download process"/>
+                                </StackPanel>
+                            </StackPanel>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -255,7 +280,7 @@
                         </Grid>
 
                         <!-- New PBE Directory -->
-                        <Grid Margin="0,0,0,0">
+                        <Grid Margin="0,0,0,24">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -299,23 +324,48 @@
                             </Grid>
                         </Grid>
                         
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
-                            <Button x:Name="loadButton" 
-                                Content="Load Results"
-                                Height="44"
-                                Width="160"
-                                Style="{StaticResource SecondaryButton}"
-                                Click="loadButton_Click"
-                                ToolTip="Load previously saved WAD comparison results"
-                                Margin="0,0,12,0"/>
-                            <Button x:Name="compareButton" 
-                                Content="Compare" 
-                                Height="44"
-                                Width="160"
-                                Style="{StaticResource ModernButton}"
-                                Click="compareButton_Click"
-                                ToolTip="Compare WAD files"/>
-                        </StackPanel>
+                        <!-- Actions -->
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentOrange}"/>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Actions" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Compare WAD files or load previous results" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,12"/>
+                                
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="loadButton" 
+                                        Content="Load Results"
+                                        Height="36"
+                                        Width="150"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Click="loadButton_Click"
+                                        ToolTip="Load previously saved WAD comparison results"
+                                        Margin="0,0,12,0"/>
+                                    <Button x:Name="compareButton" 
+                                        Content="Compare" 
+                                        Height="36"
+                                        Width="150"
+                                        Style="{StaticResource ModernButton}"
+                                        Click="compareButton_Click"
+                                        ToolTip="Compare WAD files"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
             </StackPanel>

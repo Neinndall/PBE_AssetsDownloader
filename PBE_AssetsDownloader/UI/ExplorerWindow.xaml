@@ -148,14 +148,32 @@
                             </Style>
                         </TreeView.ItemContainerStyle>
                     </TreeView>
-                    <TextBlock x:Name="NoDirectoryMessage"
-                               Text="The 'AssetsDownloaded' folder does not exist. Perform a download to explore the files."
-                               TextWrapping="Wrap"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Margin="10"
-                               Foreground="{StaticResource TextSecondary}"
-                               Visibility="Collapsed"/>
+                    <StackPanel x:Name="NoDirectoryMessage"
+                                Orientation="Vertical"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="10"
+                                Visibility="Collapsed">
+                        <materialIcons:MaterialIcon Kind="FolderOffOutline"
+                                                    Width="48" Height="48"
+                                                    HorizontalAlignment="Center"
+                                                    Foreground="{StaticResource TextMuted}"
+                                                    Opacity="0.8"/>
+                        <TextBlock Text="Directory Not Found"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,16,0,0"/>
+                        <TextBlock Text="The 'AssetsDownloaded' folder does not exist. Perform a download to explore the files."
+                                   TextWrapping="Wrap"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Margin="0,8,0,0"
+                                   Opacity="0.7"/>
+                    </StackPanel>
                 </Grid>
             </Grid>
 
@@ -167,33 +185,46 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Visibility="Visible">
-                    <materialIcons:MaterialIcon Kind="FileEyeOutline"
-                                                Width="48" Height="48"
-                                                HorizontalAlignment="Center"
-                                                Foreground="{StaticResource TextMuted}"
-                                                Opacity="0.5"/>
-                    <TextBlock x:Name="SelectFileMessage"
-                               Text="SELECT A FILE"
-                               FontSize="18" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextMuted}"
-                               HorizontalAlignment="Center"
-                               Margin="0,16,0,0"/>
-                    <TextBlock x:Name="SelectFileSubMessage"
-                               Text="Select a file from the tree to preview its content"
-                               FontSize="14"
-                               Foreground="{StaticResource TextMuted}"
-                               HorizontalAlignment="Center"
-                               Margin="0,8,0,0"
-                               Opacity="0.7"/> 
-                    <TextBlock x:Name="UnsupportedFileMessage"
-                               Text="Preview not available for this file type"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextMuted}"
-                               HorizontalAlignment="Center"
-                               Margin="0,8,0,0"
-                               Visibility="Collapsed"/>
+                    <StackPanel x:Name="SelectFileMessagePanel"
+                                Orientation="Vertical"
+                                HorizontalAlignment="Center">
+                        <materialIcons:MaterialIcon Kind="FileUploadOutline"
+                                                    Width="48" Height="48"
+                                                    HorizontalAlignment="Center"
+                                                    Foreground="{StaticResource TextMuted}"
+                                                    Opacity="0.5"/>
+                        <TextBlock x:Name="SelectFileMessage"
+                                   Text="SELECT A FILE"
+                                   FontSize="18" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,16,0,0"/>
+                        <TextBlock x:Name="SelectFileSubMessage"
+                                   Text="Select a file from the tree to preview its content"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,8,0,0"
+                                   Opacity="0.7"/>
+                    </StackPanel>
+                    <StackPanel x:Name="UnsupportedFileMessagePanel"
+                                Orientation="Vertical"
+                                HorizontalAlignment="Center"
+                                Visibility="Collapsed">
+                        <materialIcons:MaterialIcon Kind="FileCancelOutline"
+                                                    Width="48" Height="48"
+                                                    HorizontalAlignment="Center"
+                                                    Foreground="{StaticResource TextMuted}"
+                                                    Opacity="0.5"/>
+                        <TextBlock x:Name="UnsupportedFileMessage"
+                                   Text="Preview not available for this file type"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,8,0,0"/>
+                    </StackPanel>
                 </StackPanel>
                 <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
                 <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>

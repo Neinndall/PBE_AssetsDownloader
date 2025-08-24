@@ -268,18 +268,16 @@ namespace PBE_AssetsDownloader.UI
         {
             ResetPreview();
             PreviewPlaceholder.Visibility = Visibility.Visible;
-            SelectFileMessage.Visibility = Visibility.Collapsed;
-            SelectFileSubMessage.Visibility = Visibility.Collapsed;
-            UnsupportedFileMessage.Visibility = Visibility.Visible;
+            SelectFileMessagePanel.Visibility = Visibility.Collapsed;
+            UnsupportedFileMessagePanel.Visibility = Visibility.Visible;
             UnsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
         }
 
         private void ResetPreview()
         {
             PreviewPlaceholder.Visibility = Visibility.Visible;
-            SelectFileMessage.Visibility = Visibility.Visible;
-            SelectFileSubMessage.Visibility = Visibility.Visible;
-            UnsupportedFileMessage.Visibility = Visibility.Collapsed;
+            SelectFileMessagePanel.Visibility = Visibility.Visible;
+            UnsupportedFileMessagePanel.Visibility = Visibility.Collapsed;
 
             ImagePreview.Visibility = Visibility.Collapsed;
             TextPreview.Visibility = Visibility.Collapsed;

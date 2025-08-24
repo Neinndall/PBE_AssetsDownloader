@@ -121,6 +121,12 @@ namespace PBE_AssetsDownloader.Services
                     try
                     {
                         string html = await _httpClient.GetStringAsync(url);
+
+                        // var regex = new Regex(
+                        //     @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
+                        //     RegexOptions.Singleline
+                        // );
+                        
                         var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         foreach (Match match in regex.Matches(html))
                         {
@@ -158,6 +164,12 @@ namespace PBE_AssetsDownloader.Services
                         Uri fileUri = new Uri(url);
                         parentDirectoryUrl = new Uri(fileUri, ".").ToString();
                         string html = await _httpClient.GetStringAsync(parentDirectoryUrl);
+                        
+                        // var regex = new Regex(
+                        //     @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
+                        //     RegexOptions.Singleline
+                        // );
+                        
                         var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         bool foundInParent = false;
                         foreach (Match match in regex.Matches(html))

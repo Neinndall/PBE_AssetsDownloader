@@ -11,6 +11,7 @@ using PBE_AssetsDownloader.Info;
 using PBE_AssetsDownloader.UI.Dialogs;
 using PBE_AssetsDownloader.Services;
 using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsDownloader.UI.Helpers;
 
 namespace PBE_AssetsDownloader.UI
 {
@@ -75,8 +76,11 @@ namespace PBE_AssetsDownloader.UI
 
             try
             {
-                string originalJson = File.ReadAllText(originalPath);
-                string newJson = File.ReadAllText(newPath);
+                string originalContent = File.ReadAllText(originalPath);
+                string newContent = File.ReadAllText(newPath);
+
+                string originalJson = JsonDiffHelper.FormatJson(originalContent);
+                string newJson = JsonDiffHelper.FormatJson(newContent);
 
                 var diffWindow = App.ServiceProvider.GetRequiredService<JsonDiffWindow>();
                 _ = diffWindow.LoadAndDisplayDiffAsync(originalJson, newJson, Path.GetFileName(originalPath), Path.GetFileName(newPath));

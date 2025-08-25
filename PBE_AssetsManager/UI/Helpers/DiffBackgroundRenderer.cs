@@ -100,7 +100,7 @@ namespace PBE_AssetsManager.UI.Helpers
             if (brush != null && useOpacity)
             {
                 var clonedBrush = brush.Clone();
-                clonedBrush.Opacity = 0.8; // Este valor es para la opcion de resaltado (high level word)
+                clonedBrush.Opacity = 0.85; // Este valor es para la opcion de resaltado (high level word)
                 clonedBrush.Freeze();
                 return clonedBrush;
             }

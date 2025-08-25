@@ -48,7 +48,7 @@
                                    FontWeight="Bold"
                                    Foreground="{StaticResource AccentBlue}"
                                    Margin="0,2,0,0"/>
-                        <TextBlock Text="Filter and download specific assets from a differences file."
+                        <TextBlock Text="Filter, preview and download specific assets using the resources folder."
                                    FontSize="12" 
                                    Foreground="{StaticResource TextMuted}"
                                    Margin="0,2,0,0"/>

@@ -44,7 +44,7 @@
                                    FontWeight="Bold"
                                    Foreground="{StaticResource AccentBlue}"
                                    Margin="0,2,0,0"/>
-                        <TextBlock Text="Download assets or compare WAD files."
+                        <TextBlock Text="Download assets by adding the hash directories."
                                    FontSize="12" 
                                    Foreground="{StaticResource TextMuted}"
                                    Margin="0,2,0,0"/>

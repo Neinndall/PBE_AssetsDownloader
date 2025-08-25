@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="JSON Diff Viewer" Height="960" Width="1500" MinHeight="960" MinWidth="1500"
         WindowStartupLocation="CenterScreen"
-        Background="#FF1E1E1E"
+        Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New">
 
     <Grid>

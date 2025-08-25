@@ -166,9 +166,15 @@ namespace PBE_AssetsManager.Views
                         PropertyNameCaseInsensitive = true,
                         Converters = { new JsonStringEnumConverter() }
                     };
-                    var serializableDiffs = JsonSerializer.Deserialize<List<SerializableChunkDiff>>(json, options);
+                    var loadedResult = JsonSerializer.Deserialize<SerializableComparisonResult>(json, options);
 
-                    var resultWindow = new WadComparisonResultWindow(serializableDiffs, _customMessageBoxService);
+                    if (loadedResult == null || loadedResult.Diffs == null)
+                    {
+                        _customMessageBoxService.ShowError("Error", "Failed to load or parse the results file: Invalid format.", Window.GetWindow(this));
+                        return;
+                    }
+
+                    var resultWindow = new WadComparisonResultWindow(loadedResult.Diffs, _customMessageBoxService, loadedResult.OldPbePath, loadedResult.NewPbePath);
                     resultWindow.Show();
                 }
                 catch (Exception ex)

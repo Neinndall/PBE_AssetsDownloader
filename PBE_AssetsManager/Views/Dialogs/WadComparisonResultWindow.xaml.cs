@@ -158,16 +158,16 @@ namespace PBE_AssetsManager.Views.Dialogs
                     renamedOldNamePanel.Visibility = Visibility.Visible;
                     renamedNewNamePanel.Visibility = Visibility.Visible;
                     
-                    renamedOldNameTextBlock.Text = System.IO.Path.GetFileName(diff.OldPath);
-                    renamedNewNameTextBlock.Text = System.IO.Path.GetFileName(diff.NewPath);
-                    directoryPath = System.IO.Path.GetDirectoryName(diff.NewPath);
+                    renamedOldNameTextBlock.Text = Path.GetFileName(diff.OldPath);
+                    renamedNewNameTextBlock.Text = Path.GetFileName(diff.NewPath);
+                    directoryPath = Path.GetDirectoryName(diff.NewPath);
                 }
                 else
                 {
                     genericFileNamePanel.Visibility = Visibility.Visible;
                     string currentPath = diff.NewPath ?? diff.OldPath;
-                    genericFileNameTextBlock.Text = System.IO.Path.GetFileName(currentPath);
-                    directoryPath = System.IO.Path.GetDirectoryName(currentPath);
+                    genericFileNameTextBlock.Text = Path.GetFileName(currentPath);
+                    directoryPath = Path.GetDirectoryName(currentPath);
                 }
 
                 pathTextBlock.Text = string.IsNullOrEmpty(directoryPath) ? "N/A" : directoryPath;
@@ -221,7 +221,14 @@ namespace PBE_AssetsManager.Views.Dialogs
                         WriteIndented = true, 
                         Converters = { new JsonStringEnumConverter() } 
                     };
-                    var json = JsonSerializer.Serialize(_serializableDiffs, options);
+                    var comparisonResult = new SerializableComparisonResult
+                    {
+                        OldPbePath = _oldPbePath,
+                        NewPbePath = _newPbePath,
+                        Diffs = _serializableDiffs
+                    };
+
+                    var json = JsonSerializer.Serialize(comparisonResult, options);
                     File.WriteAllText(saveFileDialog.FileName, json);
                     _customMessageBoxService.ShowSuccess("Success", "Results saved successfully!", this);
                 }
@@ -247,12 +254,12 @@ namespace PBE_AssetsManager.Views.Dialogs
 
             try
             {
-                string extension = System.IO.Path.GetExtension(diff.Path).ToLowerInvariant();
+                string extension = Path.GetExtension(diff.Path).ToLowerInvariant();
                 var textExtensions = new[] { ".json", ".txt", ".lua", ".xml", ".yaml", ".yml", ".ini", ".log" };
                 var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tex" };
 
-                string oldWadPath = System.IO.Path.Combine(_oldPbePath, diff.SourceWadFile);
-                string newWadPath = System.IO.Path.Combine(_newPbePath, diff.SourceWadFile);
+                string oldWadPath = Path.Combine(_oldPbePath, diff.SourceWadFile);
+                string newWadPath = Path.Combine(_newPbePath, diff.SourceWadFile);
 
                 byte[] oldData = null;
                 byte[] newData = null;

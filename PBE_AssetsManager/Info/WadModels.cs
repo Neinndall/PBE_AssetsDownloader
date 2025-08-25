@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using LeagueToolkit.Core.Wad;
+using PBE_AssetsManager.Views.Dialogs;
 
 namespace PBE_AssetsManager.Info
 {
@@ -18,5 +20,12 @@ namespace PBE_AssetsManager.Info
         public string OldPath { get; set; }
         public string NewPath { get; set; }
         public string SourceWadFile { get; set; }
+    }
+
+    public class SerializableComparisonResult
+    {
+        public string OldPbePath { get; set; }
+        public string NewPbePath { get; set; }
+        public List<SerializableChunkDiff> Diffs { get; set; }
     }
 }

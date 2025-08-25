@@ -10,6 +10,7 @@ using PBE_AssetsManager.Info;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Views.Controls;
 
 namespace PBE_AssetsManager.Views
 {

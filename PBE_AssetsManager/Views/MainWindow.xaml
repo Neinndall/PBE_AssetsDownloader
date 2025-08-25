@@ -97,7 +97,7 @@
                     BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="0,1,0,0"
                     Padding="0">
-                <local:LogView x:Name="LogView"/>
+                <controls:LogView x:Name="LogView"/>
                 </Border>
             </Grid>
         </Grid>

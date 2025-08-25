@@ -90,16 +90,44 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
                         <materialDesign:MaterialIcon Kind="FormatListGroup" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Differences" 
                                      FontSize="16" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
                     </StackPanel>
-                    <Border Grid.Row="1"
+
+                    <!-- Search Box -->
+                    <Grid Grid.Row="1" Margin="0,0,0,8">
+                        <Border Background="{StaticResource DarkBackground}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                SnapsToDevicePixels="True"/>
+                        <TextBox x:Name="searchTextBox"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Padding="12,8"
+                                 Margin="2"
+                                 Foreground="{StaticResource TextPrimary}"
+                                 FontSize="14"
+                                 CaretBrush="Transparent"
+                                 TextChanged="SearchTextBox_TextChanged"/>
+                        <TextBlock Text="🔍 Search files..."
+                                   x:Name="searchPlaceholder"
+                                   IsHitTestVisible="False"
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Margin="14,0,0,0">
+                        </TextBlock>
+                    </Grid>
+
+                    <Border Grid.Row="2"
                             Background="{StaticResource DarkBackground}"
                             BorderBrush="{StaticResource BorderColor}"
                             BorderThickness="1"

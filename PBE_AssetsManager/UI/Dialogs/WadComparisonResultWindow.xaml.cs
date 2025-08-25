@@ -70,6 +70,24 @@ namespace PBE_AssetsManager.UI.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = searchTextBox.Text;
+            searchPlaceholder.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Visible : Visibility.Collapsed;
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                PopulateResults(_serializableDiffs);
+            }
+            else
+            {
+                var filteredDiffs = _serializableDiffs
+                    .Where(d => d.FileName.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToList();
+                PopulateResults(filteredDiffs);
+            }
+        }
+
         private void PopulateResults(List<SerializableChunkDiff> diffs)
         {
             var groupedByWad = diffs.GroupBy(d => d.SourceWadFile)

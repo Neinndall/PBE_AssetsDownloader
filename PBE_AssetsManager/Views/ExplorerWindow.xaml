@@ -12,8 +12,16 @@
              d:DataContext="{d:DesignInstance models:FileSystemNodeModel}">
     <UserControl.Resources>
         <ContextMenu x:Key="NodeContextMenu">
-            <MenuItem Header="Show Info" Click="Info_MenuItem_Click"/>
-            <MenuItem Header="Delete" Click="Delete_MenuItem_Click"/>
+            <MenuItem Header="Show Info" Click="Info_MenuItem_Click">
+                <MenuItem.Icon>
+                    <materialIcons:MaterialIcon Kind="InformationOutline"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Delete" Click="Delete_MenuItem_Click">
+                <MenuItem.Icon>
+                    <materialIcons:MaterialIcon Kind="DeleteOutline"/>
+                </MenuItem.Icon>
+            </MenuItem>
         </ContextMenu>
         
         <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">

@@ -17,7 +17,11 @@
         <converters:ChunkDiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
 
         <ContextMenu x:Key="WadDiffContextMenu">
-            <MenuItem Header="View Differences" Click="ViewDifferences_Click"/>
+            <MenuItem Click="ViewDifferences_Click" Header="View Differences">
+                <MenuItem.Icon>
+                    <materialDesign:MaterialIcon Kind="FileFindOutline" VerticalAlignment="Center"/>
+                </MenuItem.Icon>
+            </MenuItem>
         </ContextMenu>
 
         <HierarchicalDataTemplate x:Key="DiffItemTemplate" ItemsSource="{Binding Files}">

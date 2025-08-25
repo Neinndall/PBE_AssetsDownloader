@@ -12,6 +12,7 @@ using PBE_AssetsManager.Views.Dialogs;
 using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Views.Help;
 using PBE_AssetsManager.Views.Settings;
+using PBE_AssetsManager.Views.Controls;
 
 namespace PBE_AssetsManager
 {

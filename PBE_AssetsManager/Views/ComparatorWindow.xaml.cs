@@ -20,13 +20,15 @@ namespace PBE_AssetsManager.Views
         private readonly WadComparatorService _wadComparatorService;
         private readonly LogService _logService;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private string _oldPbePath;
+        private string _newPbePath;
+
         public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
             _wadComparatorService = wadComparatorService;
             _logService = logService;
             _customMessageBoxService = customMessageBoxService;
-            _wadComparatorService.ComparisonCompleted += OnComparisonCompleted;
         }
 
         private void btnSelectOriginal_Click(object sender, RoutedEventArgs e)
@@ -92,15 +94,7 @@ namespace PBE_AssetsManager.Views
             }
         }
 
-        private void OnComparisonCompleted(List<ChunkDiff> allDiffs)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                compareWadButton.IsEnabled = true;
-                var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService);
-                resultWindow.Show();
-            });
-        }
+        
 
         private void btnSelectOldPbeDirectory_Click(object sender, RoutedEventArgs e)
         {
@@ -138,14 +132,14 @@ namespace PBE_AssetsManager.Views
                 return;
             }
 
-            string oldPbeDir = oldPbeDirectoryTextBox.Text;
-            string newPbeDir = newPbeDirectoryTextBox.Text;
+            _oldPbePath = oldPbeDirectoryTextBox.Text;
+            _newPbePath = newPbeDirectoryTextBox.Text;
 
             compareWadButton.IsEnabled = false;
 
             try
             {
-                await _wadComparatorService.CompareWadsAsync(oldPbeDir, newPbeDir);
+                await _wadComparatorService.CompareWadsAsync(_oldPbePath, _newPbePath);
             }
             catch (Exception ex)
             {

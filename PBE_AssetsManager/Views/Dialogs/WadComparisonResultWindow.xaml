@@ -16,6 +16,10 @@
         <converters:ChunkDiffTypeToIconConverter x:Key="DiffTypeToIconConverter"/>
         <converters:ChunkDiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
 
+        <ContextMenu x:Key="WadDiffContextMenu">
+            <MenuItem Header="View Differences" Click="ViewDifferences_Click"/>
+        </ContextMenu>
+
         <HierarchicalDataTemplate x:Key="DiffItemTemplate" ItemsSource="{Binding Files}">
             <TextBlock Text="{Binding FileName}" />
         </HierarchicalDataTemplate>
@@ -140,7 +144,8 @@
                                   SelectedItemChanged="ResultsTreeView_SelectedItemChanged">
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
-                                    <Setter Property="ContextMenu" Value="{x:Null}" />
+                                    <Setter Property="ContextMenu" Value="{StaticResource WadDiffContextMenu}"/>
+                                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 </Style>
                             </TreeView.ItemContainerStyle>
                         </TreeView>

@@ -17,7 +17,7 @@ namespace PBE_AssetsManager.Services
 
         public event Action<int> ComparisonStarted;
         public event Action<int, string, bool, string> ComparisonProgressChanged;
-        public event Action<List<ChunkDiff>> ComparisonCompleted;
+        public event Action<List<ChunkDiff>, string, string> ComparisonCompleted;
 
         public WadComparatorService(HashResolverService hashResolverService, LogService logService)
         {
@@ -35,9 +35,9 @@ namespace PBE_AssetsManager.Services
             ComparisonProgressChanged?.Invoke(completedFiles, currentWadFile, isSuccess, errorMessage);
         }
 
-        public void NotifyComparisonCompleted(List<ChunkDiff> allDiffs)
+        public void NotifyComparisonCompleted(List<ChunkDiff> allDiffs, string oldPbePath, string newPbePath)
         {
-            ComparisonCompleted?.Invoke(allDiffs);
+            ComparisonCompleted?.Invoke(allDiffs, oldPbePath, newPbePath);
         }
 
         public async Task CompareWadsAsync(string oldPbeDir, string newPbeDir)
@@ -63,14 +63,14 @@ namespace PBE_AssetsManager.Services
 
                 if (gameWadFiles.Any())
                 {
-                    var (gameWadDiffs, gameFilesProcessed) = await CompareWadDirectoriesAsync(oldGameWadDir, newGameWadDir, "*.wad.client", processedFiles);
+                    var (gameWadDiffs, gameFilesProcessed) = await CompareWadDirectoriesAsync(oldGameWadDir, newGameWadDir, oldPbeDir, newPbeDir, "*.wad.client", processedFiles);
                     allDiffs.AddRange(gameWadDiffs);
                     processedFiles += gameFilesProcessed;
                 }
 
                 if (pluginsWadFiles.Any())
                 {
-                    var (pluginsWadDiffs, pluginFilesProcessed) = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir, "*.wad", processedFiles);
+                    var (pluginsWadDiffs, pluginFilesProcessed) = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir, oldPbeDir, newPbeDir, "*.wad", processedFiles);
                     allDiffs.AddRange(pluginsWadDiffs);
                 }
             }
@@ -80,7 +80,7 @@ namespace PBE_AssetsManager.Services
             }
             finally
             {
-                NotifyComparisonCompleted(allDiffs);
+                NotifyComparisonCompleted(allDiffs, oldPbeDir, newPbeDir);
                 if (allDiffs != null)
                 {
                     _logService.LogSuccess($"WAD comparison completed. Found {allDiffs.Count} differences.");
@@ -92,7 +92,7 @@ namespace PBE_AssetsManager.Services
             }
         }
 
-        private async Task<(List<ChunkDiff> Diffs, int ProcessedCount)> CompareWadDirectoriesAsync(string oldWadDir, string newWadDir, string searchPattern, int completedOffset)
+        private async Task<(List<ChunkDiff> Diffs, int ProcessedCount)> CompareWadDirectoriesAsync(string oldWadDir, string newWadDir, string oldPbeRoot, string newPbeRoot, string searchPattern, int completedOffset)
         {
             var allDiffs = new List<ChunkDiff>();
             var oldWadFiles = Directory.GetFiles(oldWadDir, searchPattern, SearchOption.AllDirectories);
@@ -100,8 +100,8 @@ namespace PBE_AssetsManager.Services
 
             foreach (var oldWadFile in oldWadFiles)
             {
-                var relativePath = Path.GetRelativePath(oldWadDir, oldWadFile);
-                var newWadFileFullPath = Path.Combine(newWadDir, relativePath);
+                var relativePath = Path.GetRelativePath(oldPbeRoot, oldWadFile);
+                var newWadFileFullPath = Path.Combine(newPbeRoot, relativePath);
 
                 processedInThisBatch++;
                 bool success = true;

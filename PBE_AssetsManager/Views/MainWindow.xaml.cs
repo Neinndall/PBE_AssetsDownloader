@@ -226,7 +226,7 @@ namespace PBE_AssetsManager.Views
             });
         }
 
-        private void OnComparisonCompleted(List<ChunkDiff> allDiffs)
+        private void OnComparisonCompleted(List<ChunkDiff> allDiffs, string oldPbePath, string newPbePath)
         {
             Dispatcher.Invoke(() =>
             {
@@ -238,7 +238,7 @@ namespace PBE_AssetsManager.Views
                 if (allDiffs != null)
                 {
                     var customMessageBoxService = _serviceProvider.GetRequiredService<CustomMessageBoxService>();
-                    var resultWindow = new WadComparisonResultWindow(allDiffs, customMessageBoxService);
+                    var resultWindow = new WadComparisonResultWindow(allDiffs, customMessageBoxService, oldPbePath, newPbePath);
                     resultWindow.Owner = this;
                     resultWindow.Show();
                 }

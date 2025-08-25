@@ -2,13 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using LeagueToolkit.Core.Renderer;
+using LeagueToolkit.Core.Wad;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using PBE_AssetsManager.Info;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Views.Helpers;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -37,7 +45,10 @@ namespace PBE_AssetsManager.Views.Dialogs
         public string SourceWadFile { get; set; }
         public ulong? OldUncompressedSize { get; set; }
         public ulong? NewUncompressedSize { get; set; }
-        public string FileName => System.IO.Path.GetFileName(NewPath ?? OldPath);
+        public ulong OldPathHash { get; set; }
+        public ulong NewPathHash { get; set; }
+        public string Path => NewPath ?? OldPath;
+        public string FileName => System.IO.Path.GetFileName(Path);
     }
     #endregion
 
@@ -45,28 +56,36 @@ namespace PBE_AssetsManager.Views.Dialogs
     {
         private readonly List<SerializableChunkDiff> _serializableDiffs;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly string _oldPbePath;
+        private readonly string _newPbePath;
 
-        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService)
+        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
+            _oldPbePath = oldPbePath;
+            _newPbePath = newPbePath;
             _serializableDiffs = diffs.Select(d => new SerializableChunkDiff
             {
                 Type = d.Type,
                 OldPath = d.OldPath,
                 NewPath = d.NewPath,
                 SourceWadFile = d.SourceWadFile,
+                OldPathHash = d.OldChunk.PathHash,
+                NewPathHash = d.NewChunk.PathHash,
                 OldUncompressedSize = (d.Type == ChunkDiffType.New) ? (ulong?)null : (ulong)d.OldChunk.UncompressedSize,
                 NewUncompressedSize = (d.Type == ChunkDiffType.Removed) ? (ulong?)null : (ulong)d.NewChunk.UncompressedSize
             }).ToList();
             PopulateResults(_serializableDiffs);
         }
 
-        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService)
+        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, string oldPbePath = null, string newPbePath = null)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
             _serializableDiffs = serializableDiffs;
+            _oldPbePath = oldPbePath;
+            _newPbePath = newPbePath;
             PopulateResults(_serializableDiffs);
         }
 
@@ -126,7 +145,6 @@ namespace PBE_AssetsManager.Views.Dialogs
                 noSelectionPanel.Visibility = Visibility.Collapsed;
                 detailsContentPanel.Visibility = Visibility.Visible;
 
-                // Reset visibility for all panels initially
                 renamedOldNamePanel.Visibility = Visibility.Collapsed;
                 renamedNewNamePanel.Visibility = Visibility.Collapsed;
                 genericFileNamePanel.Visibility = Visibility.Collapsed;
@@ -140,16 +158,16 @@ namespace PBE_AssetsManager.Views.Dialogs
                     renamedOldNamePanel.Visibility = Visibility.Visible;
                     renamedNewNamePanel.Visibility = Visibility.Visible;
                     
-                    renamedOldNameTextBlock.Text = Path.GetFileName(diff.OldPath);
-                    renamedNewNameTextBlock.Text = Path.GetFileName(diff.NewPath);
-                    directoryPath = Path.GetDirectoryName(diff.NewPath);
+                    renamedOldNameTextBlock.Text = System.IO.Path.GetFileName(diff.OldPath);
+                    renamedNewNameTextBlock.Text = System.IO.Path.GetFileName(diff.NewPath);
+                    directoryPath = System.IO.Path.GetDirectoryName(diff.NewPath);
                 }
                 else
                 {
                     genericFileNamePanel.Visibility = Visibility.Visible;
                     string currentPath = diff.NewPath ?? diff.OldPath;
-                    genericFileNameTextBlock.Text = Path.GetFileName(currentPath);
-                    directoryPath = Path.GetDirectoryName(currentPath);
+                    genericFileNameTextBlock.Text = System.IO.Path.GetFileName(currentPath);
+                    directoryPath = System.IO.Path.GetDirectoryName(currentPath);
                 }
 
                 pathTextBlock.Text = string.IsNullOrEmpty(directoryPath) ? "N/A" : directoryPath;
@@ -212,6 +230,151 @@ namespace PBE_AssetsManager.Views.Dialogs
                     _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this);
                 }
             }
+        }
+
+        private void ViewDifferences_Click(object sender, RoutedEventArgs e)
+        {
+            if (resultsTreeView.SelectedItem is not SerializableChunkDiff diff)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_oldPbePath) || string.IsNullOrEmpty(_newPbePath))
+            {
+                _customMessageBoxService.ShowInfo("Info", "Difference viewing is not available for results loaded from a file.", this);
+                return;
+            }
+
+            try
+            {
+                string extension = System.IO.Path.GetExtension(diff.Path).ToLowerInvariant();
+                var textExtensions = new[] { ".json", ".txt", ".lua", ".xml", ".yaml", ".yml", ".ini", ".log" };
+                var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tex" };
+
+                string oldWadPath = System.IO.Path.Combine(_oldPbePath, diff.SourceWadFile);
+                string newWadPath = System.IO.Path.Combine(_newPbePath, diff.SourceWadFile);
+
+                byte[] oldData = null;
+                byte[] newData = null;
+
+                using (var oldWad = new WadFile(oldWadPath))
+                {
+                    if (oldWad.Chunks.TryGetValue(diff.OldPathHash, out WadChunk oldChunk))
+                    {
+                        using (var decompressedChunk = oldWad.LoadChunkDecompressed(oldChunk))
+                        {
+                            oldData = decompressedChunk.Span.ToArray();
+                        }
+                    }
+                }
+
+                using (var newWad = new WadFile(newWadPath))
+                {
+                    if (newWad.Chunks.TryGetValue(diff.NewPathHash, out WadChunk newChunk))
+                    {
+                        using (var decompressedChunk = newWad.LoadChunkDecompressed(newChunk))
+                        {
+                            newData = decompressedChunk.Span.ToArray();
+                        }
+                    }
+                }
+
+                if (oldData == null || newData == null)
+                {
+                    _customMessageBoxService.ShowError("Error", "Could not extract data for one or both files.", this);
+                    return;
+                }
+
+                if (textExtensions.Contains(extension))
+                {
+                    string oldText = Encoding.UTF8.GetString(oldData);
+                    string newText = Encoding.UTF8.GetString(newData);
+
+                    string oldFormatted = JsonDiffHelper.FormatJson(oldText);
+                    string newFormatted = JsonDiffHelper.FormatJson(newText);
+
+                    var diffWindow = App.ServiceProvider.GetRequiredService<JsonDiffWindow>();
+                    _ = diffWindow.LoadAndDisplayDiffAsync(oldFormatted, newFormatted, $"Old: {diff.Path}", $"New: {diff.Path}");
+                    diffWindow.Owner = this;
+                    diffWindow.Show();
+                }
+                else if (imageExtensions.Contains(extension))
+                {
+                    var oldImage = ToBitmapSource(oldData, extension);
+                    var newImage = ToBitmapSource(newData, extension);
+
+                    if (oldImage == null || newImage == null)
+                    {
+                        _customMessageBoxService.ShowError("Error", "Could not decode one or both images.", this);
+                        return;
+                    }
+
+                    var imageDiffWindow = new ImageDiffWindow(oldImage, newImage) { Owner = this };
+                    imageDiffWindow.Show();
+                }
+                else
+                {
+                    _customMessageBoxService.ShowInfo("Info", $"File type '{extension}' is not supported for comparison.", this);
+                }
+            }
+            catch (Exception ex)
+            {
+                _customMessageBoxService.ShowError("Error", $"An error occurred while preparing the diff view: {ex.Message}", this);
+            }
+        }
+
+        private BitmapSource ToBitmapSource(byte[] data, string extension)
+        {
+            if (data == null || data.Length == 0) return null;
+
+            if (extension == ".tex" || extension == ".dds")
+            {
+                using (var stream = new MemoryStream(data))
+                {
+                    var texture = LeagueToolkit.Core.Renderer.Texture.Load(stream);
+                    if (texture.Mips.Length == 0) return null;
+
+                    var mainMip = texture.Mips[0];
+                    var width = mainMip.Width;
+                    var height = mainMip.Height;
+                    
+                    var pixelData = mainMip.Span.ToArray();
+
+                    return BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelData, width * 4);
+                }
+            }
+            else
+            {
+                using (var stream = new MemoryStream(data))
+                {
+                    var bitmapImage = new BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.StreamSource = stream;
+                    bitmapImage.EndInit();
+                    bitmapImage.Freeze();
+                    return bitmapImage;
+                }
+            }
+        }
+
+        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.IsSelected = true;
+                e.Handled = true;
+            }
+        }
+
+        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+                source = VisualTreeHelper.GetParent(source);
+
+            return source as TreeViewItem;
         }
     }
 }

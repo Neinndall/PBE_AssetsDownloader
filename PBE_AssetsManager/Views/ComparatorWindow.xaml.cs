@@ -9,8 +9,9 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using PBE_AssetsManager.Info;
-using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Views.Dialogs;
 using PBE_AssetsManager.Views.Helpers;
 
 namespace PBE_AssetsManager.Views
@@ -20,15 +21,17 @@ namespace PBE_AssetsManager.Views
         private readonly WadComparatorService _wadComparatorService;
         private readonly LogService _logService;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly DirectoriesCreator _directoriesCreator;
         private string _oldPbePath;
         private string _newPbePath;
 
-        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService)
+        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator)
         {
             InitializeComponent();
             _wadComparatorService = wadComparatorService;
             _logService = logService;
             _customMessageBoxService = customMessageBoxService;
+            _directoriesCreator = directoriesCreator;
         }
 
         private void btnSelectOriginal_Click(object sender, RoutedEventArgs e)
@@ -93,9 +96,7 @@ namespace PBE_AssetsManager.Views
                 _customMessageBoxService.ShowError("Error", $"Error reading files: {ex.Message}", Window.GetWindow(this));
             }
         }
-
-        
-
+       
         private void btnSelectOldPbeDirectory_Click(object sender, RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())
@@ -174,7 +175,7 @@ namespace PBE_AssetsManager.Views
                         return;
                     }
 
-                    var resultWindow = new WadComparisonResultWindow(loadedResult.Diffs, _customMessageBoxService, loadedResult.OldPbePath, loadedResult.NewPbePath);
+                    var resultWindow = new WadComparisonResultWindow(loadedResult.Diffs, _customMessageBoxService, _directoriesCreator, loadedResult.OldPbePath, loadedResult.NewPbePath);
                     resultWindow.Show();
                 }
                 catch (Exception ex)

@@ -17,6 +17,7 @@ using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Views.Helpers;
 using System.Windows.Input;
 using System.Windows.Media;
+using PBE_AssetsManager.Utils;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -56,13 +57,15 @@ namespace PBE_AssetsManager.Views.Dialogs
     {
         private readonly List<SerializableChunkDiff> _serializableDiffs;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly DirectoriesCreator _directoriesCreator;
         private readonly string _oldPbePath;
         private readonly string _newPbePath;
 
-        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, string oldPbePath, string newPbePath)
+        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
+            _directoriesCreator = directoriesCreator;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
             _serializableDiffs = diffs.Select(d => new SerializableChunkDiff
@@ -79,10 +82,11 @@ namespace PBE_AssetsManager.Views.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
-        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, string oldPbePath = null, string newPbePath = null)
+        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, string oldPbePath = null, string newPbePath = null)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
+            _directoriesCreator = directoriesCreator;
             _serializableDiffs = serializableDiffs;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
@@ -205,37 +209,40 @@ namespace PBE_AssetsManager.Views.Dialogs
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var saveFileDialog = new SaveFileDialog
+            try
             {
-                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
-                Title = "Save Comparison Results",
-                FileName = $"WadComparison_{DateTime.Now:yyyyMMdd_HHmmss}.json"
-            };
+                // Obtener la ruta de la carpeta de comparación de WADs
+                string saveFolderPath = _directoriesCreator.WadComparisonSavePath;
 
-            if (saveFileDialog.ShowDialog() == true)
+                // Asegurarse de que la carpeta existe (aunque DirectoriesCreator ya lo hace, es buena práctica)
+                if (!Directory.Exists(saveFolderPath))
+                {
+                    Directory.CreateDirectory(saveFolderPath);
+                }
+
+                // Generar un nombre de archivo único con timestamp
+                string fileName = $"WadComparison_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                string fullPath = Path.Combine(saveFolderPath, fileName);
+
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Converters = { new JsonStringEnumConverter() }
+                };
+                var comparisonResult = new SerializableComparisonResult
+                {
+                    OldPbePath = _oldPbePath,
+                    NewPbePath = _newPbePath,
+                    Diffs = _serializableDiffs
+                };
+
+                var json = JsonSerializer.Serialize(comparisonResult, options);
+                File.WriteAllText(fullPath, json);
+                _customMessageBoxService.ShowSuccess("Success", $"Results saved successfully to: {fullPath}", this);
+            }
+            catch (Exception ex)
             {
-                try
-                {
-                    var options = new JsonSerializerOptions 
-                    { 
-                        WriteIndented = true, 
-                        Converters = { new JsonStringEnumConverter() } 
-                    };
-                    var comparisonResult = new SerializableComparisonResult
-                    {
-                        OldPbePath = _oldPbePath,
-                        NewPbePath = _newPbePath,
-                        Diffs = _serializableDiffs
-                    };
-
-                    var json = JsonSerializer.Serialize(comparisonResult, options);
-                    File.WriteAllText(saveFileDialog.FileName, json);
-                    _customMessageBoxService.ShowSuccess("Success", "Results saved successfully!", this);
-                }
-                catch (Exception ex)
-                {
-                    _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this);
-                }
+                _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this);
             }
         }
 

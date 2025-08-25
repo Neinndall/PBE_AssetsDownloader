@@ -18,6 +18,7 @@ namespace PBE_AssetsManager.Utils
         public string JsonCacheHistoryPath { get; private set; }
         public string SubAssetsDownloadedPath { get; private set; }
         public string BackUpOldHashesPath { get; private set; }
+        public string WadComparisonSavePath { get; private set; }
 
         public string AppDirectory { get; private set; }
         public string CurrentConfigFilePath { get; private set; }
@@ -46,6 +47,7 @@ namespace PBE_AssetsManager.Utils
             JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
             JsonCacheHistoryPath = Path.Combine(appFolderPath, "json_cache", "history");
             BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
+            WadComparisonSavePath = Path.Combine(appFolderPath, "WadComparison");
 
             // New paths for updater
             AppDirectory = AppDomain.CurrentDomain.BaseDirectory;

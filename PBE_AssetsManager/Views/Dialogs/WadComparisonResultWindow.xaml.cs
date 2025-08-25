@@ -18,6 +18,8 @@ using PBE_AssetsManager.Views.Helpers;
 using System.Windows.Input;
 using System.Windows.Media;
 using PBE_AssetsManager.Utils;
+using System.Runtime.InteropServices;
+using BCnEncoder.Shared;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -351,10 +353,14 @@ namespace PBE_AssetsManager.Views.Dialogs
                     var mainMip = texture.Mips[0];
                     var width = mainMip.Width;
                     var height = mainMip.Height;
-                    
-                    var pixelData = mainMip.Span.ToArray();
 
-                    return BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelData, width * 4);
+                    if (mainMip.Span.TryGetSpan(out Span<ColorRgba32> pixelSpan))
+                    {
+                        var pixelByteSpan = MemoryMarshal.AsBytes(pixelSpan);
+                        return BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelByteSpan.ToArray(), width * 4);
+                    }
+
+                    return null; // Should not happen with how Texture is created
                 }
             }
             else

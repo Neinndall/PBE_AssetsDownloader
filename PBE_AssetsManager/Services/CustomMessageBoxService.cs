@@ -1,7 +1,7 @@
 using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
-using PBE_AssetsManager.UI.Dialogs;
+using PBE_AssetsManager.Views.Dialogs;
 
 namespace PBE_AssetsManager.Services
 {

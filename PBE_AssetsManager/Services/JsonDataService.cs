@@ -7,10 +7,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsManager.Info;
-using PBE_AssetsManager.UI;
-using PBE_AssetsManager.UI.Dialogs;
 using PBE_AssetsManager.Utils;
-using PBE_AssetsManager.UI.Helpers;
+using PBE_AssetsManager.Views;
+using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Views.Helpers;
 
 namespace PBE_AssetsManager.Services
 {

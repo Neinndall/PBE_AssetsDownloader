@@ -7,12 +7,11 @@ using System.Net.Http;
 using System.Windows;
 using Serilog.Events;
 using Microsoft.Extensions.DependencyInjection;
-using PBE_AssetsManager.UI;
-using PBE_AssetsManager.UI.Dialogs;
-using PBE_AssetsManager.UI.Views;
-using PBE_AssetsManager.UI.Models;
-using PBE_AssetsManager.UI.Views.Help;
-using PBE_AssetsManager.UI.Views.Settings;
+using PBE_AssetsManager.Views;
+using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Views.Help;
+using PBE_AssetsManager.Views.Settings;
 
 namespace PBE_AssetsManager
 {

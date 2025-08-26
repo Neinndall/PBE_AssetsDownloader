@@ -1,12 +1,26 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace PBE_AssetsManager.Utils
 {
     public static class AssetUrlRules
     {
+        private static readonly HashSet<string> _excludedExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".luabin", ".luabin64", ".preload", ".scb",
+            ".sco", ".skl", ".mapgeo", ".stringtable",
+            ".anm", ".dat", ".bnk", ".wpk",
+            ".cfg", ".cfgbin", ".subchunktoc"
+        };
+
         public static string Adjust(string url)
         {
+            // Primero, comprobar extensiones excluidas
+            string extension = Path.GetExtension(url);
+            if (!string.IsNullOrEmpty(extension) && _excludedExtensions.Contains(extension))
+                return null;
+
             // Ignorar shaders del juego
             if (url.Contains("/shaders/"))
                 return null;
@@ -92,10 +106,21 @@ namespace PBE_AssetsManager.Utils
                 url = Path.ChangeExtension(url, ".png");
             }
 
-            // Ignorar bin largos de game/data
-            if (url.Contains("/game/data/") && url.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
-                return null;
+            // Gestionar ficheros .bin: ignorar los complejos y transformar los demás.
+            if (url.EndsWith(".bin", StringComparison.OrdinalIgnoreCase))
+            {
+                // Primero, ignorar los que tienen nombres complejos que agrupan skins.
+                string fileName = Path.GetFileName(url);
+                int separatorCount = (fileName.Length - fileName.Replace("_skins_", "", StringComparison.OrdinalIgnoreCase).Length) / "_skins_".Length;
 
+                if (separatorCount > 1)
+                {
+                    return null; // Ignorar el .bin complejo
+                }
+
+                // Para todos los demás ficheros .bin, se les añade la extensión .json para su descarga.
+                url += ".json";
+            }
             return url;
         }
     }

@@ -241,9 +241,9 @@ namespace PBE_AssetsManager.Views
                 _spinningIconAnimationStoryboard = null;
                 _progressDetailsWindow?.Close();
 
-                if (allDiffs != null)
+                                if (allDiffs != null)
                 {
-                    var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService, _directoriesCreator, oldPbePath, newPbePath);
+                    var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, oldPbePath, newPbePath);
                     resultWindow.Owner = this;
                     resultWindow.Show();
                 }

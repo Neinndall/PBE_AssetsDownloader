@@ -4,22 +4,22 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using BCnEncoder.Shared;
 using LeagueToolkit.Core.Renderer;
 using LeagueToolkit.Core.Wad;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
 using PBE_AssetsManager.Info;
 using PBE_AssetsManager.Services;
-using PBE_AssetsManager.Views.Helpers;
-using System.Windows.Input;
-using System.Windows.Media;
 using PBE_AssetsManager.Utils;
-using System.Runtime.InteropServices;
-using BCnEncoder.Shared;
+using PBE_AssetsManager.Views.Helpers;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -39,20 +39,6 @@ namespace PBE_AssetsManager.Views.Dialogs
         public string TypeNameWithCount => $"{Type} ({DiffCount})";
         public List<SerializableChunkDiff> Diffs { get; set; }
     }
-
-    public class SerializableChunkDiff
-    {
-        public ChunkDiffType Type { get; set; }
-        public string OldPath { get; set; }
-        public string NewPath { get; set; }
-        public string SourceWadFile { get; set; }
-        public ulong? OldUncompressedSize { get; set; }
-        public ulong? NewUncompressedSize { get; set; }
-        public ulong OldPathHash { get; set; }
-        public ulong NewPathHash { get; set; }
-        public string Path => NewPath ?? OldPath;
-        public string FileName => System.IO.Path.GetFileName(Path);
-    }
     #endregion
 
     public partial class WadComparisonResultWindow : Window
@@ -60,14 +46,18 @@ namespace PBE_AssetsManager.Views.Dialogs
         private readonly List<SerializableChunkDiff> _serializableDiffs;
         private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly DirectoriesCreator _directoriesCreator;
+        private readonly AssetDownloader _assetDownloaderService;
+        private readonly LogService _logService;
         private readonly string _oldPbePath;
         private readonly string _newPbePath;
 
-        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, string oldPbePath, string newPbePath)
+        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
             _directoriesCreator = directoriesCreator;
+            _assetDownloaderService = assetDownloaderService;
+            _logService = logService;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
             _serializableDiffs = diffs.Select(d => new SerializableChunkDiff
@@ -84,11 +74,13 @@ namespace PBE_AssetsManager.Views.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
-        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, string oldPbePath = null, string newPbePath = null)
+        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, string oldPbePath = null, string newPbePath = null)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
             _directoriesCreator = directoriesCreator;
+            _assetDownloaderService = assetDownloaderService;
+            _logService = logService;
             _serializableDiffs = serializableDiffs;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
@@ -213,17 +205,14 @@ namespace PBE_AssetsManager.Views.Dialogs
         {
             try
             {
-                // Obtener la ruta de la carpeta de comparación de WADs
                 string saveFolderPath = _directoriesCreator.WadComparisonSavePath;
 
-                // Asegurarse de que la carpeta existe (aunque DirectoriesCreator ya lo hace, es buena práctica)
                 if (!Directory.Exists(saveFolderPath))
                 {
                     Directory.CreateDirectory(saveFolderPath);
                 }
 
-                // Generar un nombre de archivo único con timestamp
-                string fileName = $"WadComparison_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                string fileName = $"WadComparison_{{DateTime.Now:yyyyMMdd_HHmmss}}.json";
                 string fullPath = Path.Combine(saveFolderPath, fileName);
 
                 var options = new JsonSerializerOptions
@@ -395,6 +384,94 @@ namespace PBE_AssetsManager.Views.Dialogs
                 source = VisualTreeHelper.GetParent(source);
 
             return source as TreeViewItem;
+        }
+
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            // Get the ContextMenu instance from the sender
+            var contextMenu = sender as ContextMenu;
+            if (contextMenu == null) return;
+
+            // Find the "Download Selected" MenuItem dynamically by its header.
+            // This is more robust than relying on a fixed index, which was causing crashes.
+            var downloadMenuItem = contextMenu.Items.OfType<MenuItem>()
+                                                    .FirstOrDefault(m => "Download Selected".Equals(m.Header as string));
+            if (downloadMenuItem != null)
+            {
+                downloadMenuItem.IsEnabled = false; // Default to disabled
+
+                if (resultsTreeView.SelectedItem == null) return;
+
+                List<SerializableChunkDiff> downloadableDiffs = GetDownloadableDiffsFromSelection();
+                if (downloadableDiffs.Any())
+                {
+                    downloadMenuItem.IsEnabled = true;
+                }
+            }
+        }
+
+        private async void DownloadMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            List<SerializableChunkDiff> diffsToDownload = GetDownloadableDiffsFromSelection();
+            if (!diffsToDownload.Any())
+            {
+                _customMessageBoxService.ShowInfo("Info", "No downloadable files (New or Modified) in the current selection.", this);
+                return;
+            }
+
+            _logService.Log($"Starting download of {diffsToDownload.Count} assets from WAD comparison...");
+
+            try
+            {
+                int successCount = await _assetDownloaderService.DownloadWadAssetsAsync(diffsToDownload);
+
+                if (successCount == diffsToDownload.Count)
+                {
+                    _customMessageBoxService.ShowSuccess("Success", $"Successfully downloaded {successCount} asset(s).");
+                }
+                else
+                {
+                    _customMessageBoxService.ShowWarning("Partial Success", $"Successfully downloaded {successCount} out of {diffsToDownload.Count} asset(s). Check logs for details.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _customMessageBoxService.ShowError("Error", $"An error occurred during download: {ex.Message}", this);
+                _logService.LogError($"Download failed: {ex.ToString()}");
+            }
+            finally
+            {
+                _logService.Log("Asset download from WAD comparison finished.");
+            }
+        }
+
+        private List<SerializableChunkDiff> GetDownloadableDiffsFromSelection()
+        {
+            var selectedItem = resultsTreeView.SelectedItem;
+            var downloadableDiffs = new List<SerializableChunkDiff>();
+
+            if (selectedItem is SerializableChunkDiff singleDiff)
+            {
+                if (singleDiff.Type == ChunkDiffType.New || singleDiff.Type == ChunkDiffType.Modified)
+                {
+                    downloadableDiffs.Add(singleDiff);
+                }
+            }
+            else if (selectedItem is DiffTypeGroupViewModel typeGroup)
+            {
+                if (typeGroup.Type == ChunkDiffType.New || typeGroup.Type == ChunkDiffType.Modified)
+                {
+                    downloadableDiffs.AddRange(typeGroup.Diffs);
+                }
+            }
+            else if (selectedItem is WadGroupViewModel wadGroup)
+            {
+                downloadableDiffs.AddRange(wadGroup.Types
+                    .Where(t => t.Type == ChunkDiffType.New || t.Type == ChunkDiffType.Modified)
+                    .SelectMany(t => t.Diffs));
+            }
+
+            return downloadableDiffs;
         }
     }
 }

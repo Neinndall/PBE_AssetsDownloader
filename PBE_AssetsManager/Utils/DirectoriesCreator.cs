@@ -28,6 +28,9 @@ namespace PBE_AssetsManager.Utils
         public string UpdateLogFilePath { get; private set; }
         public string UpdateTempBackupConfigFilePath { get; private set; }
 
+        public string WadNewAssetsPath { get; private set; }
+        public string WadModifiedAssetsPath { get; private set; }
+
         public DirectoriesCreator(LogService logService)
         {
             _logService = logService;
@@ -57,6 +60,10 @@ namespace PBE_AssetsManager.Utils
             UpdateBatchFilePath = Path.Combine(UpdateCachePath, "update_script.bat");
             UpdateLogFilePath = Path.Combine(UpdateCachePath, "update_log.txt");
             UpdateTempBackupConfigFilePath = Path.Combine(UpdateCachePath, "config.backup.json");
+            
+            // Initialize WadComparison paths in constructor
+            WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
+            WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);

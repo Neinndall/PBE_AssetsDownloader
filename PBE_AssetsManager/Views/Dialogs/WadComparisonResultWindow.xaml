@@ -16,10 +16,15 @@
         <converters:ChunkDiffTypeToIconConverter x:Key="DiffTypeToIconConverter"/>
         <converters:ChunkDiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
 
-        <ContextMenu x:Key="WadDiffContextMenu">
-            <MenuItem Click="ViewDifferences_Click" Header="View Differences">
+         <ContextMenu x:Key="WadDiffContextMenu" Opened="ContextMenu_Opened">
+            <MenuItem Header="View Differences" Click="ViewDifferences_Click">
                 <MenuItem.Icon>
-                    <materialDesign:MaterialIcon Kind="FileFindOutline" VerticalAlignment="Center"/>
+                    <materialDesign:MaterialIcon Kind="FileFindOutline"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Download Selected" Click="DownloadMenuItem_Click">
+                <MenuItem.Icon>
+                    <materialDesign:MaterialIcon Kind="CloudDownloadOutline"/>
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>

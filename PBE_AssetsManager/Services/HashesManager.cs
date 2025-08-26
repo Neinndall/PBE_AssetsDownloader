@@ -13,13 +13,6 @@ namespace PBE_AssetsManager.Services
     private readonly AppSettings _appSettings;
     private readonly DirectoriesCreator _directoriesCreator;
     private readonly LogService _logService;
-    private readonly List<string> _excludedExtensions = new()
-    {
-        ".luabin", ".luabin64", ".preload", ".scb",
-        ".sco", ".skl", ".mapgeo", ".subchunktoc", ".stringtable",
-        ".anm", ".dat", ".bnk", ".wpk",
-        ".cfg", ".cfgbin", ".bin"
-    };
 
     public HashesManager(AppSettings appSettings, DirectoriesCreator directoriesCreator, LogService logService)
     {
@@ -109,9 +102,9 @@ namespace PBE_AssetsManager.Services
           var parts = line.Split(' ');
           if (parts.Length < 2) return;
           var filePath = parts[1];
-          var extension = Path.GetExtension(filePath);
 
-          if (_excludedExtensions.Contains(extension) || AssetUrlRules.Adjust(filePath) == null)
+          // The filtering logic is now fully centralized in AssetUrlRules.Adjust
+          if (AssetUrlRules.Adjust(filePath) == null)
             return;
 
           if (filePath.EndsWith(".tex"))
@@ -143,6 +136,7 @@ namespace PBE_AssetsManager.Services
           if (parts.Length < 2) return;
           var filePath = parts[1];
 
+          // Use the same centralized filtering logic for LCU assets for consistency
           if (AssetUrlRules.Adjust(filePath) != null)
           {
             filteredDifferencesLcu.Add(line);

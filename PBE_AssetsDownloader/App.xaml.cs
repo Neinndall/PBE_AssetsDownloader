@@ -1,20 +1,20 @@
-using PBE_AssetsDownloader.Services;
-using PBE_AssetsDownloader.Utils;
+using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Utils;
 using Serilog;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
-using PBE_AssetsDownloader.UI;
-using PBE_AssetsDownloader.UI.Dialogs;
-using PBE_AssetsDownloader.UI.Views;
-using PBE_AssetsDownloader.UI.Models;
-using PBE_AssetsDownloader.UI.Views.Help;
-using PBE_AssetsDownloader.UI.Views.Settings;
 using Serilog.Events;
+using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsManager.Views;
+using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Views.Help;
+using PBE_AssetsManager.Views.Settings;
+using PBE_AssetsManager.Views.Controls;
 
-namespace PBE_AssetsDownloader
+namespace PBE_AssetsManager
 {
     public partial class App : Application
     {
@@ -30,7 +30,7 @@ namespace PBE_AssetsDownloader
         private void ConfigureServices(IServiceCollection services)
         {
             // Logging
-            services.AddSingleton<ILogger>(sp => new LoggerConfiguration()
+            var logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Debug()
                 .WriteTo.Logger(lc => lc
@@ -39,11 +39,13 @@ namespace PBE_AssetsDownloader
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal) // Include only Fatal
                     .WriteTo.File("logs/application_errors.log", rollingInterval: RollingInterval.Day))
-                .CreateLogger());
+                .CreateLogger();
 
-            services.AddSingleton<LogService>();
-
+            Log.Logger = logger; // Assign the logger to the static Log.Logger
+            services.AddSingleton<ILogger>(logger);
+            
             // Core Services
+            services.AddSingleton<LogService>();
             services.AddSingleton<HttpClient>();
             services.AddSingleton<DirectoriesCreator>();
             services.AddSingleton(provider => AppSettings.LoadSettings());
@@ -59,6 +61,8 @@ namespace PBE_AssetsDownloader
             services.AddSingleton<DirectoryCleaner>();
             services.AddSingleton<HashBackUp>();
             services.AddSingleton<HashCopier>();
+            services.AddSingleton<WadComparatorService>();
+            services.AddSingleton<HashResolverService>();
 
             // Main Application Logic Service
             services.AddTransient<ExtractionService>();
@@ -68,6 +72,7 @@ namespace PBE_AssetsDownloader
             services.AddTransient<HomeWindow>();
             services.AddTransient<ExportWindow>();
             services.AddTransient<ExplorerWindow>();
+            services.AddTransient<ComparatorWindow>();
             services.AddTransient<HelpWindow>();
             services.AddTransient<JsonDiffWindow>();
             services.AddTransient<PreviewAssetsWindow>();

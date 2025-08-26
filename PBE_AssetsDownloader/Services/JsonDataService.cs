@@ -6,12 +6,13 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using PBE_AssetsDownloader.Info;
-using PBE_AssetsDownloader.UI;
-using PBE_AssetsDownloader.Utils;
-using PBE_AssetsDownloader.UI.Helpers;
+using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Views;
+using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Views.Helpers;
 
-namespace PBE_AssetsDownloader.Services
+namespace PBE_AssetsManager.Services
 {
     public class JsonDataService
     {
@@ -120,6 +121,12 @@ namespace PBE_AssetsDownloader.Services
                     try
                     {
                         string html = await _httpClient.GetStringAsync(url);
+
+                        // var regex = new Regex(
+                        //     @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
+                        //     RegexOptions.Singleline
+                        // );
+                        
                         var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         foreach (Match match in regex.Matches(html))
                         {
@@ -157,6 +164,12 @@ namespace PBE_AssetsDownloader.Services
                         Uri fileUri = new Uri(url);
                         parentDirectoryUrl = new Uri(fileUri, ".").ToString();
                         string html = await _httpClient.GetStringAsync(parentDirectoryUrl);
+                        
+                        // var regex = new Regex(
+                        //     @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
+                        //     RegexOptions.Singleline
+                        // );
+                        
                         var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         bool foundInParent = false;
                         foreach (Match match in regex.Matches(html))
@@ -269,7 +282,7 @@ namespace PBE_AssetsDownloader.Services
                                 () =>
                                 {
                                     var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                                    diffWindow.LoadDiff(oldFilePath, newFilePath);
+                                    _ = diffWindow.LoadAndDisplayDiffAsync(oldFilePath, newFilePath);
                                     diffWindow.Show();
                                 }
                             );

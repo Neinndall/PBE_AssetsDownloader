@@ -1,9 +1,9 @@
-using PBE_AssetsDownloader.UI.Dialogs;
 using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsManager.Views.Dialogs;
 
-namespace PBE_AssetsDownloader.Services
+namespace PBE_AssetsManager.Services
 {
     public class CustomMessageBoxService
     {
@@ -55,6 +55,18 @@ namespace PBE_AssetsDownloader.Services
             string message,
             Window owner = null,
             CustomMessageBoxIcon icon = CustomMessageBoxIcon.Error)
+        {
+            var dialog = _serviceProvider.GetRequiredService<ConfirmationDialog>();
+            dialog.Initialize(title, message, CustomMessageBoxButtons.OK, icon);
+            dialog.Owner = owner;
+            dialog.ShowDialog();
+        }
+
+        public void ShowWarning(
+            string title,
+            string message,
+            Window owner = null,
+            CustomMessageBoxIcon icon = CustomMessageBoxIcon.Warning)
         {
             var dialog = _serviceProvider.GetRequiredService<ConfirmationDialog>();
             dialog.Initialize(title, message, CustomMessageBoxButtons.OK, icon);

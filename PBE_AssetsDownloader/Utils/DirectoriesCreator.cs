@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using PBE_AssetsDownloader.Services;
+using PBE_AssetsManager.Services;
 
-namespace PBE_AssetsDownloader.Utils
+namespace PBE_AssetsManager.Utils
 {
     public class DirectoriesCreator
     {
@@ -18,6 +18,7 @@ namespace PBE_AssetsDownloader.Utils
         public string JsonCacheHistoryPath { get; private set; }
         public string SubAssetsDownloadedPath { get; private set; }
         public string BackUpOldHashesPath { get; private set; }
+        public string WadComparisonSavePath { get; private set; }
 
         public string AppDirectory { get; private set; }
         public string CurrentConfigFilePath { get; private set; }
@@ -26,6 +27,9 @@ namespace PBE_AssetsDownloader.Utils
         public string UpdateBatchFilePath { get; private set; }
         public string UpdateLogFilePath { get; private set; }
         public string UpdateTempBackupConfigFilePath { get; private set; }
+
+        public string WadNewAssetsPath { get; private set; }
+        public string WadModifiedAssetsPath { get; private set; }
 
         public DirectoriesCreator(LogService logService)
         {
@@ -39,13 +43,14 @@ namespace PBE_AssetsDownloader.Utils
             HashesOldsPaths = Path.Combine("hashes", "olds");
 
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string appFolderPath = Path.Combine(appDataPath, "PBE_AssetsDownloader");
+            string appFolderPath = Path.Combine(appDataPath, "PBE_AssetsManager");
 
             PreviewAssetsPath = Path.Combine(appFolderPath, "PBE_PreviewAssets");
             JsonCacheNewPath = Path.Combine(appFolderPath, "json_cache", "new");
             JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
             JsonCacheHistoryPath = Path.Combine(appFolderPath, "json_cache", "history");
             BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
+            WadComparisonSavePath = Path.Combine(appFolderPath, "WadComparison");
 
             // New paths for updater
             AppDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -55,6 +60,10 @@ namespace PBE_AssetsDownloader.Utils
             UpdateBatchFilePath = Path.Combine(UpdateCachePath, "update_script.bat");
             UpdateLogFilePath = Path.Combine(UpdateCachePath, "update_log.txt");
             UpdateTempBackupConfigFilePath = Path.Combine(UpdateCachePath, "config.backup.json");
+            
+            // Initialize WadComparison paths in constructor
+            WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
+            WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);

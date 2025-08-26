@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using PBE_AssetsDownloader.Services;
+using PBE_AssetsManager.Services;
 
-namespace PBE_AssetsDownloader.Utils
+namespace PBE_AssetsManager.Utils
 {
     public class HashBackUp
     {

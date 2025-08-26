@@ -1,7 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-
     <!-- Lo usamos para Styles.xaml / SidebarMenuButton -->
     <SolidColorBrush x:Key="AccentBrush" Color="#FF5577CC"/> 
     <SolidColorBrush x:Key="AccentPressedBrush" Color="#FF2E3B5C"/>
@@ -31,9 +30,9 @@
 
     <!-- Diff Viewer -->
     <!-- Background colors for the text editor lines -->
-    <Color x:Key="DiffTextBackgroundAdded">#646BCF7F</Color>
-    <Color x:Key="DiffTextBackgroundRemoved">#64FF6B6B</Color>
-    <Color x:Key="DiffTextBackgroundModified">#64E7A336</Color>
+    <Color x:Key="DiffTextBackgroundAdded">#626BCF7F</Color>
+    <Color x:Key="DiffTextBackgroundRemoved">#62FF6B6B</Color>
+    <Color x:Key="DiffTextBackgroundModified">#62E7A336</Color>
 
     <!-- Solid colors for the side navigation panel -->
     <Color x:Key="DiffNavigationAdded">#FF6BCF7F</Color>

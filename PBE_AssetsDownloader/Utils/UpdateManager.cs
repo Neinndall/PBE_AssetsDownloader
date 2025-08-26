@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Windows;
 using Newtonsoft.Json;
-using PBE_AssetsDownloader.Services;
-using PBE_AssetsDownloader.UI.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Views.Dialogs;
 
-namespace PBE_AssetsDownloader.Utils
+namespace PBE_AssetsManager.Utils
 {
     public class UpdateManager
     {
@@ -34,11 +34,11 @@ namespace PBE_AssetsDownloader.Utils
         public async Task CheckForUpdatesAsync(Window owner = null, bool showNoUpdatesMessage = true)
         {
             string currentVersionRaw = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            string apiUrl = "https://api.github.com/repos/Neinndall/PBE_AssetsDownloader/releases/latest";
+            string apiUrl = "https://api.github.com/repos/Neinndall/PBE_AssetsManager/releases/latest";
             string downloadUrl = "";
             long totalBytes = 0;
 
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("PBE_AssetsDownloader");
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("PBE_AssetsManager");
 
             try
             {
@@ -57,7 +57,7 @@ namespace PBE_AssetsDownloader.Utils
 
                 if (string.IsNullOrEmpty(parsedCurrentVersion) || string.IsNullOrEmpty(parsedLatestVersion))
                 {
-                    _customMessageBoxService.ShowError("Error", "Could not parse version numbers.", owner, CustomMessageBoxIcon.Error);
+                    _customMessageBoxService.ShowError("Error", "Could not parse version numbers.", owner);
                     return;
                 }
 
@@ -142,30 +142,30 @@ namespace PBE_AssetsDownloader.Utils
                             }
                             else
                             {
-                                _customMessageBoxService.ShowInfo("Update Ready", $"Update downloaded to:\n{downloadPath}\n\nYou can install it manually later.", owner, CustomMessageBoxIcon.Info);
+                                _customMessageBoxService.ShowInfo("Update Ready", $"Update downloaded to:\n{downloadPath}\n\nYou can install it manually later.", owner);
                             }
                         }
                     }
                 }
                 else if (showNoUpdatesMessage)
                 {
-                    _customMessageBoxService.ShowInfo("Updates", "No updates available.", owner, CustomMessageBoxIcon.Info);
+                    _customMessageBoxService.ShowInfo("Updates", "No updates available.", owner);
                 }
             }
             catch (Exception ex)
             {
                 _logService.LogError("Error checking for updates in UpdateManager. See application_errors.log for details.");
                 _logService.LogCritical(ex, "UpdateManager.CheckForUpdatesAsync Exception");
-                _customMessageBoxService.ShowInfo("Error", "Error checking for updates:\n" + ex.Message, owner, CustomMessageBoxIcon.Error);
+                _customMessageBoxService.ShowError("Error", "Error checking for updates:\n" + ex.Message, owner);
             }
         }
 
         public async Task<(bool, string)> IsNewVersionAvailableAsync()
         {
             string currentVersionRaw = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            string apiUrl = "https://api.github.com/repos/Neinndall/PBE_AssetsDownloader/releases/latest";
+            string apiUrl = "https://api.github.com/repos/Neinndall/PBE_AssetsManager/releases/latest";
 
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("PBE_AssetsDownloader");
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("PBE_AssetsManager");
 
             try
             {

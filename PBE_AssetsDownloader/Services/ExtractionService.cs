@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using PBE_AssetsDownloader.Utils;
+using PBE_AssetsManager.Utils;
 
-namespace PBE_AssetsDownloader.Services
+namespace PBE_AssetsManager.Services
 {
     public class ExtractionService
     {
@@ -39,16 +39,14 @@ namespace PBE_AssetsDownloader.Services
         {
             try
             {
-                _logService.Log("Starting extraction process...");
-
                 await _directoriesCreator.CreateAllDirectoriesAsync();
                 await _hashesManager.CompareHashesAsync();
                 await _resources.GetResourcesFiles();
                 _directoryCleaner.CleanEmptyDirectories();
                 await _hashBackUp.HandleBackUpAsync(_appSettings.CreateBackUpOldHashes);
                 await _hashCopier.HandleCopyAsync(_appSettings.AutoCopyHashes);
-
-                _logService.LogSuccess("Extraction process completed successfully.");
+                
+                // No pondremos ningun log aqui
             }
             catch (Exception ex)
             {

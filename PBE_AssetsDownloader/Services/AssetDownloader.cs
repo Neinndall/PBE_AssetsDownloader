@@ -3,28 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
-using PBE_AssetsDownloader.Utils;
 using Serilog;
+using System.Threading.Tasks;
+using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Views.Dialogs;
 
-namespace PBE_AssetsDownloader.Services
+namespace PBE_AssetsManager.Services
 {
     public class AssetDownloader
     {
         private readonly HttpClient _httpClient;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
-
-        public List<string> ExcludedExtensions => _excludedExtensions;
-
-        private readonly List<string> _excludedExtensions = new()
-        {
-            ".luabin", ".luabin64", ".preload", ".scb",
-            ".sco", ".skl", ".mapgeo", ".subchunktoc", ".stringtable",
-            ".anm", ".dat", ".bnk", ".wpk",
-            ".cfg", ".cfgbin"
-        };
-
         public event Action<int> DownloadStarted;
         public event Action<int, int, string, bool, string> DownloadProgressChanged;
         public event Action DownloadCompleted;
@@ -48,6 +39,7 @@ namespace PBE_AssetsDownloader.Services
 
         public void NotifyDownloadCompleted()
         {
+            _logService.LogSuccess("Download of assets completed.");
             DownloadCompleted?.Invoke();
         }
 
@@ -105,7 +97,7 @@ namespace PBE_AssetsDownloader.Services
                 else
                 {
                     string errorMsg = $"Failed to download '{fileName}'. Reason: {response.StatusCode} - {response.ReasonPhrase}";
-                    Log.Warning(errorMsg); // Log to file only
+                    Log.Error(errorMsg); // Log to file only
                     return (false, errorMsg);
                 }
             }
@@ -194,6 +186,76 @@ namespace PBE_AssetsDownloader.Services
                 _logService.LogCritical(ex, $"AssetDownloader.DownloadAssetIfNeeded Exception for URL: {assetUrl}");
                 return null;
             }
+        }
+
+        public async Task DownloadAssetToCustomPathAsync(string url, string fullDestinationPath)
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(fullDestinationPath));
+                var response = await _httpClient.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    await using (var fs = new FileStream(fullDestinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        await response.Content.CopyToAsync(fs);
+                    }
+                    _logService.LogSuccess($"Downloaded asset to {fullDestinationPath}");
+                }
+                else
+                {
+                    _logService.LogError($"Failed to download asset from {url}. Status: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError($"Failed to download asset from {url}. Reason: {ex.Message}");
+                _logService.LogCritical(ex, $"AssetDownloader.DownloadAssetToCustomPathAsync Exception for URL: {url}");
+                throw; // Re-throw to be caught by the calling method
+            }
+        }
+
+        public async Task<int> DownloadWadAssetsAsync(IEnumerable<SerializableChunkDiff> diffs)
+        {
+            string gameBaseUrl = "https://raw.communitydragon.org/pbe/game/";
+            string pluginBaseUrl = "https://raw.communitydragon.org/pbe/";
+            int successCount = 0;
+
+            foreach (var diff in diffs)
+            {
+                string baseUrl = diff.SourceWadFile.Contains("plugins", StringComparison.OrdinalIgnoreCase) ? pluginBaseUrl : gameBaseUrl;
+                string sourceUrl = baseUrl + diff.Path.Replace("\\", "/");
+
+                string finalUrl = AssetUrlRules.Adjust(sourceUrl);
+
+                if (string.IsNullOrEmpty(finalUrl))
+                {
+                    _logService.Log($"Skipping download for {diff.FileName} as it's filtered by asset rules.");
+                    continue;
+                }
+
+                string baseSavePath = diff.Type == ChunkDiffType.New ? _directoriesCreator.WadNewAssetsPath : _directoriesCreator.WadModifiedAssetsPath;
+
+                // Refactored to use the centralized DirectoriesCreator for path construction.
+                // This correctly handles "game/" vs "plugins/" based on the URL and keeps the logic consistent.
+                string destinationDirectory = _directoriesCreator.CreateAssetDirectoryPath(finalUrl, baseSavePath);
+                string finalFileName = Path.GetFileName(finalUrl);
+                string destinationPath = Path.Combine(destinationDirectory, finalFileName);
+
+                _logService.Log($"Downloading {finalFileName} to {destinationPath}");
+
+                try
+                {
+                    await DownloadAssetToCustomPathAsync(finalUrl, destinationPath);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError($"Failed to download {diff.FileName}. Reason: {ex.Message}");
+                    // Continue to next file
+                }
+            }
+            return successCount;
         }
     }
 }

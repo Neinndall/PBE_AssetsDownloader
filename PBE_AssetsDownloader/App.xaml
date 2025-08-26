@@ -1,7 +1,7 @@
-﻿<Application x:Class="PBE_AssetsDownloader.App"
+﻿<Application x:Class="PBE_AssetsManager.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:PBE_AssetsDownloader">
+             xmlns:local="clr-namespace:PBE_AssetsManager">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

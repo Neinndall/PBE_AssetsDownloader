@@ -3,9 +3,9 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using PBE_AssetsDownloader.Info;
+using PBE_AssetsManager.Info;
 
-namespace PBE_AssetsDownloader.Utils
+namespace PBE_AssetsManager.Utils
 {
   public class AppSettings
   {

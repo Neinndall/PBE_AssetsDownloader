@@ -1,14 +1,14 @@
-// PBE_AssetsDownloader/Utils/UpdateExtractor.cs
+// PBE_AssetsManager/Utils/UpdateExtractor.cs
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
-using PBE_AssetsDownloader.Services;
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using PBE_AssetsManager.Services;
 
-namespace PBE_AssetsDownloader.Utils
+namespace PBE_AssetsManager.Utils
 {
     public class UpdateExtractor
     {

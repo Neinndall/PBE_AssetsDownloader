@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using PBE_AssetsDownloader.Services;
+using PBE_AssetsManager.Services;
 
-namespace PBE_AssetsDownloader.Utils
+namespace PBE_AssetsManager.Utils
 {
     public class DirectoryCleaner
     {

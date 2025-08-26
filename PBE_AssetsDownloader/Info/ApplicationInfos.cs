@@ -1,8 +1,8 @@
-// PBE_AssetsDownloader/Info/ApplicationInfos.cs
+// PBE_AssetsManager/Info/ApplicationInfos.cs
 using System;
 using System.Reflection;
 
-namespace PBE_AssetsDownloader.Info
+namespace PBE_AssetsManager.Info
 {
   public static class ApplicationInfos
   {

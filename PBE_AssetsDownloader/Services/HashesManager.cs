@@ -4,16 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using PBE_AssetsDownloader.Utils;
+using PBE_AssetsManager.Utils;
 
-namespace PBE_AssetsDownloader.Services
+namespace PBE_AssetsManager.Services
 {
   public class HashesManager
   {
     private readonly AppSettings _appSettings;
     private readonly DirectoriesCreator _directoriesCreator;
     private readonly LogService _logService;
-    private readonly List<string> _excludedExtensions = new List<string> { ".bin", ".json" }; // Example
 
     public HashesManager(AppSettings appSettings, DirectoriesCreator directoriesCreator, LogService logService)
     {
@@ -103,9 +102,9 @@ namespace PBE_AssetsDownloader.Services
           var parts = line.Split(' ');
           if (parts.Length < 2) return;
           var filePath = parts[1];
-          var extension = Path.GetExtension(filePath);
 
-          if (_excludedExtensions.Contains(extension) || AssetUrlRules.Adjust(filePath) == null)
+          // The filtering logic is now fully centralized in AssetUrlRules.Adjust
+          if (AssetUrlRules.Adjust(filePath) == null)
             return;
 
           if (filePath.EndsWith(".tex"))
@@ -137,6 +136,7 @@ namespace PBE_AssetsDownloader.Services
           if (parts.Length < 2) return;
           var filePath = parts[1];
 
+          // Use the same centralized filtering logic for LCU assets for consistency
           if (AssetUrlRules.Adjust(filePath) != null)
           {
             filteredDifferencesLcu.Add(line);

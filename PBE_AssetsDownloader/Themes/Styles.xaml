@@ -474,11 +474,12 @@
                             
                             <!-- Icono -->
                             <ContentPresenter x:Name="Icon" 
+                                            ContentSource="Icon"
                                             Grid.Column="0" 
                                             VerticalAlignment="Center" 
                                             Margin="8,0,12,0"
-                                            Width="16" 
-                                            Height="16"/>
+                                            Width="18" 
+                                            Height="18"/>
                             
                             <!-- Texto principal -->
                             <ContentPresenter Grid.Column="1" 

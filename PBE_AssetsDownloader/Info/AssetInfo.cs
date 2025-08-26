@@ -1,4 +1,4 @@
-namespace PBE_AssetsDownloader.Info
+namespace PBE_AssetsManager.Info
 {
   public class AssetInfo
   {

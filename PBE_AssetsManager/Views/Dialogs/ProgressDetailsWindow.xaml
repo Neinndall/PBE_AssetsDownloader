@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
-        Height="400" Width="600"
+        Height="300" Width="600"
         MinHeight="300" MinWidth="400"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource SidebarBackground}"

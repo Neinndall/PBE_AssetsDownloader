@@ -254,7 +254,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             {
                 string extension = Path.GetExtension(diff.Path).ToLowerInvariant();
                 var textExtensions = new[] { ".json", ".txt", ".lua", ".xml", ".yaml", ".yml", ".ini", ".log" };
-                var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tex" };
+                var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tex", ".dds" };
 
                 string oldWadPath = Path.Combine(_oldPbePath, diff.SourceWadFile);
                 string newWadPath = Path.Combine(_newPbePath, diff.SourceWadFile);

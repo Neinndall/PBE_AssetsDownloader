@@ -6,83 +6,86 @@ using PBE_AssetsManager.Utils;
 
 namespace PBE_AssetsManager.Services
 {
-  public class Requests
-  {
-    private readonly HttpClient _httpClient;
-    private readonly DirectoriesCreator _directoriesCreator;
-    private readonly LogService _logService;
-    private const string BaseUrl = "https://raw.communitydragon.org/data/hashes/lol/";
-
-    public Requests(HttpClient httpClient, DirectoriesCreator directoriesCreator, LogService logService)
+    public class Requests
     {
-      _httpClient = httpClient;
-      _directoriesCreator = directoriesCreator;
-      _logService = logService;
-    }
+        private readonly HttpClient _httpClient;
+        private readonly DirectoriesCreator _directoriesCreator;
+        private readonly LogService _logService;
 
-    public async Task DownloadHashesAsync(string fileName, string downloadDirectory)
-    {
-      var url = $"{BaseUrl}/{fileName}";
-      try
-      {
-        var filePath = Path.Combine(downloadDirectory, fileName);
-        var response = await _httpClient.GetAsync(url);
+        private const string BaseUrl = "https://raw.communitydragon.org/data/hashes/lol/";
 
-        if (response.IsSuccessStatusCode)
+        public Requests(HttpClient httpClient, DirectoriesCreator directoriesCreator, LogService logService)
         {
-          await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
-          await response.Content.CopyToAsync(fileStream);
+            _httpClient = httpClient;
+            _directoriesCreator = directoriesCreator;
+            _logService = logService;
         }
-        else
+
+        public async Task DownloadHashesAsync(string fileName, string downloadDirectory)
         {
-          _logService.LogError($"Error downloading {fileName}. Status code: {response.StatusCode}");
-        }
-      }
-      catch (Exception ex)
-      {
-        _logService.LogError($"Exception downloading {fileName}. See application_errors.log for details.");
-        _logService.LogCritical(ex, $"Requests.DownloadHashesAsync Exception for file: {fileName}");
-      }
-    }
+            var url = $"{BaseUrl}/{fileName}";
 
-    public async Task DownloadHashesFilesAsync(string downloadDirectory)
-    {
-      await DownloadHashesAsync("hashes.game.txt", downloadDirectory);
-      await DownloadHashesAsync("hashes.lcu.txt", downloadDirectory);
-    }
-
-    public async Task SyncHashesIfEnabledAsync(bool syncHashesWithCDTB)
-    {
-      if (syncHashesWithCDTB)
-      {
-        var downloadDirectory = _directoriesCreator.HashesNewPath;
-        await DownloadHashesFilesAsync(downloadDirectory);
-      }
-    }
-
-    public async Task<string> DownloadJsonContentAsync(string url)
-    {
-        try
-        {
-            var response = await _httpClient.GetAsync(url);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                string content = await response.Content.ReadAsStringAsync();
-                _logService.LogDebug($"Successfully downloaded JSON content from {url}.");
-                return content;
+                var filePath = Path.Combine(downloadDirectory, fileName);
+                var response = await _httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                    await response.Content.CopyToAsync(fileStream);
+                }
+                else
+                {
+                    _logService.LogError($"Error downloading {fileName}. Status code: {response.StatusCode}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _logService.LogError($"Failed to download JSON from {url}. Status: {response.StatusCode} - {response.ReasonPhrase}");
+                _logService.LogError(
+                    $"Exception downloading {fileName}. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"Requests.DownloadHashesAsync Exception for file: {fileName}");
+            }
+        }
+
+        public async Task DownloadHashesFilesAsync(string downloadDirectory)
+        {
+            await DownloadHashesAsync("hashes.game.txt", downloadDirectory);
+            await DownloadHashesAsync("hashes.lcu.txt", downloadDirectory);
+        }
+
+        public async Task SyncHashesIfEnabledAsync(bool syncHashesWithCDTB)
+        {
+            if (syncHashesWithCDTB)
+            {
+                var downloadDirectory = _directoriesCreator.HashesNewPath;
+                await DownloadHashesFilesAsync(downloadDirectory);
+            }
+        }
+
+        public async Task<string> DownloadJsonContentAsync(string url)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    _logService.LogDebug($"Successfully downloaded JSON content from {url}.");
+                    return content;
+                }
+
+                _logService.LogError(
+                    $"Failed to download JSON from {url}. Status: {response.StatusCode} - {response.ReasonPhrase}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError($"Error downloading JSON from {url}. See application_errors.log for details.");
+                _logService.LogCritical(ex, $"Requests.DownloadJsonContentAsync Exception for URL: {url}");
                 return null;
             }
         }
-        catch (Exception ex)
-        {
-            _logService.LogError($"Error downloading JSON from {url}. See application_errors.log for details.");
-            _logService.LogCritical(ex, $"Requests.DownloadJsonContentAsync Exception for URL: {url}");
-            return null;
-        }
     }
-  }
 }

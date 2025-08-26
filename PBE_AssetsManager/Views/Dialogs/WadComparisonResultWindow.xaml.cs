@@ -286,7 +286,7 @@ namespace PBE_AssetsManager.Views.Dialogs
 
                 if (oldData == null || newData == null)
                 {
-                    _customMessageBoxService.ShowError("Error", "Could not extract data for one or both files.", this);
+                    _customMessageBoxService.ShowWarning("Warning", "You cannot search for differences with the old version because the file is new.", this);
                     return;
                 }
 
@@ -310,11 +310,11 @@ namespace PBE_AssetsManager.Views.Dialogs
 
                     if (oldImage == null || newImage == null)
                     {
-                        _customMessageBoxService.ShowError("Error", "Could not decode one or both images.", this);
+                        _customMessageBoxService.ShowWarning("Warning", "You cannot search for differences with the old version because the file is new.", this);
                         return;
                     }
 
-                    var imageDiffWindow = new ImageDiffWindow(oldImage, newImage) { Owner = this };
+                    var imageDiffWindow = new ImageDiffWindow(oldImage, newImage, diff.OldPath, diff.NewPath) { Owner = this };
                     imageDiffWindow.Show();
                 }
                 else
@@ -420,7 +420,6 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
 
             _logService.Log($"Starting download of {diffsToDownload.Count} assets from WAD comparison...");
-
             try
             {
                 int successCount = await _assetDownloaderService.DownloadWadAssetsAsync(diffsToDownload);
@@ -438,10 +437,6 @@ namespace PBE_AssetsManager.Views.Dialogs
             {
                 _customMessageBoxService.ShowError("Error", $"An error occurred during download: {ex.Message}", this);
                 _logService.LogError($"Download failed: {ex.ToString()}");
-            }
-            finally
-            {
-                _logService.Log("Asset download from WAD comparison finished.");
             }
         }
 

@@ -68,7 +68,7 @@ namespace PBE_AssetsManager.Views.Dialogs
                 if (AreFilesIdentical())
                 {
                     _customMessageBoxService.ShowInfo("Comparison Result", "No differences found. The two files are identical.", this);
-                    Close();
+                    // Close();
                 }
             }
             catch (Exception ex)

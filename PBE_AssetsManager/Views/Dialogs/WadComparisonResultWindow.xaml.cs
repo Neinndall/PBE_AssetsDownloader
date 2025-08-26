@@ -212,7 +212,7 @@ namespace PBE_AssetsManager.Views.Dialogs
                     Directory.CreateDirectory(saveFolderPath);
                 }
 
-                string fileName = $"WadComparison_{{DateTime.Now:yyyyMMdd_HHmmss}}.json";
+                string fileName = $"WadComparison_{DateTime.Now:yyyyMMdd_HHmmss}.json";
                 string fullPath = Path.Combine(saveFolderPath, fileName);
 
                 var options = new JsonSerializerOptions

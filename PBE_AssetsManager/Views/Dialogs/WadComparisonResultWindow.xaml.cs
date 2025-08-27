@@ -299,7 +299,7 @@ namespace PBE_AssetsManager.Views.Dialogs
                     string newFormatted = JsonDiffHelper.FormatJson(newText);
 
                     var diffWindow = App.ServiceProvider.GetRequiredService<JsonDiffWindow>();
-                    _ = diffWindow.LoadAndDisplayDiffAsync(oldFormatted, newFormatted, $"Old: {diff.Path}", $"New: {diff.Path}");
+                    _ = diffWindow.LoadAndDisplayDiffAsync(oldFormatted, newFormatted, diff.Path, diff.Path);
                     diffWindow.Owner = this;
                     diffWindow.Show();
                 }

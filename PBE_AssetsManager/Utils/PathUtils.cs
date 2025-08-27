@@ -30,10 +30,10 @@ namespace PBE_AssetsManager.Utils
                     path = path.Substring(1);
                 }
 
-                // Remove "pbe/" prefix if it exists at the beginning of the path
-                if (path.StartsWith("pbe/", StringComparison.OrdinalIgnoreCase))
+                // Remove "pbe/plugins/" prefix if it exists at the beginning of the path
+                if (path.StartsWith("pbe/plugins/", StringComparison.OrdinalIgnoreCase))
                 {
-                    path = path.Substring("pbe/".Length);
+                    path = path.Substring("pbe/plugins/".Length);
                 }
 
                 // Define characters that are invalid for *filename segments* but *not* path separators

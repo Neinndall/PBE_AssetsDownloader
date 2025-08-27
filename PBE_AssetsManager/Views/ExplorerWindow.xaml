@@ -28,14 +28,21 @@
         </ContextMenu>
 
         <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
-            <StackPanel Orientation="Horizontal" Margin="5,4,0,4">
-                <materialIcons:MaterialIcon Width="18" 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <materialIcons:MaterialIcon Grid.Column="0" 
+                                            Width="18" 
                                             Height="18" 
                                             VerticalAlignment="Center" 
-                                            Margin="0,0,4,0"
+                                            Margin="0,0,5,0"
                                             Kind="{Binding Converter={StaticResource PathToIconConverter}}"/>
-                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-            </StackPanel>
+                <TextBlock Grid.Column="1" 
+                           Text="{Binding Name}" 
+                           VerticalAlignment="Center" />
+            </Grid>
         </HierarchicalDataTemplate>
     </UserControl.Resources>
         <Grid>

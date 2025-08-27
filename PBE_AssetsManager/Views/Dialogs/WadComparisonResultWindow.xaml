@@ -13,7 +13,7 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <converters:ChunkDiffTypeToIconConverter x:Key="DiffTypeToIconConverter"/>
+        <converters:WadComparisonIconConverter x:Key="WadComparisonIconConverter"/>
         <converters:ChunkDiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
 
          <ContextMenu x:Key="WadDiffContextMenu" Opened="ContextMenu_Opened">
@@ -30,21 +30,43 @@
         </ContextMenu>
 
         <HierarchicalDataTemplate x:Key="DiffItemTemplate" ItemsSource="{Binding Files}">
-            <TextBlock Text="{Binding FileName}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <materialDesign:MaterialIcon Grid.Column="0" Kind="{Binding Converter={StaticResource WadComparisonIconConverter}}" 
+                                             VerticalAlignment="Center" 
+                                             Margin="0,0,5,0"/>
+                <TextBlock Grid.Column="1" Text="{Binding FileName}" VerticalAlignment="Center"/>
+            </Grid>
         </HierarchicalDataTemplate>
 
         <HierarchicalDataTemplate x:Key="DiffTypeTemplate" ItemsSource="{Binding Diffs}" ItemTemplate="{StaticResource DiffItemTemplate}">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:MaterialIcon Kind="{Binding Type, Converter={StaticResource DiffTypeToIconConverter}}" 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <materialDesign:MaterialIcon Grid.Column="0" Kind="{Binding Converter={StaticResource WadComparisonIconConverter}}" 
                                              VerticalAlignment="Center" 
                                              Margin="0,0,5,0" 
                                              Foreground="{Binding Type, Converter={StaticResource DiffTypeToBrushConverter}}"/>
-                <TextBlock Text="{Binding TypeNameWithCount}" VerticalAlignment="Center" Foreground="{Binding Type, Converter={StaticResource DiffTypeToBrushConverter}}"/>
-            </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding TypeNameWithCount}" VerticalAlignment="Center" Foreground="{Binding Type, Converter={StaticResource DiffTypeToBrushConverter}}"/>
+            </Grid>
         </HierarchicalDataTemplate>
 
         <HierarchicalDataTemplate x:Key="WadGroupTemplate" ItemsSource="{Binding Types}" ItemTemplate="{StaticResource DiffTypeTemplate}">
-            <TextBlock Text="{Binding WadNameWithCount}" FontWeight="Bold"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <materialDesign:MaterialIcon Grid.Column="0" Kind="{Binding Converter={StaticResource WadComparisonIconConverter}}" 
+                                             VerticalAlignment="Center" 
+                                             Margin="0,0,5,0"/>
+                <TextBlock Grid.Column="1" Text="{Binding WadNameWithCount}" FontWeight="Bold" VerticalAlignment="Center"/>
+            </Grid>
         </HierarchicalDataTemplate>
 
     </Window.Resources>

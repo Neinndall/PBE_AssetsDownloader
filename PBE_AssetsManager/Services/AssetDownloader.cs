@@ -224,7 +224,7 @@ namespace PBE_AssetsManager.Services
             foreach (var diff in diffs)
             {
                 string baseUrl = diff.SourceWadFile.Contains("plugins", StringComparison.OrdinalIgnoreCase) ? pluginBaseUrl : gameBaseUrl;
-                string sourceUrl = baseUrl + diff.Path.Replace("\", "/");
+                string sourceUrl = baseUrl + diff.Path.Replace("\\", "/");
 
                 string finalUrl = AssetUrlRules.Adjust(sourceUrl);
 

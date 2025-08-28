@@ -48,18 +48,26 @@ namespace PBE_AssetsManager.Services
             }
         }
 
-        public async Task DownloadHashesFilesAsync(string downloadDirectory)
+        public async Task DownloadGameHashesFilesAsync(string downloadDirectory)
         {
             await DownloadHashesAsync("hashes.game.txt", downloadDirectory);
             await DownloadHashesAsync("hashes.lcu.txt", downloadDirectory);
+        }
+
+        public async Task DownloadBinHashesFilesAsync(string downloadDirectory)
+        {
+            await DownloadHashesAsync("hashes.binentries.txt", downloadDirectory);
+            await DownloadHashesAsync("hashes.binfields.txt", downloadDirectory);
+            await DownloadHashesAsync("hashes.binhashes.txt", downloadDirectory);
+            await DownloadHashesAsync("hashes.bintypes.txt", downloadDirectory);
         }
 
         public async Task SyncHashesIfEnabledAsync(bool syncHashesWithCDTB)
         {
             if (syncHashesWithCDTB)
             {
-                var downloadDirectory = _directoriesCreator.HashesNewPath;
-                await DownloadHashesFilesAsync(downloadDirectory);
+                await DownloadGameHashesFilesAsync(_directoriesCreator.HashesNewPath);
+                await DownloadBinHashesFilesAsync(_directoriesCreator.HashesNewPath);
             }
         }
 

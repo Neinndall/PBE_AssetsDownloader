@@ -42,8 +42,7 @@ namespace PBE_AssetsManager.Services
             _binFieldsMap.Clear();
             _binTypesMap.Clear();
 
-            var binHashesDir = _directoriesCreator.BinHashesPath;
-
+            var binHashesDir = _directoriesCreator.HashesNewPath;
             var binHashesFile = Path.Combine(binHashesDir, "hashes.binhashes.txt");
             var binEntriesFile = Path.Combine(binHashesDir, "hashes.binentries.txt");
             var binFieldsFile = Path.Combine(binHashesDir, "hashes.binfields.txt");

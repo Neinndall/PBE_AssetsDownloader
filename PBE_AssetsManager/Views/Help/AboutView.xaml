@@ -66,16 +66,16 @@
                     </StackPanel>
                 </StackPanel>
 
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Automatic detection of new PBE updates."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Downloads and organizes new game assets."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Supports synchronization with CDTB."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Auto-copy functionality for hash files."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Back-Ups for old hash files."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Asset preview before downloading."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Built-in player for video files (.webm, .ogg) and audio."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  JSON file comparison tool."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  History tracking for JSON file differences."/>
-                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextPrimary}" Text="•  Manually download assets from other days with differences text files."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Automatic detection of new PBE updates."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Downloads and organizes new game assets."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Supports synchronization with CDTB."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Auto-copy functionality for hash files."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Back-Ups for old hash files."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Asset preview before downloading."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Built-in player for video files (.webm, .ogg) and audio."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  JSON file comparison tool."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  History tracking for JSON file differences."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="•  Manually download assets from other days with differences text files."/>
             </StackPanel>
         </Border>
     </StackPanel>

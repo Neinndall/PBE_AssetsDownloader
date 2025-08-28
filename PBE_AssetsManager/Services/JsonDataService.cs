@@ -79,7 +79,7 @@ namespace PBE_AssetsManager.Services
                 return result;
             }
 
-            var regex = new Regex(@"href=""(?<filename>hashes\.(game|lcu)\.txt)"".*?\s+(?<size>\d+)\s*$", RegexOptions.Multiline);
+            var regex = new Regex(@"href=""(?<filename>hashes\..*?\.txt)"".*?\s+(?<size>\d+)\s*$", RegexOptions.Multiline);
 
             foreach (Match match in regex.Matches(html))
             {

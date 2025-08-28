@@ -78,19 +78,17 @@
 
                 <TextBlock TextWrapping="Wrap"
                            FontSize="13"
-                           Foreground="{StaticResource TextPrimary}"
+                           Foreground="{StaticResource TextSecondary}"
                            LineHeight="20">
-                    When you click 'Report Bug', you will be taken to a GitHub form. Please be ready to provide the following details:
+                    To report a bug, you will be taken to GitHub. Please provide as much detail as possible:
                     <LineBreak/><LineBreak/>
-                    • <Run FontWeight="SemiBold">A clear description of the bug</Run> and the exact <Run FontWeight="SemiBold">steps to reproduce it</Run>.
+                    • <Run FontWeight="SemiBold">Description and steps to reproduce.</Run>
                     <LineBreak/>
-                    • What you <Run FontWeight="SemiBold">expected to happen</Run> versus what <Run FontWeight="SemiBold">actually occurred</Run>.
+                    • <Run FontWeight="SemiBold">Expected vs. actual results.</Run>
                     <LineBreak/>
-                    • The <Run FontWeight="SemiBold">application version</Run> and your <Run FontWeight="SemiBold">operating system</Run>.
+                    • <Run FontWeight="SemiBold">Application version and OS.</Run>
                     <LineBreak/>
-                    • Relevant entries from the <Run FontWeight="SemiBold">log files</Run> (`logs` folder), especially if the application crashed.
-                    <LineBreak/><LineBreak/>
-                    Providing as much detail as possible will help us resolve the issue much faster.
+                    • <Run FontWeight="SemiBold">Relevant log files</Run> from the `logs` folder.
                 </TextBlock>
             </StackPanel>
         </Border>

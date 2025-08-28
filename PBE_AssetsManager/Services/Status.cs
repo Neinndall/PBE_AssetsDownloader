@@ -7,8 +7,15 @@ namespace PBE_AssetsManager.Services
 {
     public class Status
     {
+        // Game Hashes
         private const string GAME_HASHES_FILENAME = "hashes.game.txt";
-        private const string LCPU_HASHES_FILENAME = "hashes.lcu.txt";
+        private const string LCU_HASHES_FILENAME = "hashes.lcu.txt";
+        
+        // Bin Hashes
+        private const string HASHES_BINENTRIES = "hashes.binentries.txt";
+        private const string HASHES_BINFIELDS = "hashes.binfields.txt";
+        private const string HASHES_BINHASHES = "hashes.binhashes.txt";
+        private const string HASHES_BINTYPES = "hashes.bintypes.txt";
 
         private readonly LogService _logService;
         private readonly Requests _requests;
@@ -57,9 +64,14 @@ namespace PBE_AssetsManager.Services
 
                 var localSizes = _appSettings.HashesSizes ?? new Dictionary<string, long>();
                 bool updated = false;
-
+        
                 updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, GAME_HASHES_FILENAME);
-                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, LCPU_HASHES_FILENAME);
+                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, LCU_HASHES_FILENAME);
+                
+                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINENTRIES);
+                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINFIELDS);
+                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINHASHES);
+                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINTYPES);
 
                 if (updated)
                 {

@@ -30,8 +30,7 @@ namespace PBE_AssetsManager.Utils
 
         public string WadNewAssetsPath { get; private set; }
         public string WadModifiedAssetsPath { get; private set; }
-        public string BinHashesPath { get; private set; }
-
+        
         public DirectoriesCreator(LogService logService)
         {
             _logService = logService;
@@ -65,7 +64,6 @@ namespace PBE_AssetsManager.Utils
             // Initialize WadComparison paths in constructor
             WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
             WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
-            BinHashesPath = Path.Combine("hashes", "binhashes");
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);

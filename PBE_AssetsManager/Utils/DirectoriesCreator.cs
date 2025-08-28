@@ -30,6 +30,7 @@ namespace PBE_AssetsManager.Utils
 
         public string WadNewAssetsPath { get; private set; }
         public string WadModifiedAssetsPath { get; private set; }
+        public string WadRenamedAssetsPath { get; private set; }
         
         public DirectoriesCreator(LogService logService)
         {
@@ -64,6 +65,7 @@ namespace PBE_AssetsManager.Utils
             // Initialize WadComparison paths in constructor
             WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
             WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
+            WadRenamedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "RENAMED");
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);

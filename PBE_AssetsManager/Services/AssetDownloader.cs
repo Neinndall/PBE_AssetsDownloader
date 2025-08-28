@@ -224,17 +224,32 @@ namespace PBE_AssetsManager.Services
             foreach (var diff in diffs)
             {
                 string baseUrl = diff.SourceWadFile.Contains("plugins", StringComparison.OrdinalIgnoreCase) ? pluginBaseUrl : gameBaseUrl;
-                string sourceUrl = baseUrl + diff.Path.Replace("\\", "/");
+                string sourceUrl = baseUrl + diff.Path.Replace("\", "/");
 
                 string finalUrl = AssetUrlRules.Adjust(sourceUrl);
 
                 if (string.IsNullOrEmpty(finalUrl))
                 {
-                    _logService.Log($"Skipping download for {diff.FileName} as it's filtered by asset rules.");
+                    Log.Information($"Skipping download for {diff.FileName} as it's filtered by asset rules."); // Log only to the .log file
                     continue;
                 }
 
-                string baseSavePath = diff.Type == ChunkDiffType.New ? _directoriesCreator.WadNewAssetsPath : _directoriesCreator.WadModifiedAssetsPath;
+                string baseSavePath;
+                switch (diff.Type)
+                {
+                    case ChunkDiffType.New:
+                        baseSavePath = _directoriesCreator.WadNewAssetsPath;
+                        break;
+                    case ChunkDiffType.Modified:
+                        baseSavePath = _directoriesCreator.WadModifiedAssetsPath;
+                        break;
+                    case ChunkDiffType.Renamed:
+                        baseSavePath = _directoriesCreator.WadRenamedAssetsPath;
+                        break;
+                    default:
+                        // Skip downloading for other types like 'Removed'
+                        continue;
+                }
 
                 // Refactored to use the centralized DirectoriesCreator for path construction.
                 // This correctly handles "game/" vs "plugins/" based on the URL and keeps the logic consistent.
@@ -242,8 +257,7 @@ namespace PBE_AssetsManager.Services
                 string finalFileName = Path.GetFileName(finalUrl);
                 string destinationPath = Path.Combine(destinationDirectory, finalFileName);
 
-                _logService.Log($"Downloading {finalFileName} to {destinationPath}");
-
+                Log.Information($"Downloaded: {finalFileName}"); // Log only to the .log file
                 try
                 {
                     await DownloadAssetToCustomPathAsync(finalUrl, destinationPath);

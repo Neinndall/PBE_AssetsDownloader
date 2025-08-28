@@ -345,14 +345,14 @@ namespace PBE_AssetsManager.Views.Dialogs
 
             if (selectedItem is SerializableChunkDiff singleDiff)
             {
-                if (singleDiff.Type == ChunkDiffType.New || singleDiff.Type == ChunkDiffType.Modified)
+                if (singleDiff.Type == ChunkDiffType.New || singleDiff.Type == ChunkDiffType.Modified || singleDiff.Type == ChunkDiffType.Renamed)
                 {
                     downloadableDiffs.Add(singleDiff);
                 }
             }
             else if (selectedItem is DiffTypeGroupViewModel typeGroup)
             {
-                if (typeGroup.Type == ChunkDiffType.New || typeGroup.Type == ChunkDiffType.Modified)
+                if (typeGroup.Type == ChunkDiffType.New || typeGroup.Type == ChunkDiffType.Modified || typeGroup.Type == ChunkDiffType.Renamed)
                 {
                     downloadableDiffs.AddRange(typeGroup.Diffs);
                 }
@@ -360,7 +360,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             else if (selectedItem is WadGroupViewModel wadGroup)
             {
                 downloadableDiffs.AddRange(wadGroup.Types
-                    .Where(t => t.Type == ChunkDiffType.New || t.Type == ChunkDiffType.Modified)
+                    .Where(t => t.Type == ChunkDiffType.New || t.Type == ChunkDiffType.Modified || t.Type == ChunkDiffType.Renamed)
                     .SelectMany(t => t.Diffs));
             }
 

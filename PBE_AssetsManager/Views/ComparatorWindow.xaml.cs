@@ -25,10 +25,11 @@ namespace PBE_AssetsManager.Views
         private readonly AssetDownloader _assetDownloaderService;
         private readonly HashResolverService _hashResolverService;
         private readonly WadDifferenceService _wadDifferenceService;
+        private readonly BackupManager _backupManager;
         private string _oldPbePath;
         private string _newPbePath;
 
-        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, HashResolverService hashResolverService, WadDifferenceService wadDifferenceService)
+        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, HashResolverService hashResolverService, WadDifferenceService wadDifferenceService, BackupManager backupManager)
         {
             InitializeComponent();
             _wadComparatorService = wadComparatorService;
@@ -38,6 +39,42 @@ namespace PBE_AssetsManager.Views
             _assetDownloaderService = assetDownloaderService;
             _hashResolverService = hashResolverService;
             _wadDifferenceService = wadDifferenceService;
+            _backupManager = backupManager;
+        }
+
+        private async void createPbeBackupButton_Click(object sender, RoutedEventArgs e)
+        {
+            string sourcePbePath = @"C:\Riot Games\League of Legends (PBE)";
+
+            if (!Directory.Exists(sourcePbePath))
+            {
+                _customMessageBoxService.ShowError("Error", $"El directorio PBE fijo para la copia de seguridad no existe: {sourcePbePath}", Window.GetWindow(this));
+                return;
+            }
+
+            string destinationBackupPath = sourcePbePath + "_old";
+
+            createPbeBackupButton.IsEnabled = false;
+            try
+            {
+                await _backupManager.CreatePbeDirectoryBackupAsync(sourcePbePath, destinationBackupPath);
+                _customMessageBoxService.ShowInfo("Info", "PBE directory backup completed successfully.", Window.GetWindow(this));
+                _logService.LogSuccess("PBE directory backup completed successfully.");
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                _logService.LogError($"Error creating PBE directory backup: {ex.Message}");
+                _customMessageBoxService.ShowError("Error", ex.Message, Window.GetWindow(this));
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError($"Error creating PBE directory backup: {ex.Message}");
+                _customMessageBoxService.ShowError("Error", $"An unexpected error occurred while creating the backup: {ex.Message}", Window.GetWindow(this));
+            }
+            finally
+            {
+                createPbeBackupButton.IsEnabled = true;
+            }
         }
 
         private void btnSelectOriginal_Click(object sender, RoutedEventArgs e)

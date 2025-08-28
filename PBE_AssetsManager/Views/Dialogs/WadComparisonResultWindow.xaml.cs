@@ -141,32 +141,30 @@ namespace PBE_AssetsManager.Views.Dialogs
                 noSelectionPanel.Visibility = Visibility.Collapsed;
                 detailsContentPanel.Visibility = Visibility.Visible;
 
+                // Reset panel visibility
                 renamedOldNamePanel.Visibility = Visibility.Collapsed;
                 renamedNewNamePanel.Visibility = Visibility.Collapsed;
                 genericFileNamePanel.Visibility = Visibility.Collapsed;
+                pathPanel.Visibility = Visibility.Visible; // Default to visible
                 oldSizePanel.Visibility = Visibility.Visible;
                 newSizePanel.Visibility = Visibility.Visible;
-
-                string directoryPath;
 
                 if (diff.Type == ChunkDiffType.Renamed)
                 {
                     renamedOldNamePanel.Visibility = Visibility.Visible;
                     renamedNewNamePanel.Visibility = Visibility.Visible;
-                    
-                    renamedOldNameTextBlock.Text = Path.GetFileName(diff.OldPath);
-                    renamedNewNameTextBlock.Text = Path.GetFileName(diff.NewPath);
-                    directoryPath = Path.GetDirectoryName(diff.NewPath);
+                    pathPanel.Visibility = Visibility.Collapsed; // Hide generic path for renames
+
+                    renamedOldNameTextBlock.Text = diff.OldPath;
+                    renamedNewNameTextBlock.Text = diff.NewPath;
                 }
                 else
                 {
                     genericFileNamePanel.Visibility = Visibility.Visible;
                     string currentPath = diff.NewPath ?? diff.OldPath;
                     genericFileNameTextBlock.Text = Path.GetFileName(currentPath);
-                    directoryPath = Path.GetDirectoryName(currentPath);
+                    pathTextBlock.Text = Path.GetDirectoryName(currentPath) ?? "N/A";
                 }
-
-                pathTextBlock.Text = string.IsNullOrEmpty(directoryPath) ? "N/A" : directoryPath;
 
                 changeTypeTextBlock.Text = diff.Type.ToString();
                 sourceWadTextBlock.Text = diff.SourceWadFile;

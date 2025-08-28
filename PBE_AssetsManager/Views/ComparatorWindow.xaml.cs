@@ -23,10 +23,12 @@ namespace PBE_AssetsManager.Views
         private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly AssetDownloader _assetDownloaderService;
+        private readonly HashResolverService _hashResolverService;
+        private readonly WadDifferenceService _wadDifferenceService;
         private string _oldPbePath;
         private string _newPbePath;
 
-        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService)
+        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, HashResolverService hashResolverService, WadDifferenceService wadDifferenceService)
         {
             InitializeComponent();
             _wadComparatorService = wadComparatorService;
@@ -34,6 +36,8 @@ namespace PBE_AssetsManager.Views
             _customMessageBoxService = customMessageBoxService;
             _directoriesCreator = directoriesCreator;
             _assetDownloaderService = assetDownloaderService;
+            _hashResolverService = hashResolverService;
+            _wadDifferenceService = wadDifferenceService;
         }
 
         private void btnSelectOriginal_Click(object sender, RoutedEventArgs e)
@@ -177,7 +181,7 @@ namespace PBE_AssetsManager.Views
                         return;
                     }
 
-                    var resultWindow = new WadComparisonResultWindow(loadedResult.Diffs, _customMessageBoxService, _directoriesCreator, _assetDownloaderService, _logService, loadedResult.OldPbePath, loadedResult.NewPbePath);
+                    var resultWindow = new WadComparisonResultWindow(loadedResult.Diffs, _customMessageBoxService, _directoriesCreator, _assetDownloaderService, _logService, _wadDifferenceService, loadedResult.OldPbePath, loadedResult.NewPbePath);
                     resultWindow.Show();
                 }
                 catch (Exception ex)

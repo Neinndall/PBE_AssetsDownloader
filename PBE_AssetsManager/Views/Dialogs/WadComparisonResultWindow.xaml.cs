@@ -1,10 +1,11 @@
 using System;
+using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Utils;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,14 +13,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using BCnEncoder.Shared;
-using LeagueToolkit.Core.Renderer;
-using LeagueToolkit.Core.Wad;
-using Microsoft.Extensions.DependencyInjection;
-using PBE_AssetsManager.Info;
-using PBE_AssetsManager.Services;
-using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -48,16 +43,18 @@ namespace PBE_AssetsManager.Views.Dialogs
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly AssetDownloader _assetDownloaderService;
         private readonly LogService _logService;
+        private readonly WadDifferenceService _wadDifferenceService;
         private readonly string _oldPbePath;
         private readonly string _newPbePath;
 
-        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, string oldPbePath, string newPbePath)
+        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
             _directoriesCreator = directoriesCreator;
             _assetDownloaderService = assetDownloaderService;
             _logService = logService;
+            _wadDifferenceService = wadDifferenceService;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
             _serializableDiffs = diffs.Select(d => new SerializableChunkDiff
@@ -74,13 +71,14 @@ namespace PBE_AssetsManager.Views.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
-        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, string oldPbePath = null, string newPbePath = null)
+        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, string oldPbePath = null, string newPbePath = null)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
             _directoriesCreator = directoriesCreator;
             _assetDownloaderService = assetDownloaderService;
             _logService = logService;
+            _wadDifferenceService = wadDifferenceService;
             _serializableDiffs = serializableDiffs;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
@@ -237,133 +235,36 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
         }
 
-        private void ViewDifferences_Click(object sender, RoutedEventArgs e)
+        private async void ViewDifferences_Click(object sender, RoutedEventArgs e)
         {
             if (resultsTreeView.SelectedItem is not SerializableChunkDiff diff)
             {
                 return;
             }
 
-            if (string.IsNullOrEmpty(_oldPbePath) || string.IsNullOrEmpty(_newPbePath))
+            var (dataType, oldData, newData, oldPath, newPath) = await _wadDifferenceService.PrepareDifferenceDataAsync(diff, _oldPbePath, _newPbePath);
+
+            switch (dataType)
             {
-                _customMessageBoxService.ShowInfo("Info", "Difference viewing is not available for results loaded from a file.", this);
-                return;
-            }
+                case "json":
+                    string oldJson = JsonDiffHelper.FormatJson((string)oldData);
+                    string newJson = JsonDiffHelper.FormatJson((string)newData);
 
-            try
-            {
-                string extension = Path.GetExtension(diff.Path).ToLowerInvariant();
-                var textExtensions = new[] { ".json", ".txt", ".lua", ".xml", ".yaml", ".yml", ".ini", ".log" };
-                var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tex", ".dds" };
+                    var jsonDiffWindow = App.ServiceProvider.GetRequiredService<JsonDiffWindow>();
+                    _ = jsonDiffWindow.LoadAndDisplayDiffAsync(oldJson, newJson, oldPath, newPath);
+                    jsonDiffWindow.Owner = this;
+                    jsonDiffWindow.Show();
+                    break;
 
-                string oldWadPath = Path.Combine(_oldPbePath, diff.SourceWadFile);
-                string newWadPath = Path.Combine(_newPbePath, diff.SourceWadFile);
-
-                byte[] oldData = null;
-                byte[] newData = null;
-
-                using (var oldWad = new WadFile(oldWadPath))
-                {
-                    if (oldWad.Chunks.TryGetValue(diff.OldPathHash, out WadChunk oldChunk))
-                    {
-                        using (var decompressedChunk = oldWad.LoadChunkDecompressed(oldChunk))
-                        {
-                            oldData = decompressedChunk.Span.ToArray();
-                        }
-                    }
-                }
-
-                using (var newWad = new WadFile(newWadPath))
-                {
-                    if (newWad.Chunks.TryGetValue(diff.NewPathHash, out WadChunk newChunk))
-                    {
-                        using (var decompressedChunk = newWad.LoadChunkDecompressed(newChunk))
-                        {
-                            newData = decompressedChunk.Span.ToArray();
-                        }
-                    }
-                }
-
-                if (oldData == null || newData == null)
-                {
-                    _customMessageBoxService.ShowWarning("Warning", "You cannot search for differences with the old version because the file is new.", this);
-                    return;
-                }
-
-                if (textExtensions.Contains(extension))
-                {
-                    string oldText = Encoding.UTF8.GetString(oldData);
-                    string newText = Encoding.UTF8.GetString(newData);
-
-                    string oldFormatted = JsonDiffHelper.FormatJson(oldText);
-                    string newFormatted = JsonDiffHelper.FormatJson(newText);
-
-                    var diffWindow = App.ServiceProvider.GetRequiredService<JsonDiffWindow>();
-                    _ = diffWindow.LoadAndDisplayDiffAsync(oldFormatted, newFormatted, diff.Path, diff.Path);
-                    diffWindow.Owner = this;
-                    diffWindow.Show();
-                }
-                else if (imageExtensions.Contains(extension))
-                {
-                    var oldImage = ToBitmapSource(oldData, extension);
-                    var newImage = ToBitmapSource(newData, extension);
-
-                    if (oldImage == null || newImage == null)
-                    {
-                        _customMessageBoxService.ShowWarning("Warning", "You cannot search for differences with the old version because the file is new.", this);
-                        return;
-                    }
-
-                    var imageDiffWindow = new ImageDiffWindow(oldImage, newImage, diff.OldPath, diff.NewPath) { Owner = this };
+                case "image":
+                    var imageDiffWindow = new ImageDiffWindow((BitmapSource)oldData, (BitmapSource)newData, oldPath, newPath) { Owner = this };
                     imageDiffWindow.Show();
-                }
-                else
-                {
-                    _customMessageBoxService.ShowInfo("Info", $"File type '{extension}' is not supported for comparison.", this);
-                }
-            }
-            catch (Exception ex)
-            {
-                _customMessageBoxService.ShowError("Error", $"An error occurred while preparing the diff view: {ex.Message}", this);
-            }
-        }
+                    break;
 
-        private BitmapSource ToBitmapSource(byte[] data, string extension)
-        {
-            if (data == null || data.Length == 0) return null;
-
-            if (extension == ".tex" || extension == ".dds")
-            {
-                using (var stream = new MemoryStream(data))
-                {
-                    var texture = LeagueToolkit.Core.Renderer.Texture.Load(stream);
-                    if (texture.Mips.Length == 0) return null;
-
-                    var mainMip = texture.Mips[0];
-                    var width = mainMip.Width;
-                    var height = mainMip.Height;
-
-                    if (mainMip.Span.TryGetSpan(out Span<ColorRgba32> pixelSpan))
-                    {
-                        var pixelByteSpan = MemoryMarshal.AsBytes(pixelSpan);
-                        return BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelByteSpan.ToArray(), width * 4);
-                    }
-
-                    return null; // Should not happen with how Texture is created
-                }
-            }
-            else
-            {
-                using (var stream = new MemoryStream(data))
-                {
-                    var bitmapImage = new BitmapImage();
-                    bitmapImage.BeginInit();
-                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmapImage.StreamSource = stream;
-                    bitmapImage.EndInit();
-                    bitmapImage.Freeze();
-                    return bitmapImage;
-                }
+                case "unsupported":
+                case "error":
+                    // The service already shows a message box in these cases.
+                    break;
             }
         }
 
@@ -388,17 +289,14 @@ namespace PBE_AssetsManager.Views.Dialogs
 
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
-            // Get the ContextMenu instance from the sender
             var contextMenu = sender as ContextMenu;
             if (contextMenu == null) return;
 
-            // Find the "Download Selected" MenuItem dynamically by its header.
-            // This is more robust than relying on a fixed index, which was causing crashes.
             var downloadMenuItem = contextMenu.Items.OfType<MenuItem>()
                                                     .FirstOrDefault(m => "Download Selected".Equals(m.Header as string));
             if (downloadMenuItem != null)
             {
-                downloadMenuItem.IsEnabled = false; // Default to disabled
+                downloadMenuItem.IsEnabled = false;
 
                 if (resultsTreeView.SelectedItem == null) return;
 

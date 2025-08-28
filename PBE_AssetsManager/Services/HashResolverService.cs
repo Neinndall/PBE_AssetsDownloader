@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -9,6 +10,11 @@ namespace PBE_AssetsManager.Services
     public class HashResolverService
     {
         private readonly Dictionary<ulong, string> _hashToPathMap = new Dictionary<ulong, string>();
+        private readonly Dictionary<uint, string> _binHashesMap = new Dictionary<uint, string>();
+        private readonly Dictionary<uint, string> _binEntriesMap = new Dictionary<uint, string>();
+        private readonly Dictionary<uint, string> _binFieldsMap = new Dictionary<uint, string>();
+        private readonly Dictionary<uint, string> _binTypesMap = new Dictionary<uint, string>();
+
         private readonly DirectoriesCreator _directoriesCreator;
 
         public HashResolverService(DirectoriesCreator directoriesCreator)
@@ -25,15 +31,34 @@ namespace PBE_AssetsManager.Services
             var gameHashesFile = Path.Combine(newHashesDir, "hashes.game.txt");
             var lcuHashesFile = Path.Combine(newHashesDir, "hashes.lcu.txt");
 
-            await LoadHashesFromFile(gameHashesFile);
-            await LoadHashesFromFile(lcuHashesFile);
+            await LoadHashesFromFile(gameHashesFile, _hashToPathMap, text => (ulong.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out ulong hash), hash));
+            await LoadHashesFromFile(lcuHashesFile, _hashToPathMap, text => (ulong.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out ulong hash), hash));
         }
 
-        private async Task LoadHashesFromFile(string filePath)
+        public async Task LoadBinHashesAsync()
+        {
+            _binHashesMap.Clear();
+            _binEntriesMap.Clear();
+            _binFieldsMap.Clear();
+            _binTypesMap.Clear();
+
+            var binHashesDir = _directoriesCreator.BinHashesPath;
+
+            var binHashesFile = Path.Combine(binHashesDir, "hashes.binhashes.txt");
+            var binEntriesFile = Path.Combine(binHashesDir, "hashes.binentries.txt");
+            var binFieldsFile = Path.Combine(binHashesDir, "hashes.binfields.txt");
+            var binTypesFile = Path.Combine(binHashesDir, "hashes.bintypes.txt");
+
+            await LoadHashesFromFile(binHashesFile, _binHashesMap, text => (uint.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out uint hash), hash));
+            await LoadHashesFromFile(binEntriesFile, _binEntriesMap, text => (uint.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out uint hash), hash));
+            await LoadHashesFromFile(binFieldsFile, _binFieldsMap, text => (uint.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out uint hash), hash));
+            await LoadHashesFromFile(binTypesFile, _binTypesMap, text => (uint.TryParse(text, System.Globalization.NumberStyles.HexNumber, null, out uint hash), hash));
+        }
+
+        private async Task LoadHashesFromFile<T>(string filePath, IDictionary<T, string> map, Func<string, (bool, T)> parser)
         {
             if (!File.Exists(filePath))
             {
-                // Log or handle the case where the file doesn't exist
                 return;
             }
 
@@ -43,10 +68,14 @@ namespace PBE_AssetsManager.Services
                 foreach (var line in lines)
                 {
                     var parts = line.Trim().Split(' ');
-                    if (parts.Length == 2 && ulong.TryParse(parts[0], System.Globalization.NumberStyles.HexNumber, null, out ulong hash))
+                    if (parts.Length == 2)
                     {
-                        var path = parts[1];
-                        _hashToPathMap[hash] = path;
+                        var (success, hash) = parser(parts[0]);
+                        if (success)
+                        {
+                            var path = parts[1];
+                            map[hash] = path;
+                        }
                     }
                 }
             });
@@ -55,6 +84,20 @@ namespace PBE_AssetsManager.Services
         public string ResolveHash(ulong pathHash)
         {
             return _hashToPathMap.TryGetValue(pathHash, out var path) ? path : pathHash.ToString("x16");
+        }
+
+        public string ResolveBinHash(uint hash) => _binHashesMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
+        public string ResolveBinEntry(uint hash) => _binEntriesMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
+        public string ResolveBinField(uint hash) => _binFieldsMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
+        public string ResolveBinType(uint hash) => _binTypesMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
+
+        public string ResolveBinHashGeneral(uint hash)
+        {
+            if (_binEntriesMap.TryGetValue(hash, out var path)) return path;
+            if (_binFieldsMap.TryGetValue(hash, out path)) return path;
+            if (_binTypesMap.TryGetValue(hash, out path)) return path;
+            if (_binHashesMap.TryGetValue(hash, out path)) return path;
+            return hash.ToString("x8");
         }
     }
 }

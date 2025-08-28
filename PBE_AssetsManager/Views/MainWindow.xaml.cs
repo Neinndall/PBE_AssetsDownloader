@@ -26,6 +26,8 @@ namespace PBE_AssetsManager.Views
         private readonly WadComparatorService _wadComparatorService;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly HashResolverService _hashResolverService;
+        private readonly WadDifferenceService _wadDifferenceService;
 
         private Timer _updateTimer;
         private Storyboard _spinningIconAnimationStoryboard;
@@ -43,7 +45,9 @@ namespace PBE_AssetsManager.Views
             AssetDownloader assetDownloader,
             WadComparatorService wadComparatorService,
             DirectoriesCreator directoriesCreator,
-            CustomMessageBoxService customMessageBoxService)
+            CustomMessageBoxService customMessageBoxService,
+            HashResolverService hashResolverService,
+            WadDifferenceService wadDifferenceService)
         {
             InitializeComponent();
 
@@ -57,6 +61,8 @@ namespace PBE_AssetsManager.Views
             _wadComparatorService = wadComparatorService;
             _directoriesCreator = directoriesCreator;
             _customMessageBoxService = customMessageBoxService;
+            _hashResolverService = hashResolverService;
+            _wadDifferenceService = wadDifferenceService;
 
             _logService.SetLogOutput(LogView.richTextBoxLogs);
 
@@ -243,7 +249,7 @@ namespace PBE_AssetsManager.Views
 
                 if (allDiffs != null)
                 {
-                    var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, oldPbePath, newPbePath);
+                    var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, oldPbePath, newPbePath);
                     resultWindow.Owner = this;
                     resultWindow.Show();
                 }

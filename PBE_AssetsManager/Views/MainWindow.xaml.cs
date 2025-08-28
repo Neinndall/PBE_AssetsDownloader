@@ -249,7 +249,8 @@ namespace PBE_AssetsManager.Views
 
                 if (allDiffs != null)
                 {
-                    var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, oldPbePath, newPbePath);
+                    var wadPackagingService = _serviceProvider.GetRequiredService<WadPackagingService>();
+                    var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, wadPackagingService, oldPbePath, newPbePath);
                     resultWindow.Owner = this;
                     resultWindow.Show();
                 }

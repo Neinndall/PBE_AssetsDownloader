@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using PBE_AssetsManager.Views.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -44,10 +45,12 @@ namespace PBE_AssetsManager.Views.Dialogs
         private readonly AssetDownloader _assetDownloaderService;
         private readonly LogService _logService;
         private readonly WadDifferenceService _wadDifferenceService;
+        private readonly WadPackagingService _wadPackagingService;
         private readonly string _oldPbePath;
         private readonly string _newPbePath;
+        private readonly string _sourceJsonPath; // Path to the loaded wadcomparison.json
 
-        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, string oldPbePath, string newPbePath)
+        public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
@@ -55,8 +58,10 @@ namespace PBE_AssetsManager.Views.Dialogs
             _assetDownloaderService = assetDownloaderService;
             _logService = logService;
             _wadDifferenceService = wadDifferenceService;
+            _wadPackagingService = wadPackagingService;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
+            _sourceJsonPath = null; // Not loaded from a file
             _serializableDiffs = diffs.Select(d => new SerializableChunkDiff
             {
                 Type = d.Type,
@@ -66,12 +71,14 @@ namespace PBE_AssetsManager.Views.Dialogs
                 OldPathHash = d.OldChunk.PathHash,
                 NewPathHash = d.NewChunk.PathHash,
                 OldUncompressedSize = (d.Type == ChunkDiffType.New) ? (ulong?)null : (ulong)d.OldChunk.UncompressedSize,
-                NewUncompressedSize = (d.Type == ChunkDiffType.Removed) ? (ulong?)null : (ulong)d.NewChunk.UncompressedSize
+                NewUncompressedSize = (d.Type == ChunkDiffType.Removed) ? (ulong?)null : (ulong)d.NewChunk.UncompressedSize,
+                OldCompressionType = (d.Type == ChunkDiffType.New) ? null : d.OldChunk.Compression,
+                NewCompressionType = (d.Type == ChunkDiffType.Removed) ? null : d.NewChunk.Compression
             }).ToList();
             PopulateResults(_serializableDiffs);
         }
 
-        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, string oldPbePath = null, string newPbePath = null)
+        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, string oldPbePath = null, string newPbePath = null, string sourceJsonPath = null)
         {
             InitializeComponent();
             _customMessageBoxService = customMessageBoxService;
@@ -79,9 +86,11 @@ namespace PBE_AssetsManager.Views.Dialogs
             _assetDownloaderService = assetDownloaderService;
             _logService = logService;
             _wadDifferenceService = wadDifferenceService;
+            _wadPackagingService = wadPackagingService;
             _serializableDiffs = serializableDiffs;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
+            _sourceJsonPath = sourceJsonPath; // Store the path of the loaded file
             PopulateResults(_serializableDiffs);
         }
 
@@ -197,20 +206,32 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_sourceJsonPath != null)
+            {
+                _customMessageBoxService.ShowInfo("Info", "This result is already saved.", this);
+                return;
+            }
+
             try
             {
-                string saveFolderPath = _directoriesCreator.WadComparisonSavePath;
+                // 1. Create unique directory structure for this comparison
+                string baseSavePath = _directoriesCreator.WadComparisonSavePath;
+                string comparisonDirName = $"Comparison_{DateTime.Now:yyyyMMdd_HHmmss}";
+                string comparisonFullPath = Path.Combine(baseSavePath, comparisonDirName);
+                string oldChunksPath = Path.Combine(comparisonFullPath, "wad_chunks", "old");
+                string newChunksPath = Path.Combine(comparisonFullPath, "wad_chunks", "new");
+                Directory.CreateDirectory(oldChunksPath);
+                Directory.CreateDirectory(newChunksPath);
 
-                if (!Directory.Exists(saveFolderPath))
-                {
-                    Directory.CreateDirectory(saveFolderPath);
-                }
+                // 2. Create lean WAD package
+                _logService.Log("Starting lean WAD packaging process...");
+                _wadPackagingService.CreateLeanWadPackage(_serializableDiffs, _oldPbePath, _newPbePath, oldChunksPath, newChunksPath);
+                _logService.LogSuccess("Finished lean WAD packaging process.");
 
-                string fileName = $"WadComparison_{DateTime.Now:yyyyMMdd_HHmmss}.json";
-                string fullPath = Path.Combine(saveFolderPath, fileName);
-
+                // 3. Save the wadcomparison.json file
+                string jsonFilePath = Path.Combine(comparisonFullPath, "wadcomparison.json");
                 var options = new JsonSerializerOptions
                 {
                     WriteIndented = true,
@@ -218,18 +239,21 @@ namespace PBE_AssetsManager.Views.Dialogs
                 };
                 var comparisonResult = new SerializableComparisonResult
                 {
+                    // We save the original PBE paths for informational purposes
                     OldPbePath = _oldPbePath,
                     NewPbePath = _newPbePath,
                     Diffs = _serializableDiffs
                 };
-
                 var json = JsonSerializer.Serialize(comparisonResult, options);
-                File.WriteAllText(fullPath, json);
-                _customMessageBoxService.ShowSuccess("Success", $"Results saved successfully to: {fullPath}", this);
+                await File.WriteAllTextAsync(jsonFilePath, json);
+
+                _logService.Log("Finished saving comparison WAD files.");
+                _customMessageBoxService.ShowSuccess("Success", $"Results and associated WAD files saved successfully to: {comparisonFullPath}", this);
             }
             catch (Exception ex)
             {
                 _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this);
+                _logService.LogError(ex, "Failed to save comparison results.");
             }
         }
 
@@ -237,6 +261,13 @@ namespace PBE_AssetsManager.Views.Dialogs
         {
             if (resultsTreeView.SelectedItem is not SerializableChunkDiff diff)
             {
+                return;
+            }
+
+            // This method now works consistently whether the paths are to a PBE directory or a saved wad_files directory.
+            if (string.IsNullOrEmpty(_oldPbePath) || string.IsNullOrEmpty(_newPbePath))
+            {
+                _customMessageBoxService.ShowInfo("Info", "The paths to the PBE or saved WAD directories are missing.", this);
                 return;
             }
 
@@ -255,7 +286,7 @@ namespace PBE_AssetsManager.Views.Dialogs
                     break;
 
                 case "image":
-                    var imageDiffWindow = new ImageDiffWindow((BitmapSource)oldData, (BitmapSource)newData, oldPath, newPath) { Owner = this };
+                    var imageDiffWindow = new ImageDiffWindow((BitmapSource)newData, (BitmapSource)newData, oldPath, newPath) { Owner = this };
                     imageDiffWindow.Show();
                     break;
 

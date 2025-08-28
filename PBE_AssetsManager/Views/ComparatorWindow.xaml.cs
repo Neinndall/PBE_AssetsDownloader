@@ -25,11 +25,12 @@ namespace PBE_AssetsManager.Views
         private readonly AssetDownloader _assetDownloaderService;
         private readonly HashResolverService _hashResolverService;
         private readonly WadDifferenceService _wadDifferenceService;
+        private readonly WadPackagingService _wadPackagingService;
         private readonly BackupManager _backupManager;
         private string _oldPbePath;
         private string _newPbePath;
 
-        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, HashResolverService hashResolverService, WadDifferenceService wadDifferenceService, BackupManager backupManager)
+        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, HashResolverService hashResolverService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, BackupManager backupManager)
         {
             InitializeComponent();
             _wadComparatorService = wadComparatorService;
@@ -39,6 +40,7 @@ namespace PBE_AssetsManager.Views
             _assetDownloaderService = assetDownloaderService;
             _hashResolverService = hashResolverService;
             _wadDifferenceService = wadDifferenceService;
+            _wadPackagingService = wadPackagingService;
             _backupManager = backupManager;
         }
 
@@ -196,36 +198,51 @@ namespace PBE_AssetsManager.Views
         {
             var openFileDialog = new OpenFileDialog
             {
-                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
-                Title = "Load Comparison Results"
+                Filter = "WAD Comparison JSON (*.json)|*.json",
+                Title = "Load WAD Comparison Results"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() != true) return;
+
+            try
             {
-                try
-                {
-                    var json = File.ReadAllText(openFileDialog.FileName);
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
-                    var loadedResult = JsonSerializer.Deserialize<SerializableComparisonResult>(json, options);
+                string jsonPath = openFileDialog.FileName;
+                string jsonContent = File.ReadAllText(jsonPath);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } };
+                var loadedResult = JsonSerializer.Deserialize<SerializableComparisonResult>(jsonContent, options);
 
-                    if (loadedResult == null || loadedResult.Diffs == null)
-                    {
-                        _customMessageBoxService.ShowError("Error", "Failed to load or parse the results file: Invalid format.", Window.GetWindow(this));
-                        return;
-                    }
-
-                    var resultWindow = new WadComparisonResultWindow(loadedResult.Diffs, _customMessageBoxService, _directoriesCreator, _assetDownloaderService, _logService, _wadDifferenceService, loadedResult.OldPbePath, loadedResult.NewPbePath);
-                    resultWindow.Show();
-                }
-                catch (Exception ex)
+                if (loadedResult == null || loadedResult.Diffs == null)
                 {
-                    _logService.LogError(ex, "Failed to load comparison results.");
-                    _customMessageBoxService.ShowError("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this));
+                    _customMessageBoxService.ShowError("Error", "Failed to load or parse the results file: Invalid format.", Window.GetWindow(this));
+                    return;
                 }
+
+                string comparisonDir = Path.GetDirectoryName(jsonPath);
+                string oldChunksPath = Path.Combine(comparisonDir, "wad_chunks", "old");
+                string newChunksPath = Path.Combine(comparisonDir, "wad_chunks", "new");
+
+                string oldPathToUse;
+                string newPathToUse;
+
+                if (Directory.Exists(oldChunksPath) && Directory.Exists(newChunksPath))
+                {
+                    oldPathToUse = oldChunksPath;
+                    newPathToUse = newChunksPath;
+                }
+                else
+                {
+                    _customMessageBoxService.ShowWarning("Warning", "Could not find the 'wad_chunks' directory. Viewing differences might fail if the original PBE directories are not present.", Window.GetWindow(this));
+                    oldPathToUse = loadedResult.OldPbePath;
+                    newPathToUse = loadedResult.NewPbePath;
+                }
+
+                var resultWindow = new WadComparisonResultWindow(loadedResult.Diffs, _customMessageBoxService, _directoriesCreator, _assetDownloaderService, _logService, _wadDifferenceService, _wadPackagingService, oldPathToUse, newPathToUse, jsonPath);
+                resultWindow.Show();
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "Failed to load comparison results.");
+                _customMessageBoxService.ShowError("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this));
             }
         }
     }

@@ -62,8 +62,7 @@ namespace PBE_AssetsManager.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError($"The folder could not be processed: {directory}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"DirectoryCleaner.DeleteEmptyDirectoriesRecursively Exception for directory: {directory}");
+                _logService.LogError(ex, $"The folder could not be processed: {directory}.");
             }
         }
     }

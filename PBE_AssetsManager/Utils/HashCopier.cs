@@ -50,8 +50,7 @@ namespace PBE_AssetsManager.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError("An error occurred while copying hashes. See application_errors.log for details.");
-                _logService.LogCritical(ex, "HashCopier.CopyNewHashesToOlds Exception");
+                _logService.LogError(ex, "An error occurred while copying hashes.");
                 return "An error occurred while copying hashes.";
             }
         }
@@ -85,8 +84,7 @@ namespace PBE_AssetsManager.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError("Error copying directory. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"HashCopier.DirectoryCopy Exception from '{sourceDirName}' to '{destDirName}'");
+                _logService.LogError(ex, $"Error copying directory from '{sourceDirName}' to '{destDirName}'.");
                 throw new InvalidOperationException("Error copying directory", ex);
             }
         }

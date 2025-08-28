@@ -50,8 +50,7 @@ namespace PBE_AssetsManager.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError("Error occurred while creating BackupManager. See application_errors.log for details.");
-                _logService.LogCritical(ex, "BackupManager.CopyFilesToBackUp Exception");
+                _logService.LogError(ex, "Error occurred while creating hash backup");
                 return string.Empty;
             }
         }
@@ -72,7 +71,7 @@ namespace PBE_AssetsManager.Utils
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogCritical(ex, $"PBE_AssetsManager.Utils.BackupManager.CreatePbeDirectoryBackupAsync Exception for source: {sourcePbePath}, destination: {destinationBackupPath}");
+                    _logService.LogError(ex, $"PBE_AssetsManager.Utils.BackupManager.CreatePbeDirectoryBackupAsync Exception for source: {sourcePbePath}, destination: {destinationBackupPath}");
                     throw; // Re-throw the exception after logging
                 }
             });

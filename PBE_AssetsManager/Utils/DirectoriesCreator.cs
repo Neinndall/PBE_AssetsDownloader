@@ -131,8 +131,7 @@ namespace PBE_AssetsManager.Utils
             catch (Exception ex)
             {
                 // Usar interpolación de cadenas para el mensaje
-                _logService.LogError($"Error during directory creation for path: {path}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Error during directory creation for path: {path}");
+                _logService.LogError(ex, $"Error during directory creation for path: {path}.");
             }
 
             return Task.CompletedTask;

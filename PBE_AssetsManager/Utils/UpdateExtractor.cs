@@ -114,8 +114,7 @@ namespace PBE_AssetsManager.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError("An error occurred during the update extraction process. See application_errors.log for details.");
-                _logService.LogCritical(ex, "UpdateExtractor.ExtractAndRestart Exception");
+                _logService.LogError(ex, "An error occurred during the update extraction process.");
                 MessageBox.Show($"Error during update: {ex.Message}", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

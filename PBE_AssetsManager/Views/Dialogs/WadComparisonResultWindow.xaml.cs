@@ -332,7 +332,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             catch (Exception ex)
             {
                 _customMessageBoxService.ShowError("Error", $"An error occurred during download: {ex.Message}", this);
-                _logService.LogError($"Download failed: {ex.ToString()}");
+                _logService.LogError(ex, "Download failed.");
             }
         }
 

@@ -84,8 +84,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError("Error checking for updates. See application_errors.log for details.");
-                _logService.LogCritical(ex, "Status.IsUpdatedAsync Exception");
+                _logService.LogError(ex, "Error checking for updates.");
                 return false;
             }
         }

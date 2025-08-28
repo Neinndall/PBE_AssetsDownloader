@@ -50,8 +50,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError("A critical error occurred during the extraction process. See application_errors.log for details.");
-                _logService.LogCritical(ex, "ExtractionService.ExecuteAsync Exception");
+                _logService.LogError(ex, "A critical error occurred during the extraction process");
             }
         }
     }

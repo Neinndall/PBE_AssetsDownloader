@@ -219,7 +219,7 @@ namespace PBE_AssetsManager.Services
 
             if (logEntry.Exception != null)
             {
-                var exceptionDetailRun = new Run($" (Error: {logEntry.Exception.Message})")
+                var exceptionDetailRun = new Run(" See application_errors.log for more details.")
                 {
                     Foreground = Brushes.OrangeRed,
                     FontStyle = FontStyles.Italic

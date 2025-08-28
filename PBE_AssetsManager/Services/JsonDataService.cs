@@ -62,14 +62,12 @@ namespace PBE_AssetsManager.Services
             }
             catch (HttpRequestException httpEx)
             {
-                _logService.LogError($"HTTP request failed for '{statusUrl}'. See application_errors.log for details.");
-                _logService.LogCritical(httpEx, $"JsonDataService.GetRemoteHashesSizesAsync HttpRequestException for URL: {statusUrl}");
+                _logService.LogError(httpEx, $"HTTP request failed for '{statusUrl}'.");
                 return result;
             }
             catch (Exception ex)
             {
-                _logService.LogError($"An unexpected exception occurred fetching URL '{statusUrl}'. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"JsonDataService.GetRemoteHashesSizesAsync Exception for URL: {statusUrl}");
+                _logService.LogError(ex, $"An unexpected exception occurred fetching URL '{statusUrl}'.");
                 return result;
             }
 
@@ -147,8 +145,7 @@ namespace PBE_AssetsManager.Services
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError($"Error processing monitored directory URL: {url}. See application_errors.log for details.");
-                        _logService.LogCritical(ex, $"JsonDataService.CheckJsonDataUpdates Exception for directory URL: {url}");
+                        _logService.LogError(ex, $"Error processing monitored directory URL: {url}.");
                     }
                 }
             }
@@ -200,8 +197,7 @@ namespace PBE_AssetsManager.Services
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError($"Error fetching or parsing parent directory {parentDirectoryUrl} for file {url}. See application_errors.log for details.");
-                        _logService.LogCritical(ex, $"JsonDataService.CheckJsonDataUpdates Exception for file URL: {url}");
+                        _logService.LogError(ex, $"Error fetching or parsing parent directory {parentDirectoryUrl} for file {url}.");
                     }
                 }
             }
@@ -295,8 +291,7 @@ namespace PBE_AssetsManager.Services
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError($"Error processing JSON content for {fullUrl}. See application_errors.log for details.");
-                        _logService.LogCritical(ex, $"JsonDataService.CheckJsonDataUpdates Exception for URL: {fullUrl}");
+                        _logService.LogError(ex, $"Error processing JSON content for {fullUrl}.");
                         wasUpdated = false;
                     }
                 }

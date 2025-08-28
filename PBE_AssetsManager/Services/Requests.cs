@@ -42,9 +42,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError(
-                    $"Exception downloading {fileName}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Requests.DownloadHashesAsync Exception for file: {fileName}");
+                _logService.LogError(ex, $"Exception downloading {fileName}.");
             }
         }
 
@@ -90,8 +88,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Error downloading JSON from {url}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Requests.DownloadJsonContentAsync Exception for URL: {url}");
+                _logService.LogError(ex, $"Error downloading JSON from {url}.");
                 return null;
             }
         }

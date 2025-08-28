@@ -34,11 +34,15 @@ namespace PBE_AssetsManager
                 .MinimumLevel.Debug()
                 .WriteTo.Debug()
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Information && e.Level < LogEventLevel.Fatal) // Filter to include Information, Warning, Error, but NOT Fatal
-                    .WriteTo.File("logs/application.log", rollingInterval: RollingInterval.Day))
+                    .Filter.ByIncludingOnly(e => e.Level < LogEventLevel.Fatal) // Information, Warning, Error
+                    .WriteTo.File("logs/application.log", 
+                        rollingInterval: RollingInterval.Day,
+                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}"))
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal) // Include only Fatal
-                    .WriteTo.File("logs/application_errors.log", rollingInterval: RollingInterval.Day))
+                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error) // Error, Fatal
+                    .WriteTo.File("logs/application_errors.log", 
+                        rollingInterval: RollingInterval.Day,
+                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"))
                 .CreateLogger();
 
             Log.Logger = logger; // Assign the logger to the static Log.Logger
@@ -59,7 +63,7 @@ namespace PBE_AssetsManager
             services.AddSingleton<HashesManager>();
             services.AddSingleton<Resources>();
             services.AddSingleton<DirectoryCleaner>();
-            services.AddSingleton<HashBackUp>();
+            services.AddSingleton<BackupManager>();
             services.AddSingleton<HashCopier>();
             services.AddSingleton<WadComparatorService>();
             services.AddSingleton<HashResolverService>();
@@ -103,9 +107,7 @@ namespace PBE_AssetsManager
 
             var logService = ServiceProvider.GetRequiredService<LogService>();
             var customMessageBoxService = ServiceProvider.GetRequiredService<CustomMessageBoxService>();
-
             
-
             SetupGlobalExceptionHandling(logService, customMessageBoxService);
 
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();

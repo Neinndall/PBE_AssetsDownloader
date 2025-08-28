@@ -154,8 +154,7 @@ namespace PBE_AssetsManager.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError("Error checking for updates in UpdateManager. See application_errors.log for details.");
-                _logService.LogCritical(ex, "UpdateManager.CheckForUpdatesAsync Exception");
+                _logService.LogError(ex, "Error checking for updates in UpdateManager.");
                 _customMessageBoxService.ShowError("Error", "Error checking for updates:\n" + ex.Message, owner);
             }
         }
@@ -191,8 +190,7 @@ namespace PBE_AssetsManager.Utils
             }
             catch (Exception ex)
             {
-                _logService.LogError("Error checking for new version in IsNewVersionAvailableAsync. See application_errors.log for details.");
-                _logService.LogCritical(ex, "UpdateManager.IsNewVersionAvailableAsync Exception");
+                _logService.LogError(ex, "Error checking for new version in IsNewVersionAvailableAsync.");
             }
 
             return (false, null);

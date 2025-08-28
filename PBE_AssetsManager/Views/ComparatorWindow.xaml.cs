@@ -48,7 +48,7 @@ namespace PBE_AssetsManager.Views
 
             if (!Directory.Exists(sourcePbePath))
             {
-                _customMessageBoxService.ShowError("Error", $"El directorio PBE fijo para la copia de seguridad no existe: {sourcePbePath}", Window.GetWindow(this));
+                _customMessageBoxService.ShowError("Error", $"PBE directory for backup does not exist: {sourcePbePath}", Window.GetWindow(this));
                 return;
             }
 
@@ -63,12 +63,12 @@ namespace PBE_AssetsManager.Views
             }
             catch (DirectoryNotFoundException ex)
             {
-                _logService.LogError($"Error creating PBE directory backup: {ex.Message}");
+                _logService.LogError(ex, "Error creating PBE directory backup");
                 _customMessageBoxService.ShowError("Error", ex.Message, Window.GetWindow(this));
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Error creating PBE directory backup: {ex.Message}");
+                _logService.LogError(ex, "Error creating PBE directory backup");
                 _customMessageBoxService.ShowError("Error", $"An unexpected error occurred while creating the backup: {ex.Message}", Window.GetWindow(this));
             }
             finally
@@ -187,7 +187,7 @@ namespace PBE_AssetsManager.Views
             }
             catch (Exception ex)
             {
-                _logService.LogError($"An error occurred during comparison: {ex.Message}");
+                _logService.LogError(ex, "An error occurred during comparison.");
                 _customMessageBoxService.ShowError("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this));
             }
         }
@@ -223,7 +223,7 @@ namespace PBE_AssetsManager.Views
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogError($"Failed to load comparison results: {ex.Message}");
+                    _logService.LogError(ex, "Failed to load comparison results.");
                     _customMessageBoxService.ShowError("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this));
                 }
             }

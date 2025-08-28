@@ -76,8 +76,7 @@ namespace PBE_AssetsManager.Services
       }
       catch (Exception ex)
       {
-        _logService.LogError($"Error reading hash file: {path}. See application_errors.log for details.");
-        _logService.LogCritical(ex, $"HashesManager.TryReadAllLinesAsync Exception for path: {path}");
+        _logService.LogError(ex, $"Error reading hash file: {path}");
         return Array.Empty<string>();
       }
     }
@@ -122,8 +121,7 @@ namespace PBE_AssetsManager.Services
         }
         catch (Exception ex)
         {
-            _logService.LogError($"Error filtering GAME line '{line}'. See application_errors.log for details.");
-            _logService.LogCritical(ex, $"HashesManager.FilterAndSaveDifferencesAsync GAME Exception for line: {line}");
+            _logService.LogError(ex, $"Error filtering GAME line '{line}'");
         }
       });
 
@@ -144,8 +142,7 @@ namespace PBE_AssetsManager.Services
         }
         catch (Exception ex)
         {
-            _logService.LogError($"Error filtering LCU line '{line}'. See application_errors.log for details.");
-            _logService.LogCritical(ex, $"HashesManager.FilterAndSaveDifferencesAsync LCU Exception for line: {line}");
+            _logService.LogError(ex, $"Error filtering LCU line '{line}'");
         }
       });
 
@@ -156,8 +153,7 @@ namespace PBE_AssetsManager.Services
       }
       catch (Exception ex)
       {
-        _logService.LogError($"Error saving game differences. See application_errors.log for details.");
-        _logService.LogCritical(ex, "HashesManager.FilterAndSaveDifferencesAsync Save Game Diffs Exception");
+        _logService.LogError(ex, "Error saving game differences");
       }
 
       try
@@ -167,8 +163,7 @@ namespace PBE_AssetsManager.Services
       }
       catch (Exception ex)
       {
-        _logService.LogError($"Error saving LCU differences. See application_errors.log for details.");
-        _logService.LogCritical(ex, "HashesManager.FilterAndSaveDifferencesAsync Save LCU Diffs Exception");
+        _logService.LogError(ex, "Error saving LCU differences");
       }
     }
   }

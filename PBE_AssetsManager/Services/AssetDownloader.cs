@@ -103,9 +103,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                string errorMsg = $"Error downloading {url}. See application_errors.log for details.";
-                _logService.LogError(errorMsg);
-                _logService.LogCritical(ex, $"AssetDownloader.DownloadFileAsync Exception for URL: {url}");
+                _logService.LogError(ex, $"Error downloading {url}");
                 return (false, ex.Message);
             }
         }
@@ -127,8 +125,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Error downloading text content from {assetUrl}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"AssetDownloader.DownloadAssetTextAsync Exception for URL: {assetUrl}");
+                _logService.LogError(ex, $"Error downloading text content from {assetUrl}");
                 return null;
             }
         }
@@ -145,8 +142,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError($"An error occurred while checking {assetUrl}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"AssetDownloader.CheckAssetAvailabilityAsync Exception for URL: {assetUrl}");
+                _logService.LogError(ex, $"An error occurred while checking {assetUrl}");
                 return (false, ex.Message);
             }
         }
@@ -182,8 +178,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Error downloading asset '{assetName}' from {assetUrl}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"AssetDownloader.DownloadAssetIfNeeded Exception for URL: {assetUrl}");
+                _logService.LogError(ex, $"Error downloading asset '{assetName}' from {assetUrl}");
                 return null;
             }
         }
@@ -209,8 +204,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to download asset from {url}. Reason: {ex.Message}");
-                _logService.LogCritical(ex, $"AssetDownloader.DownloadAssetToCustomPathAsync Exception for URL: {url}");
+                _logService.LogError(ex, $"Failed to download asset from {url}");
                 throw; // Re-throw to be caught by the calling method
             }
         }
@@ -265,7 +259,7 @@ namespace PBE_AssetsManager.Services
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogError($"Failed to download {diff.FileName}. Reason: {ex.Message}");
+                    _logService.LogError(ex, $"Failed to download {diff.FileName}");
                     // Continue to next file
                 }
             }

@@ -45,8 +45,7 @@ namespace PBE_AssetsManager.Views.Help
             }
             catch (Exception ex)
             {
-                _logService.LogError("Failed to load or parse changelog.txt. See application_errors.log for details.");
-                _logService.LogCritical(ex, "ChangelogsView.LoadChangelogs Exception");
+                _logService.LogError(ex, "Failed to load or parse changelog.txt.");
             }
         }
 

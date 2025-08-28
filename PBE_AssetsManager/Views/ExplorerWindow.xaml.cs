@@ -83,8 +83,7 @@ namespace PBE_AssetsManager.Views
             }
             catch (Exception ex)
             {
-                _logService.LogError("WebView2 initialization failed. Previews will be affected. See application_errors.log for details.");
-                _logService.LogCritical(ex, "WebView2 Initialization Failed");
+                _logService.LogError(ex, "WebView2 initialization failed. Previews will be affected.");
                 _customMessageBoxService.ShowError("Error", "Could not initialize content viewer. Some previews may not work correctly.", Window.GetWindow(this));
             }
         }
@@ -127,8 +126,7 @@ namespace PBE_AssetsManager.Views
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to load asset directory. See application_errors.log for details.");
-                _logService.LogCritical(ex, "Failed to load asset directory.");
+                _logService.LogError(ex, "Failed to load asset directory.");
             }
         }
 
@@ -236,8 +234,7 @@ namespace PBE_AssetsManager.Views
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to preview file '{selectedNode.FullPath}'. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Failed to preview file '{selectedNode.FullPath}'.");
+                _logService.LogError(ex, $"Failed to preview file '{selectedNode.FullPath}'.");
                 ResetPreview();
             }
         }
@@ -327,8 +324,7 @@ namespace PBE_AssetsManager.Views
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogError($"Failed to delete '{node.FullPath}'. See application_errors.log for details.");
-                    _logService.LogCritical(ex, $"Failed to delete '{node.FullPath}'.");
+                    _logService.LogError(ex, $"Failed to delete '{node.FullPath}'.");
                     _customMessageBoxService.ShowError("Error", $"Could not delete '{node.Name}'.", Window.GetWindow(this));
                 }
             }
@@ -358,8 +354,7 @@ namespace PBE_AssetsManager.Views
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to get info for '{path}'. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"Failed to get info for '{path}'.");
+                _logService.LogError(ex, $"Failed to get info for '{path}'.");
                 _customMessageBoxService.ShowError("Error", $"Could not get information for '{Path.GetFileName(path)}'.", Window.GetWindow(this));
             }
         }

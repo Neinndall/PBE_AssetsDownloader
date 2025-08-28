@@ -76,7 +76,7 @@ namespace PBE_AssetsManager.Services
             }
             catch (Exception ex)
             {
-                _logService.LogError($"An error occurred during WAD comparison: {ex.Message}");
+                _logService.LogError(ex, "An error occurred during WAD comparison.");
             }
             finally
             {

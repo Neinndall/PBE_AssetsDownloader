@@ -140,8 +140,7 @@ namespace PBE_AssetsManager.Views.Settings
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogError($"Error opening diff for {selectedEntry.FileName}. See application_errors.log for details.");
-                    _logService.LogCritical(ex, $"AdvancedSettingsView.btnViewDiff_Click Exception for file: {selectedEntry.FileName}");
+                    _logService.LogError(ex, $"Error opening diff for {selectedEntry.FileName}.");
                     _customMessageBoxService.ShowError("Error", "Could not open diff view. Please check the logs for details.", Window.GetWindow(this));
                 }
             }
@@ -178,8 +177,7 @@ namespace PBE_AssetsManager.Views.Settings
                     catch (Exception ex)
                     {
                         string directoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
-                        _logService.LogError($"Error deleting history for {selectedEntry.FileName}. See application_errors.log for details.");
-                        _logService.LogCritical(ex, $"AdvancedSettingsView.btnDeleteSelected_Click Exception for directory: {directoryPath}");
+                        _logService.LogError(ex, $"Error deleting history for {selectedEntry.FileName}.");
                         _customMessageBoxService.ShowInfo("Error", "Could not delete history entry. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
                     }
                 }

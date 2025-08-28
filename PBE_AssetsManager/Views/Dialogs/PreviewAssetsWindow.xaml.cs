@@ -63,8 +63,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
             catch (Exception ex)
             {
-                _logService.LogError("An error occurred while searching assets. See application_errors.log for details.");
-                _logService.LogCritical(ex, "PreviewAssetsWindow.TxtSearch_TextChanged Exception");
+                _logService.LogError(ex, "An error occurred while searching assets.");
             }
         }
 
@@ -134,8 +133,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
             catch (Exception ex)
             {
-                _logService.LogError("A critical error occurred while trying to load assets for preview. See application_errors.log for details.");
-                _logService.LogCritical(ex, "PreviewAssetsWindow.LoadAndDisplayAssets Exception");
+                _logService.LogError(ex, "A critical error occurred while trying to load assets for preview.");
                 _customMessageBoxService.ShowError("Error", "An unexpected error occurred while preparing the asset preview. Please check the logs for more details.", this);
             }
         }
@@ -222,8 +220,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
             catch (Exception ex)
             {
-                _logService.LogError($"An unexpected error occurred while creating the image display for {url}. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"PreviewAssetsWindow.DisplayImage Exception for URL: {url}");
+                _logService.LogError(ex, $"An unexpected error occurred while creating the image display for {url}.");
                 ShowInfoMessage("An error occurred while trying to display the image.");
             }
         }
@@ -247,8 +244,7 @@ namespace PBE_AssetsManager.Views.Dialogs
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError($"Failed to save image to {saveFileDialog.FileName}. See application_errors.log for details.");
-                        _logService.LogCritical(ex, $"PreviewAssetsWindow.MenuItem_Click_SaveAs Exception for file: {saveFileDialog.FileName}");
+                        _logService.LogError(ex, $"Failed to save image to {saveFileDialog.FileName}.");
                         _customMessageBoxService.ShowError("Error", "Failed to save image: {ex.Message}", this);
                     }
                 }
@@ -265,8 +261,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Could not open audio: '{{filePath}}' externally. See application_errors.log for details.");
-                _logService.LogCritical(ex, $"PreviewAssetsWindow.DisplayAudioExternal Exception for file: {{filePath}}");
+                _logService.LogError(ex, $"Could not open audio: '{filePath}' externally.");
             }
         }
 
@@ -280,7 +275,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Could not open video '{{filePath}}' externally. See application_errors.log for details.");
+                _logService.LogError(ex, $"Could not open video '{{filePath}}' externally.");
                 _logService.LogCritical(ex, $"PreviewAssetsWindow.DisplayVideoExternal Exception for file: {{filePath}}");
             }
         }
@@ -308,7 +303,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
             catch (Exception ex)
             {
-                _logService.LogError($"Failed to open {previewData.LocalFilePath} with external program. See application_errors.log for details.");
+                _logService.LogError(ex, $"Failed to open {previewData.LocalFilePath} with external program.");
                 _logService.LogCritical(ex, $"PreviewAssetsWindow.DisplayExternalProgram Exception for file: {previewData.LocalFilePath}");
             }
         }

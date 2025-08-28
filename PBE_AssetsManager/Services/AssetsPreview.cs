@@ -100,9 +100,7 @@ namespace PBE_AssetsManager.Services
                 });
             }
 
-            _logService.LogDebug(
-                $"AssetsPreview: Total assets collected for preview: {allAssets.Count}");
-
+            _logService.LogDebug($"AssetsPreview: Total assets collected for preview: {allAssets.Count}");
             return allAssets;
         }
 
@@ -136,8 +134,7 @@ namespace PBE_AssetsManager.Services
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError("Error checking image availability. See application_errors.log for details.");
-                        _logService.LogCritical(ex, "AssetsPreview.GetPreviewData Image Exception");
+                        _logService.LogError(ex, "Error checking image availability");
 
                         return new PreviewData
                         {
@@ -169,13 +166,12 @@ namespace PBE_AssetsManager.Services
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError("Error downloading text content. See application_errors.log for details.");
-                        _logService.LogCritical(ex, "AssetsPreview.GetPreviewData Text Exception");
+                        _logService.LogError(ex, "Error downloading text content.");
 
                         return new PreviewData
                         {
                             ContentType = AssetContentType.NotFound,
-                            Message = "Error downloading text content."
+                            Message = "Could not download text content."
                         };
                     }
 
@@ -214,3 +210,4 @@ namespace PBE_AssetsManager.Services
         }
     }
 }
+

@@ -66,20 +66,38 @@ namespace PBE_AssetsManager.Views.Help
         private List<ChangelogVersion> ParseChangelog(string text)
         {
             var versions = new List<ChangelogVersion>();
-            var versionBlocks = text.Split(new[] { ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" }, StringSplitOptions.RemoveEmptyEntries);
+            var versionBlocks = text.Split(
+                new[] { ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" },
+                StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var block in versionBlocks)
             {
                 var lines = block.Trim().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 if (lines.Length == 0) continue;
 
+                // Primera línea: nombre y versión (ej: PBE_AssetsManager - League of Legends | v2.2.0.0)
                 var version = new ChangelogVersion { Version = lines[0].Trim() };
                 ChangeGroup currentGroup = null;
 
                 foreach (var line in lines.Skip(1))
                 {
                     var trimmedLine = line.Trim();
-                    if (trimmedLine.StartsWith("["))
+
+                    // Detectar títulos de secciones
+                    bool isGroupTitle =
+                        trimmedLine.StartsWith("[") ||
+                        trimmedLine.Equals("New Features", StringComparison.OrdinalIgnoreCase) ||
+                        trimmedLine.Equals("Improvements", StringComparison.OrdinalIgnoreCase) ||
+                        trimmedLine.Equals("Changes", StringComparison.OrdinalIgnoreCase) ||
+                        trimmedLine.Equals("Bug Fixes", StringComparison.OrdinalIgnoreCase);
+
+                    // Detectar subtítulos de update (Major, Medium, Hotfix)
+                    bool isUpdateTitle =
+                        trimmedLine.Equals("MAJOR UPDATE", StringComparison.OrdinalIgnoreCase) ||
+                        trimmedLine.Equals("MEDIUM UPDATE", StringComparison.OrdinalIgnoreCase) ||
+                        trimmedLine.Equals("HOTFIX UPDATE", StringComparison.OrdinalIgnoreCase);
+
+                    if (isGroupTitle)
                     {
                         var title = trimmedLine.Trim('[', ']');
                         currentGroup = new ChangeGroup { Title = title };
@@ -87,21 +105,39 @@ namespace PBE_AssetsManager.Views.Help
 
                         (currentGroup.Icon, currentGroup.IconColor) = title switch
                         {
-                            "NEW" => (MaterialIconKind.Star, new SolidColorBrush(Colors.Gold)),
-                            "IMPROVEMENTS" => (MaterialIconKind.RocketLaunch, new SolidColorBrush(Colors.LightBlue)),
-                            "BUG FIXES" => (MaterialIconKind.Bug, new SolidColorBrush(Colors.OrangeRed)),
-                            "CHANGES" => (MaterialIconKind.Palette, new SolidColorBrush(Colors.LightGreen)),
+                            "New Features" => (MaterialIconKind.Star, new SolidColorBrush(Colors.Gold)),
+                            "Improvements" => (MaterialIconKind.Flash, new SolidColorBrush(Colors.LightBlue)),
+                            "Changes" => (MaterialIconKind.Build, new SolidColorBrush(Colors.LightGreen)),
+                            "Bug Fixes" => (MaterialIconKind.Bug, new SolidColorBrush(Colors.OrangeRed)),
+                            _ => (MaterialIconKind.Pencil, (SolidColorBrush)System.Windows.Application.Current.FindResource("TextSecondary"))
+                        };
+                    }
+                    else if (isUpdateTitle)
+                    {
+                        // Puedes decidir si lo guardas como "grupo especial" o en otra propiedad
+                        currentGroup = new ChangeGroup { Title = trimmedLine };
+                        version.Groups.Add(currentGroup);
+
+                        (currentGroup.Icon, currentGroup.IconColor) = trimmedLine.ToUpper() switch
+                        {
+                            "MAJOR UPDATE" => (MaterialIconKind.Rocket, new SolidColorBrush(Colors.Orange)),
+                            "MEDIUM UPDATE" => (MaterialIconKind.Update, new SolidColorBrush(Colors.CornflowerBlue)),
+                            "HOTFIX UPDATE" => (MaterialIconKind.Fire, new SolidColorBrush(Colors.Red)),
                             _ => (MaterialIconKind.Pencil, (SolidColorBrush)System.Windows.Application.Current.FindResource("TextSecondary"))
                         };
                     }
                     else if (currentGroup != null && !string.IsNullOrWhiteSpace(trimmedLine))
                     {
+                        // Línea normal (item de changelog)
                         currentGroup.Changes.Add(trimmedLine);
                     }
                 }
+
                 versions.Add(version);
             }
             return versions;
         }
+
+
     }
 }

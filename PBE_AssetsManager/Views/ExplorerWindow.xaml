@@ -65,7 +65,7 @@
                                FontWeight="Bold"
                                Foreground="{StaticResource AccentBlue}"
                                Margin="0,2,0,0"/>
-                    <TextBlock Text="Select a PBE directory to explore its WAD files" 
+                    <TextBlock Text="Select a directory to explore its WAD files" 
                                FontSize="12" 
                                Foreground="{StaticResource TextMuted}"
                                Margin="0,2,0,0"/>
@@ -125,6 +125,7 @@
                               Style="{StaticResource ModernTreeView}">
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
+                                <Setter Property="ContextMenu" Value="{x:Null}" />
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />

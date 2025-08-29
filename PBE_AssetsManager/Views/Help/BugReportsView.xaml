@@ -80,15 +80,15 @@
                            FontSize="13"
                            Foreground="{StaticResource TextSecondary}"
                            LineHeight="20">
-                    To report a bug, you will be taken to GitHub. Please provide as much detail as possible:
-                    <LineBreak/><LineBreak/>
+                    • <Run FontWeight="SemiBold">Provide as much information as possible.</Run>
+                    <LineBreak/>
                     • <Run FontWeight="SemiBold">Description and steps to reproduce.</Run>
                     <LineBreak/>
-                    • <Run FontWeight="SemiBold">Expected vs. actual results.</Run>
+                    • <Run FontWeight="SemiBold">Expected actual results.</Run>
                     <LineBreak/>
                     • <Run FontWeight="SemiBold">Application version and OS.</Run>
                     <LineBreak/>
-                    • <Run FontWeight="SemiBold">Relevant log files</Run> from the `logs` folder.
+                    • <Run FontWeight="SemiBold">Relevant log files</Run> from the logs folder.
                 </TextBlock>
             </StackPanel>
         </Border>

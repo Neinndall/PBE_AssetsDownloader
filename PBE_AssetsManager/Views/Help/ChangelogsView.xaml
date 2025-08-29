@@ -24,7 +24,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Margin="0,0,0,20">
-                        <TextBlock Text="{Binding Version}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,16"/>
+                        <TextBlock Text="{Binding Version}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,16"/>
                         <ItemsControl ItemsSource="{Binding Groups}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -36,7 +36,7 @@
                                                                        Margin="0,0,8,0" 
                                                                        VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding Title}" 
-                                                       FontSize="16" 
+                                                       FontSize="14" 
                                                        FontWeight="Medium" 
                                                        Foreground="{StaticResource TextPrimary}" 
                                                        VerticalAlignment="Center"/>
@@ -45,10 +45,10 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding}" 
-                                                               FontSize="13" 
+                                                               FontSize="12" 
                                                                Foreground="{StaticResource TextSecondary}" 
                                                                TextWrapping="Wrap" 
-                                                               Margin="24,2,0,2"/>
+                                                               Margin="12,2,0,2"/>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>

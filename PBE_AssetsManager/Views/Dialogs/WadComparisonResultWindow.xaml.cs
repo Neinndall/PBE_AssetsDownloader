@@ -216,18 +216,16 @@ namespace PBE_AssetsManager.Views.Dialogs
 
             try
             {
-                // 1. Create unique directory structure for this comparison
-                string baseSavePath = _directoriesCreator.WadComparisonSavePath;
-                string comparisonDirName = $"Comparison_{DateTime.Now:yyyyMMdd_HHmmss}";
-                string comparisonFullPath = Path.Combine(baseSavePath, comparisonDirName);
-                string oldChunksPath = Path.Combine(comparisonFullPath, "wad_chunks", "old");
-                string newChunksPath = Path.Combine(comparisonFullPath, "wad_chunks", "new");
+                // 1. Use the paths from DirectoriesCreator
+                string comparisonFullPath = _directoriesCreator.WadComparisonFullPath;
+                string oldChunksPath = _directoriesCreator.OldChunksPath;
+                string newChunksPath = _directoriesCreator.NewChunksPath;
                 Directory.CreateDirectory(oldChunksPath);
                 Directory.CreateDirectory(newChunksPath);
 
                 // 2. Create lean WAD package
                 _logService.Log("Starting lean WAD packaging process...");
-                _wadPackagingService.CreateLeanWadPackage(_serializableDiffs, _oldPbePath, _newPbePath, oldChunksPath, newChunksPath);
+                await _wadPackagingService.CreateLeanWadPackageAsync(_serializableDiffs, _oldPbePath, _newPbePath, oldChunksPath, newChunksPath);
                 _logService.LogSuccess("Finished lean WAD packaging process.");
 
                 // 3. Save the wadcomparison.json file

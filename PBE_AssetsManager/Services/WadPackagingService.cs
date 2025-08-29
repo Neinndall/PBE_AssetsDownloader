@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using LeagueToolkit.Core.Wad;
 using PBE_AssetsManager.Info;
 
@@ -15,7 +16,7 @@ namespace PBE_AssetsManager.Services
             _logService = logService;
         }
 
-        public void CreateLeanWadPackage(IEnumerable<SerializableChunkDiff> diffs, string oldPbePath, string newPbePath, string targetOldWadsPath, string targetNewWadsPath)
+        public async Task CreateLeanWadPackageAsync(IEnumerable<SerializableChunkDiff> diffs, string oldPbePath, string newPbePath, string targetOldWadsPath, string targetNewWadsPath)
         {
             var diffsByWad = diffs.GroupBy(d => d.SourceWadFile);
 
@@ -32,7 +33,7 @@ namespace PBE_AssetsManager.Services
                         .Where(d => d.Type == ChunkDiffType.Modified || d.Type == ChunkDiffType.Renamed || d.Type == ChunkDiffType.Removed)
                         .Select(d => d.OldPathHash)
                         .Distinct();
-                    SaveChunksFromWad(sourceOldWadPath, targetOldWadsPath, oldChunksToSave);
+                    await SaveChunksFromWadAsync(sourceOldWadPath, targetOldWadsPath, oldChunksToSave);
                 }
 
                 // --- Handle NEW chunks ---
@@ -43,17 +44,17 @@ namespace PBE_AssetsManager.Services
                         .Where(d => d.Type == ChunkDiffType.Modified || d.Type == ChunkDiffType.Renamed || d.Type == ChunkDiffType.New)
                         .Select(d => d.NewPathHash)
                         .Distinct();
-                    SaveChunksFromWad(sourceNewWadPath, targetNewWadsPath, newChunksToSave);
+                    await SaveChunksFromWadAsync(sourceNewWadPath, targetNewWadsPath, newChunksToSave);
                 }
             }
         }
 
-        private void SaveChunksFromWad(string sourceWadPath, string targetChunkPath, IEnumerable<ulong> chunkHashes)
+        private async Task SaveChunksFromWadAsync(string sourceWadPath, string targetChunkPath, IEnumerable<ulong> chunkHashes)
         {
             try
             {
                 using var sourceWad = new WadFile(sourceWadPath);
-                using var fs = new FileStream(sourceWadPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                await using var fs = new FileStream(sourceWadPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
 
                 foreach (var hash in chunkHashes)
                 {
@@ -61,13 +62,13 @@ namespace PBE_AssetsManager.Services
                     {
                         fs.Seek(chunk.DataOffset, SeekOrigin.Begin);
                         byte[] rawChunkData = new byte[chunk.CompressedSize];
-                        fs.Read(rawChunkData, 0, rawChunkData.Length);
+                        await fs.ReadAsync(rawChunkData, 0, rawChunkData.Length);
 
                         string chunkFileName = $"{chunk.PathHash:X16}.chunk";
                         string destChunkPath = Path.Combine(targetChunkPath, chunkFileName);
                         
                         Directory.CreateDirectory(targetChunkPath);
-                        File.WriteAllBytes(destChunkPath, rawChunkData);
+                        await File.WriteAllBytesAsync(destChunkPath, rawChunkData);
                     }
                     else
                     {

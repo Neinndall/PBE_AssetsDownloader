@@ -26,6 +26,7 @@ namespace PBE_AssetsManager.Utils
                         gzipStream.CopyTo(decompressedStream);
                     }
                     break;
+                case WadChunkCompression.ZstdChunked:
                 case WadChunkCompression.Zstd:
                     using (var zstdStream = new DecompressionStream(compressedStream))
                     {

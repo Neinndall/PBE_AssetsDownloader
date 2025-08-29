@@ -27,10 +27,11 @@ namespace PBE_AssetsManager.Views
         private readonly WadDifferenceService _wadDifferenceService;
         private readonly WadPackagingService _wadPackagingService;
         private readonly BackupManager _backupManager;
+        private readonly AppSettings _appSettings;
         private string _oldPbePath;
         private string _newPbePath;
 
-        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, HashResolverService hashResolverService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, BackupManager backupManager)
+        public ComparatorWindow(WadComparatorService wadComparatorService, LogService logService, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, HashResolverService hashResolverService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, BackupManager backupManager, AppSettings appSettings)
         {
             InitializeComponent();
             _wadComparatorService = wadComparatorService;
@@ -42,15 +43,22 @@ namespace PBE_AssetsManager.Views
             _wadDifferenceService = wadDifferenceService;
             _wadPackagingService = wadPackagingService;
             _backupManager = backupManager;
+            _appSettings = appSettings;
         }
 
         private async void createPbeBackupButton_Click(object sender, RoutedEventArgs e)
         {
-            string sourcePbePath = @"C:\Riot Games\League of Legends (PBE)";
+            string sourcePbePath = _appSettings.PbeDirectory;
+
+            if (string.IsNullOrEmpty(sourcePbePath))
+            {
+                _customMessageBoxService.ShowError("Error", "PBE directory is not configured. Please set it in Settings > Default Paths.", Window.GetWindow(this));
+                return;
+            }
 
             if (!Directory.Exists(sourcePbePath))
             {
-                _customMessageBoxService.ShowError("Error", $"PBE directory for backup does not exist: {sourcePbePath}", Window.GetWindow(this));
+                _customMessageBoxService.ShowError("Error", $"The configured PBE directory does not exist: {sourcePbePath}", Window.GetWindow(this));
                 return;
             }
 

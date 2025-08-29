@@ -40,78 +40,28 @@ namespace PBE_AssetsManager.Services
             ComparisonCompleted?.Invoke(allDiffs, oldPbePath, newPbePath);
         }
 
-        public async Task CompareWadsAsync(string oldPbeDir, string newPbeDir)
+        public async Task CompareSingleWadAsync(string oldWadFile, string newWadFile)
         {
             List<ChunkDiff> allDiffs = new List<ChunkDiff>();
+            string oldDir = Path.GetDirectoryName(oldWadFile);
+            string newDir = Path.GetDirectoryName(newWadFile);
+
             try
             {
-                _logService.Log("Starting WAD comparison...");
-
+                _logService.Log($"Starting WAD comparison for a single file: {Path.GetFileName(oldWadFile)}");
                 await _hashResolverService.LoadHashesAsync();
 
-                var oldGameWadDir = Path.Combine(oldPbeDir, "Game", "DATA", "FINAL");
-                var newGameWadDir = Path.Combine(newPbeDir, "Game", "DATA", "FINAL");
-                var oldPluginsWadDir = Path.Combine(oldPbeDir, "Plugins");
-                var newPluginsWadDir = Path.Combine(newPbeDir, "Plugins");
+                NotifyComparisonStarted(1);
 
-                var gameWadFiles = Directory.Exists(oldGameWadDir) ? Directory.GetFiles(oldGameWadDir, "*.wad.client", SearchOption.AllDirectories) : Array.Empty<string>();
-                var pluginsWadFiles = Directory.Exists(oldPluginsWadDir) ? Directory.GetFiles(oldPluginsWadDir, "*.wad", SearchOption.AllDirectories) : Array.Empty<string>();
-                int totalFiles = gameWadFiles.Length + pluginsWadFiles.Length;
-                int processedFiles = 0;
-
-                NotifyComparisonStarted(totalFiles);
-
-                if (gameWadFiles.Any())
-                {
-                    var (gameWadDiffs, gameFilesProcessed) = await CompareWadDirectoriesAsync(oldGameWadDir, newGameWadDir, oldPbeDir, newPbeDir, "*.wad.client", processedFiles);
-                    allDiffs.AddRange(gameWadDiffs);
-                    processedFiles += gameFilesProcessed;
-                }
-
-                if (pluginsWadFiles.Any())
-                {
-                    var (pluginsWadDiffs, pluginFilesProcessed) = await CompareWadDirectoriesAsync(oldPluginsWadDir, newPluginsWadDir, oldPbeDir, newPbeDir, "*.wad", processedFiles);
-                    allDiffs.AddRange(pluginsWadDiffs);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError(ex, "An error occurred during WAD comparison.");
-            }
-            finally
-            {
-                NotifyComparisonCompleted(allDiffs, oldPbeDir, newPbeDir);
-                if (allDiffs != null)
-                {
-                    _logService.LogSuccess($"WAD comparison completed. Found {allDiffs.Count} differences.");
-                }
-                else
-                {
-                    _logService.LogError("WAD comparison completed with errors.");
-                }
-            }
-        }
-
-        private async Task<(List<ChunkDiff> Diffs, int ProcessedCount)> CompareWadDirectoriesAsync(string oldWadDir, string newWadDir, string oldPbeRoot, string newPbeRoot, string searchPattern, int completedOffset)
-        {
-            var allDiffs = new List<ChunkDiff>();
-            var oldWadFiles = Directory.GetFiles(oldWadDir, searchPattern, SearchOption.AllDirectories);
-            int processedInThisBatch = 0;
-
-            foreach (var oldWadFile in oldWadFiles)
-            {
-                var relativePath = Path.GetRelativePath(oldPbeRoot, oldWadFile);
-                var newWadFileFullPath = Path.Combine(newPbeRoot, relativePath);
-
-                processedInThisBatch++;
                 bool success = true;
                 string errorMessage = null;
 
-                if (File.Exists(newWadFileFullPath))
+                if (File.Exists(oldWadFile) && File.Exists(newWadFile))
                 {
+                    var relativePath = Path.GetFileName(oldWadFile);
                     Log.Information($"Comparing {relativePath}...");
                     using var oldWad = new WadFile(oldWadFile);
-                    using var newWad = new WadFile(newWadFileFullPath);
+                    using var newWad = new WadFile(newWadFile);
 
                     var diffs = await CollectDiffsAsync(oldWad, newWad, relativePath);
                     Log.Information($"Found {diffs.Count} differences in {relativePath}.");
@@ -120,12 +70,93 @@ namespace PBE_AssetsManager.Services
                 else
                 {
                     success = false;
-                    errorMessage = $"New WAD file not found: {newWadFileFullPath}.";
-                    Log.Warning($"New WAD file not found: {newWadFileFullPath}. Skipping comparison for this file.");
+                    errorMessage = $"One or both WAD files not found. Old: {oldWadFile}, New: {newWadFile}";
+                    Log.Warning(errorMessage);
                 }
-                NotifyComparisonProgressChanged(completedOffset + processedInThisBatch, Path.GetFileName(relativePath), success, errorMessage);
+
+                NotifyComparisonProgressChanged(1, Path.GetFileName(oldWadFile), success, errorMessage);
             }
-            return (allDiffs, processedInThisBatch);
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "An error occurred during single WAD comparison.");
+            }
+            finally
+            {
+                NotifyComparisonCompleted(allDiffs, oldDir, newDir);
+                if (allDiffs != null)
+                {
+                    _logService.LogSuccess($"Single WAD comparison completed. Found {allDiffs.Count} differences.");
+                }
+                else
+                {
+                    _logService.LogError("Single WAD comparison completed with errors.");
+                }
+            }
+        }
+
+        public async Task CompareWadsAsync(string oldDir, string newDir)
+        {
+            List<ChunkDiff> allDiffs = new List<ChunkDiff>();
+            try
+            {
+                _logService.Log("Starting WADs comparison...");
+
+                await _hashResolverService.LoadHashesAsync();
+
+                var searchPatterns = new[] { "*.wad.client", "*.wad" };
+                var oldWadFiles = searchPatterns
+                    .SelectMany(pattern => Directory.GetFiles(oldDir, pattern, SearchOption.AllDirectories))
+                    .ToList();
+
+                int totalFiles = oldWadFiles.Count;
+                int processedFiles = 0;
+
+                NotifyComparisonStarted(totalFiles);
+
+                foreach (var oldWadFile in oldWadFiles)
+                {
+                    var relativePath = Path.GetRelativePath(oldDir, oldWadFile);
+                    var newWadFileFullPath = Path.Combine(newDir, relativePath);
+
+                    processedFiles++;
+                    bool success = true;
+                    string errorMessage = null;
+
+                    if (File.Exists(newWadFileFullPath))
+                    {
+                        Log.Information($"Comparing {relativePath}...");
+                        using var oldWad = new WadFile(oldWadFile);
+                        using var newWad = new WadFile(newWadFileFullPath);
+
+                        var diffs = await CollectDiffsAsync(oldWad, newWad, relativePath);
+                        Log.Information($"Found {diffs.Count} differences in {relativePath}.");
+                        allDiffs.AddRange(diffs);
+                    }
+                    else
+                    {
+                        success = false;
+                        errorMessage = $"New WAD file not found: {newWadFileFullPath}.";
+                        Log.Warning($"New WAD file not found: {newWadFileFullPath}. Skipping comparison for this file.");
+                    }
+                    NotifyComparisonProgressChanged(processedFiles, Path.GetFileName(relativePath), success, errorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "An error occurred during WAD comparison.");
+            }
+            finally
+            {
+                NotifyComparisonCompleted(allDiffs, oldDir, newDir);
+                if (allDiffs != null)
+                {
+                    _logService.LogSuccess($"WADs comparison completed. Found {allDiffs.Count} differences.");
+                }
+                else
+                {
+                    _logService.LogError("WADs comparison completed with errors.");
+                }
+            }
         }
 
         private async Task<List<ChunkDiff>> CollectDiffsAsync(WadFile oldWad, WadFile newWad, string sourceWadFile)

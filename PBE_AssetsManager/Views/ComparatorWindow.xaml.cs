@@ -147,11 +147,11 @@ namespace PBE_AssetsManager.Views
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
                 folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select Old PBE Directory";
+                folderBrowserDialog.Title = "Select Old Directory";
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     oldPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
-                    _logService.LogDebug($"Old PBE Directory selected: {folderBrowserDialog.FileName}");
+                    _logService.LogDebug($"Old Directory selected: {folderBrowserDialog.FileName}");
                 }
             }
         }
@@ -161,36 +161,79 @@ namespace PBE_AssetsManager.Views
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
                 folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select New PBE Directory";
+                folderBrowserDialog.Title = "Select New Directory";
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     newPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
-                    _logService.LogDebug($"New PBE Directory selected: {folderBrowserDialog.FileName}");
+                    _logService.LogDebug($"New Directory selected: {folderBrowserDialog.FileName}");
                 }
+            }
+        }
+
+        private void btnSelectOldWadFile_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "WAD files (*.wad, *.wad.client)|*.wad;*.wad.client|All files (*.*)|*.*",
+                Title = "Select Old WAD File"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                oldWadFileTextBox.Text = openFileDialog.FileName;
+            }
+        }
+
+        private void btnSelectNewWadFile_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "WAD files (*.wad, *.wad.client)|*.wad;*.wad.client|All files (*.*)|*.*",
+                Title = "Select New WAD File"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                newWadFileTextBox.Text = openFileDialog.FileName;
             }
         }
 
         private async void compareWadButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
-            {
-                _customMessageBoxService.ShowWarning("Warning", "Please select both PBE directories.", Window.GetWindow(this));
-                return;
-            }
-
-            _oldPbePath = oldPbeDirectoryTextBox.Text;
-            _newPbePath = newPbeDirectoryTextBox.Text;
-
             compareWadButton.IsEnabled = false;
-
             try
             {
-                await _wadComparatorService.CompareWadsAsync(_oldPbePath, _newPbePath);
+                if (wadComparatorTabControl.SelectedIndex == 0) // By Directory
+                {
+                    if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
+                    {
+                        _customMessageBoxService.ShowWarning("Warning", "Please select both directories.", Window.GetWindow(this));
+                        compareWadButton.IsEnabled = true;
+                        return;
+                    }
+                    _oldPbePath = oldPbeDirectoryTextBox.Text;
+                    _newPbePath = newPbeDirectoryTextBox.Text;
+                    await _wadComparatorService.CompareWadsAsync(_oldPbePath, _newPbePath);
+                }
+                else // By File
+                {
+                    if (string.IsNullOrEmpty(oldWadFileTextBox.Text) || string.IsNullOrEmpty(newWadFileTextBox.Text))
+                    {
+                        _customMessageBoxService.ShowWarning("Warning", "Please select both WAD files.", Window.GetWindow(this));
+                        compareWadButton.IsEnabled = true;
+                        return;
+                    }
+                    await _wadComparatorService.CompareSingleWadAsync(oldWadFileTextBox.Text, newWadFileTextBox.Text);
+                }
             }
             catch (Exception ex)
             {
                 _logService.LogError(ex, "An error occurred during comparison.");
                 _customMessageBoxService.ShowError("Error", $"An error occurred during comparison: {ex.Message}", Window.GetWindow(this));
+            }
+            finally
+            {
+                compareWadButton.IsEnabled = true;
             }
         }
 

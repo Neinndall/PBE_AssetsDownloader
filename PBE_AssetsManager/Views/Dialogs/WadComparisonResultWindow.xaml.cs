@@ -284,7 +284,7 @@ namespace PBE_AssetsManager.Views.Dialogs
                     break;
 
                 case "image":
-                    var imageDiffWindow = new ImageDiffWindow((BitmapSource)newData, (BitmapSource)newData, oldPath, newPath) { Owner = this };
+                    var imageDiffWindow = new ImageDiffWindow((BitmapSource)oldData, (BitmapSource)newData, oldPath, newPath) { Owner = this };
                     imageDiffWindow.Show();
                     break;
 
@@ -319,6 +319,23 @@ namespace PBE_AssetsManager.Views.Dialogs
             var contextMenu = sender as ContextMenu;
             if (contextMenu == null) return;
 
+            // --- Logic for "View Differences" ---
+            var viewDiffMenuItem = contextMenu.Items.OfType<MenuItem>()
+                                                    .FirstOrDefault(m => "View Differences".Equals(m.Header as string));
+            if (viewDiffMenuItem != null)
+            {
+                viewDiffMenuItem.IsEnabled = false; // Default to disabled
+                if (resultsTreeView.SelectedItem is SerializableChunkDiff diff)
+                {
+                    // Enable ONLY for Modified files.
+                    if (diff.Type == ChunkDiffType.Modified)
+                    {
+                        viewDiffMenuItem.IsEnabled = true;
+                    }
+                }
+            }
+
+            // --- Existing logic for "Download Selected" ---
             var downloadMenuItem = contextMenu.Items.OfType<MenuItem>()
                                                     .FirstOrDefault(m => "Download Selected".Equals(m.Header as string));
             if (downloadMenuItem != null)

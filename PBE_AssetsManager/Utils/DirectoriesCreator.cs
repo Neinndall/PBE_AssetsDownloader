@@ -32,6 +32,11 @@ namespace PBE_AssetsManager.Utils
         public string WadModifiedAssetsPath { get; private set; }
         public string WadRenamedAssetsPath { get; private set; }
         
+        public string WadComparisonDirName { get; private set; }
+        public string WadComparisonFullPath { get; private set; }
+        public string OldChunksPath { get; private set; }
+        public string NewChunksPath { get; private set; }
+
         public DirectoriesCreator(LogService logService)
         {
             _logService = logService;
@@ -51,7 +56,6 @@ namespace PBE_AssetsManager.Utils
             JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
             JsonCacheHistoryPath = Path.Combine(appFolderPath, "json_cache", "history");
             BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
-            WadComparisonSavePath = Path.Combine(appFolderPath, "WadComparison");
 
             // New paths for updater
             AppDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -62,10 +66,15 @@ namespace PBE_AssetsManager.Utils
             UpdateLogFilePath = Path.Combine(UpdateCachePath, "update_log.txt");
             UpdateTempBackupConfigFilePath = Path.Combine(UpdateCachePath, "config.backup.json");
             
-            // Initialize WadComparison paths in constructor
             WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
             WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
             WadRenamedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "RENAMED");
+            
+            WadComparisonSavePath = Path.Combine(appFolderPath, "WadComparison");
+            WadComparisonDirName = $"Comparison_{date}";
+            WadComparisonFullPath = Path.Combine(WadComparisonSavePath, WadComparisonDirName);
+            OldChunksPath = Path.Combine(WadComparisonFullPath, "wad_chunks", "old");
+            NewChunksPath = Path.Combine(WadComparisonFullPath, "wad_chunks", "new");
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);

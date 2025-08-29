@@ -68,6 +68,8 @@ namespace PBE_AssetsManager
             services.AddSingleton<WadComparatorService>();
             services.AddSingleton<HashResolverService>();
             services.AddSingleton<WadDifferenceService>();
+            services.AddSingleton<WadPackagingService>();
+            services.AddSingleton<WadNodeLoaderService>();
 
             // Main Application Logic Service
             services.AddTransient<ExtractionService>();

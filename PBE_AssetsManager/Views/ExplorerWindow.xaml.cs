@@ -25,13 +25,14 @@ namespace PBE_AssetsManager.Views
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
 
-        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator)
+        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator, WadNodeLoaderService wadNodeLoaderService)
         {
             InitializeComponent();
             _logService = logService;
             _customMessageBoxService = customMessageBoxService;
             _hashResolverService = hashResolverService;
             _directoriesCreator = directoriesCreator;
+            _wadNodeLoaderService = wadNodeLoaderService;
 
             _previewService = new ExplorerPreviewService(
                 ImagePreview,
@@ -45,8 +46,6 @@ namespace PBE_AssetsManager.Views
                 _hashResolverService
             );
 
-            _wadNodeLoaderService = new WadNodeLoaderService(_hashResolverService);
-
             RootNodes = new ObservableCollection<FileSystemNodeModel>();
             DataContext = this;
             this.Loaded += ExplorerWindow_Loaded;
@@ -55,9 +54,18 @@ namespace PBE_AssetsManager.Views
 
         private async void ExplorerWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            FileTreeView.Visibility = Visibility.Collapsed;
-            NoDirectoryMessage.Visibility = Visibility.Visible;
             await InitializeWebView2();
+
+            var settings = AppSettings.LoadSettings();
+            if (!string.IsNullOrEmpty(settings.PbeDirectory) && Directory.Exists(settings.PbeDirectory))
+            {
+                LoadInitialDirectory(settings.PbeDirectory);
+            }
+            else
+            {
+                FileTreeView.Visibility = Visibility.Collapsed;
+                NoDirectoryMessage.Visibility = Visibility.Visible;
+            }
         }
 
         private void ExplorerWindow_Unloaded(object sender, RoutedEventArgs e)
@@ -69,7 +77,7 @@ namespace PBE_AssetsManager.Views
         {
             var openFileDialog = new OpenFileDialog
             {
-                Title = "Select any file inside the PBE directory",
+                Title = "Select the PBE Directory",
                 Filter = "All files (*.*)|*.*",
                 CheckFileExists = false,
                 ValidateNames = false,
@@ -82,6 +90,10 @@ namespace PBE_AssetsManager.Views
                 if (Directory.Exists(pbeDirectory))
                 {
                     LoadInitialDirectory(pbeDirectory);
+
+                    var settings = AppSettings.LoadSettings();
+                    settings.PbeDirectory = pbeDirectory;
+                    AppSettings.SaveSettings(settings);
                 }
                 else
                 {
@@ -93,14 +105,31 @@ namespace PBE_AssetsManager.Views
         private async void LoadInitialDirectory(string rootPath)
         {
             NoDirectoryMessage.Visibility = Visibility.Collapsed;
-            FileTreeView.Visibility = Visibility.Visible;
+            FileTreeView.Visibility = Visibility.Collapsed;
+            LoadingIndicator.Visibility = Visibility.Visible;
 
-            await _hashResolverService.LoadHashesAsync();
-            await _hashResolverService.LoadBinHashesAsync();
+            try
+            {
+                await _hashResolverService.LoadHashesAsync();
+                await _hashResolverService.LoadBinHashesAsync();
 
-            RootNodes.Clear();
-            var rootNode = new FileSystemNodeModel(rootPath);
-            RootNodes.Add(rootNode);
+                RootNodes.Clear();
+                var rootNode = new FileSystemNodeModel(rootPath);
+                RootNodes.Add(rootNode);
+
+                FileTreeView.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "Failed to load initial directory or hashes.");
+                _customMessageBoxService.ShowError("Error", "Could not load the directory. Please check the logs.", Window.GetWindow(this));
+                FileTreeView.Visibility = Visibility.Collapsed;
+                NoDirectoryMessage.Visibility = Visibility.Visible;
+            }
+            finally
+            {
+                LoadingIndicator.Visibility = Visibility.Collapsed;
+            }
         }
 
         private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)

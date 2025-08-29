@@ -165,6 +165,16 @@
                                 Margin="0,20,0,0"
                                 ToolTip="Select the root directory of a PBE installation to browse its WAD files."/>
                     </StackPanel>
+                    <StackPanel x:Name="LoadingIndicator"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Visibility="Collapsed">
+                        <ProgressBar IsIndeterminate="True" Width="100" Foreground="{StaticResource AccentBlue}" />
+                        <TextBlock Text="Loading Files..."
+                                   Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,10,0,0" />
+                    </StackPanel>
                 </Grid>
             </Grid>
 

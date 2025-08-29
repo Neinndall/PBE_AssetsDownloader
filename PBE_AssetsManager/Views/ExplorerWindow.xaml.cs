@@ -1,20 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using LeagueToolkit.Core.Wad;
 using Microsoft.Web.WebView2.Core;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.Win32;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
-using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Views.Helpers;
-using Microsoft.Win32;
-using LeagueToolkit.Core.Wad;
-using System.Text;
+using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Views
 {
@@ -24,6 +26,9 @@ namespace PBE_AssetsManager.Views
         private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly HashResolverService _hashResolverService;
         private readonly DirectoriesCreator _directoriesCreator;
+
+        private enum Previewer { None, Image, WebView, Placeholder }
+        private Previewer _activePreviewer = Previewer.None;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
 
@@ -77,10 +82,14 @@ namespace PBE_AssetsManager.Views
             }
         }
 
-        private void LoadInitialDirectory(string rootPath)
+        private async void LoadInitialDirectory(string rootPath)
         {
             NoDirectoryMessage.Visibility = Visibility.Collapsed;
             FileTreeView.Visibility = Visibility.Visible;
+
+            // Pre-load hashes for this explorer session
+            await _hashResolverService.LoadHashesAsync();
+
             RootNodes.Clear();
             var rootNode = new FileSystemNodeModel(rootPath);
             RootNodes.Add(rootNode);
@@ -141,20 +150,27 @@ namespace PBE_AssetsManager.Views
 
         private async Task LoadWadFileChildren(FileSystemNodeModel wadNode)
         {
-            await _hashResolverService.LoadHashesAsync();
-            var rootVirtualNode = new FileSystemNodeModel(wadNode.Name, true, wadNode.FullPath, wadNode.FullPath);
-
-            using var wadFile = new WadFile(wadNode.FullPath);
-            foreach (var chunk in wadFile.Chunks.Values)
+            var childrenToAdd = await Task.Run(() =>
             {
-                string virtualPath = _hashResolverService.ResolveHash(chunk.PathHash);
-                if (!string.IsNullOrEmpty(virtualPath) && virtualPath != chunk.PathHash.ToString("x16"))
+                var rootVirtualNode = new FileSystemNodeModel(wadNode.Name, true, wadNode.FullPath, wadNode.FullPath);
+                using (var wadFile = new WadFile(wadNode.FullPath))
                 {
-                    AddNodeToVirtualTree(rootVirtualNode, virtualPath, wadNode.FullPath, chunk.PathHash);
+                    foreach (var chunk in wadFile.Chunks.Values)
+                    {
+                        string virtualPath = _hashResolverService.ResolveHash(chunk.PathHash);
+                        if (!string.IsNullOrEmpty(virtualPath) && virtualPath != chunk.PathHash.ToString("x16"))
+                        {
+                            AddNodeToVirtualTree(rootVirtualNode, virtualPath, wadNode.FullPath, chunk.PathHash);
+                        }
+                    }
                 }
-            }
+                return rootVirtualNode.Children
+                    .OrderBy(c => c.Type == NodeType.VirtualDirectory ? 0 : 1)
+                    .ThenBy(c => c.Name)
+                    .ToList();
+            });
 
-            foreach (var child in rootVirtualNode.Children.OrderBy(c => c.Type == NodeType.VirtualDirectory ? 0 : 1).ThenBy(c => c.Name))
+            foreach (var child in childrenToAdd)
             {
                 wadNode.Children.Add(child);
             }
@@ -190,7 +206,7 @@ namespace PBE_AssetsManager.Views
             var selectedNode = e.NewValue as FileSystemNodeModel;
             if (selectedNode == null || selectedNode.Type == NodeType.RealDirectory || selectedNode.Type == NodeType.VirtualDirectory || selectedNode.Type == NodeType.WadFile)
             {
-                ResetPreview();
+                await ResetPreview();
                 return;
             }
 
@@ -208,7 +224,7 @@ namespace PBE_AssetsManager.Views
             catch (Exception ex)
             {
                 _logService.LogError(ex, $"Failed to preview file '{selectedNode.FullPath}'.");
-                ShowUnsupportedPreview(selectedNode.Extension);
+                await ShowUnsupportedPreview(selectedNode.Extension);
             }
         }
 
@@ -216,96 +232,112 @@ namespace PBE_AssetsManager.Views
         {
             if (!File.Exists(node.FullPath))
             {
-                ShowUnsupportedPreview("File not found");
+                await ShowUnsupportedPreview("File not found");
                 return;
             }
 
             byte[] fileData = await File.ReadAllBytesAsync(node.FullPath);
             var extension = node.Extension;
 
-            if (IsImageExtension(extension)) { ShowImagePreview(fileData); }
-            else if (IsTextureExtension(extension)) { ShowTexturePreview(fileData); }
-            else if (IsVectorImageExtension(extension)) { ShowSvgPreview(fileData); }
-            else if (IsTextExtension(extension)) { ShowTextPreview(fileData); }
-            else if (IsMediaExtension(extension)) { ShowAudioVideoPreview(fileData, extension); }
-            else { ShowUnsupportedPreview(extension); }
+            if (IsImageExtension(extension)) { await ShowImagePreview(fileData); }
+            else if (IsTextureExtension(extension)) { await ShowTexturePreview(fileData); }
+            else if (IsVectorImageExtension(extension)) { await ShowSvgPreview(fileData); }
+            else if (IsTextExtension(extension)) { await ShowTextPreview(fileData); }
+            else if (IsMediaExtension(extension)) { await ShowAudioVideoPreview(fileData, extension); }
+            else { await ShowUnsupportedPreview(extension); }
         }
 
         private async Task PreviewWadFile(FileSystemNodeModel node)
         {
             if (string.IsNullOrEmpty(node.SourceWadPath) || node.SourceChunkPathHash == 0)
             {
-                ShowUnsupportedPreview(node.Extension);
+                await ShowUnsupportedPreview(node.Extension);
                 return;
             }
 
             byte[] decompressedData;
             try
             {
-                using var wadFile = new WadFile(node.SourceWadPath);
-                var chunk = wadFile.FindChunk(node.SourceChunkPathHash);
-                using var decompressedOwner = wadFile.LoadChunkDecompressed(chunk);
-                decompressedData = decompressedOwner.Span.ToArray();
+                decompressedData = await Task.Run(() =>
+                {
+                    using var wadFile = new WadFile(node.SourceWadPath);
+                    var chunk = wadFile.FindChunk(node.SourceChunkPathHash);
+                    using var decompressedOwner = wadFile.LoadChunkDecompressed(chunk);
+                    return decompressedOwner.Span.ToArray();
+                });
             }
             catch (Exception ex)
             {
                 _logService.LogError(ex, $"Failed to decompress chunk for preview: {node.FullPath}");
-                ShowUnsupportedPreview(node.Extension);
+                await ShowUnsupportedPreview(node.Extension);
                 return;
             }
 
             var extension = node.Extension;
 
-            if (IsImageExtension(extension)) { ShowImagePreview(decompressedData); }
-            else if (IsTextureExtension(extension)) { ShowTexturePreview(decompressedData); }
-            else if (IsVectorImageExtension(extension)) { ShowSvgPreview(decompressedData); }
-            else if (IsTextExtension(extension)) { ShowTextPreview(decompressedData); }
-            else if (IsMediaExtension(extension)) { ShowAudioVideoPreview(decompressedData, extension); }
-            else { ShowUnsupportedPreview(extension); }
+            if (IsImageExtension(extension)) { await ShowImagePreview(decompressedData); }
+            else if (IsTextureExtension(extension)) { await ShowTexturePreview(decompressedData); }
+            else if (IsVectorImageExtension(extension)) { await ShowSvgPreview(decompressedData); }
+            else if (IsTextExtension(extension)) { await ShowTextPreview(decompressedData); }
+            else if (IsMediaExtension(extension)) { await ShowAudioVideoPreview(decompressedData, extension); }
+            else { await ShowUnsupportedPreview(extension); }
         }
 
-        private void ShowImagePreview(byte[] data)
+        private async Task ShowImagePreview(byte[] data)
         {
-            ResetPreview();
-            ImagePreview.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+            SetPreviewer(Previewer.Image);
 
-            using var stream = new MemoryStream(data);
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.StreamSource = stream;
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            bitmap.Freeze();
+            var bitmap = await Task.Run(() =>
+            {
+                using var stream = new MemoryStream(data);
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.StreamSource = stream;
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+                bmp.Freeze();
+                return bmp;
+            });
             ImagePreview.Source = bitmap;
         }
 
-        private void ShowTexturePreview(byte[] data)
+        private async Task ShowTexturePreview(byte[] data)
         {
-            ResetPreview();
-            ImagePreview.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+            SetPreviewer(Previewer.Image);
 
-            using var stream = new MemoryStream(data);
-            var texture = LeagueToolkit.Core.Renderer.Texture.Load(stream);
-            if (texture.Mips.Length > 0)
+            var bitmapSource = await Task.Run(() =>
             {
-                var mainMip = texture.Mips[0];
-                var width = mainMip.Width;
-                var height = mainMip.Height;
-                if (mainMip.Span.TryGetSpan(out Span<BCnEncoder.Shared.ColorRgba32> pixelSpan))
+                using var stream = new MemoryStream(data);
+                var texture = LeagueToolkit.Core.Renderer.Texture.Load(stream);
+                if (texture.Mips.Length > 0)
                 {
-                    var pixelBytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes(pixelSpan);
-                    ImagePreview.Source = BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, pixelBytes.ToArray(), width * 4);
+                    var mainMip = texture.Mips[0];
+                    var width = mainMip.Width;
+                    var height = mainMip.Height;
+                    if (mainMip.Span.TryGetSpan(out Span<BCnEncoder.Shared.ColorRgba32> pixelSpan))
+                    {
+                        var pixelBytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes(pixelSpan).ToArray();
+                        var bmp = BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelBytes, width * 4);
+                        bmp.Freeze();
+                        return bmp;
+                    }
                 }
+                return null;
+            });
+
+            if (bitmapSource != null)
+            {
+                ImagePreview.Source = bitmapSource;
+            }
+            else
+            {
+                await ShowUnsupportedPreview(".tex/.dds");
             }
         }
 
-        private async void ShowSvgPreview(byte[] data)
+        private async Task ShowSvgPreview(byte[] data)
         {
-            ResetPreview();
-            WebView2Preview.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+            SetPreviewer(Previewer.WebView);
 
             string svgContent = Encoding.UTF8.GetString(data);
 
@@ -345,32 +377,29 @@ namespace PBE_AssetsManager.Views
             catch (Exception ex)
             {
                 _logService.LogError(ex, "Failed to show SVG preview.");
-                ShowUnsupportedPreview(".svg");
+                await ShowUnsupportedPreview(".svg");
             }
         }
 
-        private async void ShowTextPreview(byte[] data)
+        private async Task ShowTextPreview(byte[] data)
         {
-            ResetPreview();
-            WebView2Preview.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+            SetPreviewer(Previewer.WebView);
 
-            string textContent = Encoding.UTF8.GetString(data);
-
-            // Limpiar caracteres raros
-            textContent = new string(textContent.Where(c => !char.IsControl(c) || c == '\n' || c == '\r' || c == '\t').ToArray());
-
-            // Truncar si es demasiado largo
-            const int MaxLength = 500_000;
-            if (textContent.Length > MaxLength)
+            string textContent = await Task.Run(() =>
             {
-                textContent = textContent.Substring(0, MaxLength) + "\n\n--- LOG TRUNCATED ---";
-            }
-
-            // Si es JSON -> formatear
-            bool isJson = textContent.TrimStart().StartsWith("{") || textContent.TrimStart().StartsWith("[");
+                var rawText = Encoding.UTF8.GetString(data);
+                var cleanText = new string(rawText.Where(c => !char.IsControl(c) || c == '\n' || c == '\r' || c == '\t').ToArray());
+                
+                const int MaxLength = 500_000;
+                if (cleanText.Length > MaxLength)
+                {
+                    cleanText = cleanText.Substring(0, MaxLength) + "\n\n--- LOG TRUNCATED ---";
+                }
+                return cleanText;
+            });
+            
+            bool isJson = textContent.TrimStart().StartsWith("{ ") || textContent.TrimStart().StartsWith("[");
             string formattedText = isJson ? JsonDiffHelper.FormatJson(textContent) : textContent;
-
             string escapedHtml = System.Net.WebUtility.HtmlEncode(formattedText);
 
             var htmlContent = @$"
@@ -393,22 +422,19 @@ namespace PBE_AssetsManager.Views
             WebView2Preview.CoreWebView2.NavigateToString(htmlContent);
         }
 
-
-
-
-
-        private async void ShowAudioVideoPreview(byte[] data, string extension)
+        private async Task ShowAudioVideoPreview(byte[] data, string extension)
         {
-            ResetPreview();
-            WebView2Preview.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+            SetPreviewer(Previewer.WebView);
 
             try
             {
-                foreach (var file in Directory.GetFiles(_directoriesCreator.TempPreviewPath))
+                await Task.Run(() =>
                 {
-                    File.Delete(file);
-                }
+                    foreach (var file in Directory.GetFiles(_directoriesCreator.TempPreviewPath))
+                    {
+                        File.Delete(file);
+                    }
+                });
 
                 var tempFileName = "preview" + extension;
                 var tempFilePath = Path.Combine(_directoriesCreator.TempPreviewPath, tempFileName);
@@ -427,61 +453,87 @@ namespace PBE_AssetsManager.Views
                 var fileUrl = $"https://preview.assets/{tempFileName}";
                 var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{tag} controls autoplay {extraAttributes} style=\"width: 100%; max-height: 100%;\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{tag}>";
                 
+                await WebView2Preview.EnsureCoreWebView2Async();
                 WebView2Preview.CoreWebView2.NavigateToString(htmlContent);
             }
             catch (Exception ex)
             {
                 _logService.LogError(ex, $"Failed to create and show preview for {extension} file.");
-                ShowUnsupportedPreview(extension);
+                await ShowUnsupportedPreview(extension);
             }
         }
 
-        private void ShowUnsupportedPreview(string extension)
+        private async Task ShowUnsupportedPreview(string extension)
         {
-            ResetPreview();
-            PreviewPlaceholder.Visibility = Visibility.Visible;
+            SetPreviewer(Previewer.Placeholder);
             SelectFileMessagePanel.Visibility = Visibility.Collapsed;
             UnsupportedFileMessagePanel.Visibility = Visibility.Visible;
             UnsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
+            await Task.CompletedTask;
         }
 
-        private void ResetPreview()
+        private void SetPreviewer(Previewer previewer)
         {
-            PreviewPlaceholder.Visibility = Visibility.Visible;
+            if (_activePreviewer == previewer) return;
+
+            if (_activePreviewer == Previewer.WebView && previewer != Previewer.WebView)
+            {
+                if (WebView2Preview != null && WebView2Preview.CoreWebView2 != null)
+                {
+                    WebView2Preview.CoreWebView2.NavigateToString("about:blank");
+                }
+            }
+
+            ImagePreview.Visibility = previewer == Previewer.Image ? Visibility.Visible : Visibility.Collapsed;
+            WebView2Preview.Visibility = previewer == Previewer.WebView ? Visibility.Visible : Visibility.Collapsed;
+            PreviewPlaceholder.Visibility = previewer == Previewer.Placeholder ? Visibility.Visible : Visibility.Collapsed;
+
+            _activePreviewer = previewer;
+        }
+
+        private async Task ResetPreview()
+        {
+            SetPreviewer(Previewer.Placeholder);
             SelectFileMessagePanel.Visibility = Visibility.Visible;
             UnsupportedFileMessagePanel.Visibility = Visibility.Collapsed;
-
-            ImagePreview.Visibility = Visibility.Collapsed;
-            TextPreview.Visibility = Visibility.Collapsed;
-            WebView2Preview.Visibility = Visibility.Collapsed;
-
-            if (WebView2Preview != null && WebView2Preview.CoreWebView2 != null)
-            {
-                WebView2Preview.CoreWebView2.Navigate("about:blank");
-            }
+            await Task.CompletedTask;
         }
 
         private bool IsImageExtension(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
         private bool IsVectorImageExtension(string extension) => extension == ".svg";
         private bool IsTextureExtension(string extension) => extension == ".tex" || extension == ".dds";
-                private bool IsTextExtension(string extension) => extension == ".json" || extension == ".lua" || extension == ".xml" || extension == ".yml" || extension == ".yaml" || extension == ".ini" || extension == ".log" || extension == ".txt";
+        private bool IsTextExtension(string extension) => extension == ".json" || extension == ".lua" || extension == ".xml" || extension == ".yml" || extension == ".yaml" || extension == ".ini" || extension == ".log" || extension == ".txt";
         private bool IsMediaExtension(string extension) => extension == ".ogg" || extension == ".wav" || extension == ".webm";
 
-        private async void InitializeWebView2()
+        private async Task InitializeWebView2()
         {
             try
             {
+                // Crea un entorno personalizado (si necesitas almacenar datos)
                 var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: _directoriesCreator.WebView2DataPath);
+
+                // Inicializa WebView2
                 await WebView2Preview.EnsureCoreWebView2Async(environment);
-                WebView2Preview.CoreWebView2.SetVirtualHostNameToFolderMapping("preview.assets", _directoriesCreator.TempPreviewPath, CoreWebView2HostResourceAccessKind.Allow);
+                WebView2Preview.DefaultBackgroundColor = System.Drawing.Color.Transparent;
+                
+                // Configura host virtual para recursos locales
+                WebView2Preview.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "preview.assets",
+                    _directoriesCreator.TempPreviewPath,
+                    CoreWebView2HostResourceAccessKind.Allow
+                );
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"WebView2 initialization failed. Previews will be affected.");
-                _customMessageBoxService.ShowError("Error", "Could not initialize content viewer. Some previews may not work correctly.", Window.GetWindow(this));
+                _logService.LogError(ex, "WebView2 initialization failed. Previews will be affected.");
+                _customMessageBoxService.ShowError(
+                    "Error",
+                    "Could not initialize content viewer. Some previews may not work correctly.",
+                    Window.GetWindow(this)
+                );
             }
         }
-
+        
         private void txtSearchExplorer_GotFocus(object sender, RoutedEventArgs e)
         {
             txtSearchExplorerPlaceholder.Visibility = Visibility.Collapsed;

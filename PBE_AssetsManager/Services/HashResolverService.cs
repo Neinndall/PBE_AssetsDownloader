@@ -24,7 +24,7 @@ namespace PBE_AssetsManager.Services
 
         public async Task LoadHashesAsync()
         {
-            _hashToPathMap.Clear();
+            if (_hashToPathMap.Count > 0) return;
 
             var newHashesDir = _directoriesCreator.HashesNewPath;
 
@@ -37,10 +37,7 @@ namespace PBE_AssetsManager.Services
 
         public async Task LoadBinHashesAsync()
         {
-            _binHashesMap.Clear();
-            _binEntriesMap.Clear();
-            _binFieldsMap.Clear();
-            _binTypesMap.Clear();
+            if (_binHashesMap.Count > 0) return; // Already loaded
 
             var binHashesDir = _directoriesCreator.HashesNewPath;
             var binHashesFile = Path.Combine(binHashesDir, "hashes.binhashes.txt");

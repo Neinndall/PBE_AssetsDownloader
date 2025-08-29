@@ -209,7 +209,7 @@ namespace PBE_AssetsManager.Views
                 string jsonPath = openFileDialog.FileName;
                 string jsonContent = File.ReadAllText(jsonPath);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } };
-                var loadedResult = JsonSerializer.Deserialize<SerializableComparisonResult>(jsonContent, options);
+                var loadedResult = JsonSerializer.Deserialize<WadComparisonData>(jsonContent, options);
 
                 if (loadedResult == null || loadedResult.Diffs == null)
                 {

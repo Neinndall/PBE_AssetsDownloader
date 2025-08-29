@@ -38,7 +38,7 @@ namespace PBE_AssetsManager.Info
         public WadChunkCompression? NewCompressionType { get; set; }
     }                                                                 
 
-    public class SerializableComparisonResult
+    public class WadComparisonData
     {
         public string OldPbePath { get; set; }
         public string NewPbePath { get; set; }

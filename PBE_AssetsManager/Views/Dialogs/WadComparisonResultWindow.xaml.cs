@@ -50,6 +50,7 @@ namespace PBE_AssetsManager.Views.Dialogs
         private readonly string _newPbePath;
         private readonly string _sourceJsonPath; // Path to the loaded wadcomparison.json
 
+        // Constructor for results from a live, freshly generated comparison
         public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
@@ -78,6 +79,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
+        // Constructor for results loaded from a saved .json file
         public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, string oldPbePath = null, string newPbePath = null, string sourceJsonPath = null)
         {
             InitializeComponent();
@@ -235,7 +237,7 @@ namespace PBE_AssetsManager.Views.Dialogs
                     WriteIndented = true,
                     Converters = { new JsonStringEnumConverter() }
                 };
-                var comparisonResult = new SerializableComparisonResult
+                var comparisonResult = new WadComparisonData
                 {
                     // We save the original PBE paths for informational purposes
                     OldPbePath = _oldPbePath,

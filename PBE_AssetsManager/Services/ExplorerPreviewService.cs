@@ -26,7 +26,6 @@ namespace PBE_AssetsManager.Services
         private enum Previewer { None, Image, WebView, Placeholder }
         private Previewer _activePreviewer = Previewer.None;
 
-        // UI Controls - to be initialized via Initialize method
         private Image _imagePreview;
         private WebView2 _webView2Preview;
         private Panel _previewPlaceholder;
@@ -34,7 +33,6 @@ namespace PBE_AssetsManager.Services
         private Panel _unsupportedFileMessagePanel;
         private TextBlock _unsupportedFileMessage;
 
-        // Injected Services
         private readonly LogService _logService;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly HashResolverService _hashResolverService;
@@ -66,8 +64,6 @@ namespace PBE_AssetsManager.Services
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
-            
-
             if (node == null || node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory || node.Type == NodeType.WadFile)
             {
                 await ResetPreviewAsync(); // This will show _selectFileMessagePanel

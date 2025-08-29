@@ -20,12 +20,11 @@ namespace PBE_AssetsManager.Views
         private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly HashResolverService _hashResolverService;
         private readonly DirectoriesCreator _directoriesCreator;
-        private readonly ExplorerPreviewService _previewService;
+        private readonly ExplorerPreviewService _explorerPreviewService;
         private readonly WadNodeLoaderService _wadNodeLoaderService;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
-
-        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator, WadNodeLoaderService wadNodeLoaderService, ExplorerPreviewService previewService)
+        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator, WadNodeLoaderService wadNodeLoaderService, ExplorerPreviewService explorerPreviewService)
         {
             InitializeComponent();
             _logService = logService;
@@ -33,9 +32,9 @@ namespace PBE_AssetsManager.Views
             _hashResolverService = hashResolverService;
             _directoriesCreator = directoriesCreator;
             _wadNodeLoaderService = wadNodeLoaderService;
-            _previewService = previewService;
+            _explorerPreviewService = explorerPreviewService;
 
-            _previewService.Initialize(
+            _explorerPreviewService.Initialize(
                 ImagePreview,
                 WebView2Preview,
                 PreviewPlaceholder,
@@ -190,7 +189,7 @@ namespace PBE_AssetsManager.Views
         private async void FileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             var selectedNode = e.NewValue as FileSystemNodeModel;
-            await _previewService.ShowPreviewAsync(selectedNode);
+            await _explorerPreviewService.ShowPreviewAsync(selectedNode);
         }
 
         private async Task InitializeWebView2()

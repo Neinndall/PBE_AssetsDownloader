@@ -31,6 +31,9 @@ namespace PBE_AssetsManager.Utils
         public string WadNewAssetsPath { get; private set; }
         public string WadModifiedAssetsPath { get; private set; }
         public string WadRenamedAssetsPath { get; private set; }
+
+        public string WebView2DataPath { get; private set; }
+        public string TempPreviewPath { get; private set; }
         
         public string WadComparisonDirName { get; private set; }
         public string WadComparisonFullPath { get; private set; }
@@ -69,6 +72,10 @@ namespace PBE_AssetsManager.Utils
             WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
             WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
             WadRenamedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "RENAMED");
+
+            WebView2DataPath = Path.Combine(appFolderPath, "WebView2Data");
+            TempPreviewPath = Path.Combine(WebView2DataPath, "TempPreview");
+            Directory.CreateDirectory(TempPreviewPath);
             
             WadComparisonSavePath = Path.Combine(appFolderPath, "WadComparison");
             WadComparisonDirName = $"Comparison_{date}";

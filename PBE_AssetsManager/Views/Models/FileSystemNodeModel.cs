@@ -1,18 +1,23 @@
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 
 namespace PBE_AssetsManager.Views.Models
 {
+    public enum NodeType { RealDirectory, RealFile, WadFile, VirtualDirectory, VirtualFile }
+
     public class FileSystemNodeModel : INotifyPropertyChanged
     {
         public string Name { get; set; }
-        public string FullPath { get; set; }
-        public bool IsDirectory { get; set; }
-        public string Extension { get; set; }
+        public NodeType Type { get; set; }
+        public string FullPath { get; set; } // Real path for RealDirectory/WadFile/RealFile, Virtual path for Virtual items
         public ObservableCollection<FileSystemNodeModel> Children { get; set; }
+
+        // --- Data for WADs and Chunks ---
+        public string SourceWadPath { get; set; } // Only for VirtualFile/VirtualDirectory
+        public ulong SourceChunkPathHash { get; set; } // Only for VirtualFile
+
+        public string Extension => (Type == NodeType.RealDirectory || Type == NodeType.VirtualDirectory) ? "" : Path.GetExtension(FullPath).ToLowerInvariant();
 
         private bool _isExpanded;
         public bool IsExpanded
@@ -28,49 +33,62 @@ namespace PBE_AssetsManager.Views.Models
             }
         }
 
+        private bool _isVisible = true;
+        public bool IsVisible
+        {
+            get { return _isVisible; }
+            set
+            {
+                if (_isVisible != value)
+                {
+                    _isVisible = value;
+                    OnPropertyChanged(nameof(IsVisible));
+                }
+            }
+        }
+
+        // Constructor for real files/directories
         public FileSystemNodeModel(string path)
         {
             FullPath = path;
             Name = Path.GetFileName(path);
-            IsDirectory = Directory.Exists(path);
-            Extension = Path.GetExtension(path).ToLowerInvariant();
             Children = new ObservableCollection<FileSystemNodeModel>();
 
-            if (IsDirectory)
+            if (Directory.Exists(path))
             {
-                LoadChildren();
+                Type = NodeType.RealDirectory;
+                Children.Add(new FileSystemNodeModel()); // Add dummy child for lazy loading
+            }
+            else
+            {
+                string lowerPath = path.ToLowerInvariant();
+                if (lowerPath.EndsWith(".wad") || lowerPath.EndsWith(".wad.client"))
+                {
+                    Type = NodeType.WadFile;
+                    Children.Add(new FileSystemNodeModel()); // Add dummy child for lazy loading
+                }
+                else
+                {
+                    Type = NodeType.RealFile; // It's a real file on the filesystem
+                }
             }
         }
 
-        public FileSystemNodeModel(string path, bool isDirectory, ObservableCollection<FileSystemNodeModel> children = null)
+        // Constructor for virtual nodes inside a WAD
+        public FileSystemNodeModel(string name, bool isDirectory, string virtualPath, string sourceWad)
         {
-            FullPath = path;
-            Name = Path.GetFileName(path);
-            IsDirectory = isDirectory;
-            Extension = IsDirectory ? "" : Path.GetExtension(path).ToLowerInvariant();
-            Children = children ?? new ObservableCollection<FileSystemNodeModel>();
+            Name = name;
+            FullPath = virtualPath;
+            SourceWadPath = sourceWad;
+            Type = isDirectory ? NodeType.VirtualDirectory : NodeType.VirtualFile;
+            Children = new ObservableCollection<FileSystemNodeModel>();
         }
 
-        private void LoadChildren()
+        // Private constructor for the dummy node
+        private FileSystemNodeModel() 
         {
-            try
-            {
-                var directories = Directory.GetDirectories(FullPath).Select(dir => new FileSystemNodeModel(dir));
-                foreach (var dir in directories)
-                {
-                    Children.Add(dir);
-                }
-
-                var files = Directory.GetFiles(FullPath).Select(file => new FileSystemNodeModel(file));
-                foreach (var file in files)
-                {
-                    Children.Add(file);
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Ignore folders we can't access
-            }
+            Name = "Loading...";
+            Children = new ObservableCollection<FileSystemNodeModel>();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

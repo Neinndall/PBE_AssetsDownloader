@@ -39,7 +39,7 @@ namespace PBE_AssetsManager
                         rollingInterval: RollingInterval.Day,
                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}"))
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error) // Error, Fatal
+                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Error && e.Exception != null) // Error, Fatal and with an Exception
                     .WriteTo.File("logs/application_errors.log", 
                         rollingInterval: RollingInterval.Day,
                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"))
@@ -68,6 +68,9 @@ namespace PBE_AssetsManager
             services.AddSingleton<WadComparatorService>();
             services.AddSingleton<HashResolverService>();
             services.AddSingleton<WadDifferenceService>();
+            services.AddSingleton<WadPackagingService>();
+            services.AddSingleton<WadNodeLoaderService>();
+            services.AddTransient<ExplorerPreviewService>();
 
             // Main Application Logic Service
             services.AddTransient<ExtractionService>();

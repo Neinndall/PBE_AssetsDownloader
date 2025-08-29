@@ -13,19 +13,7 @@
              d:DataContext="{d:DesignInstance models:FileSystemNodeModel}">
     <UserControl.Resources>
         <converters:PathToIconConverter x:Key="PathToIconConverter"/>
-        
-        <ContextMenu x:Key="NodeContextMenu">
-            <MenuItem Header="Show Info" Click="Info_MenuItem_Click">
-                <MenuItem.Icon>
-                    <materialIcons:MaterialIcon Kind="InformationOutline"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Delete" Click="Delete_MenuItem_Click">
-                <MenuItem.Icon>
-                    <materialIcons:MaterialIcon Kind="DeleteOutline"/>
-                </MenuItem.Icon>
-            </MenuItem>
-        </ContextMenu>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
         <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
             <Grid Margin="0,2,0,2">
@@ -61,6 +49,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <materialIcons:MaterialIcon Kind="FolderSearchOutline"
@@ -71,16 +60,18 @@
                                              Foreground="{StaticResource AccentBlue}"
                                              Grid.Column="0"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="EXPLORER" 
+                    <TextBlock Text="WAD EXPLORER" 
                                FontSize="26" 
                                FontWeight="Bold"
                                Foreground="{StaticResource AccentBlue}"
                                Margin="0,2,0,0"/>
-                    <TextBlock Text="Explore and manage your downloaded assets" 
+                    <TextBlock Text="Select a directory to explore its WAD files" 
                                FontSize="12" 
                                Foreground="{StaticResource TextMuted}"
                                Margin="0,2,0,0"/>
                 </StackPanel>
+                
+                
             </Grid>
         </Border>
 
@@ -134,10 +125,11 @@
                               Style="{StaticResource ModernTreeView}">
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
+                                <Setter Property="ContextMenu" Value="{x:Null}" />
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                                <Setter Property="ContextMenu" Value="{StaticResource NodeContextMenu}"/>
                                 <Setter Property="Background" Value="Transparent"/>
-                                <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded"/>
                             </Style>
                         </TreeView.ItemContainerStyle>
                     </TreeView>
@@ -147,18 +139,18 @@
                                 VerticalAlignment="Center"
                                 Margin="10"
                                 Visibility="Collapsed">
-                        <materialIcons:MaterialIcon Kind="FolderOffOutline"
+                        <materialIcons:MaterialIcon Kind="FolderSearchOutline"
                                                     Width="48" Height="48"
                                                     HorizontalAlignment="Center"
                                                     Foreground="{StaticResource TextMuted}"
                                                     Opacity="0.8"/>
-                        <TextBlock Text="Directory Not Found"
+                        <TextBlock Text="Select a PBE Directory"
                                    FontSize="18"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource TextMuted}"
                                    HorizontalAlignment="Center"
                                    Margin="0,16,0,0"/>
-                        <TextBlock Text="The 'AssetsDownloaded' folder does not exist. Perform a download to explore the files."
+                        <TextBlock Text="Choose the root folder of a PBE installation to browse its WAD files."
                                    TextWrapping="Wrap"
                                    FontSize="14"
                                    Foreground="{StaticResource TextMuted}"
@@ -166,6 +158,25 @@
                                    TextAlignment="Center"
                                    Margin="0,8,0,0"
                                    Opacity="0.7"/>
+                        <Button x:Name="SelectPbeDirButton"
+                                Content="Select Directory..."
+                                Style="{StaticResource SecondaryButton}"
+                                Click="SelectPbeDirButton_Click"
+                                Padding="16,0"
+                                Height="36"
+                                HorizontalAlignment="Center"
+                                Margin="0,20,0,0"
+                                ToolTip="Select the root directory of a PBE installation to browse its WAD files."/>
+                    </StackPanel>
+                    <StackPanel x:Name="LoadingIndicator"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Visibility="Collapsed">
+                        <ProgressBar IsIndeterminate="True" Width="100" Foreground="{StaticResource AccentBlue}" />
+                        <TextBlock Text="Loading Files..."
+                                   Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,10,0,0" />
                     </StackPanel>
                 </Grid>
             </Grid>

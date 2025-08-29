@@ -48,7 +48,7 @@
                                Style="{StaticResource NavButtonStyle}"/>
                     
                     <RadioButton x:Name="NavHashes" 
-                               Content="Hash Paths" 
+                               Content="Default Paths" 
                                Tag="📁"
                                GroupName="Navigation" 
                                Style="{StaticResource NavButtonStyle}"/>

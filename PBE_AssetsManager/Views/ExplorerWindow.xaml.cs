@@ -1,96 +1,68 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using Microsoft.Web.WebView2.Core;
-using System.Linq;
-using System.Collections.Generic;
-using System.Windows.Media;
+using Microsoft.Win32;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Models;
-using PBE_AssetsManager.Views.Dialogs;
+using Microsoft.Web.WebView2.Core;
 
 namespace PBE_AssetsManager.Views
 {
     public partial class ExplorerWindow : UserControl
     {
-        private readonly DirectoriesCreator _directoriesCreator;
         private readonly LogService _logService;
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly HashResolverService _hashResolverService;
+        private readonly DirectoriesCreator _directoriesCreator;
+        private readonly ExplorerPreviewService _explorerPreviewService;
+        private readonly WadNodeLoaderService _wadNodeLoaderService;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
-        private readonly List<FileSystemNodeModel> _fullTree = new List<FileSystemNodeModel>();
-
-        public ExplorerWindow(DirectoriesCreator directoriesCreator, LogService logService, CustomMessageBoxService customMessageBoxService)
+        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator, WadNodeLoaderService wadNodeLoaderService, ExplorerPreviewService explorerPreviewService)
         {
             InitializeComponent();
-            _directoriesCreator = directoriesCreator;
             _logService = logService;
             _customMessageBoxService = customMessageBoxService;
-            RootNodes = new ObservableCollection<FileSystemNodeModel>();
+            _hashResolverService = hashResolverService;
+            _directoriesCreator = directoriesCreator;
+            _wadNodeLoaderService = wadNodeLoaderService;
+            _explorerPreviewService = explorerPreviewService;
 
+            _explorerPreviewService.Initialize(
+                ImagePreview,
+                WebView2Preview,
+                PreviewPlaceholder,
+                SelectFileMessagePanel,
+                UnsupportedFileMessagePanel,
+                UnsupportedFileMessage
+            );
+
+            RootNodes = new ObservableCollection<FileSystemNodeModel>();
             DataContext = this;
             this.Loaded += ExplorerWindow_Loaded;
             this.Unloaded += ExplorerWindow_Unloaded;
-            InitializeWebView2();
         }
 
-        private void Info_MenuItem_Click(object sender, RoutedEventArgs e)
+        private async void ExplorerWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            if (FileTreeView.SelectedItem is FileSystemNodeModel node)
+            await InitializeWebView2();
+
+            var settings = AppSettings.LoadSettings();
+            if (!string.IsNullOrEmpty(settings.PbeDirectory) && Directory.Exists(settings.PbeDirectory))
             {
-                ShowFileInfo(node.FullPath);
+                LoadInitialDirectory(settings.PbeDirectory);
             }
-        }
-
-        private void Delete_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (FileTreeView.SelectedItem is FileSystemNodeModel node)
+            else
             {
-                DeletePath(node);
+                FileTreeView.Visibility = Visibility.Collapsed;
+                NoDirectoryMessage.Visibility = Visibility.Visible;
             }
-        }
-
-        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
-
-            if (treeViewItem != null)
-            {
-                treeViewItem.IsSelected = true;
-                e.Handled = true;
-            }
-        }
-
-        static TreeViewItem VisualUpwardSearch(DependencyObject source)
-        {
-            while (source != null && !(source is TreeViewItem))
-                source = VisualTreeHelper.GetParent(source);
-
-            return source as TreeViewItem;
-        }
-
-        private async void InitializeWebView2()
-        {
-            try
-            {
-                var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PBE_AssetsManager", "WebView2Data");
-                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: appDataPath);
-                await WebView2Preview.EnsureCoreWebView2Async(environment);
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError(ex, "WebView2 initialization failed. Previews will be affected.");
-                _customMessageBoxService.ShowError("Error", "Could not initialize content viewer. Some previews may not work correctly.", Window.GetWindow(this));
-            }
-        }
-
-        private void ExplorerWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            LoadDirectory();
         }
 
         private void ExplorerWindow_Unloaded(object sender, RoutedEventArgs e)
@@ -98,103 +70,174 @@ namespace PBE_AssetsManager.Views
             WebView2Preview.CoreWebView2?.Navigate("about:blank");
         }
 
-        private void LoadDirectory()
+        private void SelectPbeDirButton_Click(object sender, RoutedEventArgs e)
         {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "Select the PBE Directory",
+                Filter = "All files (*.*)|*.*",
+                CheckFileExists = false,
+                ValidateNames = false,
+                FileName = "Folder Selection."
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string pbeDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                if (Directory.Exists(pbeDirectory))
+                {
+                    LoadInitialDirectory(pbeDirectory);
+
+                    var settings = AppSettings.LoadSettings();
+                    settings.PbeDirectory = pbeDirectory;
+                    AppSettings.SaveSettings(settings);
+                }
+                else
+                {
+                    _customMessageBoxService.ShowError("Error", "Invalid directory selected.", Window.GetWindow(this));
+                }
+            }
+        }
+
+        private async void LoadInitialDirectory(string rootPath)
+        {
+            NoDirectoryMessage.Visibility = Visibility.Collapsed;
+            FileTreeView.Visibility = Visibility.Collapsed;
+            LoadingIndicator.Visibility = Visibility.Visible;
+
             try
             {
-                var rootDirectory = Path.Combine(_directoriesCreator.AppDirectory, "AssetsDownloaded");
-                if (!Directory.Exists(rootDirectory))
-                {
-                    FileTreeView.Visibility = Visibility.Collapsed;
-                    NoDirectoryMessage.Visibility = Visibility.Visible;
-                    return;
-                }
+                await _hashResolverService.LoadHashesAsync();
+                await _hashResolverService.LoadBinHashesAsync();
 
-                FileTreeView.Visibility = Visibility.Visible;
-                NoDirectoryMessage.Visibility = Visibility.Collapsed;
-
-                _fullTree.Clear();
                 RootNodes.Clear();
 
-                var rootNode = new FileSystemNodeModel(rootDirectory);
-                _fullTree.Add(rootNode);
+                string gamePath = Path.Combine(rootPath, "Game");
+                string pluginsPath = Path.Combine(rootPath, "Plugins");
 
-                foreach (var node in _fullTree)
+                bool directoryFound = false;
+                if (Directory.Exists(gamePath))
                 {
-                    RootNodes.Add(node);
+                    RootNodes.Add(new FileSystemNodeModel(gamePath));
+                    directoryFound = true;
+                }
+                if (Directory.Exists(pluginsPath))
+                {
+                    RootNodes.Add(new FileSystemNodeModel(pluginsPath));
+                    directoryFound = true;
+                }
+
+                if (!directoryFound)
+                {
+                    _customMessageBoxService.ShowError("Error", "Could not find 'Game' or 'Plugins' subdirectories in the selected path.", Window.GetWindow(this));
+                    NoDirectoryMessage.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    FileTreeView.Visibility = Visibility.Visible;
                 }
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, "Failed to load asset directory.");
+                _logService.LogError(ex, "Failed to load initial directory or hashes.");
+                _customMessageBoxService.ShowError("Error", "Could not load the directory. Please check the logs.", Window.GetWindow(this));
+                FileTreeView.Visibility = Visibility.Collapsed;
+                NoDirectoryMessage.Visibility = Visibility.Visible;
+            }
+            finally
+            {
+                LoadingIndicator.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void txtSearchExplorer_TextChanged(object sender, TextChangedEventArgs e)
+        private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
         {
-            string searchText = txtSearchExplorer.Text;
-            txtSearchExplorerPlaceholder.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Visible : Visibility.Collapsed;
+            var item = sender as TreeViewItem;
+            if (item?.DataContext is not FileSystemNodeModel node) return;
 
-            RootNodes.Clear();
+            if (node.Children.Count != 1 || node.Children[0].Name != "Loading...") return;
 
-            if (string.IsNullOrWhiteSpace(searchText))
+            item.IsEnabled = false;
+            try
             {
-                foreach (var node in _fullTree)
+                node.Children.Clear();
+                switch (node.Type)
                 {
-                    RootNodes.Add(node);
+                    case NodeType.RealDirectory:
+                        LoadRealDirectoryChildren(node);
+                        break;
+                    case NodeType.WadFile:
+                        var children = await _wadNodeLoaderService.LoadChildrenAsync(node);
+                        foreach (var child in children)
+                        {
+                            node.Children.Add(child);
+                        }
+                        break;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                foreach (var rootNode in _fullTree)
-                {
-                    var filteredNode = FilterNode(rootNode, searchText);
-                    if (filteredNode != null)
-                    {
-                        RootNodes.Add(filteredNode);
-                    }
-                }
+                _logService.LogError(ex, $"Failed to expand node: {node.FullPath}");
+            }
+            finally
+            {
+                item.IsEnabled = true;
             }
         }
 
-        private FileSystemNodeModel FilterNode(FileSystemNodeModel node, string searchText)
+        private void LoadRealDirectoryChildren(FileSystemNodeModel parent)
         {
-            bool selfMatches = node.Name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
-
-            if (node.IsDirectory)
+            try
             {
-                if (selfMatches)
+                var directories = Directory.GetDirectories(parent.FullPath);
+                foreach (var dir in directories.OrderBy(d => d))
                 {
-                    var fullNode = new FileSystemNodeModel(node.FullPath);
-                    fullNode.IsExpanded = true;
-                    return fullNode;
+                    parent.Children.Add(new FileSystemNodeModel(dir));
                 }
 
-                var filteredChildren = new ObservableCollection<FileSystemNodeModel>();
-                foreach (var child in node.Children)
+                var files = Directory.GetFiles(parent.FullPath);
+                foreach (var file in files.OrderBy(f => f))
                 {
-                    var filteredChild = FilterNode(child, searchText);
-                    if (filteredChild != null)
-                    {
-                        filteredChildren.Add(filteredChild);
-                    }
-                }
-
-                if (filteredChildren.Any())
-                {
-                    var newNode = new FileSystemNodeModel(node.FullPath, isDirectory: true, children: filteredChildren);
-                    newNode.IsExpanded = true;
-                    return newNode;
+                    parent.Children.Add(new FileSystemNodeModel(file));
                 }
             }
-            else if (selfMatches)
+            catch (UnauthorizedAccessException)
             {
-                return new FileSystemNodeModel(node.FullPath, isDirectory: false);
+                _logService.LogWarning($"Access denied to: {parent.FullPath}");
             }
-
-            return null;
         }
 
+        private async void FileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var selectedNode = e.NewValue as FileSystemNodeModel;
+            await _explorerPreviewService.ShowPreviewAsync(selectedNode);
+        }
+
+        private async Task InitializeWebView2()
+        {
+            try
+            {
+                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: _directoriesCreator.WebView2DataPath);
+                await WebView2Preview.EnsureCoreWebView2Async(environment);
+                WebView2Preview.DefaultBackgroundColor = System.Drawing.Color.Transparent;
+                
+                WebView2Preview.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "preview.assets",
+                    _directoriesCreator.TempPreviewPath,
+                    CoreWebView2HostResourceAccessKind.Allow
+                );
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "WebView2 initialization failed. Previews will be affected.");
+                _customMessageBoxService.ShowError(
+                    "Error",
+                    "Could not initialize content viewer. Some previews may not work correctly.",
+                    Window.GetWindow(this)
+                );
+            }
+        }
+        
         private void txtSearchExplorer_GotFocus(object sender, RoutedEventArgs e)
         {
             txtSearchExplorerPlaceholder.Visibility = Visibility.Collapsed;
@@ -208,154 +251,64 @@ namespace PBE_AssetsManager.Views
             }
         }
 
-        private void FileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void txtSearchExplorer_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var selectedNode = e.NewValue as FileSystemNodeModel;
-            if (selectedNode == null || selectedNode.IsDirectory)
+            string searchText = txtSearchExplorer.Text;
+
+            if (string.IsNullOrWhiteSpace(searchText))
             {
-                ResetPreview();
+                SetVisibility(RootNodes, true);
                 return;
             }
 
-            try
+            FilterTree(RootNodes, searchText, false);
+        }
+
+        private bool FilterTree(IEnumerable<FileSystemNodeModel> nodes, string searchText, bool parentMatched)
+        {
+            bool somethingVisibleInThisLevel = false;
+            if (nodes == null) return false;
+
+            foreach (var node in nodes)
             {
-                if (IsImageExtension(selectedNode.Extension))
+                if (node.Name == "Loading...")
                 {
-                    ShowImagePreview(selectedNode.FullPath);
+                    if (parentMatched)
+                    {
+                        node.IsVisible = true;
+                        somethingVisibleInThisLevel = true;
+                    }
+                    continue;
                 }
-                else if (IsPreviewableInWebView(selectedNode.Extension))
+
+                bool selfMatches = node.Name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                if (parentMatched || selfMatches)
                 {
-                    ShowWebViewPreview(selectedNode.FullPath);
+                    node.IsVisible = true;
+                    somethingVisibleInThisLevel = true;
+                    FilterTree(node.Children, searchText, true);
                 }
                 else
                 {
-                    ShowUnsupportedPreview(selectedNode.Extension);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError(ex, $"Failed to preview file '{selectedNode.FullPath}'.");
-                ResetPreview();
-            }
-        }
-
-        private void ShowImagePreview(string path)
-        {
-            ResetPreview();
-            ImagePreview.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
-
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(path, UriKind.Absolute);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            ImagePreview.Source = bitmap;
-        }
-
-        private void ShowWebViewPreview(string path)
-        {
-            ResetPreview();
-            WebView2Preview.Visibility = Visibility.Visible;
-            PreviewPlaceholder.Visibility = Visibility.Collapsed;
-            WebView2Preview.CoreWebView2.Navigate(new Uri(path).AbsoluteUri);
-        }
-
-        private void ShowUnsupportedPreview(string extension)
-        {
-            ResetPreview();
-            PreviewPlaceholder.Visibility = Visibility.Visible;
-            SelectFileMessagePanel.Visibility = Visibility.Collapsed;
-            UnsupportedFileMessagePanel.Visibility = Visibility.Visible;
-            UnsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
-        }
-
-        private void ResetPreview()
-        {
-            PreviewPlaceholder.Visibility = Visibility.Visible;
-            SelectFileMessagePanel.Visibility = Visibility.Visible;
-            UnsupportedFileMessagePanel.Visibility = Visibility.Collapsed;
-
-            ImagePreview.Visibility = Visibility.Collapsed;
-            TextPreview.Visibility = Visibility.Collapsed;
-            WebView2Preview.Visibility = Visibility.Collapsed;
-            
-            if (WebView2Preview != null && WebView2Preview.CoreWebView2 != null)
-            {
-                WebView2Preview.CoreWebView2.Navigate("about:blank");
-            }
-        }
-
-        private bool IsImageExtension(string extension)
-        {
-            return extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
-        }
-
-        private bool IsPreviewableInWebView(string extension)
-        {
-            return extension == ".svg" ||
-                   extension == ".txt" || extension == ".json" || extension == ".log" ||
-                   extension == ".webm" || extension == ".ogg" || extension == ".mp4" ||
-                   extension == ".mp3" || extension == ".wav";
-        }
-
-        private void DeletePath(FileSystemNodeModel node)
-        {
-            var message = node.IsDirectory
-                ? $"Are you sure you want to delete the directory '{node.Name}' and all its contents?"
-                : $"Are you sure you want to delete the file '{node.Name}'";
-
-            var result = _customMessageBoxService.ShowYesNo("Confirm Deletion", message, Window.GetWindow(this));
-
-            if (result == true)
-            {
-                try
-                {
-                    if (node.IsDirectory)
+                    bool childMatches = FilterTree(node.Children, searchText, false);
+                    node.IsVisible = childMatches;
+                    if (childMatches)
                     {
-                        Directory.Delete(node.FullPath, true);
+                        node.IsExpanded = true;
+                        somethingVisibleInThisLevel = true;
                     }
-                    else
-                    {
-                        File.Delete(node.FullPath);
-                    }
-                    LoadDirectory();
-                    _logService.Log($"Deleted: {node.FullPath}");
-                }
-                catch (Exception ex)
-                {
-                    _logService.LogError(ex, $"Failed to delete '{node.FullPath}'.");
-                    _customMessageBoxService.ShowError("Error", $"Could not delete '{node.Name}'.", Window.GetWindow(this));
                 }
             }
+            return somethingVisibleInThisLevel;
         }
 
-        private void ShowFileInfo(string path)
+        private void SetVisibility(IEnumerable<FileSystemNodeModel> nodes, bool isVisible)
         {
-            try
+            foreach (var node in nodes)
             {
-                if (File.Exists(path))
-                {
-                    var fileInfo = new FileInfo(path);
-                    var message = $"File: {fileInfo.Name}\n" +
-                                  $"Size: {fileInfo.Length / 1024:N0} KB\n" +
-                                  $"Created: {fileInfo.CreationTime}\n" +
-                                  $"Modified: {fileInfo.LastWriteTime}";
-                    _customMessageBoxService.ShowInfo("File Information", message, Window.GetWindow(this));
-                }
-                else if (Directory.Exists(path))
-                {
-                    var dirInfo = new DirectoryInfo(path);
-                    var message = $"Directory: {dirInfo.Name}\n" +
-                                  $"Created: {dirInfo.CreationTime}\n" +
-                                  $"Last Modified: {dirInfo.LastWriteTime}";
-                    _customMessageBoxService.ShowInfo("Directory Information", message, Window.GetWindow(this));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError(ex, $"Failed to get info for '{path}'.");
-                _customMessageBoxService.ShowError("Error", $"Could not get information for '{Path.GetFileName(path)}'.", Window.GetWindow(this));
+                node.IsVisible = isVisible;
+                SetVisibility(node.Children, isVisible);
             }
         }
     }

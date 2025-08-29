@@ -24,7 +24,7 @@ namespace PBE_AssetsManager.Services
 
         public async Task LoadHashesAsync()
         {
-            _hashToPathMap.Clear();
+            if (_hashToPathMap.Count > 0) return;
 
             var newHashesDir = _directoriesCreator.HashesNewPath;
 
@@ -37,10 +37,7 @@ namespace PBE_AssetsManager.Services
 
         public async Task LoadBinHashesAsync()
         {
-            _binHashesMap.Clear();
-            _binEntriesMap.Clear();
-            _binFieldsMap.Clear();
-            _binTypesMap.Clear();
+            if (_binHashesMap.Count > 0) return; // Already loaded
 
             var binHashesDir = _directoriesCreator.HashesNewPath;
             var binHashesFile = Path.Combine(binHashesDir, "hashes.binhashes.txt");
@@ -84,11 +81,6 @@ namespace PBE_AssetsManager.Services
         {
             return _hashToPathMap.TryGetValue(pathHash, out var path) ? path : pathHash.ToString("x16");
         }
-
-        public string ResolveBinHash(uint hash) => _binHashesMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
-        public string ResolveBinEntry(uint hash) => _binEntriesMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
-        public string ResolveBinField(uint hash) => _binFieldsMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
-        public string ResolveBinType(uint hash) => _binTypesMap.TryGetValue(hash, out var path) ? path : hash.ToString("x8");
 
         public string ResolveBinHashGeneral(uint hash)
         {

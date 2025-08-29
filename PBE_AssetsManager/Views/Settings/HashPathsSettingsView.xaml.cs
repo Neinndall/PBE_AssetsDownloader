@@ -21,6 +21,7 @@ namespace PBE_AssetsManager.Views.Settings
             _appSettings = appSettings;
             textBoxNewHashPath.Text = _appSettings.NewHashesPath;
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
+            textBoxPbePath.Text = _appSettings.PbeDirectory;
         }
 
         public void SaveSettings()
@@ -28,6 +29,7 @@ namespace PBE_AssetsManager.Views.Settings
             if (_appSettings == null) return;
             _appSettings.NewHashesPath = textBoxNewHashPath.Text;
             _appSettings.OldHashesPath = textBoxOldHashPath.Text;
+            _appSettings.PbeDirectory = textBoxPbePath.Text;
         }
 
         private void btnBrowseNew_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -59,5 +61,18 @@ namespace PBE_AssetsManager.Views.Settings
         }
         
         
+    private void btnBrowsePbe_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            {
+                folderBrowserDialog.IsFolderPicker = true;
+                folderBrowserDialog.Title = "Select PBE Directory for Explorer";
+
+                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    textBoxPbePath.Text = folderBrowserDialog.FileName;
+                }
+            }
+        }
     }
 }

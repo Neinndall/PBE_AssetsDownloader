@@ -76,20 +76,11 @@
                     </StackPanel>
                 </StackPanel>
 
-                <TextBlock TextWrapping="Wrap"
-                           FontSize="13"
-                           Foreground="{StaticResource TextSecondary}"
-                           LineHeight="20">
-                    To report a bug, you will be taken to GitHub. Please provide as much detail as possible:
-                    <LineBreak/><LineBreak/>
-                    • <Run FontWeight="SemiBold">Description and steps to reproduce.</Run>
-                    <LineBreak/>
-                    • <Run FontWeight="SemiBold">Expected vs. actual results.</Run>
-                    <LineBreak/>
-                    • <Run FontWeight="SemiBold">Application version and OS.</Run>
-                    <LineBreak/>
-                    • <Run FontWeight="SemiBold">Relevant log files</Run> from the `logs` folder.
-                </TextBlock>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="• Provide as much information as possible."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="• Description and steps to reproduce."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="• Expected actual results."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="• Application version and OS."/>
+                <TextBlock Margin="0,4" FontSize="13" Foreground="{StaticResource TextSecondary}" Text="• Relevant log files from the logs folder."/>
             </StackPanel>
         </Border>
     </StackPanel>

@@ -13,19 +13,6 @@
              d:DataContext="{d:DesignInstance models:FileSystemNodeModel}">
     <UserControl.Resources>
         <converters:PathToIconConverter x:Key="PathToIconConverter"/>
-        
-        <ContextMenu x:Key="NodeContextMenu">
-            <MenuItem Header="Show Info" Click="Info_MenuItem_Click">
-                <MenuItem.Icon>
-                    <materialIcons:MaterialIcon Kind="InformationOutline"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Delete" Click="Delete_MenuItem_Click">
-                <MenuItem.Icon>
-                    <materialIcons:MaterialIcon Kind="DeleteOutline"/>
-                </MenuItem.Icon>
-            </MenuItem>
-        </ContextMenu>
 
         <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
             <Grid Margin="0,2,0,2">
@@ -61,6 +48,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <materialIcons:MaterialIcon Kind="FolderSearchOutline"
@@ -71,16 +59,25 @@
                                              Foreground="{StaticResource AccentBlue}"
                                              Grid.Column="0"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="EXPLORER" 
+                    <TextBlock Text="WAD EXPLORER" 
                                FontSize="26" 
                                FontWeight="Bold"
                                Foreground="{StaticResource AccentBlue}"
                                Margin="0,2,0,0"/>
-                    <TextBlock Text="Explore and manage your downloaded assets" 
+                    <TextBlock Text="Select a PBE directory to explore its WAD files" 
                                FontSize="12" 
                                Foreground="{StaticResource TextMuted}"
                                Margin="0,2,0,0"/>
                 </StackPanel>
+                
+                <Button x:Name="SelectPbeDirButton"
+                        Grid.Column="2"
+                        Content="Select PBE Directory"
+                        Height="36"
+                        Width="180"
+                        Style="{StaticResource ModernButton}"
+                        Click="SelectPbeDirButton_Click"
+                        ToolTip="Select the root directory of a PBE installation to browse its WAD files."/>
             </Grid>
         </Border>
 
@@ -135,9 +132,8 @@
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                                <Setter Property="ContextMenu" Value="{StaticResource NodeContextMenu}"/>
                                 <Setter Property="Background" Value="Transparent"/>
-                                <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded"/>
                             </Style>
                         </TreeView.ItemContainerStyle>
                     </TreeView>

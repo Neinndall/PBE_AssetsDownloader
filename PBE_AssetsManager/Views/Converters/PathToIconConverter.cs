@@ -17,9 +17,14 @@ namespace PBE_AssetsManager.Views.Converters
                 return MaterialIconKind.FileOutline;
             }
 
-            if (node.IsDirectory)
+            if (node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory)
             {
                 return MaterialIconKind.FolderOutline;
+            }
+
+            if (node.Type == NodeType.WadFile)
+            {
+                return MaterialIconKind.PackageVariant;
             }
 
             return node.Extension.ToLowerInvariant() switch

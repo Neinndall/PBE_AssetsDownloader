@@ -16,6 +16,23 @@ namespace PBE_AssetsManager.Services
             _hashResolverService = hashResolverService;
         }
 
+        private void SortChildrenRecursively(FileSystemNodeModel node)
+        {
+            if (node.Type != NodeType.VirtualDirectory && node.Type != NodeType.WadFile) return;
+
+            var sortedChildren = node.Children
+                .OrderBy(c => c.Type == NodeType.VirtualDirectory ? 0 : 1)
+                .ThenBy(c => c.Name)
+                .ToList();
+
+            node.Children.Clear();
+            foreach (var child in sortedChildren)
+            {
+                node.Children.Add(child);
+                SortChildrenRecursively(child);
+            }
+        }
+
         public async Task<List<FileSystemNodeModel>> LoadChildrenAsync(FileSystemNodeModel wadNode)
         {
             var childrenToAdd = await Task.Run(() =>
@@ -33,21 +50,8 @@ namespace PBE_AssetsManager.Services
                     }
                 }
 
-                // Now, sort the children within the rootVirtualNode's Children ObservableCollection
-                // and return them. The TreeView will update based on this sorted list.
-                var sortedChildren = rootVirtualNode.Children
-                    .OrderBy(c => c.Type == NodeType.VirtualDirectory ? 0 : 1)
-                    .ThenBy(c => c.Name)
-                    .ToList(); // Create a new sorted list
-
-                // Clear the existing (unsorted) children and add the sorted ones
-                rootVirtualNode.Children.Clear();
-                foreach (var child in sortedChildren)
-                {
-                    rootVirtualNode.Children.Add(child);
-                }
-
-                return sortedChildren; // Return the sorted list
+                SortChildrenRecursively(rootVirtualNode);
+                return rootVirtualNode.Children.ToList();
             });
 
             return childrenToAdd;

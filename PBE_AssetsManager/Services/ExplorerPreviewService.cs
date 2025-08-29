@@ -26,27 +26,35 @@ namespace PBE_AssetsManager.Services
         private enum Previewer { None, Image, WebView, Placeholder }
         private Previewer _activePreviewer = Previewer.None;
 
-        private readonly Image _imagePreview;
-        private readonly WebView2 _webView2Preview;
-        private readonly Panel _previewPlaceholder;
-        private readonly Panel _selectFileMessagePanel;
-        private readonly Panel _unsupportedFileMessagePanel;
-        private readonly TextBlock _unsupportedFileMessage;
+        // UI Controls - to be initialized via Initialize method
+        private Image _imagePreview;
+        private WebView2 _webView2Preview;
+        private Panel _previewPlaceholder;
+        private Panel _selectFileMessagePanel;
+        private Panel _unsupportedFileMessagePanel;
+        private TextBlock _unsupportedFileMessage;
 
+        // Injected Services
         private readonly LogService _logService;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly HashResolverService _hashResolverService;
 
-        public ExplorerPreviewService(
+        // Constructor for DI
+        public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService)
+        {
+            _logService = logService;
+            _directoriesCreator = directoriesCreator;
+            _hashResolverService = hashResolverService;
+        }
+
+        // Method to initialize UI-dependent components
+        public void Initialize(
             Image imagePreview,
             WebView2 webView2Preview,
             Panel previewPlaceholder,
             Panel selectFileMessagePanel,
             Panel unsupportedFileMessagePanel,
-            TextBlock unsupportedFileMessage,
-            LogService logService,
-            DirectoriesCreator directoriesCreator,
-            HashResolverService hashResolverService)
+            TextBlock unsupportedFileMessage)
         {
             _imagePreview = imagePreview;
             _webView2Preview = webView2Preview;
@@ -54,9 +62,6 @@ namespace PBE_AssetsManager.Services
             _selectFileMessagePanel = selectFileMessagePanel;
             _unsupportedFileMessagePanel = unsupportedFileMessagePanel;
             _unsupportedFileMessage = unsupportedFileMessage;
-            _logService = logService;
-            _directoriesCreator = directoriesCreator;
-            _hashResolverService = hashResolverService;
         }
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
@@ -169,8 +174,9 @@ namespace PBE_AssetsManager.Services
                 });
 
                 string formattedText = JsonDiffHelper.FormatJson(textContent);
+                
                 string escapedHtml = System.Net.WebUtility.HtmlEncode(formattedText);
-                var htmlPageContent = $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #2D2D30; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; }} pre {{ margin: 0; word-wrap: break-word; white-space: pre-wrap; }}</style></head><body><pre>{escapedHtml}</pre></body></html>";
+                var htmlPageContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""><style>body {{ background-color: #2D2D30; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; }} pre {{ margin: 0; white-space: nowrap; overflow-x: auto; }}</style></head><body><pre>{escapedHtml}</pre></body></html>";
 
                 var tempFileName = "preview.html";
                 var tempFilePath = Path.Combine(_directoriesCreator.TempPreviewPath, tempFileName);
@@ -325,14 +331,14 @@ namespace PBE_AssetsManager.Services
                 string tag = mimeType.StartsWith("video/") ? "video" : "audio";
                 string extraAttributes = tag == "video" ? "muted" : "";
                 var fileUrl = $"https://preview.assets/{tempFileName}";
-                var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{{tag}} controls autoplay {extraAttributes} style=\"width: 100%; max-height: 100%;\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{{tag}}>";
+                var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{{tag}} controls autoplay {extraAttributes} style=\"width: 100%; max-height: 100%;\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{{tag}}></body>";
 
                 await _webView2Preview.EnsureCoreWebView2Async();
                 _webView2Preview.CoreWebView2.NavigateToString(htmlContent);
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Failed to create and show preview for {extension} file.");
+                _logService.LogError(ex, $"Failed to create and show preview for {{extension}} file.");
                 await ShowUnsupportedPreviewAsync(extension);
             }
         }
@@ -340,7 +346,7 @@ namespace PBE_AssetsManager.Services
         private async Task ShowUnsupportedPreviewAsync(string extension)
         {
             SetPreviewer(Previewer.Placeholder);
-            _selectFileMessagePanel.Visibility = Visibility.Collapsed;
+            _selectFileMessagePanel.Visibility = Visibility.Visible;
             _unsupportedFileMessagePanel.Visibility = Visibility.Visible;
             _unsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
             await Task.CompletedTask;

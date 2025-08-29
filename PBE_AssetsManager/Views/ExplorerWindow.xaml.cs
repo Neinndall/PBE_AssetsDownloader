@@ -25,7 +25,7 @@ namespace PBE_AssetsManager.Views
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
 
-        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator, WadNodeLoaderService wadNodeLoaderService)
+        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator, WadNodeLoaderService wadNodeLoaderService, ExplorerPreviewService previewService)
         {
             InitializeComponent();
             _logService = logService;
@@ -33,17 +33,15 @@ namespace PBE_AssetsManager.Views
             _hashResolverService = hashResolverService;
             _directoriesCreator = directoriesCreator;
             _wadNodeLoaderService = wadNodeLoaderService;
+            _previewService = previewService;
 
-            _previewService = new ExplorerPreviewService(
+            _previewService.Initialize(
                 ImagePreview,
                 WebView2Preview,
                 PreviewPlaceholder,
                 SelectFileMessagePanel,
                 UnsupportedFileMessagePanel,
-                UnsupportedFileMessage,
-                _logService,
-                _directoriesCreator,
-                _hashResolverService
+                UnsupportedFileMessage
             );
 
             RootNodes = new ObservableCollection<FileSystemNodeModel>();

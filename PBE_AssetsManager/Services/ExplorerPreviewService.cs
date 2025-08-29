@@ -66,9 +66,11 @@ namespace PBE_AssetsManager.Services
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
+            
+
             if (node == null || node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory || node.Type == NodeType.WadFile)
             {
-                await ResetPreviewAsync();
+                await ResetPreviewAsync(); // This will show _selectFileMessagePanel
                 return;
             }
 
@@ -86,7 +88,7 @@ namespace PBE_AssetsManager.Services
             catch (Exception ex)
             {
                 _logService.LogError(ex, $"Failed to preview file '{node.FullPath}'.");
-                await ShowUnsupportedPreviewAsync(node.Extension);
+                await ShowUnsupportedPreviewAsync(node.Extension); // This will show _unsupportedFileMessagePanel
             }
         }
 
@@ -176,7 +178,7 @@ namespace PBE_AssetsManager.Services
                 string formattedText = JsonDiffHelper.FormatJson(textContent);
                 
                 string escapedHtml = System.Net.WebUtility.HtmlEncode(formattedText);
-                var htmlPageContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""><style>body {{ background-color: #2D2D30; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; }} pre {{ margin: 0; white-space: nowrap; overflow-x: auto; }}</style></head><body><pre>{escapedHtml}</pre></body></html>";
+                var htmlPageContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""><style>body {{ background-color: #2D2D30; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; }} pre {{ margin: 0; white-space: pre-wrap; overflow-wrap: break-word; }}</style></head><body><pre>{escapedHtml}</pre></body></html>";
 
                 var tempFileName = "preview.html";
                 var tempFilePath = Path.Combine(_directoriesCreator.TempPreviewPath, tempFileName);
@@ -331,7 +333,7 @@ namespace PBE_AssetsManager.Services
                 string tag = mimeType.StartsWith("video/") ? "video" : "audio";
                 string extraAttributes = tag == "video" ? "muted" : "";
                 var fileUrl = $"https://preview.assets/{tempFileName}";
-                var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{{tag}} controls autoplay {extraAttributes} style=\"width: 100%; max-height: 100%;\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{{tag}}></body>";
+                var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{tag} controls autoplay {extraAttributes} style=\"width:{(tag == "audio" ? "300px" : "100%")}; height:{(tag == "audio" ? "80px" : "100%")};\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{tag}></body>";
 
                 await _webView2Preview.EnsureCoreWebView2Async();
                 _webView2Preview.CoreWebView2.NavigateToString(htmlContent);
@@ -346,7 +348,7 @@ namespace PBE_AssetsManager.Services
         private async Task ShowUnsupportedPreviewAsync(string extension)
         {
             SetPreviewer(Previewer.Placeholder);
-            _selectFileMessagePanel.Visibility = Visibility.Visible;
+            _selectFileMessagePanel.Visibility = Visibility.Collapsed;
             _unsupportedFileMessagePanel.Visibility = Visibility.Visible;
             _unsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
             await Task.CompletedTask;

@@ -32,10 +32,22 @@ namespace PBE_AssetsManager.Services
                         }
                     }
                 }
-                return rootVirtualNode.Children
+
+                // Now, sort the children within the rootVirtualNode's Children ObservableCollection
+                // and return them. The TreeView will update based on this sorted list.
+                var sortedChildren = rootVirtualNode.Children
                     .OrderBy(c => c.Type == NodeType.VirtualDirectory ? 0 : 1)
                     .ThenBy(c => c.Name)
-                    .ToList();
+                    .ToList(); // Create a new sorted list
+
+                // Clear the existing (unsorted) children and add the sorted ones
+                rootVirtualNode.Children.Clear();
+                foreach (var child in sortedChildren)
+                {
+                    rootVirtualNode.Children.Add(child);
+                }
+
+                return sortedChildren; // Return the sorted list
             });
 
             return childrenToAdd;

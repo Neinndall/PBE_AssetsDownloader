@@ -111,10 +111,31 @@ namespace PBE_AssetsManager.Views
                 await _hashResolverService.LoadBinHashesAsync();
 
                 RootNodes.Clear();
-                var rootNode = new FileSystemNodeModel(rootPath);
-                RootNodes.Add(rootNode);
 
-                FileTreeView.Visibility = Visibility.Visible;
+                string gamePath = Path.Combine(rootPath, "Game");
+                string pluginsPath = Path.Combine(rootPath, "Plugins");
+
+                bool directoryFound = false;
+                if (Directory.Exists(gamePath))
+                {
+                    RootNodes.Add(new FileSystemNodeModel(gamePath));
+                    directoryFound = true;
+                }
+                if (Directory.Exists(pluginsPath))
+                {
+                    RootNodes.Add(new FileSystemNodeModel(pluginsPath));
+                    directoryFound = true;
+                }
+
+                if (!directoryFound)
+                {
+                    _customMessageBoxService.ShowError("Error", "Could not find 'Game' or 'Plugins' subdirectories in the selected path.", Window.GetWindow(this));
+                    NoDirectoryMessage.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    FileTreeView.Visibility = Visibility.Visible;
+                }
             }
             catch (Exception ex)
             {

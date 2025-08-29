@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Views.Helpers;
 using Microsoft.Win32;
 using LeagueToolkit.Core.Wad;
 using System.Text;
@@ -296,13 +297,54 @@ namespace PBE_AssetsManager.Views
             }
         }
 
-        private void ShowTextPreview(byte[] data)
+
+        private async void ShowTextPreview(byte[] data)
         {
             ResetPreview();
-            TextPreview.Visibility = Visibility.Visible;
+            WebView2Preview.Visibility = Visibility.Visible;
             PreviewPlaceholder.Visibility = Visibility.Collapsed;
-            TextPreview.Text = Encoding.UTF8.GetString(data);
+
+            string textContent = Encoding.UTF8.GetString(data);
+
+            // Limpiar caracteres raros
+            textContent = new string(textContent.Where(c => !char.IsControl(c) || c == '\n' || c == '\r' || c == '\t').ToArray());
+
+            // Truncar si es demasiado largo
+            const int MaxLength = 500_000;
+            if (textContent.Length > MaxLength)
+            {
+                textContent = textContent.Substring(0, MaxLength) + "\n\n--- LOG TRUNCATED ---";
+            }
+
+            // Si es JSON -> formatear
+            bool isJson = textContent.TrimStart().StartsWith("{") || textContent.TrimStart().StartsWith("[");
+            string formattedText = isJson ? JsonDiffHelper.FormatJson(textContent) : textContent;
+
+            string escapedHtml = System.Net.WebUtility.HtmlEncode(formattedText);
+
+            var htmlContent = @$"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset=""UTF-8"">
+                    <style>
+                        body {{ background-color: #2D2D30; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; }}
+                        pre {{ margin: 0; word-wrap: break-word; white-space: pre-wrap; }}
+                    </style>
+                </head>
+                <body>
+                    <pre>{escapedHtml}</pre>
+                </body>
+                </html>
+            ";
+
+            await WebView2Preview.EnsureCoreWebView2Async();
+            WebView2Preview.CoreWebView2.NavigateToString(htmlContent);
         }
+
+
+
+
 
         private void ShowAudioVideoPreview(byte[] data, string extension)
         {
@@ -318,7 +360,7 @@ namespace PBE_AssetsManager.Views
                 _ => "application/octet-stream"
             };
 
-            var htmlContent = $"<body style=\"background-color: #282c34; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><audio controls autoplay style=\"width: 80%;\"><source src=\"data:{mimeType};base64,{base64Data}\" type=\"{mimeType}\"></audio></body>";
+            var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><audio controls autoplay style=\"width: 80%;\"><source src=\"data:{mimeType};base64,{base64Data}\" type=\"{mimeType}\"></audio></body>";
             WebView2Preview.CoreWebView2.NavigateToString(htmlContent);
         }
 

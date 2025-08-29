@@ -23,15 +23,17 @@ namespace PBE_AssetsManager.Views
         private readonly LogService _logService;
         private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly HashResolverService _hashResolverService;
+        private readonly DirectoriesCreator _directoriesCreator;
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
 
-        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService)
+        public ExplorerWindow(LogService logService, CustomMessageBoxService customMessageBoxService, HashResolverService hashResolverService, DirectoriesCreator directoriesCreator)
         {
             InitializeComponent();
             _logService = logService;
             _customMessageBoxService = customMessageBoxService;
             _hashResolverService = hashResolverService;
+            _directoriesCreator = directoriesCreator;
             RootNodes = new ObservableCollection<FileSystemNodeModel>();
             DataContext = this;
             this.Loaded += ExplorerWindow_Loaded;
@@ -223,8 +225,9 @@ namespace PBE_AssetsManager.Views
 
             if (IsImageExtension(extension)) { ShowImagePreview(fileData); }
             else if (IsTextureExtension(extension)) { ShowTexturePreview(fileData); }
+            else if (IsVectorImageExtension(extension)) { ShowSvgPreview(fileData); }
             else if (IsTextExtension(extension)) { ShowTextPreview(fileData); }
-            else if (IsAudioExtension(extension)) { ShowAudioVideoPreview(fileData, extension); }
+            else if (IsMediaExtension(extension)) { ShowAudioVideoPreview(fileData, extension); }
             else { ShowUnsupportedPreview(extension); }
         }
 
@@ -255,8 +258,9 @@ namespace PBE_AssetsManager.Views
 
             if (IsImageExtension(extension)) { ShowImagePreview(decompressedData); }
             else if (IsTextureExtension(extension)) { ShowTexturePreview(decompressedData); }
+            else if (IsVectorImageExtension(extension)) { ShowSvgPreview(decompressedData); }
             else if (IsTextExtension(extension)) { ShowTextPreview(decompressedData); }
-            else if (IsAudioExtension(extension)) { ShowAudioVideoPreview(decompressedData, extension); }
+            else if (IsMediaExtension(extension)) { ShowAudioVideoPreview(decompressedData, extension); }
             else { ShowUnsupportedPreview(extension); }
         }
 
@@ -297,6 +301,53 @@ namespace PBE_AssetsManager.Views
             }
         }
 
+        private async void ShowSvgPreview(byte[] data)
+        {
+            ResetPreview();
+            WebView2Preview.Visibility = Visibility.Visible;
+            PreviewPlaceholder.Visibility = Visibility.Collapsed;
+
+            string svgContent = Encoding.UTF8.GetString(data);
+
+            var htmlContent = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset=""UTF-8"">
+                    <style>
+                        body {{ 
+                            background-color: #2D2D30; 
+                            display: flex; 
+                            justify-content: center; 
+                            align-items: center; 
+                            height: 100vh; 
+                            margin: 0; 
+                            padding: 20px;
+                            box-sizing: border-box;
+                        }}
+                        svg {{ 
+                            max-width: 100%; 
+                            max-height: 100%;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    {svgContent}
+                </body>
+                </html>
+            ";
+
+            try
+            {
+                await WebView2Preview.EnsureCoreWebView2Async();
+                WebView2Preview.CoreWebView2.NavigateToString(htmlContent);
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "Failed to show SVG preview.");
+                ShowUnsupportedPreview(".svg");
+            }
+        }
 
         private async void ShowTextPreview(byte[] data)
         {
@@ -346,22 +397,43 @@ namespace PBE_AssetsManager.Views
 
 
 
-        private void ShowAudioVideoPreview(byte[] data, string extension)
+        private async void ShowAudioVideoPreview(byte[] data, string extension)
         {
             ResetPreview();
             WebView2Preview.Visibility = Visibility.Visible;
             PreviewPlaceholder.Visibility = Visibility.Collapsed;
 
-            var base64Data = Convert.ToBase64String(data);
-            var mimeType = extension switch
+            try
             {
-                ".ogg" => "audio/ogg",
-                ".wav" => "audio/wav",
-                _ => "application/octet-stream"
-            };
+                foreach (var file in Directory.GetFiles(_directoriesCreator.TempPreviewPath))
+                {
+                    File.Delete(file);
+                }
 
-            var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><audio controls autoplay style=\"width: 80%;\"><source src=\"data:{mimeType};base64,{base64Data}\" type=\"{mimeType}\"></audio></body>";
-            WebView2Preview.CoreWebView2.NavigateToString(htmlContent);
+                var tempFileName = "preview" + extension;
+                var tempFilePath = Path.Combine(_directoriesCreator.TempPreviewPath, tempFileName);
+                await File.WriteAllBytesAsync(tempFilePath, data);
+
+                var mimeType = extension switch
+                {
+                    ".ogg" => "audio/ogg",
+                    ".wav" => "audio/wav",
+                    ".webm" => "video/webm",
+                    _ => "application/octet-stream"
+                };
+                string tag = mimeType.StartsWith("video/") ? "video" : "audio";
+                string extraAttributes = tag == "video" ? "muted" : "";
+
+                var fileUrl = $"https://preview.assets/{tempFileName}";
+                var htmlContent = $"<body style=\"background-color: #2D2D30; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{tag} controls autoplay {extraAttributes} style=\"width: 100%; max-height: 100%;\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{tag}>";
+                
+                WebView2Preview.CoreWebView2.NavigateToString(htmlContent);
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, $"Failed to create and show preview for {extension} file.");
+                ShowUnsupportedPreview(extension);
+            }
         }
 
         private void ShowUnsupportedPreview(string extension)
@@ -390,17 +462,18 @@ namespace PBE_AssetsManager.Views
         }
 
         private bool IsImageExtension(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
+        private bool IsVectorImageExtension(string extension) => extension == ".svg";
         private bool IsTextureExtension(string extension) => extension == ".tex" || extension == ".dds";
-        private bool IsTextExtension(string extension) => extension == ".json" || extension == ".lua" || extension == ".xml" || extension == ".yml" || extension == ".ini" || extension == ".log" || extension == ".txt";
-        private bool IsAudioExtension(string extension) => extension == ".ogg" || extension == ".wav";
+                private bool IsTextExtension(string extension) => extension == ".json" || extension == ".lua" || extension == ".xml" || extension == ".yml" || extension == ".yaml" || extension == ".ini" || extension == ".log" || extension == ".txt";
+        private bool IsMediaExtension(string extension) => extension == ".ogg" || extension == ".wav" || extension == ".webm";
 
         private async void InitializeWebView2()
         {
             try
             {
-                var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PBE_AssetsManager", "WebView2Data");
-                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: appDataPath);
+                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: _directoriesCreator.WebView2DataPath);
                 await WebView2Preview.EnsureCoreWebView2Async(environment);
+                WebView2Preview.CoreWebView2.SetVirtualHostNameToFolderMapping("preview.assets", _directoriesCreator.TempPreviewPath, CoreWebView2HostResourceAccessKind.Allow);
             }
             catch (Exception ex)
             {

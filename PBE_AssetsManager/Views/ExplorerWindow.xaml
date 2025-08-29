@@ -70,14 +70,7 @@
                                Margin="0,2,0,0"/>
                 </StackPanel>
                 
-                <Button x:Name="SelectPbeDirButton"
-                        Grid.Column="2"
-                        Content="Select PBE Directory"
-                        Height="36"
-                        Width="180"
-                        Style="{StaticResource ModernButton}"
-                        Click="SelectPbeDirButton_Click"
-                        ToolTip="Select the root directory of a PBE installation to browse its WAD files."/>
+                
             </Grid>
         </Border>
 
@@ -143,18 +136,18 @@
                                 VerticalAlignment="Center"
                                 Margin="10"
                                 Visibility="Collapsed">
-                        <materialIcons:MaterialIcon Kind="FolderOffOutline"
+                        <materialIcons:MaterialIcon Kind="FolderSearchOutline"
                                                     Width="48" Height="48"
                                                     HorizontalAlignment="Center"
                                                     Foreground="{StaticResource TextMuted}"
                                                     Opacity="0.8"/>
-                        <TextBlock Text="Directory Not Found"
+                        <TextBlock Text="Select a PBE Directory"
                                    FontSize="18"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource TextMuted}"
                                    HorizontalAlignment="Center"
                                    Margin="0,16,0,0"/>
-                        <TextBlock Text="The 'AssetsDownloaded' folder does not exist. Perform a download to explore the files."
+                        <TextBlock Text="Choose the root folder of a PBE installation to browse its WAD files."
                                    TextWrapping="Wrap"
                                    FontSize="14"
                                    Foreground="{StaticResource TextMuted}"
@@ -162,6 +155,15 @@
                                    TextAlignment="Center"
                                    Margin="0,8,0,0"
                                    Opacity="0.7"/>
+                        <Button x:Name="SelectPbeDirButton"
+                                Content="Select Directory..."
+                                Style="{StaticResource SecondaryButton}"
+                                Click="SelectPbeDirButton_Click"
+                                Padding="16,0"
+                                Height="36"
+                                HorizontalAlignment="Center"
+                                Margin="0,20,0,0"
+                                ToolTip="Select the root directory of a PBE installation to browse its WAD files."/>
                     </StackPanel>
                 </Grid>
             </Grid>

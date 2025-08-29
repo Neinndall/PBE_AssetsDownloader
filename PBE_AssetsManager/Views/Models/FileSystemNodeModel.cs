@@ -33,6 +33,20 @@ namespace PBE_AssetsManager.Views.Models
             }
         }
 
+        private bool _isVisible = true;
+        public bool IsVisible
+        {
+            get { return _isVisible; }
+            set
+            {
+                if (_isVisible != value)
+                {
+                    _isVisible = value;
+                    OnPropertyChanged(nameof(IsVisible));
+                }
+            }
+        }
+
         // Constructor for real files/directories
         public FileSystemNodeModel(string path)
         {
@@ -71,7 +85,11 @@ namespace PBE_AssetsManager.Views.Models
         }
 
         // Private constructor for the dummy node
-        private FileSystemNodeModel() { Name = "Loading..."; }
+        private FileSystemNodeModel() 
+        {
+            Name = "Loading...";
+            Children = new ObservableCollection<FileSystemNodeModel>();
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)

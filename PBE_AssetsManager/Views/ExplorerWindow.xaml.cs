@@ -253,7 +253,63 @@ namespace PBE_AssetsManager.Views
 
         private void txtSearchExplorer_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // TODO: Implement search logic for the virtual tree
+            string searchText = txtSearchExplorer.Text;
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                SetVisibility(RootNodes, true);
+                return;
+            }
+
+            FilterTree(RootNodes, searchText, false);
+        }
+
+        private bool FilterTree(IEnumerable<FileSystemNodeModel> nodes, string searchText, bool parentMatched)
+        {
+            bool somethingVisibleInThisLevel = false;
+            if (nodes == null) return false;
+
+            foreach (var node in nodes)
+            {
+                if (node.Name == "Loading...")
+                {
+                    if (parentMatched)
+                    {
+                        node.IsVisible = true;
+                        somethingVisibleInThisLevel = true;
+                    }
+                    continue;
+                }
+
+                bool selfMatches = node.Name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                if (parentMatched || selfMatches)
+                {
+                    node.IsVisible = true;
+                    somethingVisibleInThisLevel = true;
+                    FilterTree(node.Children, searchText, true);
+                }
+                else
+                {
+                    bool childMatches = FilterTree(node.Children, searchText, false);
+                    node.IsVisible = childMatches;
+                    if (childMatches)
+                    {
+                        node.IsExpanded = true;
+                        somethingVisibleInThisLevel = true;
+                    }
+                }
+            }
+            return somethingVisibleInThisLevel;
+        }
+
+        private void SetVisibility(IEnumerable<FileSystemNodeModel> nodes, bool isVisible)
+        {
+            foreach (var node in nodes)
+            {
+                node.IsVisible = isVisible;
+                SetVisibility(node.Children, isVisible);
+            }
         }
     }
 }

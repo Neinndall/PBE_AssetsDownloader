@@ -4,13 +4,13 @@ using System.IO;
 
 namespace PBE_AssetsManager.Views.Models
 {
-    public enum NodeType { RealDirectory, WadFile, VirtualDirectory, VirtualFile }
+    public enum NodeType { RealDirectory, RealFile, WadFile, VirtualDirectory, VirtualFile }
 
     public class FileSystemNodeModel : INotifyPropertyChanged
     {
         public string Name { get; set; }
         public NodeType Type { get; set; }
-        public string FullPath { get; set; } // Real path for RealDirectory/WadFile, Virtual path for Virtual items
+        public string FullPath { get; set; } // Real path for RealDirectory/WadFile/RealFile, Virtual path for Virtual items
         public ObservableCollection<FileSystemNodeModel> Children { get; set; }
 
         // --- Data for WADs and Chunks ---
@@ -55,7 +55,7 @@ namespace PBE_AssetsManager.Views.Models
                 }
                 else
                 {
-                    Type = NodeType.VirtualFile; // Treat other files as non-expandable
+                    Type = NodeType.RealFile; // It's a real file on the filesystem
                 }
             }
         }

@@ -193,13 +193,38 @@ namespace PBE_AssetsManager.Views
 
             try
             {
-                await PreviewWadFile(selectedNode);
+                if (selectedNode.Type == NodeType.VirtualFile)
+                {
+                    await PreviewWadFile(selectedNode);
+                }
+                else if (selectedNode.Type == NodeType.RealFile)
+                {
+                    await PreviewRealFile(selectedNode);
+                }
             }
             catch (Exception ex)
             {
                 _logService.LogError(ex, $"Failed to preview file '{selectedNode.FullPath}'.");
                 ShowUnsupportedPreview(selectedNode.Extension);
             }
+        }
+
+        private async Task PreviewRealFile(FileSystemNodeModel node)
+        {
+            if (!File.Exists(node.FullPath))
+            {
+                ShowUnsupportedPreview("File not found");
+                return;
+            }
+
+            byte[] fileData = await File.ReadAllBytesAsync(node.FullPath);
+            var extension = node.Extension;
+
+            if (IsImageExtension(extension)) { ShowImagePreview(fileData); }
+            else if (IsTextureExtension(extension)) { ShowTexturePreview(fileData); }
+            else if (IsTextExtension(extension)) { ShowTextPreview(fileData); }
+            else if (IsAudioExtension(extension)) { ShowAudioVideoPreview(fileData, extension); }
+            else { ShowUnsupportedPreview(extension); }
         }
 
         private async Task PreviewWadFile(FileSystemNodeModel node)

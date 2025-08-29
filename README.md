@@ -53,13 +53,14 @@ This tool is designed to automatically download and manage new assets from Leagu
 
 ## ⚙️ Configuration
 
-All application settings are managed through the `Settings` window within the application. These settings are persisted in a `config.json` file located in the application's root directory. You can configure:
+All application settings are managed through the `Settings` window and persisted in the `config.json` file. This allows you to customize the application's behavior to fit your workflow.
 
-*   Hash synchronization with Community Dragon.
-*   Automatic copying of new hashes.
-*   Backup options for old hashes.
-*   Paths for new and old hash directories.
-*   JSON data updates.
+Key configurable options include:
+
+*   **Default Paths:** Set the default directories for new hashes, old hashes, and the starting folder for the PBE File Explorer.
+*   **Workflow Automation:** Enable or disable automatic copying of new hashes and the creation of backups for old hash lists after a download.
+*   **Advanced Data Monitoring:** Specify a list of remote JSON files to monitor for updates and manage their change history.
+*   **Application Updates:** Control whether the application automatically checks for new versions on startup.
 
 ## 🤝 Contributing
 

@@ -1,40 +1,36 @@
 <div align="center">
-  <img src="https://github.com/Neinndall/PBE_AssetsDownloader/blob/main/PBE_AssetsDownloader/Resources/img/full_logo.ico" alt="PBE_AssetsDownloader Logo" width="150">
+  <img src="https://github.com/Neinndall/PBE_AssetsManager/blob/main/PBE_AssetsManager/Resources/img/full_logo.ico" alt="PBE_AssetsManager Logo" width="150">
 </div>
 
 ## ✅ APP Reliability
 I decided to create this section to provide reliability to the tool I've been developing for some time, so that all GitHub developers and users can trust my projects and future ones. Therefore, I decided to do it for your security. So you can verify that no file has been modified since its publication and that it is free of malware.
 
-GitHub includes a **SHA-256** security code linked to the .rar package. You can find this **SHA-256** number in the [releases of the tool](https://github.com/Neinndall/PBE_AssetsDownloader/releases) section, in the **ASSETS** section. It gives you the option to copy it and verify it with the **VIRUSTOTAL** link I will provide with each version release.
+GitHub includes a **SHA-256** security code linked to the .rar package. You can find this **SHA-256** number in the [releases of the tool](https://github.com/Neinndall/PBE_AssetsManager/releases) section, in the **ASSETS** section. It gives you the option to copy it and verify it with the **VIRUSTOTAL** link I will provide with each version release.
 
 If both the **SHA-256** from **GitHub** and **VIRUSTOTAL** match, it means that the .rar package that was scanned by virustotal has not been modified at any point, so you can confidently verify that the scan was performed on the .rar package of the latest version. With each release, I will provide you with the URL of each virustotal scan with its details and the package name for the version that will appear just above with its details. Most importantly, **SHA-256**, don't forget to check every detail.
 
-*   **Latest Version v2.1.3.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/b38c1f3825bf2a7c13636afd45863252ccf98c3b3bad4bed6b82b042b964bcf1/details)** 
-     *   *GITHUB* --> You cant get the sha-256 [here](https://github.com/Neinndall/PBE_AssetsDownloader/releases)
+*   **Latest Version v2.2.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/a83a4c44c4a030a2828409875b013bc870aa31baaff3c9d43ba09ba9ede9ec95/details)** 
+     *   *GITHUB* --> You cant get the sha-256 [here](https://github.com/Neinndall/PBE_AssetsManager/releases)
      *   *VIRUSTOTAL* --> You cant get the sha-256 in `details` from the link of VirusTotal in details
 
-## 🛠️ PBE_AssetsDownloader
+## 🛠️ PBE_AssetsManager
 
-This tool is designed to automatically download and manage new assets from League of Legends PBE server updates. It helps content creators, League of Legends players, and more stay up-to-date with the latest changes and additions to the game, leveraging data from [Communitydragon](https://raw.communitydragon.org/). Forget manual checks and downloads; PBE_AssetsDownloader streamlines your workflow, ensuring you always have the most current game files.
+This tool is designed to automatically download and manage new assets from League of Legends PBE server updates. It helps content creators, League of legends players, and more stay up-to-date with the latest changes and additions to the game, leveraging data from [Communitydragon](https://raw.communitydragon.org/). Forget manual checks and downloads; PBE_AssetsManager streamlines your workflow, ensuring you always have the most current game files.
 
 ## ✨ Key Features
 
-*   **Automated Hash Comparison:** Efficiently compares local file hashes with server-side data to identify only new or modified assets.
-*   **Intelligent Asset Downloading:** Downloads new and updated assets from Community Dragon, minimizing bandwidth usage.
-*   **Flexible Asset Filtering:** Customize downloads by excluding specific file extensions and applying custom rules for URLs.
-*   **Robust File Management:**
-    *   Automatic directory creation for downloaded assets.
-    *   Smart cleanup of empty directories post-download.
-    *   Automated backup of old hash files.
-    *   Seamless copying of new hashes to the old hashes folder for continuous tracking.
-*   **In-App Update Checks:** Stay current with the latest version of PBE_AssetsDownloader through integrated GitHub update checks.
-*   **Intuitive Graphical Interface (GUI):**
-    *   Real-time download progress display.
-    *   Comprehensive application settings configuration.
-    *   Detailed operation logs for transparency.
-*   **Advanced Asset Preview System:**
-    *   Direct in-app preview for images and text-based assets (JSON, XML, TXT) without temporary files.
-    *   Robust temporary file handling for external media (audio, video) with automated cleanup.
+*   **Advanced WAD File Comparison:** Compare `.wad` archives between two PBE directories to identify new, modified, deleted, or renamed assets. Includes a side-by-side visual diff for image changes.
+*   **Portable Comparison Packages:** Save comparison results as a lightweight, self-contained package. This includes only the changed file chunks, allowing for easy sharing and review without the original PBE directories.
+*   **Powerful PBE File Explorer:** Browse game files with a familiar file-tree interface, featuring real-time search and lazy-loading for efficient navigation of large .wad archives.
+*   **Integrated Asset Preview:** Directly preview a wide range of file types: visualize `.bin` files as readable data, view textures (`.tex`, `.dds`), images (`.png`, `.svg`), text (`.json`, `.lua`, `.xml`), audio, and video.
+*   **Automated Hash-Based Downloading:** Efficiently compares local and server hashes to download only new or modified assets from Community Dragon, saving bandwidth.
+*   **Flexible Asset Filtering:** Customize downloads by excluding specific file extensions and applying custom rules for asset URLs, including complex patterns for `.bin` files.
+*   **Robust File & Settings Management:** Features automatic directory creation, smart cleanup, hash file backups, and persistent settings for a streamlined workflow.
+*   **In-App Update Checks:** Stay current with the latest version of PBE_AssetsManager through integrated GitHub update checks.
+*   **Modern & Responsive Architecture:**
+    *   Built with an event-driven approach and asynchronous operations to ensure a smooth, non-blocking user experience.
+    *   Utilizes Dependency Injection (DI) for a clean, maintainable, and testable codebase.
+    *   Features a dual-log system for simplified debugging, with separate logs for general information and detailed errors.
 
 ## 🚀 Getting Started
 
@@ -44,9 +40,9 @@ This tool is designed to automatically download and manage new assets from Leagu
 
 ### Installation
 
-1.  **Download the latest release:** Visit the [Releases page](https://github.com/Neinndall/PBE_AssetsDownloader/releases) (replace with your actual releases URL) and download the `PBE_AssetsDownloader.zip` file.
-2.  **Extract the contents:** Unzip the downloaded file to your desired location (e.g., `C:\PBE_AssetsDownloader`).
-3.  **Run the application:** Navigate to the extracted folder and run `PBE_AssetsDownloader.exe`.
+1.  **Download the latest release:** Visit the [Releases page](https://github.com/Neinndall/PBE_AssetsManager/releases) (replace with your actual releases URL) and download the `PBE_AssetsManager.zip` file.
+2.  **Extract the contents:** Unzip the downloaded file to your desired location (e.g., `C:\PBE_AssetsManager`).
+3.  **Run the application:** Navigate to the extracted folder and run `PBE_AssetsManager.exe`.
 
 ## 📖 Usage
 
@@ -69,8 +65,8 @@ All application settings are managed through the `Settings` window within the ap
 
 Contributions are welcome! If you have suggestions for improvements, bug reports, or want to contribute code, please feel free to:
 
-1.  Fork the repository and submit a [pull requests](https://github.com/Neinndall/PBE_AssetsDownloader/pulls). 
-2.  Open an [issues](https://github.com/Neinndall/PBE_AssetsDownloader/issues) to discuss your ideas or report bugs.
+1.  Fork the repository and submit a [pull requests](https://github.com/Neinndall/PBE_AssetsManager/pulls). 
+2.  Open an [issues](https://github.com/Neinndall/PBE_AssetsManager/issues) to discuss your ideas or report bugs.
 
 Please ensure your code adheres to the project's existing style and conventions.
 

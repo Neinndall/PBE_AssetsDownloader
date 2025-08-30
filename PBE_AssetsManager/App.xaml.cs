@@ -70,6 +70,7 @@ namespace PBE_AssetsManager
             services.AddSingleton<WadDifferenceService>();
             services.AddSingleton<WadPackagingService>();
             services.AddSingleton<WadNodeLoaderService>();
+            services.AddSingleton<UpdateCheckService>();
             services.AddTransient<ExplorerPreviewService>();
 
             // Main Application Logic Service

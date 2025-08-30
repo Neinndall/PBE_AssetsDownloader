@@ -4,36 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
-             xmlns:models="clr-namespace:PBE_AssetsManager.Views.Models"
-             xmlns:converters="clr-namespace:PBE_AssetsManager.Views.Converters"
-             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             xmlns:explorer="clr-namespace:PBE_AssetsManager.Views.Explorer"
              mc:Ignorable="d"
              Background="{StaticResource CardBackground}"
-             d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance models:FileSystemNodeModel}">
-    <UserControl.Resources>
-        <converters:PathToIconConverter x:Key="PathToIconConverter"/>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-
-        <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
-            <Grid Margin="0,2,0,2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <materialIcons:MaterialIcon Grid.Column="0" 
-                                            Width="18" 
-                                            Height="18" 
-                                            VerticalAlignment="Center" 
-                                            Margin="0,0,5,0"
-                                            Kind="{Binding Converter={StaticResource PathToIconConverter}}"/>
-                <TextBlock Grid.Column="1" 
-                           Text="{Binding Name}" 
-                           VerticalAlignment="Center" />
-            </Grid>
-        </HierarchicalDataTemplate>
-    </UserControl.Resources>
-        <Grid>
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -70,8 +45,6 @@
                                Foreground="{StaticResource TextMuted}"
                                Margin="0,2,0,0"/>
                 </StackPanel>
-                
-                
             </Grid>
         </Border>
 
@@ -80,160 +53,15 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="150"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Search Box -->
-                <Grid Grid.Row="0" Margin="5,10,5,0">
-                    <Border Background="{StaticResource DarkBackground}"
-                            BorderBrush="{StaticResource BorderColor}"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            SnapsToDevicePixels="True"/>
-                    <TextBox x:Name="txtSearchExplorer"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             Padding="12,8"
-                             Margin="2"
-                             Foreground="{StaticResource TextPrimary}"
-                             FontSize="14"
-                             CaretBrush="Transparent"
-                             TextChanged="txtSearchExplorer_TextChanged"
-                             GotFocus="txtSearchExplorer_GotFocus"
-                             LostFocus="txtSearchExplorer_LostFocus"/>
-                    <TextBlock Text="🔍 Search files..."
-                               x:Name="txtSearchExplorerPlaceholder"
-                               IsHitTestVisible="False"
-                               Foreground="{StaticResource TextMuted}"
-                               FontSize="14"
-                               VerticalAlignment="Center"
-                               Margin="14,0,0,0">
-                    </TextBlock>
-                </Grid>
-                
-                <Grid Grid.Row="1">
-                    <TreeView x:Name="FileTreeView" 
-                              Margin="5,0,5,5" 
-                              ItemsSource="{Binding RootNodes}"
-                              SelectedItemChanged="FileTreeView_SelectedItemChanged"
-                              Style="{StaticResource ModernTreeView}">
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
-                                <Setter Property="ContextMenu" Value="{x:Null}" />
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded"/>
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                    </TreeView>
-                    <StackPanel x:Name="NoDirectoryMessage"
-                                Orientation="Vertical"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Margin="10"
-                                Visibility="Collapsed">
-                        <materialIcons:MaterialIcon Kind="FolderSearchOutline"
-                                                    Width="48" Height="48"
-                                                    HorizontalAlignment="Center"
-                                                    Foreground="{StaticResource TextMuted}"
-                                                    Opacity="0.8"/>
-                        <TextBlock Text="Select a PBE Directory"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,16,0,0"/>
-                        <TextBlock Text="Choose the root folder of a PBE installation to browse its WAD files."
-                                   TextWrapping="Wrap"
-                                   FontSize="14"
-                                   Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"
-                                   Margin="0,8,0,0"
-                                   Opacity="0.7"/>
-                        <Button x:Name="SelectPbeDirButton"
-                                Content="Select Directory..."
-                                Style="{StaticResource SecondaryButton}"
-                                Click="SelectPbeDirButton_Click"
-                                Padding="16,0"
-                                Height="36"
-                                HorizontalAlignment="Center"
-                                Margin="0,20,0,0"
-                                ToolTip="Select the root directory of a PBE installation to browse its WAD files."/>
-                    </StackPanel>
-                    <StackPanel x:Name="LoadingIndicator"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Visibility="Collapsed">
-                        <ProgressBar IsIndeterminate="True" Width="100" Foreground="{StaticResource AccentBlue}" />
-                        <TextBlock Text="Loading Files..."
-                                   Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,10,0,0" />
-                    </StackPanel>
-                </Grid>
-            </Grid>
+            <explorer:FileExplorerControl x:Name="FileExplorer" Grid.Column="0" FileSelected="FileExplorer_FileSelected"/>
 
             <Border Grid.Column="1" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,0" Margin="0,10" />
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent"/>
 
-            <Grid Grid.Column="2" x:Name="PreviewContainer" Margin="5">
-                <StackPanel x:Name="PreviewPlaceholder"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Visibility="Visible">
-                    <StackPanel x:Name="SelectFileMessagePanel"
-                                Orientation="Vertical"
-                                HorizontalAlignment="Center">
-                        <materialIcons:MaterialIcon Kind="FileUploadOutline"
-                                                    Width="48" Height="48"
-                                                    HorizontalAlignment="Center"
-                                                    Foreground="{StaticResource TextMuted}"
-                                                    Opacity="0.5"/>
-                        <TextBlock x:Name="SelectFileMessage"
-                                   Text="SELECT A FILE"
-                                   FontSize="18" 
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,16,0,0"/>
-                        <TextBlock x:Name="SelectFileSubMessage"
-                                   Text="Select a file from the tree to preview its content"
-                                   FontSize="14"
-                                   Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,8,0,0"
-                                   Opacity="0.7"/>
-                    </StackPanel>
-                    <StackPanel x:Name="UnsupportedFileMessagePanel"
-                                Orientation="Vertical"
-                                HorizontalAlignment="Center"
-                                Visibility="Collapsed">
-                        <materialIcons:MaterialIcon Kind="FileCancelOutline"
-                                                    Width="48" Height="48"
-                                                    HorizontalAlignment="Center"
-                                                    Foreground="{StaticResource TextMuted}"
-                                                    Opacity="0.5"/>
-                        <TextBlock x:Name="UnsupportedFileMessage"
-                                   Text="Preview not available for this file type"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,8,0,0"/>
-                    </StackPanel>
-                </StackPanel>
-                <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
-                <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
-                <wv2:WebView2 x:Name="WebView2Preview" Visibility="Collapsed"/>
-            </Grid>
+            <explorer:FilePreviewerControl x:Name="FilePreviewer" Grid.Column="2"/>
         </Grid>
     </Grid>
 </UserControl>

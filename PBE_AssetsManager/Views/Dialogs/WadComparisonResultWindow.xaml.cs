@@ -7,15 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using PBE_AssetsManager.Views.Helpers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -50,7 +46,6 @@ namespace PBE_AssetsManager.Views.Dialogs
         private readonly string _newPbePath;
         private readonly string _sourceJsonPath; // Path to the loaded wadcomparison.json
 
-        // Constructor for results from a live, freshly generated comparison
         public WadComparisonResultWindow(List<ChunkDiff> diffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
@@ -79,7 +74,6 @@ namespace PBE_AssetsManager.Views.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
-        // Constructor for results loaded from a saved .json file
         public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, string oldPbePath = null, string newPbePath = null, string sourceJsonPath = null)
         {
             InitializeComponent();
@@ -98,17 +92,15 @@ namespace PBE_AssetsManager.Views.Dialogs
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchText = searchTextBox.Text;
-            searchPlaceholder.Visibility = string.IsNullOrEmpty(searchText) ? Visibility.Visible : Visibility.Collapsed;
-
-            if (string.IsNullOrWhiteSpace(searchText))
+            var searchTextBox = (TextBox)e.Source;
+            if (string.IsNullOrWhiteSpace(searchTextBox.Text))
             {
                 PopulateResults(_serializableDiffs);
             }
             else
             {
                 var filteredDiffs = _serializableDiffs
-                    .Where(d => d.FileName.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .Where(d => d.FileName.IndexOf(searchTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                     .ToList();
                 PopulateResults(filteredDiffs);
             }
@@ -135,77 +127,12 @@ namespace PBE_AssetsManager.Views.Dialogs
                                 }).ToList()
             }).ToList();
 
-            resultsTreeView.ItemsSource = wadGroups;
+            ResultsTree.ItemsSource = wadGroups;
         }
 
-        private string FormatSize(ulong? sizeInBytes)
+        private void ResultsTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (sizeInBytes == null) return "N/A";
-            double sizeInKB = (double)sizeInBytes / 1024.0;
-            return $"{sizeInKB:F2} KB";
-        }
-
-        private void ResultsTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (e.NewValue is SerializableChunkDiff diff)
-            {
-                noSelectionPanel.Visibility = Visibility.Collapsed;
-                detailsContentPanel.Visibility = Visibility.Visible;
-
-                // Reset panel visibility
-                renamedOldNamePanel.Visibility = Visibility.Collapsed;
-                renamedNewNamePanel.Visibility = Visibility.Collapsed;
-                genericFileNamePanel.Visibility = Visibility.Collapsed;
-                pathPanel.Visibility = Visibility.Visible; // Default to visible
-                oldSizePanel.Visibility = Visibility.Visible;
-                newSizePanel.Visibility = Visibility.Visible;
-
-                if (diff.Type == ChunkDiffType.Renamed)
-                {
-                    renamedOldNamePanel.Visibility = Visibility.Visible;
-                    renamedNewNamePanel.Visibility = Visibility.Visible;
-                    pathPanel.Visibility = Visibility.Collapsed; // Hide generic path for renames
-
-                    renamedOldNameTextBlock.Text = diff.OldPath;
-                    renamedNewNameTextBlock.Text = diff.NewPath;
-                }
-                else
-                {
-                    genericFileNamePanel.Visibility = Visibility.Visible;
-                    string currentPath = diff.NewPath ?? diff.OldPath;
-                    genericFileNameTextBlock.Text = Path.GetFileName(currentPath);
-                    pathTextBlock.Text = Path.GetDirectoryName(currentPath) ?? "N/A";
-                }
-
-                changeTypeTextBlock.Text = diff.Type.ToString();
-                sourceWadTextBlock.Text = diff.SourceWadFile;
-
-                oldSizeTextBlock.Text = FormatSize(diff.OldUncompressedSize);
-                newSizeTextBlock.Text = FormatSize(diff.NewUncompressedSize);
-
-                if (diff.Type == ChunkDiffType.New)
-                {
-                    oldSizePanel.Visibility = Visibility.Collapsed;
-                }
-                else if (diff.Type == ChunkDiffType.Removed)
-                {
-                    newSizePanel.Visibility = Visibility.Collapsed;
-                }
-                else if (diff.Type == ChunkDiffType.Modified)
-                {
-                    long sizeDiff = (long)(diff.NewUncompressedSize ?? 0) - (long)(diff.OldUncompressedSize ?? 0);
-                    if (sizeDiff != 0)
-                    {
-                        string diffSign = sizeDiff > 0 ? "+" : "";
-                        newSizeTextBlock.Text += $" ({diffSign}{FormatSize((ulong)Math.Abs(sizeDiff))})";
-                    }
-                }
-            }
-            else
-            {
-                noSelectionPanel.Visibility = Visibility.Visible;
-                detailsContentPanel.Visibility = Visibility.Collapsed;
-            }
+            DiffDetails.DisplayDetails(e.NewValue);
         }
 
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -218,19 +145,16 @@ namespace PBE_AssetsManager.Views.Dialogs
 
             try
             {
-                // 1. Use the paths from DirectoriesCreator
                 string comparisonFullPath = _directoriesCreator.WadComparisonFullPath;
                 string oldChunksPath = _directoriesCreator.OldChunksPath;
                 string newChunksPath = _directoriesCreator.NewChunksPath;
                 Directory.CreateDirectory(oldChunksPath);
                 Directory.CreateDirectory(newChunksPath);
 
-                // 2. Create lean WAD package
                 _logService.Log("Starting lean WAD packaging process...");
                 await _wadPackagingService.CreateLeanWadPackageAsync(_serializableDiffs, _oldPbePath, _newPbePath, oldChunksPath, newChunksPath);
                 _logService.LogSuccess("Finished lean WAD packaging process.");
 
-                // 3. Save the wadcomparison.json file
                 string jsonFilePath = Path.Combine(comparisonFullPath, "wadcomparison.json");
                 var options = new JsonSerializerOptions
                 {
@@ -239,7 +163,6 @@ namespace PBE_AssetsManager.Views.Dialogs
                 };
                 var comparisonResult = new WadComparisonData
                 {
-                    // We save the original PBE paths for informational purposes
                     OldPbePath = _oldPbePath,
                     NewPbePath = _newPbePath,
                     Diffs = _serializableDiffs
@@ -259,12 +182,8 @@ namespace PBE_AssetsManager.Views.Dialogs
 
         private async void ViewDifferences_Click(object sender, RoutedEventArgs e)
         {
-            if (resultsTreeView.SelectedItem is not SerializableChunkDiff diff)
-            {
-                return;
-            }
+            if (ResultsTree.SelectedItem is not SerializableChunkDiff diff) return;
 
-            // This method now works consistently whether the paths are to a PBE directory or a saved wad_files directory.
             if (string.IsNullOrEmpty(_oldPbePath) || string.IsNullOrEmpty(_newPbePath))
             {
                 _customMessageBoxService.ShowInfo("Info", "The paths to the PBE or saved WAD directories are missing.", this);
@@ -276,11 +195,8 @@ namespace PBE_AssetsManager.Views.Dialogs
             switch (dataType)
             {
                 case "json":
-                    string oldJson = JsonDiffHelper.FormatJson((string)oldData);
-                    string newJson = JsonDiffHelper.FormatJson((string)newData);
-
                     var jsonDiffWindow = App.ServiceProvider.GetRequiredService<JsonDiffWindow>();
-                    _ = jsonDiffWindow.LoadAndDisplayDiffAsync(oldJson, newJson, oldPath, newPath);
+                    _ = jsonDiffWindow.LoadAndDisplayDiffAsync((string)oldData, (string)newData, oldPath, newPath);
                     jsonDiffWindow.Owner = this;
                     jsonDiffWindow.Show();
                     break;
@@ -289,68 +205,23 @@ namespace PBE_AssetsManager.Views.Dialogs
                     var imageDiffWindow = new ImageDiffWindow((BitmapSource)oldData, (BitmapSource)newData, oldPath, newPath) { Owner = this };
                     imageDiffWindow.Show();
                     break;
-
-                case "unsupported":
-                case "error":
-                    // The service already shows a message box in these cases.
-                    break;
             }
         }
 
-        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void ResultsTree_ContextMenuOpening(object sender, RoutedEventArgs e)
         {
-            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
-
-            if (treeViewItem != null)
+            if (ResultsTree.ViewDifferencesMenuItem is MenuItem viewDiffMenuItem)
             {
-                treeViewItem.IsSelected = true;
-                e.Handled = true;
-            }
-        }
-
-        static TreeViewItem VisualUpwardSearch(DependencyObject source)
-        {
-            while (source != null && !(source is TreeViewItem))
-                source = VisualTreeHelper.GetParent(source);
-
-            return source as TreeViewItem;
-        }
-
-        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
-        {
-            var contextMenu = sender as ContextMenu;
-            if (contextMenu == null) return;
-
-            // --- Logic for "View Differences" ---
-            var viewDiffMenuItem = contextMenu.Items.OfType<MenuItem>()
-                                                    .FirstOrDefault(m => "View Differences".Equals(m.Header as string));
-            if (viewDiffMenuItem != null)
-            {
-                viewDiffMenuItem.IsEnabled = false; // Default to disabled
-                if (resultsTreeView.SelectedItem is SerializableChunkDiff diff)
+                viewDiffMenuItem.IsEnabled = false;
+                if (ResultsTree.SelectedItem is SerializableChunkDiff diff && diff.Type == ChunkDiffType.Modified)
                 {
-                    // Enable ONLY for Modified files.
-                    if (diff.Type == ChunkDiffType.Modified)
-                    {
-                        viewDiffMenuItem.IsEnabled = true;
-                    }
+                    viewDiffMenuItem.IsEnabled = true;
                 }
             }
 
-            // --- Existing logic for "Download Selected" ---
-            var downloadMenuItem = contextMenu.Items.OfType<MenuItem>()
-                                                    .FirstOrDefault(m => "Download Selected".Equals(m.Header as string));
-            if (downloadMenuItem != null)
+            if (ResultsTree.DownloadMenuItem is MenuItem downloadMenuItem)
             {
-                downloadMenuItem.IsEnabled = false;
-
-                if (resultsTreeView.SelectedItem == null) return;
-
-                List<SerializableChunkDiff> downloadableDiffs = GetDownloadableDiffsFromSelection();
-                if (downloadableDiffs.Any())
-                {
-                    downloadMenuItem.IsEnabled = true;
-                }
+                downloadMenuItem.IsEnabled = GetDownloadableDiffsFromSelection().Any();
             }
         }
 
@@ -367,7 +238,6 @@ namespace PBE_AssetsManager.Views.Dialogs
             try
             {
                 int successCount = await _assetDownloaderService.DownloadWadAssetsAsync(diffsToDownload);
-
                 if (successCount == diffsToDownload.Count)
                 {
                     _customMessageBoxService.ShowSuccess("Success", $"Successfully downloaded {successCount} asset(s).");
@@ -386,22 +256,16 @@ namespace PBE_AssetsManager.Views.Dialogs
 
         private List<SerializableChunkDiff> GetDownloadableDiffsFromSelection()
         {
-            var selectedItem = resultsTreeView.SelectedItem;
+            var selectedItem = ResultsTree.SelectedItem;
             var downloadableDiffs = new List<SerializableChunkDiff>();
 
-            if (selectedItem is SerializableChunkDiff singleDiff)
+            if (selectedItem is SerializableChunkDiff singleDiff && (singleDiff.Type == ChunkDiffType.New || singleDiff.Type == ChunkDiffType.Modified || singleDiff.Type == ChunkDiffType.Renamed))
             {
-                if (singleDiff.Type == ChunkDiffType.New || singleDiff.Type == ChunkDiffType.Modified || singleDiff.Type == ChunkDiffType.Renamed)
-                {
-                    downloadableDiffs.Add(singleDiff);
-                }
+                downloadableDiffs.Add(singleDiff);
             }
-            else if (selectedItem is DiffTypeGroupViewModel typeGroup)
+            else if (selectedItem is DiffTypeGroupViewModel typeGroup && (typeGroup.Type == ChunkDiffType.New || typeGroup.Type == ChunkDiffType.Modified || typeGroup.Type == ChunkDiffType.Renamed))
             {
-                if (typeGroup.Type == ChunkDiffType.New || typeGroup.Type == ChunkDiffType.Modified || typeGroup.Type == ChunkDiffType.Renamed)
-                {
-                    downloadableDiffs.AddRange(typeGroup.Diffs);
-                }
+                downloadableDiffs.AddRange(typeGroup.Diffs);
             }
             else if (selectedItem is WadGroupViewModel wadGroup)
             {

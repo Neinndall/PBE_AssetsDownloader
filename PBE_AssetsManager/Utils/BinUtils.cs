@@ -11,36 +11,50 @@ namespace PBE_AssetsManager.Utils
         public static object ConvertPropertyToValue(BinTreeProperty prop, HashResolverService hashResolver)
         {
             if (prop == null) return null;
-            return prop.Type switch
+
+            switch (prop.Type)
             {
-                BinPropertyType.String => ((BinTreeString)prop).Value,
-                BinPropertyType.Hash => hashResolver.ResolveBinHashGeneral(((BinTreeHash)prop).Value),
-                BinPropertyType.I8 => ((BinTreeI8)prop).Value,
-                BinPropertyType.U8 => ((BinTreeU8)prop).Value,
-                BinPropertyType.I16 => ((BinTreeI16)prop).Value,
-                BinPropertyType.U16 => ((BinTreeU16)prop).Value,
-                BinPropertyType.I32 => ((BinTreeI32)prop).Value,
-                BinPropertyType.U32 => ((BinTreeU32)prop).Value,
-                BinPropertyType.I64 => ((BinTreeI64)prop).Value,
-                BinPropertyType.U64 => ((BinTreeU64)prop).Value,
-                BinPropertyType.F32 => ((BinTreeF32)prop).Value,
-                BinPropertyType.Bool => ((BinTreeBool)prop).Value,
-                BinPropertyType.BitBool => ((BinTreeBitBool)prop).Value,
-                BinPropertyType.Vector2 => ((BinTreeVector2)prop).Value,
-                BinPropertyType.Vector3 => ((BinTreeVector3)prop).Value,
-                BinPropertyType.Vector4 => ((BinTreeVector4)prop).Value,
-                BinPropertyType.Matrix44 => ((BinTreeMatrix44)prop).Value,
-                BinPropertyType.Color => ((BinTreeColor)prop).Value,
-                BinPropertyType.ObjectLink => hashResolver.ResolveBinHashGeneral(((BinTreeObjectLink)prop).Value),
-                BinPropertyType.WadChunkLink => hashResolver.ResolveHash(((BinTreeWadChunkLink)prop).Value),
-                BinPropertyType.Container => ((BinTreeContainer)prop).Elements.Select(p => ConvertPropertyToValue(p, hashResolver)).ToList(),
-                BinPropertyType.UnorderedContainer => ((BinTreeUnorderedContainer)prop).Elements.Select(p => ConvertPropertyToValue(p, hashResolver)).ToList(),
-                BinPropertyType.Struct => ((BinTreeStruct)prop).Properties.ToDictionary(kvp => hashResolver.ResolveBinHashGeneral(kvp.Key), kvp => ConvertPropertyToValue(kvp.Value, hashResolver)),
-                BinPropertyType.Embedded => ((BinTreeEmbedded)prop).Properties.ToDictionary(kvp => hashResolver.ResolveBinHashGeneral(kvp.Key), kvp => ConvertPropertyToValue(kvp.Value, hashResolver)),
-                BinPropertyType.Optional => ConvertPropertyToValue(((BinTreeOptional)prop).Value, hashResolver),
-                BinPropertyType.Map => ((BinTreeMap)prop).ToDictionary(kvp => ConvertPropertyToValue(kvp.Key, hashResolver), kvp => ConvertPropertyToValue(kvp.Value, hashResolver)),
-                _ => new Dictionary<string, object> { { "Type", prop.Type }, { "NameHash", hashResolver.ResolveBinHashGeneral(prop.NameHash) } }
-            };
+                case BinPropertyType.String: return ((BinTreeString)prop).Value;
+                case BinPropertyType.Hash: return hashResolver.ResolveBinHashGeneral(((BinTreeHash)prop).Value);
+                case BinPropertyType.I8: return ((BinTreeI8)prop).Value;
+                case BinPropertyType.U8: return ((BinTreeU8)prop).Value;
+                case BinPropertyType.I16: return ((BinTreeI16)prop).Value;
+                case BinPropertyType.U16: return ((BinTreeU16)prop).Value;
+                case BinPropertyType.I32: return ((BinTreeI32)prop).Value;
+                case BinPropertyType.U32: return ((BinTreeU32)prop).Value;
+                case BinPropertyType.I64: return ((BinTreeI64)prop).Value;
+                case BinPropertyType.U64: return ((BinTreeU64)prop).Value;
+                case BinPropertyType.F32: return ((BinTreeF32)prop).Value;
+                case BinPropertyType.Bool: return ((BinTreeBool)prop).Value;
+                case BinPropertyType.BitBool: return ((BinTreeBitBool)prop).Value;
+                case BinPropertyType.Vector2: return ((BinTreeVector2)prop).Value;
+                case BinPropertyType.Vector3: return ((BinTreeVector3)prop).Value;
+                case BinPropertyType.Vector4: return ((BinTreeVector4)prop).Value;
+                case BinPropertyType.Matrix44: return ((BinTreeMatrix44)prop).Value;
+                case BinPropertyType.Color: return ((BinTreeColor)prop).Value;
+                case BinPropertyType.ObjectLink: return hashResolver.ResolveBinHashGeneral(((BinTreeObjectLink)prop).Value);
+                case BinPropertyType.WadChunkLink: return hashResolver.ResolveHash(((BinTreeWadChunkLink)prop).Value);
+                case BinPropertyType.Container: return ((BinTreeContainer)prop).Elements.Select(p => ConvertPropertyToValue(p, hashResolver)).ToList();
+                case BinPropertyType.UnorderedContainer: return ((BinTreeUnorderedContainer)prop).Elements.Select(p => ConvertPropertyToValue(p, hashResolver)).ToList();
+                case BinPropertyType.Struct:
+                    {
+                        var structProp = (BinTreeStruct)prop;
+                        var dict = structProp.Properties.ToDictionary(kvp => hashResolver.ResolveBinHashGeneral(kvp.Key), kvp => ConvertPropertyToValue(kvp.Value, hashResolver));
+                        dict["type"] = hashResolver.ResolveBinHashGeneral(structProp.ClassHash);
+                        return dict;
+                    }
+                case BinPropertyType.Embedded:
+                    {
+                        var embeddedProp = (BinTreeEmbedded)prop;
+                        var dict = embeddedProp.Properties.ToDictionary(kvp => hashResolver.ResolveBinHashGeneral(kvp.Key), kvp => ConvertPropertyToValue(kvp.Value, hashResolver));
+                        dict["type"] = hashResolver.ResolveBinHashGeneral(embeddedProp.ClassHash);
+                        return dict;
+                    }
+                case BinPropertyType.Optional: return ConvertPropertyToValue(((BinTreeOptional)prop).Value, hashResolver);
+                case BinPropertyType.Map: return ((BinTreeMap)prop).ToDictionary(kvp => ConvertPropertyToValue(kvp.Key, hashResolver), kvp => ConvertPropertyToValue(kvp.Value, hashResolver));
+                default:
+                    return new Dictionary<string, object> { { "Type", prop.Type }, { "NameHash", hashResolver.ResolveBinHashGeneral(prop.NameHash) } };
+            }
         }
 
         public static Dictionary<string, object> ConvertBinTreeToDictionary(BinTree binTree, HashResolverService hashResolver)
@@ -57,14 +71,13 @@ namespace PBE_AssetsManager.Utils
                 }).ToList(),
                 ["Objects"] = binTree.Objects.ToDictionary(
                     kvp => hashResolver.ResolveBinHashGeneral(kvp.Key),
-                    kvp => new Dictionary<string, object>
-                    {
-                        ["Type"] = hashResolver.ResolveBinHashGeneral(kvp.Value.ClassHash),
-                        ["Path"] = hashResolver.ResolveBinHashGeneral(kvp.Value.PathHash),
-                        ["Properties"] = kvp.Value.Properties.ToDictionary(
+                    kvp => {
+                        var objDict = kvp.Value.Properties.ToDictionary(
                             propKvp => hashResolver.ResolveBinHashGeneral(propKvp.Key),
                             propKvp => ConvertPropertyToValue(propKvp.Value, hashResolver)
-                        )
+                        );
+                        objDict["type"] = hashResolver.ResolveBinHashGeneral(kvp.Value.ClassHash);
+                        return objDict;
                     }
                 )
             };

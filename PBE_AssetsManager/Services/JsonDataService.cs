@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsManager.Info;
 using PBE_AssetsManager.Utils;
@@ -22,6 +23,7 @@ namespace PBE_AssetsManager.Services
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly Requests _requests;
         private readonly IServiceProvider _serviceProvider;
+        private readonly DiffViewService _diffViewService;
         private readonly string statusUrl = "https://raw.communitydragon.org/data/hashes/lol/";
 
         private readonly HashSet<string> _filesRequiringUniquePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -29,7 +31,7 @@ namespace PBE_AssetsManager.Services
             "trans.json",
         };
 
-        public JsonDataService(LogService logService, HttpClient httpClient, AppSettings appSettings, DirectoriesCreator directoriesCreator, Requests requests, IServiceProvider serviceProvider)
+        public JsonDataService(LogService logService, HttpClient httpClient, AppSettings appSettings, DirectoriesCreator directoriesCreator, Requests requests, IServiceProvider serviceProvider, DiffViewService diffViewService)
         {
             _logService = logService;
             _httpClient = httpClient;
@@ -37,6 +39,7 @@ namespace PBE_AssetsManager.Services
             _directoriesCreator = directoriesCreator;
             _requests = requests;
             _serviceProvider = serviceProvider;
+            _diffViewService = diffViewService;
         }
 
         public async Task<Dictionary<string, long>> GetRemoteHashesSizesAsync()
@@ -120,12 +123,12 @@ namespace PBE_AssetsManager.Services
                     {
                         string html = await _httpClient.GetStringAsync(url);
 
-                        // var regex = new Regex(
-                        //     @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
-                        //     RegexOptions.Singleline
-                        // );
+                        var regex = new Regex(
+                            @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
+                            RegexOptions.Singleline
+                        );
                         
-                        var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
+                        //var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         foreach (Match match in regex.Matches(html))
                         {
                             string filename = match.Groups["filename"].Value;
@@ -162,12 +165,12 @@ namespace PBE_AssetsManager.Services
                         parentDirectoryUrl = new Uri(fileUri, ".").ToString();
                         string html = await _httpClient.GetStringAsync(parentDirectoryUrl);
                         
-                        // var regex = new Regex(
-                        //     @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
-                        //     RegexOptions.Singleline
-                        // );
+                        var regex = new Regex(
+                            @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
+                            RegexOptions.Singleline
+                        );
                         
-                        var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
+                        // var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         bool foundInParent = false;
                         foreach (Match match in regex.Matches(html))
                         {
@@ -236,18 +239,12 @@ namespace PBE_AssetsManager.Services
                             File.Copy(newFilePath, oldFilePath, true);
                         }
 
-                        string jsonContent = await _requests.DownloadJsonContentAsync(fullUrl);
+                        byte[] fileBytes = await _requests.DownloadFileAsBytesAsync(fullUrl);
 
-                        if (!string.IsNullOrEmpty(jsonContent))
+                        if (fileBytes != null && fileBytes.Length > 0)
                         {
-                            string contentToSave = jsonContent;
-                            // Heuristic: If the content doesn't contain newlines, it's likely unformatted.
-                            if (!jsonContent.Contains('\n'))
-                            {
-                                contentToSave = JsonDiffHelper.FormatJson(jsonContent);
-                            }
-
-                            await File.WriteAllTextAsync(newFilePath, contentToSave);
+                            await File.WriteAllBytesAsync(newFilePath, fileBytes);
+                            
                             if (_appSettings.SaveDiffHistory && isUpdate)
                             {
                                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
@@ -271,15 +268,13 @@ namespace PBE_AssetsManager.Services
                                 });
                             }
 
-                            _logService.LogDebug($"Saved new JSON content to {newFilePath}");
+                            _logService.LogDebug($"Saved new file content to {newFilePath}");
                             _logService.LogInteractive(
                                 $"Updated: {key} ({serverDate:yyyy-MMM-dd HH:mm})",
                                 "View Diff",
                                 () =>
                                 {
-                                    var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                                    _ = diffWindow.LoadAndDisplayDiffAsync(oldFilePath, newFilePath);
-                                    diffWindow.Show();
+                                    _ = _diffViewService.ShowFileDiffAsync(oldFilePath, newFilePath, Application.Current.MainWindow);
                                 }
                             );
                         }

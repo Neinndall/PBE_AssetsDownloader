@@ -1,6 +1,7 @@
 using PBE_AssetsManager.Views.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows;
@@ -19,21 +20,27 @@ namespace PBE_AssetsManager.Services
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly AssetDownloader _assetDownloader;
         private readonly WadDifferenceService _wadDifferenceService;
+        private readonly WadPackagingService _wadPackagingService;
+        private readonly DiffViewService _diffViewService;
 
-        private readonly Button _progressSummaryButton;
-        private readonly MaterialIcon _progressIcon;
-        private readonly Window _owner;
+        private Button _progressSummaryButton;
+        private MaterialIcon _progressIcon;
+        private Window _owner;
 
         private Storyboard _spinningIconAnimationStoryboard;
         private ProgressDetailsWindow _progressDetailsWindow;
         private int _totalFiles;
 
         public ProgressUIManager(
-            // Services
-            LogService logService, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService, 
-            DirectoriesCreator directoriesCreator, AssetDownloader assetDownloader, WadDifferenceService wadDifferenceService,
-            // UI Elements
-            Button progressSummaryButton, MaterialIcon progressIcon, Window owner)
+            LogService logService, 
+            IServiceProvider serviceProvider, 
+            CustomMessageBoxService customMessageBoxService,
+            DirectoriesCreator directoriesCreator, 
+            AssetDownloader assetDownloader, 
+            WadDifferenceService wadDifferenceService,
+            WadPackagingService wadPackagingService,
+            DiffViewService diffViewService
+            )
         {
             _logService = logService;
             _serviceProvider = serviceProvider;
@@ -41,10 +48,15 @@ namespace PBE_AssetsManager.Services
             _directoriesCreator = directoriesCreator;
             _assetDownloader = assetDownloader;
             _wadDifferenceService = wadDifferenceService;
+            _wadPackagingService = wadPackagingService;
+            _diffViewService = diffViewService;
+        }
+
+        public void Initialize(Button progressSummaryButton, MaterialIcon progressIcon, Window owner)
+        {
             _progressSummaryButton = progressSummaryButton;
             _progressIcon = progressIcon;
             _owner = owner;
-
             _progressSummaryButton.Click += ProgressSummaryButton_Click;
         }
 
@@ -134,14 +146,6 @@ namespace PBE_AssetsManager.Services
                 _spinningIconAnimationStoryboard?.Stop();
                 _spinningIconAnimationStoryboard = null;
                 _progressDetailsWindow?.Close();
-
-                if (allDiffs != null)
-                {
-                    var wadPackagingService = _serviceProvider.GetRequiredService<WadPackagingService>();
-                    var resultWindow = new WadComparisonResultWindow(allDiffs, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, wadPackagingService, oldPbePath, newPbePath);
-                    resultWindow.Owner = _owner;
-                    resultWindow.Show();
-                }
             });
         }
 

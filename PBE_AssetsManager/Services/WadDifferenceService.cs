@@ -19,150 +19,151 @@ namespace PBE_AssetsManager.Services
     public class WadDifferenceService
     {
         private readonly HashResolverService _hashResolverService;
-        private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly LogService _logService;
 
-        public WadDifferenceService(HashResolverService hashResolverService, CustomMessageBoxService customMessageBoxService)
+        public WadDifferenceService(HashResolverService hashResolverService, LogService logService)
         {
             _hashResolverService = hashResolverService;
-            _customMessageBoxService = customMessageBoxService;
+            _logService = logService;
         }
 
         public async Task<(string DataType, object OldData, object NewData, string OldPath, string NewPath)> PrepareDifferenceDataAsync(SerializableChunkDiff diff, string oldPbePath, string newPbePath)
         {
-            if (string.IsNullOrEmpty(oldPbePath) || string.IsNullOrEmpty(newPbePath))
-            {
-                _customMessageBoxService.ShowInfo("Info", "Difference viewing is not available for results loaded from a file.");
+            if (string.IsNullOrEmpty(oldPbePath) || string.IsNullOrEmpty(newPbePath)){
                 return ("error", null, null, null, null);
             }
 
-            try
+            string extension = Path.GetExtension(diff.Path).ToLowerInvariant();
+            byte[] oldData = null;
+            byte[] newData = null;
+
+            bool isChunkBased = oldPbePath.Contains("wad_chunks");
+
+            if (isChunkBased)
             {
-                string extension = Path.GetExtension(diff.Path).ToLowerInvariant();
-                var textExtensions = new[] { ".json", ".txt", ".lua", ".xml", ".yaml", ".yml", ".ini", ".log" };
-                var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tex", ".dds" };
-                var binExtensions = new[] { ".bin" };
-
-                byte[] oldData = null;
-                byte[] newData = null;
-
-                bool isChunkBased = oldPbePath.Contains("wad_chunks");
-
-                if (isChunkBased)
+                if (diff.OldPathHash != 0)
                 {
-                    if (diff.OldPathHash != 0)
+                    string oldChunkPath = Path.Combine(oldPbePath, $"{diff.OldPathHash:X16}.chunk");
+                    if (File.Exists(oldChunkPath))
                     {
-                        string oldChunkPath = Path.Combine(oldPbePath, $"{diff.OldPathHash:X16}.chunk");
-                        if (File.Exists(oldChunkPath))
-                        {
-                            byte[] compressedOldData = await File.ReadAllBytesAsync(oldChunkPath);
-                            oldData = WadChunkUtils.DecompressChunk(compressedOldData, diff.OldCompressionType);
-                        }
-                    }
-
-                    if (diff.NewPathHash != 0)
-                    {
-                        string newChunkPath = Path.Combine(newPbePath, $"{diff.NewPathHash:X16}.chunk");
-                        if (File.Exists(newChunkPath))
-                        {
-                            byte[] compressedNewData = await File.ReadAllBytesAsync(newChunkPath);
-                            newData = WadChunkUtils.DecompressChunk(compressedNewData, diff.NewCompressionType);
-                        }
-                    }
-                }
-                else
-                {
-                    if (diff.OldPathHash != 0 && File.Exists(Path.Combine(oldPbePath, diff.SourceWadFile)))
-                    {
-                        using var oldWad = new WadFile(Path.Combine(oldPbePath, diff.SourceWadFile));
-                        if (oldWad.Chunks.TryGetValue(diff.OldPathHash, out WadChunk oldChunk))
-                        {
-                            using var decompressedChunk = oldWad.LoadChunkDecompressed(oldChunk);
-                            oldData = decompressedChunk.Span.ToArray();
-                        }
-                    }
-
-                    if (diff.NewPathHash != 0 && File.Exists(Path.Combine(newPbePath, diff.SourceWadFile)))
-                    {
-                        using var newWad = new WadFile(Path.Combine(newPbePath, diff.SourceWadFile));
-                        if (newWad.Chunks.TryGetValue(diff.NewPathHash, out WadChunk newChunk))
-                        {
-                            using var decompressedChunk = newWad.LoadChunkDecompressed(newChunk);
-                            newData = decompressedChunk.Span.ToArray();
-                        }
+                        byte[] compressedOldData = await File.ReadAllBytesAsync(oldChunkPath);
+                        oldData = WadChunkUtils.DecompressChunk(compressedOldData, diff.OldCompressionType);
                     }
                 }
 
-                if (oldData == null && diff.Type != ChunkDiffType.New)
+                if (diff.NewPathHash != 0)
                 {
-                    _customMessageBoxService.ShowWarning("Warning", "Could not load old version of the file.");
-                    return ("error", null, null, null, null);
-                }
-
-                if (newData == null && diff.Type != ChunkDiffType.Removed)
-                {
-                     _customMessageBoxService.ShowWarning("Warning", "Could not load new version of the file.");
-                    return ("error", null, null, null, null);
-                }
-
-                if (textExtensions.Contains(extension) || binExtensions.Contains(extension))
-                {
-                    string oldText = null, newText = null;
-                    if (oldData != null)
+                    string newChunkPath = Path.Combine(newPbePath, $"{diff.NewPathHash:X16}.chunk");
+                    if (File.Exists(newChunkPath))
                     {
-                        if (binExtensions.Contains(extension))
-                        {
-                            await _hashResolverService.LoadBinHashesAsync();
-                            var options = new JsonSerializerOptions { WriteIndented = true };
-                            using var oldStream = new MemoryStream(oldData);
-                            var oldBin = new BinTree(oldStream);
-                            var oldDict = BinUtils.ConvertBinTreeToDictionary(oldBin, _hashResolverService);
-                            oldText = JsonSerializer.Serialize(oldDict, options);
-                        }
-                        else
-                        {
-                            oldText = Encoding.UTF8.GetString(oldData);
-                        }
+                        byte[] compressedNewData = await File.ReadAllBytesAsync(newChunkPath);
+                        newData = WadChunkUtils.DecompressChunk(compressedNewData, diff.NewCompressionType);
                     }
-
-                    if (newData != null)
-                    {
-                        if (binExtensions.Contains(extension))
-                        {
-                            await _hashResolverService.LoadBinHashesAsync();
-                            var options = new JsonSerializerOptions { WriteIndented = true };
-                            using var newStream = new MemoryStream(newData);
-                            var newBin = new BinTree(newStream);
-                            var newDict = BinUtils.ConvertBinTreeToDictionary(newBin, _hashResolverService);
-                            newText = JsonSerializer.Serialize(newDict, options);
-                        }
-                        else
-                        {
-                            newText = Encoding.UTF8.GetString(newData);
-                        }
-                    }
-                    
-                    return ("json", oldText, newText, diff.OldPath, diff.NewPath);
-                }
-                else if (imageExtensions.Contains(extension))
-                {
-                    var oldImage = ToBitmapSource(oldData, extension);
-                    var newImage = ToBitmapSource(newData, extension);
-
-                    if (oldImage == null && diff.Type != ChunkDiffType.New) return ("error", null, null, null, null);
-                    if (newImage == null && diff.Type != ChunkDiffType.Removed) return ("error", null, null, null, null);
-
-                    return ("image", oldImage, newImage, diff.OldPath, diff.NewPath);
-                }
-                else
-                {
-                    _customMessageBoxService.ShowInfo("Info", $"File type '{extension}' is not supported for comparison.");
-                    return ("unsupported", null, null, null, null);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                _customMessageBoxService.ShowError("Error", $"An error occurred while preparing the diff view: {ex.Message}");
-                return ("error", null, null, null, null);
+                if (diff.OldPathHash != 0 && File.Exists(Path.Combine(oldPbePath, diff.SourceWadFile)))
+                {
+                    using var oldWad = new WadFile(Path.Combine(oldPbePath, diff.SourceWadFile));
+                    if (oldWad.Chunks.TryGetValue(diff.OldPathHash, out WadChunk oldChunk))
+                    {
+                        using var decompressedChunk = oldWad.LoadChunkDecompressed(oldChunk);
+                        oldData = decompressedChunk.Span.ToArray();
+                    }
+                }
+
+                if (diff.NewPathHash != 0 && File.Exists(Path.Combine(newPbePath, diff.SourceWadFile)))
+                {
+                    using var newWad = new WadFile(Path.Combine(newPbePath, diff.SourceWadFile));
+                    if (newWad.Chunks.TryGetValue(diff.NewPathHash, out WadChunk newChunk))
+                    {
+                        using var decompressedChunk = newWad.LoadChunkDecompressed(newChunk);
+                        newData = decompressedChunk.Span.ToArray();
+                    }
+                }
+            }
+
+            if (oldData == null && diff.Type != ChunkDiffType.New) return ("error", null, null, null, null);
+            if (newData == null && diff.Type != ChunkDiffType.Removed) return ("error", null, null, null, null);
+
+            var (dataType, oldResult, newResult) = await PrepareDataFromBytesAsync(oldData, newData, extension);
+            return (dataType, oldResult, newResult, diff.OldPath, diff.NewPath);
+        }
+
+        public async Task<(string DataType, object OldData, object NewData)> PrepareFileDifferenceDataAsync(string oldFilePath, string newFilePath)
+        {
+            string extension = Path.GetExtension(newFilePath ?? oldFilePath).ToLowerInvariant();
+            byte[] oldData = File.Exists(oldFilePath) ? await File.ReadAllBytesAsync(oldFilePath) : null;
+            byte[] newData = File.Exists(newFilePath) ? await File.ReadAllBytesAsync(newFilePath) : null;
+
+            return await PrepareDataFromBytesAsync(oldData, newData, extension);
+        }
+
+        private async Task<(string DataType, object OldData, object NewData)> PrepareDataFromBytesAsync(byte[] oldData, byte[] newData, string extension)
+        {
+            var jsExtensions = new[] { ".js" };
+            var jsonExtensions = new[] { ".json" };
+            var textExtensions = new[] { ".txt", ".lua", ".xml", ".yaml", ".yml", ".ini", ".log" };
+            var imageExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tex", ".dds" };
+            var binExtensions = new[] { ".bin" };
+
+            object GetBinDataObject(byte[] data)
+            {
+                if (data == null) return null;
+                try
+                {
+                    using var stream = new MemoryStream(data);
+                    var bin = new BinTree(stream);
+                    return BinUtils.ConvertBinTreeToDictionary(bin, _hashResolverService);
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError(ex, "Failed to parse .bin file content.");
+                    throw;
+                }
+            }
+
+            string GetTextContent(byte[] data)
+            {
+                if (data == null) return null;
+                return Encoding.UTF8.GetString(data);
+            }
+
+            if (binExtensions.Contains(extension))
+            {
+                await _hashResolverService.LoadBinHashesAsync();
+                object oldBinObject = GetBinDataObject(oldData);
+                object newBinObject = GetBinDataObject(newData);
+                return ("bin", oldBinObject, newBinObject);
+            }
+            if (jsExtensions.Contains(extension))
+            {
+                string oldText = GetTextContent(oldData);
+                string newText = GetTextContent(newData);
+                return ("js", oldText, newText);
+            }
+            if (jsonExtensions.Contains(extension))
+            {
+                string oldText = GetTextContent(oldData);
+                string newText = GetTextContent(newData);
+                return ("json", oldText, newText);
+            }
+            if (textExtensions.Contains(extension))
+            {
+                string oldText = GetTextContent(oldData);
+                string newText = GetTextContent(newData);
+                return ("text", oldText, newText);
+            }
+            else if (imageExtensions.Contains(extension))
+            {
+                var oldImage = ToBitmapSource(oldData, extension);
+                var newImage = ToBitmapSource(newData, extension);
+                return ("image", oldImage, newImage);
+            }
+            else
+            {
+                return ("unsupported", null, null);
             }
         }
 
@@ -187,7 +188,7 @@ namespace PBE_AssetsManager.Services
                         return BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, pixelByteSpan.ToArray(), width * 4);
                     }
 
-                    return null; // Should not happen with how Texture is created
+                    return null;
                 }
             }
             else

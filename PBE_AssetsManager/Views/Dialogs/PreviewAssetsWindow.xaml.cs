@@ -12,11 +12,16 @@ namespace PBE_AssetsManager.Views.Dialogs
         private readonly AssetsPreview _assetsPreview;
         private readonly LogService _logService;
 
-        public PreviewAssetsWindow(LogService logService, AssetsPreview assetsPreview)
+        public PreviewAssetsWindow(LogService logService, AssetsPreview assetsPreview, CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
             _logService = logService;
             _assetsPreview = assetsPreview;
+
+            // Pass services down to the child control
+            AssetPreview.LogService = logService;
+            AssetPreview.AssetsPreview = assetsPreview;
+            AssetPreview.CustomMessageBoxService = customMessageBoxService;
         }
 
         public void InitializeData(string inputFolder, List<string> selectedAssetTypes, Func<IEnumerable<string>, List<string>, List<string>> filterAssetsByType)

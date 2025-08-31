@@ -34,14 +34,14 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
                     renamedNewNamePanel.Visibility = Visibility.Visible;
                     pathPanel.Visibility = Visibility.Collapsed; // Hide generic path for renames
 
-                    renamedOldNameTextBlock.Text = diff.OldPath;
-                    renamedNewNameTextBlock.Text = diff.NewPath;
+                    renamedOldNameTextBlock.Text = !string.IsNullOrEmpty(diff.OldPath) ? diff.OldPath : "N/A";
+                    renamedNewNameTextBlock.Text = !string.IsNullOrEmpty(diff.NewPath) ? diff.NewPath : "N/A";
                 }
                 else
                 {
                     genericFileNamePanel.Visibility = Visibility.Visible;
                     string currentPath = diff.NewPath ?? diff.OldPath;
-                    genericFileNameTextBlock.Text = Path.GetFileName(currentPath);
+                    genericFileNameTextBlock.Text = !string.IsNullOrEmpty(currentPath) ? Path.GetFileName(currentPath) : "N/A";
                     pathTextBlock.Text = Path.GetDirectoryName(currentPath) ?? "N/A";
                 }
 

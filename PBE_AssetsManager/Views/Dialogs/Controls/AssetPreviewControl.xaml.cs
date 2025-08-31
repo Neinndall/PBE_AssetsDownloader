@@ -8,22 +8,18 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PBE_AssetsManager.Views.Dialogs.Controls
 {
     public partial class AssetPreviewControl : UserControl
     {
-        private readonly LogService _logService;
-        private readonly AssetsPreview _assetsPreview;
-        private readonly CustomMessageBoxService _customMessageBoxService;
+        public LogService LogService { get; set; }
+        public AssetsPreview AssetsPreview { get; set; }
+        public CustomMessageBoxService CustomMessageBoxService { get; set; }
 
         public AssetPreviewControl()
         {
             InitializeComponent();
-            _logService = App.ServiceProvider.GetRequiredService<LogService>();
-            _assetsPreview = App.ServiceProvider.GetRequiredService<AssetsPreview>();
-            _customMessageBoxService = App.ServiceProvider.GetRequiredService<CustomMessageBoxService>();
             this.Unloaded += AssetPreviewControl_Unloaded;
         }
 
@@ -49,7 +45,7 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
             
             noDataPanel.Visibility = Visibility.Collapsed;
 
-            PreviewData previewData = await _assetsPreview.GetPreviewData(selectedAsset.Url, selectedAsset.Name);
+            PreviewData previewData = await AssetsPreview.GetPreviewData(selectedAsset.Url, selectedAsset.Name);
 
             DisplayAssetInUI(previewData);
         }
@@ -98,7 +94,7 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"An unexpected error occurred while creating the image display for {url}.");
+                LogService.LogError(ex, $"An unexpected error occurred while creating the image display for {url}.");
                 ShowInfoMessage("An error occurred while trying to display the image.");
             }
         }
@@ -118,12 +114,12 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
                         {
                             encoder.Save(stream);
                         }
-                        _logService.LogSuccess($"Image saved successfully to {saveFileDialog.FileName}");
+                        LogService.LogSuccess($"Image saved successfully to {saveFileDialog.FileName}");
                     }
                     catch (Exception ex)
                     {
-                        _logService.LogError(ex, $"Failed to save image to {saveFileDialog.FileName}.");
-                        _customMessageBoxService.ShowError("Error", $"Failed to save image: {ex.Message}", Window.GetWindow(this));
+                        LogService.LogError(ex, $"Failed to save image to {saveFileDialog.FileName}.");
+                        CustomMessageBoxService.ShowError("Error", $"Failed to save image: {ex.Message}", Window.GetWindow(this));
                     }
                 }
             }
@@ -134,12 +130,12 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(filePath) { UseShellExecute = true });
-                _logService.LogDebug($"PreviewAssetsWindow: Opening audio '{{Path.GetFileName(filePath)}}' in external application.");
+                LogService.LogDebug($"PreviewAssetsWindow: Opening audio '{{Path.GetFileName(filePath)}}' in external application.");
                 ShowInfoMessage($"Opening audio '{{Path.GetFileName(filePath)}}' in external application.");
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Could not open audio: '{filePath}' externally.");
+                LogService.LogError(ex, $"Could not open audio: '{filePath}' externally.");
             }
         }
 
@@ -148,13 +144,13 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(filePath) { UseShellExecute = true });
-                _logService.LogDebug($"PreviewAssetsWindow: Opening video file '{{Path.GetFileName(filePath)}}' in external application.");
+                LogService.LogDebug($"PreviewAssetsWindow: Opening video file '{{Path.GetFileName(filePath)}}' in external application.");
                 ShowInfoMessage($"Opening video '{{Path.GetFileName(filePath)}}' with external program.");
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Could not open video '{{filePath}}' externally.");
-                _logService.LogCritical(ex, $"PreviewAssetsWindow.DisplayVideoExternal Exception for file: {{filePath}}");
+                LogService.LogError(ex, $"Could not open video '{{filePath}}' externally.");
+                LogService.LogCritical(ex, $"PreviewAssetsWindow.DisplayVideoExternal Exception for file: {{filePath}}");
             }
         }
 
@@ -176,13 +172,13 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(previewData.LocalFilePath) { UseShellExecute = true });
-                _logService.LogDebug($"PreviewAssetsWindow: Opening {previewData.LocalFilePath} with external program.");
+                LogService.LogDebug($"PreviewAssetsWindow: Opening {previewData.LocalFilePath} with external program.");
                 ShowInfoMessage($"Opening '{{Path.GetFileName(previewData.LocalFilePath)}}' in an external application.\n{previewData.Message}");
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Failed to open {previewData.LocalFilePath} with external program.");
-                _logService.LogCritical(ex, $"PreviewAssetsWindow.DisplayExternalProgram Exception for file: {previewData.LocalFilePath}");
+                LogService.LogError(ex, $"Failed to open {previewData.LocalFilePath} with external program.");
+                LogService.LogCritical(ex, $"PreviewAssetsWindow.DisplayExternalProgram Exception for file: {previewData.LocalFilePath}");
             }
         }
 

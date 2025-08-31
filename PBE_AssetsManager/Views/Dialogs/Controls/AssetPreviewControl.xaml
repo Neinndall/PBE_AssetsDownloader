@@ -31,7 +31,7 @@
             <!-- Preview Content -->
             <Border Grid.Row="1"
                     x:Name="borderMediaPlayer"
-                    Background="#FF0D1117"
+                    Background="{StaticResource DarkBackground}"
                     BorderBrush="{StaticResource BorderColor}"
                     BorderThickness="1"
                     CornerRadius="6">

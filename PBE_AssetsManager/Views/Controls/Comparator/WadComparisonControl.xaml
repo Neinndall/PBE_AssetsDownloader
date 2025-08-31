@@ -1,0 +1,271 @@
+<UserControl x:Class="PBE_AssetsManager.Views.Controls.Comparator.WadComparisonControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PBE_AssetsManager.Views.Controls.Comparator"
+             xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             FontFamily="Consolas, Courier New">
+    <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,24">
+        <StackPanel>
+            <!-- Header con icono y título -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,15" VerticalAlignment="Center">
+                <materialDesign:MaterialIcon Kind="Compare"
+                                             FontSize="20"
+                                             Margin="0,0,12,0"
+                                             VerticalAlignment="Center"
+                                             Foreground="{StaticResource AccentBlue}"/>
+                <StackPanel>
+                    <TextBlock Text="WADs Comparator" 
+                               FontSize="18" 
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock Text="Compare WAD files to identify differences" 
+                               FontSize="12" 
+                               Foreground="{StaticResource TextMuted}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <TabControl x:Name="wadComparatorTabControl" Margin="0,-5,0,0" Style="{StaticResource CustomTabControlStyle}">
+                <!-- Tab: By Directory -->
+                <TabItem Header="By Directory" Style="{StaticResource CustomTabItemStyle}">
+                    <StackPanel Margin="0,20,0,0">
+                        <!-- New PBE Directory -->
+                        <Grid Margin="0,0,0,24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderRefreshOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentGreen}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="New Directory" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the new directory or folder" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Grid Grid.Column="1" Margin="0,42,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="newPbeDirectoryTextBox" 
+                                             Grid.Column="0"
+                                             Height="36"
+                                             IsReadOnly="True"
+                                             Style="{StaticResource ModernTextBox}"
+                                             ToolTip="Select the new directory"/>
+                                <Button Grid.Column="2"
+                                            Content="Browse"
+                                            Padding="16,0"
+                                            Height="36"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Click="btnSelectNewPbeDirectory_Click"
+                                            ToolTip="Browse for directory"/>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Old PBE Directory -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderClockOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentOrange}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="Old Directory" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the old directory or folder" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Grid Grid.Column="1" Margin="0,42,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="oldPbeDirectoryTextBox" 
+                                             Grid.Column="0"
+                                             Height="36"
+                                             IsReadOnly="True"
+                                             Style="{StaticResource ModernTextBox}"
+                                             ToolTip="Select the old directory"/>
+                                <Button Grid.Column="2"
+                                            Content="Browse"
+                                            Padding="16,0"
+                                            Height="36"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Click="btnSelectOldPbeDirectory_Click"
+                                            ToolTip="Browse for directory"/>
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+
+                <!-- Tab: By File -->
+                <TabItem Header="By File" Style="{StaticResource CustomTabItemStyle}">
+                    <StackPanel Margin="0,20,0,0">
+                        <!-- New WAD File -->
+                        <Grid Margin="0,0,0,24">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FilePlusOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentGreen}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="New WAD File" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the new WAD file to compare" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Grid Grid.Column="1" Margin="0,42,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="newWadFileTextBox" 
+                                             Grid.Column="0"
+                                             Height="36"
+                                             IsReadOnly="True"
+                                             Style="{StaticResource ModernTextBox}"
+                                             ToolTip="Select the new WAD file"/>
+                                <Button Grid.Column="2"
+                                            Content="Browse"
+                                            Padding="16,0"
+                                            Height="36"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Click="btnSelectNewWadFile_Click"
+                                            ToolTip="Browse for file"/>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Old WAD File -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" 
+                                                         FontSize="20" 
+                                                         Margin="0,0,12,0" 
+                                                         VerticalAlignment="Top"
+                                                         Foreground="{StaticResource AccentOrange}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                <TextBlock Text="Old WAD File" 
+                                           FontWeight="Medium"
+                                           FontSize="14"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Select the old WAD file to compare" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Grid Grid.Column="1" Margin="0,42,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="oldWadFileTextBox" 
+                                             Grid.Column="0"
+                                             Height="36"
+                                             IsReadOnly="True"
+                                             Style="{StaticResource ModernTextBox}"
+                                             ToolTip="Select the old WAD file"/>
+                                <Button Grid.Column="2"
+                                            Content="Browse"
+                                            Padding="16,0"
+                                            Height="36"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Click="btnSelectOldWadFile_Click"
+                                            ToolTip="Browse for file"/>
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+
+            <!-- Actions -->
+            <Grid Margin="0,24,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
+                                             FontSize="20" 
+                                             Margin="0,0,12,0" 
+                                             VerticalAlignment="Top"
+                                             Foreground="{StaticResource AccentOrange}"/>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Actions" 
+                               FontWeight="Medium"
+                               FontSize="14"
+                               Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock Text="Compare WAD files or load previous results" 
+                               FontSize="12" 
+                               Foreground="{StaticResource TextMuted}"
+                               Margin="0,2,0,12"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="createPbeBackupButton" 
+                            Content="Create PBE Backup"
+                            Height="36"
+                            Padding="16,0"
+                            Style="{StaticResource SecondaryButton}"
+                            Click="createPbeBackupButton_Click"
+                            ToolTip="Create a backup of the current PBE directory"
+                            Margin="0,0,12,0"/>
+                        <Button x:Name="loadButton" 
+                            Content="Load Results"
+                            Height="36"
+                            Padding="16,0"
+                            Style="{StaticResource SecondaryButton}"
+                            Click="loadButton_Click"
+                            ToolTip="Load previously saved WAD comparison results"
+                            Margin="0,0,12,0"/>
+                        <Button x:Name="compareWadButton" 
+                            Content="Compare" 
+                            Height="36"
+                            Padding="36,0"
+                            Style="{StaticResource ModernButton}"
+                            Click="compareWadButton_Click"
+                            ToolTip="Compare WAD files"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

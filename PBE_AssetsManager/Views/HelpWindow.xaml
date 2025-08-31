@@ -6,7 +6,7 @@
         MinHeight="750" MinWidth="950"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResizeWithGrip"
-        Background="#FF1E1E1E"
+        Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New">
 
     <Grid>

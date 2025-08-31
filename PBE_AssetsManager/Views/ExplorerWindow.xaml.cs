@@ -1,14 +1,34 @@
+using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Views.Models;
 using System.Windows;
 using System.Windows.Controls;
-using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Views
 {
     public partial class ExplorerWindow : UserControl
     {
-        public ExplorerWindow()
+        public ExplorerWindow(
+            LogService logService,
+            CustomMessageBoxService customMessageBoxService,
+            HashResolverService hashResolverService,
+            WadNodeLoaderService wadNodeLoaderService,
+            DirectoriesCreator directoriesCreator,
+            ExplorerPreviewService explorerPreviewService,
+            JsBeautifierService jsBeautifierService
+        )
         {
             InitializeComponent();
+
+            FileExplorer.LogService = logService;
+            FileExplorer.CustomMessageBoxService = customMessageBoxService;
+            FileExplorer.HashResolverService = hashResolverService;
+            FileExplorer.WadNodeLoaderService = wadNodeLoaderService;
+
+            FilePreviewer.LogService = logService;
+            FilePreviewer.CustomMessageBoxService = customMessageBoxService;
+            FilePreviewer.DirectoriesCreator = directoriesCreator;
+            FilePreviewer.ExplorerPreviewService = explorerPreviewService;
         }
 
         private async void FileExplorer_FileSelected(object sender, RoutedPropertyChangedEventArgs<object> e)

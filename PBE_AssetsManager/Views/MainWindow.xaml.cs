@@ -6,6 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Controls;
+using PBE_AssetsManager.Views.Controls.Comparator;
+using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Views.Controls.Export;
 
 namespace PBE_AssetsManager.Views
 {
@@ -17,8 +20,17 @@ namespace PBE_AssetsManager.Views
         private readonly UpdateManager _updateManager;
         private readonly AssetDownloader _assetDownloader;
         private readonly WadComparatorService _wadComparatorService;
+        private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly DirectoriesCreator _directoriesCreator;
+        private readonly WadDifferenceService _wadDifferenceService;
+        private readonly WadPackagingService _wadPackagingService;
+        private readonly BackupManager _backupManager;
+        private readonly HashResolverService _hashResolverService;
+        private readonly WadNodeLoaderService _wadNodeLoaderService;
+        private readonly ExplorerPreviewService _explorerPreviewService;
         private readonly ProgressUIManager _progressUIManager;
         private readonly UpdateCheckService _updateCheckService;
+        private readonly DiffViewService _diffViewService;
 
         private string _latestAppVersionAvailable;
 
@@ -32,7 +44,14 @@ namespace PBE_AssetsManager.Views
             DirectoriesCreator directoriesCreator,
             CustomMessageBoxService customMessageBoxService,
             WadDifferenceService wadDifferenceService,
-            UpdateCheckService updateCheckService)
+            WadPackagingService wadPackagingService,
+            BackupManager backupManager,
+            HashResolverService hashResolverService,
+            WadNodeLoaderService wadNodeLoaderService,
+            ExplorerPreviewService explorerPreviewService,
+            UpdateCheckService updateCheckService,
+            ProgressUIManager progressUIManager,
+            DiffViewService diffViewService)
         {
             InitializeComponent();
 
@@ -42,13 +61,19 @@ namespace PBE_AssetsManager.Views
             _updateManager = updateManager;
             _assetDownloader = assetDownloader;
             _wadComparatorService = wadComparatorService;
+            _customMessageBoxService = customMessageBoxService;
+            _directoriesCreator = directoriesCreator;
+            _wadDifferenceService = wadDifferenceService;
+            _wadPackagingService = wadPackagingService;
+            _backupManager = backupManager;
+            _hashResolverService = hashResolverService;
+            _wadNodeLoaderService = wadNodeLoaderService;
+            _explorerPreviewService = explorerPreviewService;
             _updateCheckService = updateCheckService;
+            _progressUIManager = progressUIManager;
+            _diffViewService = diffViewService;
 
-            _progressUIManager = new ProgressUIManager(
-                logService, serviceProvider, customMessageBoxService, directoriesCreator, 
-                assetDownloader, wadDifferenceService,
-                ProgressSummaryButton, ProgressIcon, this
-            );
+            _progressUIManager.Initialize(ProgressSummaryButton, ProgressIcon, this);
 
             _logService.SetLogOutput(LogView.richTextBoxLogs);
 
@@ -139,12 +164,31 @@ namespace PBE_AssetsManager.Views
 
         private void LoadExportWindow()
         {
-            MainContentArea.Content = _serviceProvider.GetRequiredService<ExportWindow>();
+            var exportWindow = _serviceProvider.GetRequiredService<ExportWindow>();
+            exportWindow.PreviewRequested += OnPreviewRequested;
+            MainContentArea.Content = exportWindow;
         }
 
         private void LoadComparatorWindow()
         {
-            MainContentArea.Content = _serviceProvider.GetRequiredService<ComparatorWindow>();
+            var comparatorWindow = _serviceProvider.GetRequiredService<ComparatorWindow>();
+            comparatorWindow.LoadWadComparisonRequested += OnLoadWadComparisonRequested;
+
+            MainContentArea.Content = comparatorWindow;
+        }
+
+        private void OnPreviewRequested(object sender, PreviewRequestedEventArgs e)
+        {
+            var previewWindow = _serviceProvider.GetRequiredService<PreviewAssetsWindow>();
+            previewWindow.Owner = this;
+            previewWindow.InitializeData(e.DifferencesPath, e.SelectedAssetTypes, e.FilterLogic);
+            previewWindow.ShowDialog();
+        }
+
+        private void OnLoadWadComparisonRequested(object sender, LoadWadComparisonEventArgs e)
+        {
+            var resultWindow = new WadComparisonResultWindow(e.Diffs, _serviceProvider, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, _wadPackagingService, _diffViewService, e.OldPath, e.NewPath, e.JsonPath);
+            resultWindow.Show();
         }
 
         private void btnHelp_Click(object sender, RoutedEventArgs e)

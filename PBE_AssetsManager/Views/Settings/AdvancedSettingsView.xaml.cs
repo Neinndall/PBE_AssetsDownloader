@@ -16,15 +16,17 @@ namespace PBE_AssetsManager.Views.Settings
     {
         private AppSettings _appSettings;
         private readonly LogService _logService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider; // Keep for InputDialog, or refactor later
         private readonly CustomMessageBoxService _customMessageBoxService;
+        private readonly DiffViewService _diffViewService;
 
-        public AdvancedSettingsView(LogService logService, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService)
+        public AdvancedSettingsView(LogService logService, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService, DiffViewService diffViewService)
         {
             InitializeComponent();
             _logService = logService;
             _serviceProvider = serviceProvider;
             _customMessageBoxService = customMessageBoxService;
+            _diffViewService = diffViewService;
         }
 
         public void ApplySettingsToUI(AppSettings appSettings)
@@ -68,7 +70,7 @@ namespace PBE_AssetsManager.Views.Settings
         private void btnAddJsonFile_Click(object sender, RoutedEventArgs e)
         {
             var inputDialog = _serviceProvider.GetRequiredService<InputDialog>();
-            inputDialog.Initialize("Add JSON File URL", "Enter the URL of the JSON file or directory:", "");
+            inputDialog.Initialize("Add URL", "Enter the URL of the file or directory:", "");
             inputDialog.Owner = Window.GetWindow(this);
 
             if (inputDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(inputDialog.InputText))
@@ -85,7 +87,7 @@ namespace PBE_AssetsManager.Views.Settings
             if (JsonFilesListBox.SelectedItem is string selectedUrl)
             {
                 var inputDialog = _serviceProvider.GetRequiredService<InputDialog>();
-                inputDialog.Initialize("Edit JSON File URL", "Edit the URL:", selectedUrl);
+                inputDialog.Initialize("Edit URL", "Edit the URL:", selectedUrl);
                 inputDialog.Owner = Window.GetWindow(this);
 
                 if (inputDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(inputDialog.InputText))
@@ -112,7 +114,7 @@ namespace PBE_AssetsManager.Views.Settings
         {
             if (JsonFilesListBox.SelectedItem is string selectedUrl)
             {
-                if (_customMessageBoxService.ShowYesNo("Confirm Removal", $"Are you sure you want to remove '{selectedUrl}'?", Window.GetWindow(this)) == true)
+                if (_customMessageBoxService.ShowYesNo("Info", $"Are you sure you want to remove '{selectedUrl}'?", Window.GetWindow(this)) == true)
                 {
                     if (JsonFilesListBox.ItemsSource is List<string> currentItems)
                     {
@@ -128,21 +130,11 @@ namespace PBE_AssetsManager.Views.Settings
             }
         }
 
-        private void btnViewDiff_Click(object sender, RoutedEventArgs e)
+        private async void btnViewDiff_Click(object sender, RoutedEventArgs e)
         {
             if (DiffHistoryListView.SelectedItem is JsonDiffHistoryEntry selectedEntry)
             {
-                try
-                {
-                    var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                    _ = diffWindow.LoadAndDisplayDiffAsync(selectedEntry.OldFilePath, selectedEntry.NewFilePath);
-                    diffWindow.Show();
-                }
-                catch (Exception ex)
-                {
-                    _logService.LogError(ex, $"Error opening diff for {selectedEntry.FileName}.");
-                    _customMessageBoxService.ShowError("Error", "Could not open diff view. Please check the logs for details.", Window.GetWindow(this));
-                }
+                await _diffViewService.ShowFileDiffAsync(selectedEntry.OldFilePath, selectedEntry.NewFilePath, Window.GetWindow(this));
             }
             else
             {
@@ -152,39 +144,48 @@ namespace PBE_AssetsManager.Views.Settings
 
         private void btnRemoveSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (DiffHistoryListView.SelectedItem is JsonDiffHistoryEntry selectedEntry)
+            if (DiffHistoryListView.SelectedItems.Count > 0)
             {
-                if (_customMessageBoxService.ShowYesNo("Confirm Deletion", $"Are you sure you want to delete the history entry for '{selectedEntry.FileName}' from {selectedEntry.Timestamp}? This will delete the backup files and cannot be undone.", Window.GetWindow(this)) == true)
+                // Create a copy of the selected items to avoid issues with modifying the collection while iterating.
+                var itemsToRemove = DiffHistoryListView.SelectedItems.Cast<JsonDiffHistoryEntry>().ToList();
+                
+                string message = itemsToRemove.Count == 1
+                    ? $"Are you sure you want to delete the history entry for '{itemsToRemove.First().FileName}' from {itemsToRemove.First().Timestamp}? This will delete the backup files and cannot be undone."
+                    : $"Are you sure you want to delete the {itemsToRemove.Count} selected history entries? This will delete their backup files and cannot be undone.";
+
+                if (_customMessageBoxService.ShowYesNo("Info", message, Window.GetWindow(this)) == true)
                 {
                     try
                     {
-                        // Get the directory from one of the file paths
-                        string historyDirectoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
-
-                        // Delete the physical directory
-                        if (!string.IsNullOrEmpty(historyDirectoryPath) && Directory.Exists(historyDirectoryPath))
+                        foreach (var selectedEntry in itemsToRemove)
                         {
-                            Directory.Delete(historyDirectoryPath, true);
+                            // Get the directory from one of the file paths
+                            string historyDirectoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
+
+                            // Delete the physical directory
+                            if (!string.IsNullOrEmpty(historyDirectoryPath) && Directory.Exists(historyDirectoryPath))
+                            {
+                                Directory.Delete(historyDirectoryPath, true);
+                            }
+
+                            // Remove from settings
+                            _appSettings.DiffHistory.Remove(selectedEntry);
                         }
 
-                        // Remove from settings and refresh UI
-                        _appSettings.DiffHistory.Remove(selectedEntry);
-                        
-                        // We need to re-bind the list to make the UI update correctly after removal.
+                        // Refresh UI once after all deletions
                         DiffHistoryListView.ItemsSource = null;
                         DiffHistoryListView.ItemsSource = _appSettings.DiffHistory;
                     }
                     catch (Exception ex)
                     {
-                        string directoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
-                        _logService.LogError(ex, $"Error deleting history for {selectedEntry.FileName}.");
-                        _customMessageBoxService.ShowInfo("Error", "Could not delete history entry. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
+                        _logService.LogError(ex, "Error deleting history entries.");
+                        _customMessageBoxService.ShowInfo("Error", "Could not delete one or more history entries. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
                     }
                 }
             }
             else
             {
-                _customMessageBoxService.ShowInfo("No Selection", "Please select a history entry to delete.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                _customMessageBoxService.ShowInfo("Info", "Please select one or more history entries to delete.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
             }
         }
     }

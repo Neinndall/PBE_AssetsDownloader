@@ -1,0 +1,108 @@
+<UserControl x:Class="PBE_AssetsManager.Views.ModelWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:PBE_AssetsManager.Views.Controls.Models"
+             xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="1000">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- CABECERA -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Padding="32,24">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Icono + textos -->
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <materialDesign:MaterialIcon Kind="Cube"
+                                                 Height="54"
+                                                 Width="54"
+                                                 Margin="0,0,10,0"
+                                                 VerticalAlignment="Center"
+                                                 Foreground="{StaticResource AccentBlue}"
+                                                 Grid.Column="0"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Model Viewer" 
+                                   FontSize="26" 
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource AccentBlue}"
+                                   Margin="0,2,0,0"/>
+                        <TextBlock Text="Visualize .skn models and animations."
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- CUERPO -->
+        <Grid Grid.Row="1">
+            <!-- Empty State Panel -->
+            <StackPanel x:Name="EmptyStatePanel"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="Visible">
+                <materialDesign:MaterialIcon Kind="CubeOutline"
+                                            Width="64" Height="64"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{StaticResource TextMuted}"
+                                            Opacity="0.5"
+                                            Margin="0,0,0,16"/>
+                <TextBlock Text="SELECT A MODEL"
+                           FontSize="24" 
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,8"/>
+                <TextBlock Text="Load a model to visualize it in 3D."
+                           FontSize="16"
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,24"
+                           Opacity="0.7"/>
+                <Button Content="Load Model"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="OpenFile_Click"
+                        HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Main Content Grid (initially collapsed) -->
+            <Grid x:Name="MainContentGrid" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="280"/>
+                </Grid.ColumnDefinitions>
+
+                <models:ModelViewerViewportControl Grid.Column="0" x:Name="ViewportControl"/>
+
+                <GridSplitter Grid.Column="1"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Stretch"
+                              Width="4"
+                              Background="Transparent"
+                              ResizeBehavior="PreviousAndNext"
+                              ResizeDirection="Columns"/>
+                <models:ModelViewerPanelControl Grid.Column="2" x:Name="PanelControl" AnimationSelected="AnimationsListBox_SelectionChanged"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

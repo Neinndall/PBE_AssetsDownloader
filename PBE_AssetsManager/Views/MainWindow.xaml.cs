@@ -147,6 +147,7 @@ namespace PBE_AssetsManager.Views
                 case "Export": LoadExportWindow(); break;
                 case "Explorer": LoadExplorerWindow(); break;
                 case "Comparator": LoadComparatorWindow(); break;
+                case "Models": LoadModelWindow(); break;
                 case "Settings": btnSettings_Click(null, null); break;
                 case "Help": btnHelp_Click(null, null); break;
             }
@@ -175,6 +176,11 @@ namespace PBE_AssetsManager.Views
             comparatorWindow.LoadWadComparisonRequested += OnLoadWadComparisonRequested;
 
             MainContentArea.Content = comparatorWindow;
+        }
+
+        private void LoadModelWindow()
+        {
+            MainContentArea.Content = _serviceProvider.GetRequiredService<ModelWindow>();
         }
 
         private void OnPreviewRequested(object sender, PreviewRequestedEventArgs e)

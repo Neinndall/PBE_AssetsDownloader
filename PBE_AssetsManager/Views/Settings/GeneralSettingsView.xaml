@@ -58,7 +58,7 @@
                 <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
                          Foreground="{StaticResource TextMuted}" 
                          FontSize="12" 
-                         Margin="30,0,0,8" 
+                         Margin="27,0,0,8" 
                          TextWrapping="Wrap"/>
 
                 <CheckBox x:Name="checkBoxCheckJsonData" 
@@ -67,7 +67,7 @@
                 <TextBlock Text="Check for updates to JSON files and their differences"
                          Foreground="{StaticResource TextMuted}" 
                          FontSize="12" 
-                         Margin="30,0,0,8" 
+                         Margin="27,0,0,8" 
                          TextWrapping="Wrap"/>
 
                 <CheckBox x:Name="checkBoxBackgroundUpdates" 
@@ -76,7 +76,7 @@
                 <TextBlock Text="Periodically check for updates while the application is running."
                          Foreground="{StaticResource TextMuted}" 
                          FontSize="12" 
-                         Margin="30,0,0,8" 
+                         Margin="27,0,0,8" 
                          TextWrapping="Wrap"/>
 
                 <!-- Frequency Selector - Visible only when background updates are enabled -->
@@ -108,7 +108,7 @@
                 <TextBlock Text="Save a history of all JSON file differences detected during updates."
                          Foreground="{StaticResource TextMuted}"
                          FontSize="12"
-                         Margin="30,0,0,8"
+                         Margin="27,0,0,8"
                          TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
@@ -139,7 +139,7 @@
                 <TextBlock Text="Automatically replace old hash files with newer versions"
                          Foreground="{StaticResource TextMuted}" 
                          FontSize="12" 
-                         Margin="30,0,0,8" 
+                         Margin="27,0,0,8" 
                          TextWrapping="Wrap"/>
                 
                 <CheckBox x:Name="checkBoxCreateBackUp" 
@@ -148,7 +148,7 @@
                 <TextBlock Text="Backup existing files to prevent data loss during updates"
                          Foreground="{StaticResource TextMuted}" 
                          FontSize="12" 
-                         Margin="30,0,0,8" 
+                         Margin="27,0,0,8" 
                          TextWrapping="Wrap"/>
             </StackPanel>
         </Border>

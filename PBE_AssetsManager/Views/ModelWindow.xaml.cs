@@ -26,6 +26,7 @@ namespace PBE_AssetsManager.Views
 
         private readonly Dictionary<string, IAnimationAsset> _animations = new();
         private readonly ObservableCollection<string> _animationNames = new();
+        private readonly ObservableCollection<SceneModel> _loadedModels = new();
         private RigResource _skeleton;
 
         public ModelWindow(ModelLoadingService modelLoadingService, LogService logService)
@@ -39,9 +40,15 @@ namespace PBE_AssetsManager.Views
 
             SetupScene();
 
+            // ItemSources
             PanelControl.AnimationsListBoxControl.ItemsSource = _animationNames;
+            PanelControl.ModelsListBoxControl.ItemsSource = _loadedModels;
+            
+            // Event Subscriptions
             PanelControl.AnimationFileLoaded += PanelControl_AnimationFileLoaded;
             PanelControl.ModelFileLoaded += PanelControl_ModelFileLoaded;
+            PanelControl.ModelDeleted += PanelControl_ModelDeleted;
+            PanelControl.AnimationSelected += AnimationsListBox_SelectionChanged;
         }
 
         private void SetupScene()
@@ -74,26 +81,7 @@ namespace PBE_AssetsManager.Views
                 }
                 else if (extension == ".skn")
                 {
-                    string sklFilePath = Path.ChangeExtension(openFileDialog.FileName, ".skl");
-                    if (File.Exists(sklFilePath))
-                    {
-                        using (var stream = File.OpenRead(sklFilePath))
-                        {
-                            _skeleton = new RigResource(stream);
-                            ViewportControl.SetSkeleton(_skeleton);
-                        }
-                    }
-                    
-                    _sceneModel = _modelLoadingService.LoadModel(openFileDialog.FileName);
-                    if (_sceneModel != null)
-                    {
-                        EmptyStatePanel.Visibility = Visibility.Collapsed;
-                        MainContentGrid.Visibility = Visibility.Visible;
-                        ViewportControl.SetModel(_sceneModel);
-                        PanelControl.MeshesListBoxControl.ItemsSource = _sceneModel.Parts;
-                        
-                        ViewportControl.ResetCamera();
-                    }
+                    LoadModel(openFileDialog.FileName, true);
                 }
             }
         }
@@ -105,32 +93,55 @@ namespace PBE_AssetsManager.Views
 
         private void PanelControl_ModelFileLoaded(object sender, string filePath)
         {
-            LoadModel(filePath);
+            LoadModel(filePath, false);
         }
 
-        private void LoadModel(string filePath)
+        private void PanelControl_ModelDeleted(object sender, SceneModel modelToDelete)
         {
-            var extension = Path.GetExtension(filePath).ToLower();
-            if (extension == ".skn")
+            if (modelToDelete == null) return;
+
+            _loadedModels.Remove(modelToDelete);
+            ViewportControl.Viewport.Children.Remove(modelToDelete.RootVisual);
+
+            // If no models are left, just reset the state but keep the view active.
+            if (_loadedModels.Count == 0)
             {
-                string sklFilePath = Path.ChangeExtension(filePath, ".skl");
-                if (File.Exists(sklFilePath))
+                _sceneModel = null;
+                _skeleton = null;
+                _animations.Clear();
+                _animationNames.Clear();
+                PanelControl.MeshesListBoxControl.ItemsSource = null;
+            }
+        }
+
+        private void LoadModel(string filePath, bool isInitialLoad)
+        {
+            string sklFilePath = Path.ChangeExtension(filePath, ".skl");
+            if (File.Exists(sklFilePath))
+            {
+                using (var stream = File.OpenRead(sklFilePath))
                 {
-                    using (var stream = File.OpenRead(sklFilePath))
-                    {
-                        _skeleton = new RigResource(stream);
-                        ViewportControl.SetSkeleton(_skeleton);
-                    }
+                    _skeleton = new RigResource(stream);
+                    ViewportControl.SetSkeleton(_skeleton);
+                }
+            }
+            
+            _sceneModel = _modelLoadingService.LoadModel(filePath);
+            if (_sceneModel != null)
+            {
+                if (isInitialLoad)
+                {
+                    EmptyStatePanel.Visibility = Visibility.Collapsed;
+                    MainContentGrid.Visibility = Visibility.Visible;
                 }
                 
-                _sceneModel = _modelLoadingService.LoadModel(filePath);
-                if (_sceneModel != null)
-                {
-                    ViewportControl.SetModel(_sceneModel);
-                    PanelControl.MeshesListBoxControl.ItemsSource = _sceneModel.Parts;
-                    
-                    ViewportControl.ResetCamera();
-                }
+                ViewportControl.SetModel(_sceneModel);
+                PanelControl.MeshesListBoxControl.ItemsSource = _sceneModel.Parts;
+                
+                _loadedModels.Clear();
+                _loadedModels.Add(_sceneModel);
+
+                ViewportControl.ResetCamera();
             }
         }
 
@@ -152,15 +163,12 @@ namespace PBE_AssetsManager.Views
                     _animationNames.Add(animationName);
                 }
             }
-            _logService.Log($"Loaded animation: {Path.GetFileName(filePath)}");
         }
 
-        private void AnimationsListBox_SelectionChanged(object sender, RoutedPropertyChangedEventArgs<string> e)
+        private void AnimationsListBox_SelectionChanged(object sender, string selectedAnimationName)
         {
-            var selectedAnimationName = e.NewValue;
-            if (_animations.TryGetValue(selectedAnimationName, out var animationAsset))
+            if (selectedAnimationName != null && _animations.TryGetValue(selectedAnimationName, out var animationAsset))
             {
-                _logService.Log($"Animation selected: {selectedAnimationName}");
                 ViewportControl.SetAnimation(animationAsset);
             }
         }

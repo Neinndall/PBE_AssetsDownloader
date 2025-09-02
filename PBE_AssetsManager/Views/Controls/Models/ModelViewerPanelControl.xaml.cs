@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Views.Controls.Models
 {
@@ -12,18 +13,12 @@ namespace PBE_AssetsManager.Views.Controls.Models
     {
         public event EventHandler<string> AnimationFileLoaded;
         public event EventHandler<string> ModelFileLoaded;
-
-        public static readonly RoutedEvent AnimationSelectedEvent = EventManager.RegisterRoutedEvent(
-            "AnimationSelected", RoutingStrategy.Bubble, typeof(RoutedPropertyChangedEventHandler<string>), typeof(ModelViewerPanelControl));
-
-        public event RoutedPropertyChangedEventHandler<string> AnimationSelected
-        {
-            add { AddHandler(AnimationSelectedEvent, value); }
-            remove { RemoveHandler(AnimationSelectedEvent, value); }
-        }
+        public event EventHandler<string> AnimationSelected;
+        public event EventHandler<SceneModel> ModelDeleted;
 
         public ListBox MeshesListBoxControl => MeshesListBox;
         public ListBox AnimationsListBoxControl => AnimationsListBox;
+        public ListBox ModelsListBoxControl => ModelsListBox;
 
         public ModelViewerPanelControl()
         {
@@ -35,7 +30,15 @@ namespace PBE_AssetsManager.Views.Controls.Models
         {
             if (AnimationsListBox.SelectedItem is string selectedAnimationName)
             {
-                RaiseEvent(new RoutedPropertyChangedEventArgs<string>("", selectedAnimationName, AnimationSelectedEvent));
+                AnimationSelected?.Invoke(this, selectedAnimationName);
+            }
+        }
+
+        private void DeleteModelButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is SceneModel modelToDelete)
+            {
+                ModelDeleted?.Invoke(this, modelToDelete);
             }
         }
 

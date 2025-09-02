@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="250">
     <UserControl.Resources>
@@ -77,7 +78,39 @@
                              ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}" Margin="10,0,0,0" Foreground="{StaticResource TextPrimary}" Background="Transparent" IsHitTestVisible="False"/>
+                                <TextBlock Text="{Binding}" 
+                                        Margin="10,3,0,3" 
+                                        Foreground="{StaticResource TextPrimary}" 
+                                        Background="Transparent" 
+                                        IsHitTestVisible="False"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+                <TabItem Header="Models">
+                    <ListBox x:Name="ModelsListBox"
+                             Background="{StaticResource SidebarBackground}"
+                             BorderThickness="1"
+                             BorderBrush="{StaticResource BorderColor}"
+                             ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource TextPrimary}"/>
+                                    <Button Grid.Column="1" x:Name="DeleteModelButton"
+                                            Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                                            Click="DeleteModelButton_Click"
+                                            Tag="{Binding}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Margin="5,0,5,0">
+                                        <materialDesign:MaterialIcon Kind="TrashCan" Foreground="Red" Width="16" Height="16"/>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

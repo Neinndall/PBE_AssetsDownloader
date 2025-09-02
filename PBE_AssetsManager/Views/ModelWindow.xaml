@@ -101,7 +101,7 @@
                               Background="Transparent"
                               ResizeBehavior="PreviousAndNext"
                               ResizeDirection="Columns"/>
-                <models:ModelViewerPanelControl Grid.Column="2" x:Name="PanelControl" AnimationSelected="AnimationsListBox_SelectionChanged"/>
+                <models:ModelViewerPanelControl Grid.Column="2" x:Name="PanelControl"/>
             </Grid>
         </Grid>
     </Grid>

@@ -46,11 +46,6 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
                 OldFileNameLabel.Text = oldFileName;
                 NewFileNameLabel.Text = newFileName;
 
-                if (string.IsNullOrEmpty(oldText))
-                {
-                    return;
-                }
-
                 _originalDiffModel = await Task.Run(() => new SideBySideDiffBuilder(new Differ()).BuildDiffModel(oldText, newText, false));
 
                 DiffGrid.Visibility = Visibility.Visible;

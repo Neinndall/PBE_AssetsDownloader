@@ -41,6 +41,7 @@
                              BorderThickness="0"
                              Padding="12,10"
                              Foreground="{StaticResource TextPrimary}"
+                             CaretBrush="White"
                              FontSize="14"
                              TextChanged="TxtSearch_TextChanged"
                              GotFocus="TxtSearch_GotFocus"

@@ -199,6 +199,41 @@
                     </Grid>
                 </Button>
 
+                <Button x:Name="MonitorButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Monitor" Margin="2,0,0,4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="Radar" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Monitor" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Opacity" Value="0"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsExpanded, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.1" BeginTime="0:0:0.1"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.1"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Button>
+
                 <Button x:Name="SettingsButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Settings" Margin="0,0,0,4">
                     <Grid>
                         <Grid.ColumnDefinitions>

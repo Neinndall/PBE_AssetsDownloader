@@ -50,7 +50,7 @@
                      Margin="2"
                      Foreground="{StaticResource TextPrimary}"
                      FontSize="14"
-                     CaretBrush="Transparent"
+                     CaretBrush="White"
                      TextChanged="txtSearchExplorer_TextChanged"
                      GotFocus="txtSearchExplorer_GotFocus"
                      LostFocus="txtSearchExplorer_LostFocus"/>

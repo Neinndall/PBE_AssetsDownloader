@@ -31,6 +31,7 @@ namespace PBE_AssetsManager.Views
         private readonly ProgressUIManager _progressUIManager;
         private readonly UpdateCheckService _updateCheckService;
         private readonly DiffViewService _diffViewService;
+        private readonly MonitorService _monitorService;
 
         private string _latestAppVersionAvailable;
 
@@ -51,7 +52,8 @@ namespace PBE_AssetsManager.Views
             ExplorerPreviewService explorerPreviewService,
             UpdateCheckService updateCheckService,
             ProgressUIManager progressUIManager,
-            DiffViewService diffViewService)
+            DiffViewService diffViewService,
+            MonitorService monitorService)
         {
             InitializeComponent();
 
@@ -72,6 +74,7 @@ namespace PBE_AssetsManager.Views
             _updateCheckService = updateCheckService;
             _progressUIManager = progressUIManager;
             _diffViewService = diffViewService;
+            _monitorService = monitorService;
 
             _progressUIManager.Initialize(ProgressSummaryButton, ProgressIcon, this);
 
@@ -148,6 +151,7 @@ namespace PBE_AssetsManager.Views
                 case "Explorer": LoadExplorerWindow(); break;
                 case "Comparator": LoadComparatorWindow(); break;
                 case "Models": LoadModelWindow(); break;
+                case "Monitor": LoadMonitorWindow(); break;
                 case "Settings": btnSettings_Click(null, null); break;
                 case "Help": btnHelp_Click(null, null); break;
             }
@@ -181,6 +185,11 @@ namespace PBE_AssetsManager.Views
         private void LoadModelWindow()
         {
             MainContentArea.Content = _serviceProvider.GetRequiredService<ModelWindow>();
+        }
+
+        private void LoadMonitorWindow()
+        {
+            MainContentArea.Content = _serviceProvider.GetRequiredService<MonitorWindow>();
         }
 
         private void OnPreviewRequested(object sender, PreviewRequestedEventArgs e)

@@ -42,19 +42,6 @@ namespace PBE_AssetsManager.Services
             }
         }
 
-        public class InteractiveLogEntry : LogEntry
-        {
-            public string LinkText { get; }
-            public Action LinkAction { get; }
-
-            public InteractiveLogEntry(string message, LogLevel level, string linkText, Action linkAction, Exception exception = null)
-                : base(message, level, exception)
-            {
-                LinkText = linkText;
-                LinkAction = linkAction;
-            }
-        }
-
         public LogService(ILogger logger)
         {
             _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
@@ -132,12 +119,6 @@ namespace PBE_AssetsManager.Services
             // This method now only logs to the fatal error file, not to the UI.
         }
 
-        public void LogInteractive(string message, string linkText, Action linkAction, LogLevel level = LogLevel.Info)
-        {
-            _logger.Information($"{message} (Link: {linkText})");
-            WriteLog(new InteractiveLogEntry(message, level, linkText, linkAction));
-        }
-
         private void WriteLog(LogEntry logEntry)
         {
             if (_outputRichTextBox == null)
@@ -201,21 +182,7 @@ namespace PBE_AssetsManager.Services
 
             paragraph.Inlines.Add(timestampRun);
             paragraph.Inlines.Add(levelRun);
-
-            if (logEntry is InteractiveLogEntry interactiveLogEntry)
-            {
-                var hyperlink = new Hyperlink(messageRun)
-                {
-                    Foreground = Brushes.Cyan,
-                    TextDecorations = TextDecorations.Underline
-                };
-                hyperlink.Click += (s, e) => interactiveLogEntry.LinkAction?.Invoke();
-                paragraph.Inlines.Add(hyperlink);
-            }
-            else
-            {
-                paragraph.Inlines.Add(messageRun);
-            }
+            paragraph.Inlines.Add(messageRun);
 
             if (logEntry.Exception != null)
             {

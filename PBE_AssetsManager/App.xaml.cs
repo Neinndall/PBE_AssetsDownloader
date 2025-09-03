@@ -70,7 +70,15 @@ namespace PBE_AssetsManager
             services.AddSingleton<WadDifferenceService>();
             services.AddSingleton<WadPackagingService>();
             services.AddSingleton<WadNodeLoaderService>();
+            services.AddSingleton<UpdateCheckService>();
+            services.AddSingleton<ProgressUIManager>();
             services.AddTransient<ExplorerPreviewService>();
+            services.AddSingleton<JsBeautifierService>();
+            services.AddSingleton<DiffViewService>();
+            services.AddSingleton<MonitorService>();
+
+            // Model Viewer Services
+            services.AddSingleton<ModelLoadingService>();
 
             // Main Application Logic Service
             services.AddTransient<ExtractionService>();
@@ -81,6 +89,8 @@ namespace PBE_AssetsManager
             services.AddTransient<ExportWindow>();
             services.AddTransient<ExplorerWindow>();
             services.AddTransient<ComparatorWindow>();
+            services.AddTransient<ModelWindow>();
+            services.AddTransient<MonitorWindow>();
             services.AddTransient<HelpWindow>();
             services.AddTransient<JsonDiffWindow>();
             services.AddTransient<PreviewAssetsWindow>();

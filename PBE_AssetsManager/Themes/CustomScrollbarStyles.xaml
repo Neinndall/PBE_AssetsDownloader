@@ -141,11 +141,11 @@
 
     <!-- Estilo para ScrollViewer para corregir la esquina -->
     <Style TargetType="{x:Type ScrollViewer}">
-        <Setter Property="Background" Value="{StaticResource ScrollBarBackground}"/>
+        <Setter Property="Background" Value="Transparent"/>
         <Style.Resources>
             <!-- Esto cambia el color por defecto de la esquina -->
             <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" 
-                             Color="{Binding Source={StaticResource ScrollBarBackground}, Path=Color}"/>
+                             Color="Transparent"/>
         </Style.Resources>
     </Style>
 </ResourceDictionary>

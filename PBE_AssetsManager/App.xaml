@@ -6,10 +6,19 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Themes/Colors.xaml"/>
-                <ResourceDictionary Source="/Themes/Styles.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernTabsControl.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernButton.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernRichTextBox.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernBorder.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernCheckBox.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernTextBox.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernComboBox.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernMenu.xaml"/>
+                <ResourceDictionary Source="/Themes/ModernProgressBar.xaml"/>
                 <ResourceDictionary Source="/Themes/Animations.xaml"/> 
                 <ResourceDictionary Source="/Themes/CustomScrollbarStyles.xaml"/> 
                 <ResourceDictionary Source="/Themes/TreeViewStyles.xaml"/> 
+                <ResourceDictionary Source="/Themes/ModernListView.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

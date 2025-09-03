@@ -25,15 +25,8 @@ namespace PBE_AssetsManager.Views.Helpers
         private readonly List<int> _diffLines;
         public int CurrentLine { get; set; }
 
-        // Brush for the overall background of the navigation panels
-        private readonly SolidColorBrush _backgroundPanelBrush;
-
-        // Brushes for the diff markers WITHIN the navigation panels
-        private readonly SolidColorBrush _addedBrush;
-        private readonly SolidColorBrush _removedBrush;
-        private readonly SolidColorBrush _modifiedBrush;
-        private readonly SolidColorBrush _imaginaryBrush;
-        private readonly SolidColorBrush _viewportBrush; 
+        private readonly SolidColorBrush _backgroundPanelBrush, _addedBrush, _removedBrush, _modifiedBrush, _imaginaryBrush, _viewportBrush;
+        private Rectangle _oldViewportGuide, _newViewportGuide;
 
         public event Action<int> ScrollRequested;
 
@@ -47,15 +40,13 @@ namespace PBE_AssetsManager.Views.Helpers
             _originalDiffModel = originalDiffModel ?? diffModel;
             _diffLines = new List<int>();
 
-            // Cache brushes for performance
             _backgroundPanelBrush = new SolidColorBrush((Color)Application.Current.FindResource("BackgroundPanelNavigation"));
-
             _addedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationAdded"));
             _removedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationRemoved"));
             _modifiedBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationModified"));
             _imaginaryBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationImaginary"));
             _viewportBrush = new SolidColorBrush((Color)Application.Current.FindResource("DiffNavigationViewPort"));
- 
+
             _backgroundPanelBrush.Freeze();
             _addedBrush.Freeze();
             _removedBrush.Freeze();
@@ -65,6 +56,8 @@ namespace PBE_AssetsManager.Views.Helpers
 
             SetupEvents();
             FindDiffLines();
+            InitializeDiffMarkers();
+            UpdateViewportGuide();
         }
 
         private void SetupEvents()
@@ -72,12 +65,94 @@ namespace PBE_AssetsManager.Views.Helpers
             _oldPanel.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
             _oldPanel.MouseMove += NavigationPanel_MouseMove;
             _oldPanel.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
-            _oldPanel.SizeChanged += (s, e) => DrawPanels();
+            _oldPanel.SizeChanged += (s, e) => { InitializeDiffMarkers(); UpdateViewportGuide(); };
 
             _newPanel.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
             _newPanel.MouseMove += NavigationPanel_MouseMove;
             _newPanel.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
-            _newPanel.SizeChanged += (s, e) => DrawPanels();
+            _newPanel.SizeChanged += (s, e) => { InitializeDiffMarkers(); UpdateViewportGuide(); };
+        }
+
+        public void InitializeDiffMarkers()
+        {
+            _oldPanel.Children.Clear();
+            _newPanel.Children.Clear();
+
+            _oldPanel.Background = _backgroundPanelBrush;
+            _newPanel.Background = _backgroundPanelBrush;
+
+            if (_diffModel?.OldText?.Lines == null) return;
+
+            var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
+            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+            if (totalLines == 0) return;
+            var lineHeight = panelHeight / totalLines;
+
+            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
+            DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
+        }
+
+        public void UpdateViewportGuide()
+        {
+            if (_oldViewportGuide != null) _oldPanel.Children.Remove(_oldViewportGuide);
+            if (_newViewportGuide != null) _newPanel.Children.Remove(_newViewportGuide);
+
+            var panelHeight = _oldPanel.ActualHeight;
+            if (panelHeight <= 0) return;
+
+            if (_originalDiffModel != _diffModel)
+            {
+                var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
+                if (totalLines == 0 || CurrentLine <= 0) return;
+                var lineHeight = panelHeight / totalLines;
+                var lineIndex = CurrentLine - 1;
+                if (lineIndex < 0 || lineIndex >= totalLines) return;
+
+                var highlighterTop = lineIndex * lineHeight;
+                _oldViewportGuide = new Rectangle { Width = _oldPanel.ActualWidth, Height = Math.Max(2.0, lineHeight), Fill = _viewportBrush, IsHitTestVisible = false };
+                _newViewportGuide = new Rectangle { Width = _newPanel.ActualWidth, Height = Math.Max(2.0, lineHeight), Fill = _viewportBrush, IsHitTestVisible = false };
+
+                Canvas.SetTop(_oldViewportGuide, highlighterTop);
+                Canvas.SetTop(_newViewportGuide, highlighterTop);
+            }
+            else
+            {
+                if (_newEditor.ExtentHeight <= 0) return;
+
+                var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
+                var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
+                var viewportHeight = panelHeight * viewportRatio;
+                var viewportTop = panelHeight * offsetRatio;
+
+                _oldViewportGuide = new Rectangle { Width = _oldPanel.ActualWidth, Height = Math.Max(2.0, viewportHeight), Fill = _viewportBrush, IsHitTestVisible = false };
+                _newViewportGuide = new Rectangle { Width = _newPanel.ActualWidth, Height = Math.Max(2.0, viewportHeight), Fill = _viewportBrush, IsHitTestVisible = false };
+
+                Canvas.SetTop(_oldViewportGuide, viewportTop);
+                Canvas.SetTop(_newViewportGuide, viewportTop);
+            }
+
+            _oldPanel.Children.Add(_oldViewportGuide);
+            _newPanel.Children.Add(_newViewportGuide);
+        }
+
+        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var brush = GetBrushForChangeType(lines[i].Type);
+                if (brush == null) continue;
+
+                var rect = new Rectangle
+                {
+                    Width = panel.ActualWidth,
+                    Height = Math.Max(1.0, lineHeight),
+                    Fill = brush,
+                    IsHitTestVisible = false
+                };
+
+                Canvas.SetTop(rect, i * lineHeight);
+                panel.Children.Add(rect);
+            }
         }
 
         private void FindDiffLines()
@@ -160,114 +235,6 @@ namespace PBE_AssetsManager.Views.Helpers
         private void ScrollToLine(int lineNumber)
         {
             ScrollRequested?.Invoke(lineNumber);
-        }
-
-        public void DrawPanels()
-        {
-            _oldPanel.Children.Clear();
-            _newPanel.Children.Clear();
-
-            _oldPanel.Background = _backgroundPanelBrush;
-            _newPanel.Background = _backgroundPanelBrush;
-
-            if (_diffModel?.OldText?.Lines == null) return;
-
-            var panelHeight = _oldPanel.ActualHeight > 0 ? _oldPanel.ActualHeight : 600;
-            var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-            if (totalLines == 0) return;
-            var lineHeight = panelHeight / totalLines;
-
-            DrawPanelContent(_oldPanel, _diffModel.OldText.Lines, lineHeight);
-            DrawPanelContent(_newPanel, _diffModel.NewText.Lines, lineHeight);
-
-            if (_originalDiffModel != _diffModel)
-            {
-                // In filtered view, draw a highlighter for the current line.
-                if (CurrentLine > 0)
-                {
-                    var lineIndex = CurrentLine - 1;
-                    if (lineIndex >= 0 && lineIndex < totalLines)
-                    {
-                        var highlighterTop = lineIndex * lineHeight;
-
-                        var oldHighlighterRect = new Rectangle
-                        {
-                            Width = _oldPanel.ActualWidth,
-                            Height = Math.Max(2.0, lineHeight),
-                            Fill = _viewportBrush,
-                            IsHitTestVisible = false
-                        };
-                        Canvas.SetTop(oldHighlighterRect, highlighterTop);
-                        _oldPanel.Children.Add(oldHighlighterRect);
-                
-                        var newHighlighterRect = new Rectangle
-                        {
-                            Width = _newPanel.ActualWidth,
-                            Height = Math.Max(2.0, lineHeight),
-                            Fill = _viewportBrush,
-                            IsHitTestVisible = false
-                        };
-                        Canvas.SetTop(newHighlighterRect, highlighterTop);
-                        _newPanel.Children.Add(newHighlighterRect);
-                    }
-                }
-            }
-            else
-            {
-                // In unfiltered view, draw the original viewport guide.
-                if (_newEditor.ExtentHeight > 0)
-                {
-                    var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
-                    var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
-
-                    var viewportHeight = panelHeight * viewportRatio;
-                    var viewportTop = panelHeight * offsetRatio;
-
-                    // Create guide for the left panel
-                    var oldViewportRect = new Rectangle
-                    {
-                        Width = _oldPanel.ActualWidth,
-                        Height = Math.Max(2.0, viewportHeight),
-                        Fill = _viewportBrush,
-                        IsHitTestVisible = false
-                    };
-
-                    // Create guide for the right panel
-                    var newViewportRect = new Rectangle
-                    {
-                        Width = _newPanel.ActualWidth,
-                        Height = Math.Max(2.0, viewportHeight),
-                        Fill = _viewportBrush,
-                        IsHitTestVisible = false
-                    };
-
-                    Canvas.SetTop(oldViewportRect, viewportTop);
-                    _oldPanel.Children.Add(oldViewportRect);
-
-                    Canvas.SetTop(newViewportRect, viewportTop);
-                    _newPanel.Children.Add(newViewportRect);
-                }
-            }
-        }
-
-        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
-        {
-            for (int i = 0; i < lines.Count; i++)
-            {
-                var brush = GetBrushForChangeType(lines[i].Type);
-                if (brush == null) continue;
-
-                var rect = new Rectangle
-                {
-                    Width = panel.ActualWidth,
-                    Height = Math.Max(2.0, lineHeight),
-                    Fill = brush,
-                    IsHitTestVisible = false
-                };
-
-                Canvas.SetTop(rect, i * lineHeight);
-                panel.Children.Add(rect);
-            }
         }
 
         private SolidColorBrush GetBrushForChangeType(ChangeType changeType)

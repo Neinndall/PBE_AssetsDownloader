@@ -4,72 +4,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:PBE_AssetsManager.Views.Dialogs"
-        xmlns:converters="clr-namespace:PBE_AssetsManager.Views.Converters"
+        xmlns:controls="clr-namespace:PBE_AssetsManager.Views.Dialogs.Controls"
         xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
         Title="WAD Comparison Results" Height="800" Width="1400"
         Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New"
         WindowStartupLocation="CenterScreen">
-
-    <Window.Resources>
-        <converters:WadComparisonIconConverter x:Key="WadComparisonIconConverter"/>
-        <converters:ChunkDiffTypeToBrushConverter x:Key="DiffTypeToBrushConverter"/>
-
-         <ContextMenu x:Key="WadDiffContextMenu" Opened="ContextMenu_Opened">
-            <MenuItem Header="View Differences" Click="ViewDifferences_Click">
-                <MenuItem.Icon>
-                    <materialDesign:MaterialIcon Kind="FileFindOutline"/>
-                </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Header="Download Selected" Click="DownloadMenuItem_Click">
-                <MenuItem.Icon>
-                    <materialDesign:MaterialIcon Kind="CloudDownloadOutline"/>
-                </MenuItem.Icon>
-            </MenuItem>
-        </ContextMenu>
-
-        <HierarchicalDataTemplate x:Key="DiffItemTemplate" ItemsSource="{Binding Files}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="{Binding Converter={StaticResource WadComparisonIconConverter}}" 
-                                             VerticalAlignment="Center" 
-                                             Margin="0,0,5,0"/>
-                <TextBlock Grid.Column="1" Text="{Binding FileName}" VerticalAlignment="Center"/>
-            </Grid>
-        </HierarchicalDataTemplate>
-
-        <HierarchicalDataTemplate x:Key="DiffTypeTemplate" ItemsSource="{Binding Diffs}" ItemTemplate="{StaticResource DiffItemTemplate}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="{Binding Converter={StaticResource WadComparisonIconConverter}}" 
-                                             VerticalAlignment="Center" 
-                                             Margin="0,0,5,0" 
-                                             Foreground="{Binding Type, Converter={StaticResource DiffTypeToBrushConverter}}"/>
-                <TextBlock Grid.Column="1" Text="{Binding TypeNameWithCount}" VerticalAlignment="Center" Foreground="{Binding Type, Converter={StaticResource DiffTypeToBrushConverter}}"/>
-            </Grid>
-        </HierarchicalDataTemplate>
-
-        <HierarchicalDataTemplate x:Key="WadGroupTemplate" ItemsSource="{Binding Types}" ItemTemplate="{StaticResource DiffTypeTemplate}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="{Binding Converter={StaticResource WadComparisonIconConverter}}" 
-                                             VerticalAlignment="Center" 
-                                             Margin="0,0,5,0"/>
-                <TextBlock Grid.Column="1" Text="{Binding WadNameWithCount}" FontWeight="Bold" VerticalAlignment="Center"/>
-            </Grid>
-        </HierarchicalDataTemplate>
-
-    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -116,174 +57,21 @@
         <Grid Grid.Row="1" Margin="24">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Results TreeView Card -->
-            <Border Grid.Column="0" Style="{StaticResource SettingsCard}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-                        <materialDesign:MaterialIcon Kind="FormatListGroup" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Differences" 
-                                     FontSize="16" 
-                                     FontWeight="SemiBold"
-                                     Foreground="{StaticResource TextPrimary}"/>
-                    </StackPanel>
+            <controls:WadResultsTreeControl x:Name="ResultsTree" Grid.Column="0"
+                                              SelectedItemChanged="ResultsTree_SelectedItemChanged"
+                                              SearchTextChanged="SearchTextBox_TextChanged"
+                                              WadContextMenuOpening="ResultsTree_ContextMenuOpening"
+                                              ViewDifferencesClick="ViewDifferences_Click"
+                                              DownloadMenuItemClick="DownloadMenuItem_Click"/>
 
-                    <!-- Search Box -->
-                    <Grid Grid.Row="1" Margin="0,0,0,8">
-                        <Border Background="{StaticResource DarkBackground}"
-                                BorderBrush="{StaticResource BorderColor}"
-                                BorderThickness="1"
-                                CornerRadius="6"
-                                SnapsToDevicePixels="True"/>
-                        <TextBox x:Name="searchTextBox"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 Padding="12,8"
-                                 Margin="2"
-                                 Foreground="{StaticResource TextPrimary}"
-                                 FontSize="14"
-                                 CaretBrush="Transparent"
-                                 TextChanged="SearchTextBox_TextChanged"/>
-                        <TextBlock Text="🔍 Search files..."
-                                   x:Name="searchPlaceholder"
-                                   IsHitTestVisible="False"
-                                   Foreground="{StaticResource TextMuted}"
-                                   FontSize="14"
-                                   VerticalAlignment="Center"
-                                   Margin="14,0,0,0">
-                        </TextBlock>
-                    </Grid>
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent"/>
 
-                    <Border Grid.Row="2"
-                            Background="{StaticResource DarkBackground}"
-                            BorderBrush="{StaticResource BorderColor}"
-                            BorderThickness="1"
-                            CornerRadius="6">
-                        <TreeView x:Name="resultsTreeView" 
-                                  Style="{StaticResource ModernTreeView}"
-                                  Background="Transparent"
-                                  BorderThickness="0"
-                                  ItemTemplate="{StaticResource WadGroupTemplate}"
-                                  SelectedItemChanged="ResultsTreeView_SelectedItemChanged">
-                            <TreeView.ItemContainerStyle>
-                                <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
-                                    <Setter Property="ContextMenu" Value="{StaticResource WadDiffContextMenu}"/>
-                                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
-                                </Style>
-                            </TreeView.ItemContainerStyle>
-                        </TreeView>
-                    </Border>
-                </Grid>
-            </Border>
+            <controls:WadDiffDetailsControl x:Name="DiffDetails" Grid.Column="2"/>
 
-            <!-- Details Panel Card -->
-            <Border Grid.Column="2" Style="{StaticResource SettingsCard}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-                        <materialDesign:MaterialIcon Kind="FileDocumentOutline" FontSize="18" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Difference Details" 
-                                     FontSize="16" 
-                                     FontWeight="SemiBold"
-                                     Foreground="{StaticResource TextPrimary}"/>
-                    </StackPanel>
-                    
-                    <Border Grid.Row="1" x:Name="detailsPanel"
-                            Background="{StaticResource DarkBackground}"
-                            BorderBrush="{StaticResource BorderColor}"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="16"
-                            MinHeight="400">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <!-- No Selection Message -->
-                            <StackPanel x:Name="noSelectionPanel" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">
-                                <materialDesign:MaterialIcon Kind="FileSearchOutline" Foreground="{StaticResource TextMuted}" Height="36" Width="36" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Select a difference from the list to view its details." Foreground="{StaticResource TextMuted}" Margin="0,10,0,0"/>
-                            </StackPanel>
-                            
-                            <!-- Details Content -->
-                            <StackPanel x:Name="detailsContentPanel" Visibility="Collapsed" VerticalAlignment="Top" Grid.Row="0" Grid.Column="0">
-                                
-                                <!-- COMMON DETAILS -->
-                                <StackPanel x:Name="pathPanel" Margin="0,0,0,12">
-                                    <TextBlock Text="Path" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="pathTextBlock" 
-                                               Foreground="{StaticResource TextPrimary}"
-                                               FontSize="14"
-                                               Margin="0,4,0,0"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-
-                                <!-- RENAME-SPECIFIC -->
-                                <StackPanel x:Name="renamedOldNamePanel" Visibility="Collapsed" Margin="0,0,0,12">
-                                    <TextBlock Text="Old Path" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="renamedOldNameTextBlock" 
-                                               Foreground="{StaticResource TextPrimary}"
-                                               FontSize="14"
-                                               Margin="0,4,0,0"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-                                <StackPanel x:Name="renamedNewNamePanel" Visibility="Collapsed" Margin="0,0,0,12">
-                                    <TextBlock Text="New Path" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="renamedNewNameTextBlock" 
-                                               Foreground="{StaticResource TextPrimary}"
-                                               FontSize="14"
-                                               Margin="0,4,0,0"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-
-                                <!-- GENERIC FILENAME -->
-                                <StackPanel x:Name="genericFileNamePanel" Margin="0,0,0,12">
-                                    <TextBlock Text="File Name" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="genericFileNameTextBlock" 
-                                           Foreground="{StaticResource TextPrimary}"
-                                           FontSize="14"
-                                           Margin="0,4,0,0"
-                                           TextWrapping="Wrap"/>
-                                </StackPanel>
-
-                                <StackPanel Margin="0,0,0,12">
-                                    <TextBlock Text="Change Type" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="changeTypeTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
-                                </StackPanel>
-
-                                <StackPanel x:Name="oldSizePanel" Margin="0,0,0,12">
-                                    <TextBlock Text="Old Size" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="oldSizeTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
-                                </StackPanel>
-
-                                <StackPanel x:Name="newSizePanel" Margin="0,0,0,12">
-                                    <TextBlock Text="New Size" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="newSizeTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
-                                </StackPanel>
-
-                                <StackPanel>
-                                    <TextBlock Text="Source WAD" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock x:Name="sourceWadTextBlock" Foreground="{StaticResource TextPrimary}" FontSize="14" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Border>
         </Grid>
     </Grid>
 </Window>

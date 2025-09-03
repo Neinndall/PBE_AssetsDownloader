@@ -92,5 +92,29 @@ namespace PBE_AssetsManager.Services
                 return null;
             }
         }
+
+        public async Task<byte[]> DownloadFileAsBytesAsync(string url)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    byte[] content = await response.Content.ReadAsByteArrayAsync();
+                    _logService.LogDebug($"Successfully downloaded file as bytes from {url}.");
+                    return content;
+                }
+
+                _logService.LogError(
+                    $"Failed to download file from {url}. Status: {response.StatusCode} - {response.ReasonPhrase}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, $"Error downloading file from {url}.");
+                return null;
+            }
+        }
     }
 }

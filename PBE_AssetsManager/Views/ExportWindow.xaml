@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:PBE_AssetsManager.Views" 
+             xmlns:local="clr-namespace:PBE_AssetsManager.Views"
+             xmlns:export="clr-namespace:PBE_AssetsManager.Views.Controls.Export"
              xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
-             mc:Ignorable="d" FontFamily="Consolas, Courier New">    
+             mc:Ignorable="d" FontFamily="Consolas, Courier New">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -40,7 +41,7 @@
                                                  VerticalAlignment="Center"
                                                  Foreground="{StaticResource AccentBlue}"
                                                  Grid.Column="0"/>
-                                                             
+
                     <!-- Título + Subtítulo -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="EXPORT" 
@@ -64,272 +65,10 @@
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="32,24,32,0">
             <StackPanel>
-                <!-- DIRECTORY CONFIGURATION CARD -->
-                <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,24">
-                    <StackPanel>
-                        <!-- Header con icono y título -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
-                            <materialDesign:MaterialIcon Kind="Folder"
-                                                         FontSize="20"
-                                                         Margin="0,0,12,0"
-                                                         VerticalAlignment="Center"
-                                                         Foreground="{StaticResource AccentBlue}"/>
-                            <StackPanel>
-                                <TextBlock Text="Directory Configuration" 
-                                           FontSize="18" 
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimary}"/>
-                                <TextBlock Text="Set up your source and destination folders" 
-                                           FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"/>
-                            </StackPanel>
-                        </StackPanel>
+                <export:DirectoryConfigControl x:Name="DirectoryConfig"/>
+                <export:FilterConfigControl x:Name="FilterConfig"/>
 
-                        <!-- Differences Folder -->
-                        <Grid Margin="0,0,0,24">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Icono -->
-                            <materialDesign:MaterialIcon Grid.Column="0" Kind="FileDocument" 
-                                                         FontSize="20" 
-                                                         Margin="0,0,12,0" 
-                                                         VerticalAlignment="Top"
-                                                         Foreground="{StaticResource AccentGreen}"/>
-
-                            <!-- Textos -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                                <TextBlock Text="Differences Folder" 
-                                           FontWeight="Medium"
-                                           FontSize="14"
-                                           Foreground="{StaticResource TextPrimary}"/>
-                                <TextBlock Text="Select the directory containing differences files" 
-                                           FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"
-                                           Margin="0,2,0,0"/>
-                            </StackPanel>
-
-                            <!-- Cuadro alineado con el texto -->
-                            <Grid Grid.Column="1" Margin="0,42,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox x:Name="txtDifferencesPath" 
-                                         Grid.Column="0"
-                                         Height="36"
-                                         IsReadOnly="True"
-                                         Style="{StaticResource ModernTextBox}"
-                                         ToolTip="Path to the differences folder"/>
-                                <Button Grid.Column="2"
-                                        x:Name="BtnBrowseDifferencesPath"
-                                        Content="Browse"
-                                        Width="80" 
-                                        Height="36"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Click="BtnBrowseDifferencesPath_Click"
-                                        ToolTip="Browse for differences folder"/>
-                            </Grid>
-                        </Grid>
-
-                        <!-- Download Target Folder -->
-                        <Grid Margin="0,0,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Icono -->
-                            <materialDesign:MaterialIcon Grid.Column="0" Kind="Download" 
-                                                         FontSize="20" 
-                                                         Margin="0,0,12,0" 
-                                                         VerticalAlignment="Top"
-                                                         Foreground="{StaticResource AccentOrange}"/>
-                            
-                            <!-- Contenido alineado -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                                <TextBlock Text="Download Target Folder" 
-                                           FontWeight="Medium"
-                                           FontSize="14"
-                                           Foreground="{StaticResource TextPrimary}"/>
-                                <TextBlock Text="Select the directory where assets will be downloaded" 
-                                           FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"
-                                           Margin="0,2,0,0"/>
-                            </StackPanel>
-
-                            <!-- Cuadro alineado con el texto -->
-                            <Grid Grid.Column="1" Margin="0,42,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox x:Name="txtDownloadTargetPath" 
-                                         Grid.Column="0"
-                                         Height="36"
-                                         IsReadOnly="True"
-                                         Style="{StaticResource ModernTextBox}"
-                                         ToolTip="Path to the download target folder"/>
-                                <Button Grid.Column="2"
-                                        x:Name="BtnBrowseDownloadTargetPath"
-                                        Content="Browse"
-                                        Width="80" 
-                                        Height="36"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Click="BtnBrowseDownloadTargetPath_Click"
-                                        ToolTip="Browse for download target folder"/>
-                            </Grid>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <!-- FILTER CONFIGURATION CARD -->
-                <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,24">
-                    <StackPanel>
-                        <!-- Header con icono y título -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
-                            <materialDesign:MaterialIcon Kind="FilterVariant"
-                                                         FontSize="20"
-                                                         Margin="0,0,12,0"
-                                                         VerticalAlignment="Center"
-                                                         Foreground="{StaticResource AccentBlue}"/>
-                            <StackPanel>
-                                <TextBlock Text="Filter Configuration" 
-                                           FontSize="18" 
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextPrimary}"/>
-                                <TextBlock Text="Choose which asset types to include" 
-                                           FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- Asset Types Selection -->
-                        <Grid Margin="0,0,0,24">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Icono alineado -->
-                            <materialDesign:MaterialIcon Grid.Column="0" Kind="Target"
-                                                         FontSize="20"
-                                                         Margin="0,2,12,0"
-                                                         VerticalAlignment="Top"
-                                                         Foreground="{StaticResource AccentGreen}"/>
-
-                            <!-- Contenido alineado -->
-                            <StackPanel Grid.Column="1">
-                                <!-- Título y subtítulo -->
-                                <StackPanel Margin="0,0,0,12">
-                                    <TextBlock Text="Select Asset Types"
-                                               FontWeight="Medium"
-                                               FontSize="14"
-                                               Foreground="{StaticResource TextPrimary}"/>
-                                    <TextBlock Text="Choose which asset types should be included in the export"
-                                               FontSize="12"
-                                               Foreground="{StaticResource TextMuted}"
-                                               Margin="0,2,0,0"/>
-                                </StackPanel>
-
-                                <!-- Lista de CheckBoxes dentro de un borde -->
-                                <Border Background="{StaticResource DarkBackground}"
-                                        BorderBrush="{StaticResource BorderColor}"
-                                        BorderThickness="1"
-                                        CornerRadius="6"
-                                        Padding="15"
-                                        Margin="0,0,25,0">
-                                    <StackPanel>
-                                        <CheckBox x:Name="chkAll"
-                                                  Content="All"
-                                                  FontSize="14"
-                                                  FontWeight="Medium"
-                                                  Style="{StaticResource ModernCheckBox}"
-                                                  Margin="0,0,0,8"
-                                                  IsChecked="True"/>
-                                        <CheckBox x:Name="chkImages"
-                                                  Content="Images"
-                                                  Tag="Images"
-                                                  FontSize="14"
-                                                  Style="{StaticResource ModernCheckBox}"
-                                                  Margin="0,0,0,8"/>
-                                        <CheckBox x:Name="chkAudios"
-                                                  Content="Audios"
-                                                  Tag="Audios"
-                                                  FontSize="14"
-                                                  Style="{StaticResource ModernCheckBox}"
-                                                  Margin="0,0,0,8"/>
-                                        <CheckBox x:Name="chkPlugins"
-                                                  Content="Plugins"
-                                                  Tag="Plugins"
-                                                  FontSize="14"
-                                                  Style="{StaticResource ModernCheckBox}"
-                                                  Margin="0,0,0,8"/>
-                                        <CheckBox x:Name="chkGame"
-                                                  Content="Game"
-                                                  Tag="Game"
-                                                  FontSize="14"
-                                                  Style="{StaticResource ModernCheckBox}"
-                                                  Margin="0,0,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-                        </Grid>
-
-
-                        <!-- Actions -->
-                        <Grid Margin="0,0,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Icono -->
-                            <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
-                                                         FontSize="20" 
-                                                         Margin="0,0,12,0" 
-                                                         VerticalAlignment="Top"
-                                                         Foreground="{StaticResource AccentOrange}"/>
-
-                            <!-- Contenido alineado -->
-                            <StackPanel Grid.Column="1" Margin="0,0,0,0">
-                                <StackPanel Margin="0,0,0,12">
-                                    <TextBlock Text="Actions" 
-                                               FontWeight="Medium"
-                                               FontSize="14"
-                                               Foreground="{StaticResource TextPrimary}"/>
-                                    <TextBlock Text="Preview or download the selected assets" 
-                                               FontSize="12" 
-                                               Foreground="{StaticResource TextMuted}"/>
-                                </StackPanel>
-                                
-                                <StackPanel Orientation="Horizontal" 
-                                            Margin="0,0,0,0">
-                                    <Button x:Name="btnPreviewAssets" 
-                                            Content="🔍 Preview Assets" 
-                                            Height="36"
-                                            Width="160"
-                                            Margin="0,0,16,0"
-                                            Style="{StaticResource ModernButton}"
-                                            Click="btnPreviewAssets_Click"
-                                            ToolTip="Preview selected assets before download"/>
-                                            
-                                    <Button x:Name="BtnDownloadSelectedAssets" 
-                                            Content="⬇️ Download Assets" 
-                                            Height="36"
-                                            Width="160"
-                                            Style="{StaticResource ModernButton}"
-                                            Click="BtnDownloadSelectedAssets_Click"
-                                            ToolTip="Download the selected assets"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                <export:ExportActionsControl x:Name="ExportActions"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>

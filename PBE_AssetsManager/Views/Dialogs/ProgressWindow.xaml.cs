@@ -38,10 +38,13 @@ namespace PBE_AssetsManager.Views.Dialogs
 				else
 				{
 					// If we are already on the UI thread, update the controls directly
-					progressBar.Value = Math.Max(0, Math.Min(progress, 100));
+					                {
+                    // If we are already on the UI thread, update the controls directly
+                    progressBar.Value = Math.Max(0, Math.Min(progress, 100));
 
-					// Update the TextBlock (WPF's equivalent of Label)
-					textBlockProgress.Text = labelText;
+                    // Update the TextBlock (WPF's equivalent of Label)
+                    textBlockProgress.Text = labelText;
+                }
 				}
 			}
 			catch (InvalidOperationException ex) when (ex.Message.Contains("Dispatcher processing has been suspended"))

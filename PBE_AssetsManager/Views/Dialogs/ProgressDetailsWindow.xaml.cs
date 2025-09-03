@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using PBE_AssetsManager.Services;
 
 namespace PBE_AssetsManager.Views.Dialogs
@@ -11,7 +12,9 @@ namespace PBE_AssetsManager.Views.Dialogs
     {
         private readonly LogService _logService;
         private DateTime _startTime;
+        private int _completedFiles;
         private int _totalFiles;
+        private readonly DispatcherTimer _timer;
 
         public string OperationVerb { get; set; } = "Downloading";
         public string WindowTitle { get; set; } // No default value here
@@ -28,15 +31,33 @@ namespace PBE_AssetsManager.Views.Dialogs
             this.WindowTitle = windowTitle; // Also set the property for consistency
             this.DataContext = this; // Set DataContext for binding
 
-            DetailedLogsRichTextBox.Document.Blocks.Clear(); // Clear any default content
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            UpdateEstimatedTime(_completedFiles, _totalFiles);
         }
 
         public void UpdateProgress(int completedFiles, int totalFiles, string currentFileName, bool isSuccess, string errorMessage)
         {
-            _totalFiles = totalFiles; // Store total files for estimated time calculation
+            _completedFiles = completedFiles;
+            _totalFiles = totalFiles;
+
             ProgressSummaryTextBlock.Text = $"{OperationVerb}: {completedFiles} of {totalFiles}";
             CurrentFileTextBlock.Text = $"Current file: {currentFileName}";
-            UpdateEstimatedTime(completedFiles, totalFiles);
+            UpdateEstimatedTime(completedFiles, totalFiles); // Update once immediately for responsiveness
+
+            if (completedFiles >= totalFiles && totalFiles > 0)
+            {
+                _timer.Stop();
+                EstimatedTimeTextBlock.Text = "Estimated time remaining: 00:00:00";
+            }
         }
 
         private void UpdateEstimatedTime(int completedFiles, int totalFiles)
@@ -74,6 +95,12 @@ namespace PBE_AssetsManager.Views.Dialogs
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Hide();
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            _timer?.Stop();
+            base.OnClosing(e);
         }
     }
 }

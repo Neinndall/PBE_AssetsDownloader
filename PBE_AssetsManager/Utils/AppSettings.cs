@@ -4,133 +4,129 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using PBE_AssetsManager.Info;
+using Newtonsoft.Json.Linq;
 
 namespace PBE_AssetsManager.Utils
 {
-  public class AppSettings
-  {
-    public bool SyncHashesWithCDTB { get; set; }
-    public bool AutoCopyHashes { get; set; }
-    public bool CreateBackUpOldHashes { get; set; }
-    public bool OnlyCheckDifferences { get; set; }
-    public bool CheckJsonDataUpdates { get; set; }
-    public bool SaveDiffHistory { get; set; }
-    public bool BackgroundUpdates { get; set; }
-    public int UpdateCheckFrequency { get; set; }
-    
-    public string NewHashesPath { get; set; }
-    public string OldHashesPath { get; set; }
-    public string PbeDirectory { get; set; }
-    public Dictionary<string, long> HashesSizes { get; set; }
-
-    public Dictionary<string, DateTime> JsonDataModificationDates { get; set; }
-    public List<string> MonitoredJsonDirectories { get; set; }
-    public List<string> MonitoredJsonFiles { get; set; }
-    public List<JsonDiffHistoryEntry> DiffHistory { get; set; }
-
-    private const string ConfigFilePath = "config.json";
-
-    public static AppSettings LoadSettings()
+    public class AppSettings
     {
-        if (!File.Exists(ConfigFilePath))
+        public bool SyncHashesWithCDTB { get; set; }
+        public bool AutoCopyHashes { get; set; }
+        public bool CreateBackUpOldHashes { get; set; }
+        public bool OnlyCheckDifferences { get; set; }
+        public bool CheckJsonDataUpdates { get; set; }
+        public bool SaveDiffHistory { get; set; }
+        public bool BackgroundUpdates { get; set; }
+        public int UpdateCheckFrequency { get; set; }
+
+        public string NewHashesPath { get; set; }
+        public string OldHashesPath { get; set; }
+        public string PbeDirectory { get; set; }
+        public Dictionary<string, long> HashesSizes { get; set; }
+
+        // This will become redundant after migration
+        public Dictionary<string, DateTime> JsonDataModificationDates { get; set; }
+
+        // New structure for monitored files and directories
+        public List<string> MonitoredJsonFiles { get; set; }
+        public List<JsonDiffHistoryEntry> DiffHistory { get; set; }
+
+        private const string ConfigFilePath = "config.json";
+
+        public static AppSettings LoadSettings()
         {
-            var defaultSettings = GetDefaultSettings();
-            SaveSettings(defaultSettings);
-            return defaultSettings;
-        }
-
-        var json = File.ReadAllText(ConfigFilePath);
-        var jObject = Newtonsoft.Json.Linq.JObject.Parse(json);
-
-        if (jObject.TryGetValue("JsonFiles", out var jsonFilesToken) && jsonFilesToken is Newtonsoft.Json.Linq.JArray jsonFilesArray)
-        {
-            var monitoredDirectories = (jObject["MonitoredJsonDirectories"] as Newtonsoft.Json.Linq.JArray) ?? new Newtonsoft.Json.Linq.JArray();
-            var monitoredFiles = (jObject["MonitoredJsonFiles"] as Newtonsoft.Json.Linq.JArray) ?? new Newtonsoft.Json.Linq.JArray();
-
-            foreach (var urlToken in jsonFilesArray)
+            if (!File.Exists(ConfigFilePath))
             {
-                string url = urlToken.ToString(); // Correct way to get the string value
-                if (!string.IsNullOrEmpty(url))
+                var defaultSettings = GetDefaultSettings();
+                SaveSettings(defaultSettings);
+                return defaultSettings;
+            }
+
+            var json = File.ReadAllText(ConfigFilePath);
+            var settings = JsonConvert.DeserializeObject<AppSettings>(json) ?? GetDefaultSettings();
+
+            // Migration block to handle old formats.
+            var jObject = JObject.Parse(json);
+            bool needsResave = false;
+
+            if (jObject.TryGetValue("MonitoredJsonFiles", out var monitoredFilesToken) &&
+                monitoredFilesToken is JArray monitoredFilesArray)
+            {
+                var newUrls = new List<string>();
+                var newDates = settings.JsonDataModificationDates ?? new Dictionary<string, DateTime>();
+
+                foreach (var token in monitoredFilesArray)
                 {
-                    if (url.EndsWith("/"))
+                    if (token is JObject itemObject &&
+                        itemObject.TryGetValue("Url", StringComparison.OrdinalIgnoreCase, out var urlToken))
                     {
-                        if (!monitoredDirectories.Any(x => x.ToString() == url)) monitoredDirectories.Add(url);
+                        // Old object format: {"Url": "...", "LastUpdated": "..."}
+                        string url = urlToken.ToString();
+                        if (!string.IsNullOrWhiteSpace(url))
+                        {
+                            newUrls.Add(url);
+
+                            if (itemObject.TryGetValue("LastUpdated", StringComparison.OrdinalIgnoreCase, out var dateToken) &&
+                                DateTime.TryParse(dateToken.ToString(), out var date))
+                            {
+                                newDates[url] = date;
+                            }
+
+                            needsResave = true; // Mark for resave to migrate format
+                        }
                     }
-                    else
+                    else if (token.Type == JTokenType.String)
                     {
-                        if (!monitoredFiles.Any(x => x.ToString() == url)) monitoredFiles.Add(url);
+                        // Current/new format: "...url..."
+                        newUrls.Add(token.ToString());
                     }
                 }
+
+                settings.MonitoredJsonFiles = newUrls.Distinct().ToList();
+                settings.JsonDataModificationDates = newDates;
             }
 
-            jObject["MonitoredJsonDirectories"] = monitoredDirectories;
-            jObject["MonitoredJsonFiles"] = monitoredFiles;
-            jObject.Remove("JsonFiles");
-        }
-
-        var settings = jObject.ToObject<AppSettings>();
-
-        if (settings == null)
-        {
-            return GetDefaultSettings();
-        }
-        
-        // Ensure lists are not null if they are missing from the JSON
-        if (settings.MonitoredJsonDirectories == null) settings.MonitoredJsonDirectories = new List<string>();
-        if (settings.MonitoredJsonFiles == null) settings.MonitoredJsonFiles = new List<string>();
-        if (settings.DiffHistory == null) settings.DiffHistory = new List<JsonDiffHistoryEntry>();
-
-        // Handle backward compatibility for JsonDataSizes (old format with full URLs as keys)
-        if (jObject.TryGetValue("JsonDataSizes", out var jsonDataSizesToken) && jsonDataSizesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
-        {
-            var oldSizes = jsonDataSizesToken.ToObject<Dictionary<string, long>>();
-            if (oldSizes != null)
+            if (needsResave)
             {
-                settings.JsonDataModificationDates = oldSizes.ToDictionary(kvp => Path.GetFileName(kvp.Key), kvp => DateTime.MinValue);
+                SaveSettings(settings);
             }
+
+            // Ensure lists are not null
+            settings.MonitoredJsonFiles ??= new List<string>();
+            settings.JsonDataModificationDates ??= new Dictionary<string, DateTime>();
+            settings.DiffHistory ??= new List<JsonDiffHistoryEntry>();
+
+            return settings;
         }
-        // Handle loading JsonDataModificationDates (new format with filenames as keys)
-        else if (jObject.TryGetValue("JsonDataModificationDates", out var jsonDataDatesToken) && jsonDataDatesToken.Type == Newtonsoft.Json.Linq.JTokenType.Object)
+
+        public static AppSettings GetDefaultSettings()
         {
-            settings.JsonDataModificationDates = jsonDataDatesToken.ToObject<Dictionary<string, DateTime>>();
+            return new AppSettings
+            {
+                SyncHashesWithCDTB = true,
+                AutoCopyHashes = false,
+                CreateBackUpOldHashes = false,
+                OnlyCheckDifferences = false,
+                CheckJsonDataUpdates = false,
+                SaveDiffHistory = false,
+                BackgroundUpdates = false,
+                UpdateCheckFrequency = 10, // Default to 10 minutes
+
+                NewHashesPath = null,
+                OldHashesPath = null,
+                PbeDirectory = null,
+                HashesSizes = new Dictionary<string, long>(),
+
+                JsonDataModificationDates = new Dictionary<string, DateTime>(),
+                MonitoredJsonFiles = new List<string>(),
+                DiffHistory = new List<JsonDiffHistoryEntry>()
+            };
         }
-        else
+
+        public static void SaveSettings(AppSettings settings)
         {
-            settings.JsonDataModificationDates = new Dictionary<string, DateTime>();
+            var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
+            File.WriteAllText(ConfigFilePath, json);
         }
-
-        return settings;
     }
-
-    public static AppSettings GetDefaultSettings()
-    {
-      return new AppSettings
-      {
-        SyncHashesWithCDTB = true,
-        AutoCopyHashes = false,
-        CreateBackUpOldHashes = false,
-        OnlyCheckDifferences = false,
-        CheckJsonDataUpdates = false,
-        SaveDiffHistory = false,
-        BackgroundUpdates = false,
-        UpdateCheckFrequency = 10, // Default to 10 minutes
-        
-        NewHashesPath = null,
-        OldHashesPath = null,
-        PbeDirectory = null,
-        HashesSizes = new Dictionary<string, long>(),
-
-        JsonDataModificationDates = new Dictionary<string, DateTime>(),
-        MonitoredJsonDirectories = new List<string>(),
-        MonitoredJsonFiles = new List<string>(),
-        DiffHistory = new List<JsonDiffHistoryEntry>()
-      };
-    }
-
-    public static void SaveSettings(AppSettings settings)
-    {
-        var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
-        File.WriteAllText(ConfigFilePath, json);
-    }
-  }
 }

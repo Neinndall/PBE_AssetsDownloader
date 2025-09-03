@@ -181,17 +181,49 @@ namespace PBE_AssetsManager.Services
 
         private string FindBestTextureMatch(string materialName, IEnumerable<string> availableTextureKeys, string defaultTextureKey)
         {
-            // 1. Exact match
+            // 1. Exact match (highest priority)
             string bestMatch = availableTextureKeys.FirstOrDefault(key => key.Equals(materialName, StringComparison.OrdinalIgnoreCase));
             if (bestMatch != null) return bestMatch;
 
-            // 2. Starts with match
-            bestMatch = availableTextureKeys.FirstOrDefault(key => key.StartsWith(materialName, StringComparison.OrdinalIgnoreCase));
-            if (bestMatch != null) return bestMatch;
+            // 2. Keyword-based scoring match (the new generalized logic)
+            var materialKeywords = materialName.ToLower().Split('_', '-', ' ');
 
-            // 3. Contains match
-            bestMatch = availableTextureKeys.FirstOrDefault(key => key.IndexOf(materialName, StringComparison.OrdinalIgnoreCase) >= 0);
-            if (bestMatch != null) return bestMatch;
+            string bestScoringMatch = null;
+            int bestScore = 0;
+
+            foreach (string key in availableTextureKeys)
+            {
+                string lowerKey = key.ToLower();
+                int currentScore = 0;
+
+                foreach (string keyword in materialKeywords)
+                {
+                    if (string.IsNullOrWhiteSpace(keyword)) continue;
+                    if (lowerKey.Contains(keyword))
+                    {
+                        currentScore++;
+                    }
+                }
+
+                if (currentScore > bestScore)
+                {
+                    bestScore = currentScore;
+                    bestScoringMatch = key;
+                }
+                // Tie-breaking: if scores are equal, prefer the shorter key name as it's likely more specific
+                else if (currentScore > 0 && currentScore == bestScore)
+                {
+                    if (bestScoringMatch == null || key.Length < bestScoringMatch.Length)
+                    {
+                        bestScoringMatch = key;
+                    }
+                }
+            }
+
+            if (bestScoringMatch != null)
+            {
+                return bestScoringMatch;
+            }
 
             // Fallback
             return defaultTextureKey;

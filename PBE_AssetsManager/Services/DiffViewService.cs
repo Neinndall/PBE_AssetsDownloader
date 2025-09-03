@@ -139,8 +139,8 @@ namespace PBE_AssetsManager.Services
 
         private async Task<(string oldText, string newText)> ProcessDataAsync(string dataType, object oldData, object newData)
         {
-            string oldText = null;
-            string newText = null;
+            string oldText = string.Empty;
+            string newText = string.Empty;
 
             switch (dataType)
             {
@@ -158,8 +158,8 @@ namespace PBE_AssetsManager.Services
                     catch (Exception ex)
                     {
                         _logService.LogWarning($"JS Beautifier failed: {ex.Message}");
-                        oldText = (string)oldData;
-                        newText = (string)newData;
+                        oldText = (string)oldData ?? string.Empty;
+                        newText = (string)newData ?? string.Empty;
                     }
                     break;
                 case "json":
@@ -167,12 +167,12 @@ namespace PBE_AssetsManager.Services
                     if (newData != null) newText = await JsonDiffHelper.FormatJsonAsync(newData);
                     break;
                 case "text":
-                    oldText = (string)oldData;
-                    newText = (string)newData;
+                    oldText = (string)oldData ?? string.Empty;
+                    newText = (string)newData ?? string.Empty;
                     break;
                 default:
-                    oldText = oldData?.ToString();
-                    newText = newData?.ToString();
+                    oldText = oldData?.ToString() ?? string.Empty;
+                    newText = newData?.ToString() ?? string.Empty;
                     break;
             }
             return (oldText, newText);

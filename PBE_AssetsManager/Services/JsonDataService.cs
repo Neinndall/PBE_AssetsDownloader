@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,8 +16,19 @@ using PBE_AssetsManager.Views.Helpers;
 
 namespace PBE_AssetsManager.Services
 {
+    public class FileUpdateInfo
+    {
+        public string FileName { get; set; }
+        public string FullUrl { get; set; }
+        public string OldFilePath { get; set; }
+        public string NewFilePath { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
     public class JsonDataService
     {
+        public event Action<FileUpdateInfo> FileUpdated;
+        
         private readonly LogService _logService;
         private readonly HttpClient _httpClient;
         private readonly AppSettings _appSettings;
@@ -40,6 +52,43 @@ namespace PBE_AssetsManager.Services
             _requests = requests;
             _serviceProvider = serviceProvider;
             _diffViewService = diffViewService;
+        }
+
+        public async Task<List<(string Url, DateTime Timestamp)>> GetFileUrlsFromDirectoryAsync(string directoryUrl)
+        {
+            var fileUrls = new List<(string Url, DateTime Timestamp)>();
+            if (string.IsNullOrWhiteSpace(directoryUrl))
+            {
+                return fileUrls;
+            }
+
+            try
+            {
+                string html = await _httpClient.GetStringAsync(directoryUrl);
+                var regex = new Regex(
+                    @"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
+                    RegexOptions.Singleline
+                );
+
+                foreach (Match match in regex.Matches(html))
+                {
+                    string filename = match.Groups["filename"].Value;
+                    string dateStr = match.Groups["date"].Value.Trim();
+
+                    if (!string.IsNullOrEmpty(filename) && ParseDate(dateStr, out DateTime parsedDate))
+                    {
+                        var baseUri = new Uri(directoryUrl.EndsWith("/") ? directoryUrl : directoryUrl + "/");
+                        var fullUri = new Uri(baseUri, filename);
+                        fileUrls.Add((fullUri.ToString(), parsedDate));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, $"Error getting file list from directory URL: {directoryUrl}.");
+            }
+
+            return fileUrls;
         }
 
         public async Task<Dictionary<string, long>> GetRemoteHashesSizesAsync()
@@ -105,7 +154,7 @@ namespace PBE_AssetsManager.Services
 
         public async Task<bool> CheckJsonDataUpdatesAsync(bool silent = false)
         {
-            if (!_appSettings.CheckJsonDataUpdates || (_appSettings.MonitoredJsonDirectories == null && _appSettings.MonitoredJsonFiles == null))
+            if (!_appSettings.CheckJsonDataUpdates || (_appSettings.MonitoredJsonFiles == null))
             {
                 return false;
             }
@@ -114,45 +163,7 @@ namespace PBE_AssetsManager.Services
             var serverJsonDataEntries = new Dictionary<string, (DateTime Date, string FullUrl)>();
             bool anyUrlProcessed = false;
 
-            if (_appSettings.MonitoredJsonDirectories != null)
-            {
-                foreach (var url in _appSettings.MonitoredJsonDirectories)
-                {
-                    if (string.IsNullOrWhiteSpace(url)) continue;
-                    try
-                    {
-                        string html = await _httpClient.GetStringAsync(url);
-
-                        var regex = new Regex(
-                            @"<a href=""(?<filename>[^""]+)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>",
-                            RegexOptions.Singleline
-                        );
-                        
-                        //var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
-                        foreach (Match match in regex.Matches(html))
-                        {
-                            string filename = match.Groups["filename"].Value;
-                            string dateStr = match.Groups["date"].Value.Trim();
-                            if (ParseDate(dateStr, out DateTime parsedDate))
-                            {
-                                string fullFileUrl = url + filename;
-                                string key = _filesRequiringUniquePaths.Contains(filename) ? PathUtils.GetUniqueLocalPathFromJsonUrl(fullFileUrl) : filename;
-                                serverJsonDataEntries[key] = (parsedDate, fullFileUrl);
-                                anyUrlProcessed = true;
-                            }
-                            else
-                            {
-                                _logService.LogWarning($"Could not parse date for {filename}: {dateStr}");
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logService.LogError(ex, $"Error processing monitored directory URL: {url}.");
-                    }
-                }
-            }
-
+            // Process MonitoredJsonFiles
             if (_appSettings.MonitoredJsonFiles != null)
             {
                 foreach (var url in _appSettings.MonitoredJsonFiles)
@@ -170,7 +181,6 @@ namespace PBE_AssetsManager.Services
                             RegexOptions.Singleline
                         );
                         
-                        // var regex = new Regex(@"<a href=""(?<filename>[^""]+\.json)""[^>]*>.*?<\/a><\/td><td class=""size"">.*?<\/td><td class=""date"">(?<date>[^<]+)<\/td>", RegexOptions.Singleline);
                         bool foundInParent = false;
                         foreach (Match match in regex.Matches(html))
                         {
@@ -184,7 +194,6 @@ namespace PBE_AssetsManager.Services
                                     serverJsonDataEntries[key] = (parsedDate, url);
                                     anyUrlProcessed = true;
                                     foundInParent = true;
-                                    _logService.LogDebug($"Found {url} in parent directory listing. Date: {parsedDate}");
                                     break;
                                 }
                                 else
@@ -211,7 +220,8 @@ namespace PBE_AssetsManager.Services
                 return false;
             }
 
-            var localJsonDataDates = _appSettings.JsonDataModificationDates ?? new Dictionary<string, DateTime>();
+            // Use a temporary dictionary to track updates for the current run
+            var currentRunUpdates = new Dictionary<string, DateTime>();
             bool wasUpdated = false;
 
             foreach (var serverEntry in serverJsonDataEntries)
@@ -220,9 +230,12 @@ namespace PBE_AssetsManager.Services
                 DateTime serverDate = serverEntry.Value.Date;
                 string fullUrl = serverEntry.Value.FullUrl;
 
-                if (!localJsonDataDates.ContainsKey(key) || localJsonDataDates[key] != serverDate)
+                // Find the corresponding entry in AppSettings
+                _appSettings.JsonDataModificationDates.TryGetValue(fullUrl, out DateTime lastUpdated);
+
+                if (lastUpdated != serverDate)
                 {
-                    localJsonDataDates[key] = serverDate;
+                    _appSettings.JsonDataModificationDates[fullUrl] = serverDate; // Update the date in the AppSettings object
                     wasUpdated = true;
 
                     string oldFilePath = Path.Combine(_directoriesCreator.JsonCacheOldPath, key);
@@ -237,6 +250,11 @@ namespace PBE_AssetsManager.Services
                         if (isUpdate)
                         {
                             File.Copy(newFilePath, oldFilePath, true);
+                        }
+                        else
+                        {
+                            // This is a new file, create an empty old file for diffing purposes
+                            File.WriteAllText(oldFilePath, string.Empty);
                         }
 
                         byte[] fileBytes = await _requests.DownloadFileAsBytesAsync(fullUrl);
@@ -268,25 +286,37 @@ namespace PBE_AssetsManager.Services
                                 });
                             }
 
-                            _logService.LogDebug($"Saved new file content to {newFilePath}");
-                            _logService.LogInteractive(
-                                $"Updated: {key} ({serverDate:yyyy-MMM-dd HH:mm})",
-                                "View Diff",
-                                () =>
-                                {
-                                    _ = _diffViewService.ShowFileDiffAsync(oldFilePath, newFilePath, Application.Current.MainWindow);
-                                }
-                            );
+                            // Notify listeners that a file has been updated.
+                            FileUpdated?.Invoke(new FileUpdateInfo
+                            {
+                                FileName = key,
+                                FullUrl = fullUrl,
+                                OldFilePath = oldFilePath,
+                                NewFilePath = newFilePath,
+                                Timestamp = serverDate
+                            });
+
+                            
                         }
                         else
                         {
-                            _logService.LogError($"Failed to download and save JSON content for {fullUrl}.");
+                            _logService.LogError($"Failed to download and save JSON content for {fullUrl}. FileBytes were null or empty.");
                             wasUpdated = false;
                         }
                     }
+                    catch (IOException ioEx)
+                    {
+                        _logService.LogError(ioEx, $"IO Error during file operation for {fullUrl}. Path: {newFilePath}");
+                        wasUpdated = false;
+                    }
+                    catch (UnauthorizedAccessException uaEx)
+                    {
+                        _logService.LogError(uaEx, $"Permission denied during file operation for {fullUrl}. Path: {newFilePath}");
+                        wasUpdated = false;
+                    }
                     catch (Exception ex)
                     {
-                        _logService.LogError(ex, $"Error processing JSON content for {fullUrl}.");
+                        _logService.LogError(ex, $"General error during file operation for {fullUrl}. Path: {newFilePath}");
                         wasUpdated = false;
                     }
                 }
@@ -294,7 +324,7 @@ namespace PBE_AssetsManager.Services
 
             if (wasUpdated)
             {
-                _appSettings.JsonDataModificationDates = localJsonDataDates;
+                // Save settings only if there was an update to persist the LastUpdated date
                 AppSettings.SaveSettings(_appSettings);
                 if (!silent) _logService.LogSuccess("Local game data dates updated.");
             }

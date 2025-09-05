@@ -25,9 +25,7 @@ namespace PBE_AssetsManager.Views.Settings
             _settings = settings;
             
             IntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
-
-            EnableAssetTrackerCheckBox.IsChecked = _settings.CheckAssetUpdates;
-
+            EnableAssetTrackerCheckBox.IsChecked = _settings.AssetTrackerTimer;
             LoadIntervalSettings();
         }
 
@@ -35,8 +33,7 @@ namespace PBE_AssetsManager.Views.Settings
         {
             if (_settings == null) return;
 
-            _settings.CheckAssetUpdates = EnableAssetTrackerCheckBox.IsChecked ?? false;
-
+            _settings.AssetTrackerTimer = EnableAssetTrackerCheckBox.IsChecked ?? false;
             if (!int.TryParse(IntervalValueTextBox.Text, out int value) || value < 0)
             {
                 // On invalid input, perhaps default to a safe value or do nothing.

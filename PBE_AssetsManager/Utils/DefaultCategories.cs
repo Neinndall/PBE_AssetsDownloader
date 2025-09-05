@@ -19,7 +19,7 @@ namespace PBE_AssetsManager.Utils
                 new AssetCategory { Id = "8", Name = "Chibis", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 33300247, Extension = "png" },
                 new AssetCategory { Id = "9", Name = "Banners", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/regaliaBanner/regalia_banner_", Start = 13, Extension = "png" },
                 new AssetCategory { Id = "10", Name = "Skins Augments", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/skinaugment/", Start = 4, Extension = "png" },
-                new AssetCategory { Id = "11", Name = "Skins Variants", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 91000009, Extension = "png" }
+                new AssetCategory { Id = "11", Name = "Skins Variants", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 91000006, Extension = "jpg" }
             };
         }
     }

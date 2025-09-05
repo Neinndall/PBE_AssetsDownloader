@@ -48,7 +48,7 @@ namespace PBE_AssetsManager.Services.Core
             }
 
             // Start Asset Tracker timer
-            if (_appSettings.CheckAssetUpdates && _appSettings.AssetTrackerFrequency > 0)
+            if (_appSettings.AssetTrackerTimer && _appSettings.AssetTrackerFrequency > 0)
             {
                 if (_assetTrackerTimer == null)
                 {

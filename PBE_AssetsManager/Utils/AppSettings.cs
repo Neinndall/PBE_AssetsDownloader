@@ -16,6 +16,7 @@ namespace PBE_AssetsManager.Utils
         public bool OnlyCheckDifferences { get; set; }
         public bool CheckJsonDataUpdates { get; set; }
         public bool CheckAssetUpdates { get; set; }
+        public bool AssetTrackerTimer { get; set; }
         public bool SaveDiffHistory { get; set; }
         public bool BackgroundUpdates { get; set; }
         public int UpdateCheckFrequency { get; set; }
@@ -117,6 +118,7 @@ namespace PBE_AssetsManager.Utils
                 OnlyCheckDifferences = false,
                 CheckJsonDataUpdates = false,
                 CheckAssetUpdates = false,
+                AssetTrackerTimer = false,
                 SaveDiffHistory = false,
                 BackgroundUpdates = false,
                 UpdateCheckFrequency = 10, // Default to 10 minutes

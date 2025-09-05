@@ -10,7 +10,7 @@ namespace PBE_AssetsManager.Utils
             return new List<AssetCategory>
             {
                 new AssetCategory { Id = "1", Name = "Bundles Chromas", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 79900846, Extension = "jpg" },
-                new AssetCategory { Id = "2", Name = "Bundles Skins and Borders", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 99901569, Extension = "png" },
+                new AssetCategory { Id = "2", Name = "Bundles Skins and Borders", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 99901560, Extension = "png" },
                 new AssetCategory { Id = "3", Name = "Bundles Skins", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 89900041, Extension = "jpg" },
                 new AssetCategory { Id = "4", Name = "Bundles Showcase", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 69901023, Extension = "png" },
                 new AssetCategory { Id = "5", Name = "Battle Passes", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/eventpass/", Start = 52, Extension = "png" },

@@ -30,6 +30,7 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
         {
             InitializeComponent();
             this.Loaded += AssetTrackerControl_Loaded;
+            this.Unloaded += AssetTrackerControl_Unloaded;
             Categories = new ObservableCollection<AssetCategory>();
             Assets = new ObservableCollection<TrackedAsset>();
         }
@@ -37,6 +38,9 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
         private void AssetTrackerControl_Loaded(object sender, RoutedEventArgs e)
         {
             if (MonitorService == null) return;
+
+            MonitorService.CategoryCheckStarted += OnCategoryCheckStarted;
+            MonitorService.CategoryCheckCompleted += OnCategoryCheckCompleted;
 
             MonitorService.LoadAssetCategories();
 
@@ -143,6 +147,41 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             {
                 CheckButton.IsEnabled = true;
                 LoadMoreButton.IsEnabled = true;
+            }
+        }
+
+        private void AssetTrackerControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (MonitorService != null)
+            {
+                MonitorService.CategoryCheckStarted -= OnCategoryCheckStarted;
+                MonitorService.CategoryCheckCompleted -= OnCategoryCheckCompleted;
+            }
+        }
+
+        private void OnCategoryCheckStarted(AssetCategory category)
+        {
+            if (category == SelectedCategory)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var asset in Assets.Where(a => a.Status == "Pending"))
+                    {
+                        asset.Status = "Checking";
+                    }
+                });
+            }
+        }
+
+        private void OnCategoryCheckCompleted(AssetCategory category)
+        {
+            if (category == SelectedCategory)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MonitorService.InvalidateAssetCacheForCategory(category);
+                    RefreshAssetList();
+                });
             }
         }
     }

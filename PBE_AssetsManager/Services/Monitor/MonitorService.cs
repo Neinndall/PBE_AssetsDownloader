@@ -28,6 +28,9 @@ namespace PBE_AssetsManager.Services.Monitor
 
         public ObservableCollection<MonitoredUrl> MonitoredItems { get; } = new ObservableCollection<MonitoredUrl>();
 
+        public event Action<AssetCategory> CategoryCheckStarted;
+        public event Action<AssetCategory> CategoryCheckCompleted;
+
         public MonitorService(AppSettings appSettings, JsonDataService jsonDataService, LogService logService, DiffViewService diffViewService, CustomMessageBoxService customMessageBoxService, HttpClient httpClient)
         {
             _appSettings = appSettings;
@@ -123,6 +126,14 @@ namespace PBE_AssetsManager.Services.Monitor
 
         private readonly Dictionary<string, ObservableCollection<TrackedAsset>> _assetCache = new Dictionary<string, ObservableCollection<TrackedAsset>>();
         public List<AssetCategory> AssetCategories { get; private set; } = new List<AssetCategory>();
+
+        public void InvalidateAssetCacheForCategory(AssetCategory category)
+        {
+            if (category != null)
+            {
+                _assetCache.Remove(category.Id);
+            }
+        }
 
         public void LoadAssetCategories()
         {
@@ -348,6 +359,8 @@ namespace PBE_AssetsManager.Services.Monitor
 
         private async Task<bool> _CheckCategoryAsync(AssetCategory category, bool silent)
         {
+            CategoryCheckStarted?.Invoke(category);
+
             bool anyNewAssetFound = false;
             bool progressChanged = false; // New flag
             _logService.LogDebug($"Checking category: {category.Name}");
@@ -465,7 +478,7 @@ namespace PBE_AssetsManager.Services.Monitor
 
                 AppSettings.SaveSettings(_appSettings);
             }
-
+            CategoryCheckCompleted?.Invoke(category);
             return anyNewAssetFound;
         }
 

@@ -1,4 +1,5 @@
 using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
 using System;
 using System.Collections.Generic;

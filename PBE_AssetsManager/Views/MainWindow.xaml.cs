@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsManager.Services.Comparator;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;

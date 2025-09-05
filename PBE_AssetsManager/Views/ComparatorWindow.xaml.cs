@@ -1,4 +1,5 @@
 using PBE_AssetsManager.Services.Comparator;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Controls.Comparator;

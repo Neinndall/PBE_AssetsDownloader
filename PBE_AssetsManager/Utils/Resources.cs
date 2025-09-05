@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
 
 namespace PBE_AssetsManager.Utils

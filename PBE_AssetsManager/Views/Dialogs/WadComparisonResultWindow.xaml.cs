@@ -1,6 +1,7 @@
 using System;
 using PBE_AssetsManager.Services.Comparator;
 using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using System.Collections.Generic;

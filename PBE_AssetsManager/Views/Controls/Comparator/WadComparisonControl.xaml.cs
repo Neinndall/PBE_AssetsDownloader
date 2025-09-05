@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Services.Comparator;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 

@@ -13,6 +13,7 @@ using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Views;
 using PBE_AssetsManager.Views.Dialogs;
 using PBE_AssetsManager.Views.Helpers;
+using PBE_AssetsManager.Services.Downloads;
 
 namespace PBE_AssetsManager.Services
 {

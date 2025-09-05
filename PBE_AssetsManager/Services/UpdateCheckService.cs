@@ -1,4 +1,5 @@
 using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Services.Downloads;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

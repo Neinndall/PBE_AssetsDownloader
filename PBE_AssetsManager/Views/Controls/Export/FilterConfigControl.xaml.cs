@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
 
 namespace PBE_AssetsManager.Views.Controls.Export

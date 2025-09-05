@@ -1,3 +1,4 @@
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using System.Windows;

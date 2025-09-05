@@ -139,36 +139,48 @@ namespace PBE_AssetsManager.Services.Monitor
             var assets = new List<TrackedAsset>();
             if (category == null) return assets;
 
-            var foundIds = new HashSet<long>(category.FoundUrls);
-            var failedIds = new HashSet<long>(category.FailedUrls);
-            long currentNumber = category.LastValid > 0 ? Math.Max(category.Start, category.LastValid - 5) : category.Start;
+            var allIds = new HashSet<long>(category.FoundUrls);
+            allIds.UnionWith(category.FailedUrls);
 
-            while (assets.Count < 10)
+            if (!allIds.Any())
             {
-                if (!failedIds.Contains(currentNumber))
+                long startId = category.Start > 0 ? category.Start : 1;
+                for (int i = 0; i < 10; i++)
                 {
-                    string url = category.FoundUrlOverrides.TryGetValue(currentNumber, out var overrideUrl) ? overrideUrl : $"{category.BaseUrl}{currentNumber}.{category.Extension}";
-
-                    try
-                    {
-                        string status = foundIds.Contains(currentNumber) ? "OK" : "Pending";
-                        string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
-                        if (string.IsNullOrEmpty(displayName)) displayName = $"Asset ID: {currentNumber}";
-
-                        assets.Add(new TrackedAsset
-                        {
-                            Url = url,
-                            DisplayName = displayName,
-                            Status = status,
-                            Thumbnail = status == "OK" ? url : null
-                        });
-                    }
-                    catch (UriFormatException)
-                    {
-                        assets.Add(new TrackedAsset { Url = url, DisplayName = "Invalid URL format", Status = "Error" });
-                    }
+                    allIds.Add(startId + i);
                 }
-                currentNumber++;
+            }
+
+            foreach (long id in allIds.OrderBy(i => i))
+            {
+                string url = category.FoundUrlOverrides.TryGetValue(id, out var overrideUrl) ? overrideUrl : $"{category.BaseUrl}{id}.{category.Extension}";
+                string status = "Pending";
+                if (category.FoundUrls.Contains(id))
+                {
+                    status = "OK";
+                }
+                else if (category.FailedUrls.Contains(id))
+                {
+                    status = "Not Found";
+                }
+
+                try
+                {
+                    string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
+                    if (string.IsNullOrEmpty(displayName)) displayName = $"Asset ID: {id}";
+
+                    assets.Add(new TrackedAsset
+                    {
+                        Url = url,
+                        DisplayName = displayName,
+                        Status = status,
+                        Thumbnail = status == "OK" ? url : null
+                    });
+                }
+                catch (UriFormatException)
+                {
+                    assets.Add(new TrackedAsset { Url = url, DisplayName = "Invalid URL format", Status = "Error" });
+                }
             }
             return assets;
         }
@@ -178,16 +190,35 @@ namespace PBE_AssetsManager.Services.Monitor
             var newAssets = new List<TrackedAsset>();
             if (category == null) return newAssets;
 
-            long lastNumber = currentAssets.Any() ? GetAssetIdFromUrl(currentAssets.Last().Url) ?? 0 : category.Start - 1;
+            long lastNumber = 0;
+            if (currentAssets.Any())
+            {
+                var lastAssetId = GetAssetIdFromUrl(currentAssets.Last().Url);
+                if (lastAssetId.HasValue) lastNumber = lastAssetId.Value;
+            }
+            else
+            {
+                lastNumber = category.Start > 0 ? category.Start - 1 : 0;
+            }
+
+            var existingIds = new HashSet<long>(currentAssets.Select(a => GetAssetIdFromUrl(a.Url) ?? -1));
             var failedIds = new HashSet<long>(category.FailedUrls);
 
-            while (newAssets.Count < amountToAdd)
+            int count = 0;
+            while (count < amountToAdd)
             {
                 lastNumber++;
-                if (!failedIds.Contains(lastNumber))
+                if (failedIds.Contains(lastNumber) || existingIds.Contains(lastNumber)) continue;
+
+                var url = $"{category.BaseUrl}{lastNumber}.{category.Extension}";
+                try
                 {
-                    var url = $"{category.BaseUrl}{lastNumber}.{category.Extension}";
                     newAssets.Add(new TrackedAsset { Url = url, DisplayName = Path.GetFileName(new Uri(url).AbsolutePath), Status = "Pending" });
+                    count++;
+                }
+                catch (UriFormatException)
+                {
+                    // Skip invalid URLs
                 }
             }
             return newAssets;

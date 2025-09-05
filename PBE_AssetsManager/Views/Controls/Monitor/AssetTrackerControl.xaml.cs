@@ -115,19 +115,22 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
 
         private async void CheckButton_Click(object sender, RoutedEventArgs e)
         {
-            if (MonitorService == null || SelectedCategory == null || !Assets.Any()) return;
+            if (MonitorService == null || SelectedCategory == null) return;
 
             var assetsToCheck = Assets.Where(a => a.Status == "Pending").ToList();
             if (!assetsToCheck.Any())
             {
-                CustomMessageBoxService?.ShowInfo("Info", "No pending assets to check.");
-                return;
+                var result = CustomMessageBoxService.ShowYesNo("No Pending Assets", "There are no pending assets to check. Do you want to load more?");
+                if (result != true) return;
+
+                LoadMoreButton_Click(this, new RoutedEventArgs());
+                assetsToCheck = Assets.Where(a => a.Status == "Pending").ToList();
+                if (!assetsToCheck.Any()) return; // Nothing more was loaded
             }
 
             CheckButton.IsEnabled = false;
             LoadMoreButton.IsEnabled = false;
 
-            // Instantly update UI to show "Checking"
             foreach (var asset in assetsToCheck)
             {
                 asset.Status = "Checking";
@@ -135,10 +138,8 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
 
             try
             {
-                // Process the assets in the background. The UI will update live thanks to INotifyPropertyChanged.
                 await MonitorService.CheckAssetsAsync(assetsToCheck, SelectedCategory, CancellationToken.None);
 
-                // Optional: Show a summary message after completion
                 var foundCount = assetsToCheck.Count(a => a.Status == "OK");
                 CustomMessageBoxService?.ShowInfo("Info", $"Check finished. Found {foundCount} new assets out of {assetsToCheck.Count} checked.");
             }

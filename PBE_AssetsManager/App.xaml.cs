@@ -41,7 +41,8 @@ namespace PBE_AssetsManager
                 .MinimumLevel.Debug()
                 .WriteTo.Debug()
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(e => e.Level < LogEventLevel.Fatal) // Information, Warning, Error
+                    // .Filter.ByIncludingOnly(e => e.Level < LogEventLevel.Fatal) // Information, Warning, Error (Original)
+                    .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Information && e.Level < LogEventLevel.Fatal) // Information, Warning, Error (Excludes Debug)
                     .WriteTo.File("logs/application.log", 
                         rollingInterval: RollingInterval.Day,
                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}"))

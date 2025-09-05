@@ -52,7 +52,7 @@ namespace PBE_AssetsManager.Views
             // Apply settings to all views
             _generalSettingsView.ApplySettingsToUI(_appSettings);
             _hashPathsSettingsView.ApplySettingsToUI(_appSettings);
-            //_advancedSettingsView.ApplySettingsToUI(_appSettings);     
+            _advancedSettingsView.ApplySettingsToUI(_appSettings);     
             _logsSettingsView.ApplySettingsToUI(_appSettings);
             _logsSettingsView.SetLogService(_logService);
 
@@ -100,7 +100,7 @@ namespace PBE_AssetsManager.Views
                 // Apply settings to all views
                 _generalSettingsView.ApplySettingsToUI(_appSettings);
                 _hashPathsSettingsView.ApplySettingsToUI(_appSettings);
-                //_advancedSettingsView.ApplySettingsToUI(_appSettings);
+                _advancedSettingsView.ApplySettingsToUI(_appSettings);
                 _logsSettingsView.ApplySettingsToUI(_appSettings);
 
                 SettingsChanged?.Invoke(this, new SettingsChangedEventArgs { WasResetToDefaults = true });
@@ -112,7 +112,7 @@ namespace PBE_AssetsManager.Views
             // Save settings from all views
             _generalSettingsView.SaveSettings();
             _hashPathsSettingsView.SaveSettings();
-            //_advancedSettingsView.SaveSettings();
+            _advancedSettingsView.SaveSettings();
             _logsSettingsView.SaveSettings();
 
             AppSettings.SaveSettings(_appSettings);

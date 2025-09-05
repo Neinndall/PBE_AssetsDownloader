@@ -8,7 +8,6 @@ namespace PBE_AssetsManager.Views.Settings
     public partial class AdvancedSettingsView : UserControl
     {
         private AppSettings _settings;
-        private bool _isLoaded = false;
 
         public AdvancedSettingsView()
         {
@@ -18,51 +17,30 @@ namespace PBE_AssetsManager.Views.Settings
 
         private void AdvancedSettingsView_Loaded(object sender, RoutedEventArgs e)
         {
-            _settings = AppSettings.LoadSettings();
+            // The parent window will pass the settings via ApplySettingsToUI
+        }
+
+        public void ApplySettingsToUI(AppSettings settings)
+        {
+            _settings = settings;
             
             IntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
 
             EnableAssetTrackerCheckBox.IsChecked = _settings.CheckAssetUpdates;
 
             LoadIntervalSettings();
-
-            _isLoaded = true;
         }
 
-        private void LoadIntervalSettings()
+        public void SaveSettings()
         {
-            int totalMinutes = _settings.AssetTrackerFrequency;
+            if (_settings == null) return;
 
-            if (totalMinutes <= 0)
-            {
-                IntervalValueTextBox.Text = "0";
-                IntervalUnitComboBox.SelectedItem = "Minutes";
-                return;
-            }
-
-            if (totalMinutes % 1440 == 0) // 60 * 24
-            {
-                IntervalValueTextBox.Text = (totalMinutes / 1440).ToString();
-                IntervalUnitComboBox.SelectedItem = "Days";
-            }
-            else if (totalMinutes % 60 == 0)
-            {
-                IntervalValueTextBox.Text = (totalMinutes / 60).ToString();
-                IntervalUnitComboBox.SelectedItem = "Hours";
-            }
-            else
-            {
-                IntervalValueTextBox.Text = totalMinutes.ToString();
-                IntervalUnitComboBox.SelectedItem = "Minutes";
-            }
-        }
-
-        private void SaveInterval()
-        {
-            if (!_isLoaded) return;
+            _settings.CheckAssetUpdates = EnableAssetTrackerCheckBox.IsChecked ?? false;
 
             if (!int.TryParse(IntervalValueTextBox.Text, out int value) || value < 0)
             {
+                // On invalid input, perhaps default to a safe value or do nothing.
+                // For now, we'll just not save the interval.
                 return;
             }
 
@@ -84,20 +62,34 @@ namespace PBE_AssetsManager.Views.Settings
             }
 
             _settings.AssetTrackerFrequency = totalMinutes;
-            AppSettings.SaveSettings(_settings);
         }
 
-        private void Interval_SettingChanged(object sender, RoutedEventArgs e)
+        private void LoadIntervalSettings()
         {
-            SaveInterval();
-        }
+            int totalMinutes = _settings.AssetTrackerFrequency;
 
-        private void EnableAssetTracker_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
+            if (totalMinutes <= 0)
+            {
+                IntervalValueTextBox.Text = "0";
+                IntervalUnitComboBox.SelectedItem = "Minutes";
+                return;
+            }
 
-            _settings.CheckAssetUpdates = EnableAssetTrackerCheckBox.IsChecked ?? false;
-            AppSettings.SaveSettings(_settings);
+            if (totalMinutes > 0 && totalMinutes % 1440 == 0)
+            {
+                IntervalValueTextBox.Text = (totalMinutes / 1440).ToString();
+                IntervalUnitComboBox.SelectedItem = "Days";
+            }
+            else if (totalMinutes > 0 && totalMinutes % 60 == 0)
+            {
+                IntervalValueTextBox.Text = (totalMinutes / 60).ToString();
+                IntervalUnitComboBox.SelectedItem = "Hours";
+            }
+            else
+            {
+                IntervalValueTextBox.Text = totalMinutes.ToString();
+                IntervalUnitComboBox.SelectedItem = "Minutes";
+            }
         }
     }
 }

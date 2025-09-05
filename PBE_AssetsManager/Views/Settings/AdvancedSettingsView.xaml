@@ -44,8 +44,7 @@
                 <!-- Enable CheckBox -->
                 <CheckBox x:Name="EnableAssetTrackerCheckBox"
                           Content="Enable automatic background check"
-                          Style="{StaticResource ModernCheckBox}"
-                          Click="EnableAssetTracker_Click"/>
+                          Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="When enabled, the application will periodically check for new assets."
                              Foreground="{StaticResource TextMuted}" 
                              FontSize="12" 
@@ -74,17 +73,14 @@
                                  FontSize="12" 
                                  Margin="0,0,0,10"
                                  TextWrapping="Wrap"/>
-                
                     <StackPanel Orientation="Horizontal">
                         <TextBox x:Name="IntervalValueTextBox"
                                  Width="75"
-                                 Style="{StaticResource ModernTextBox}"
-                                 TextChanged="Interval_SettingChanged"/>
+                                 Style="{StaticResource ModernTextBox}"/>
                         <ComboBox x:Name="IntervalUnitComboBox"
                                   Width="120"
                                   Margin="10,0,0,0"
-                                  Style="{StaticResource ModernComboBox}"
-                                  SelectionChanged="Interval_SettingChanged"/>
+                                  Style="{StaticResource ModernComboBox}"/>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

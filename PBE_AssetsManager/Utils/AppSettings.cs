@@ -36,6 +36,7 @@ namespace PBE_AssetsManager.Utils
         public Dictionary<string, long> AssetTrackerProgress { get; set; }
         public Dictionary<string, List<long>> AssetTrackerFailedIds { get; set; }
         public Dictionary<string, List<long>> AssetTrackerFoundIds { get; set; }
+        public Dictionary<string, Dictionary<long, string>> AssetTrackerUrlOverrides { get; set; }
 
         private const string ConfigFilePath = "config.json";
 
@@ -104,6 +105,7 @@ namespace PBE_AssetsManager.Utils
             settings.AssetTrackerProgress ??= new Dictionary<string, long>();
             settings.AssetTrackerFailedIds ??= new Dictionary<string, List<long>>();
             settings.AssetTrackerFoundIds ??= new Dictionary<string, List<long>>();
+            settings.AssetTrackerUrlOverrides ??= new Dictionary<string, Dictionary<long, string>>();
 
             return settings;
         }
@@ -134,7 +136,8 @@ namespace PBE_AssetsManager.Utils
                 DiffHistory = new List<JsonDiffHistoryEntry>(),
                 AssetTrackerProgress = new Dictionary<string, long>(),
                 AssetTrackerFailedIds = new Dictionary<string, List<long>>(),
-                AssetTrackerFoundIds = new Dictionary<string, List<long>>()
+                AssetTrackerFoundIds = new Dictionary<string, List<long>>(),
+                AssetTrackerUrlOverrides = new Dictionary<string, Dictionary<long, string>>(),
             };
         }
 

@@ -14,6 +14,7 @@ namespace PBE_AssetsManager.Views.Models
         public long LastValid { get; set; }
         public List<long> FoundUrls { get; set; } = new List<long>();
         public List<long> FailedUrls { get; set; } = new List<long>();
+        public Dictionary<long, string> FoundUrlOverrides { get; set; } = new Dictionary<long, string>();
 
         private bool _hasNewAssets;
         public bool HasNewAssets

@@ -98,6 +98,7 @@ namespace PBE_AssetsManager.Views
                 _appSettings.AssetTrackerFoundIds = defaultSettings.AssetTrackerFoundIds;
                 _appSettings.AssetTrackerFailedIds = defaultSettings.AssetTrackerFailedIds;
                 _appSettings.AssetTrackerProgress = defaultSettings.AssetTrackerProgress;
+                _appSettings.AssetTrackerUrlOverrides = defaultSettings.AssetTrackerUrlOverrides;
 
                 AppSettings.SaveSettings(_appSettings);
                 _customMessageBoxService.ShowInfo("Reset Successful", "Settings have been reset to default values.", this);

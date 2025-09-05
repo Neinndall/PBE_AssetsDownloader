@@ -8,10 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Models;
-using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using PBE_AssetsManager.Services.Core;
 
@@ -22,8 +20,6 @@ namespace PBE_AssetsManager.Services.Monitor
         private readonly AppSettings _appSettings;
         private readonly JsonDataService _jsonDataService;
         private readonly LogService _logService;
-        private readonly DiffViewService _diffViewService;
-        private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly HttpClient _httpClient;
 
         public ObservableCollection<MonitoredUrl> MonitoredItems { get; } = new ObservableCollection<MonitoredUrl>();
@@ -31,13 +27,11 @@ namespace PBE_AssetsManager.Services.Monitor
         public event Action<AssetCategory> CategoryCheckStarted;
         public event Action<AssetCategory> CategoryCheckCompleted;
 
-        public MonitorService(AppSettings appSettings, JsonDataService jsonDataService, LogService logService, DiffViewService diffViewService, CustomMessageBoxService customMessageBoxService, HttpClient httpClient)
+        public MonitorService(AppSettings appSettings, JsonDataService jsonDataService, LogService logService, HttpClient httpClient)
         {
             _appSettings = appSettings;
             _jsonDataService = jsonDataService;
             _logService = logService;
-            _diffViewService = diffViewService;
-            _customMessageBoxService = customMessageBoxService;
             _httpClient = httpClient;
 
             LoadMonitoredUrls();
@@ -77,14 +71,11 @@ namespace PBE_AssetsManager.Services.Monitor
 
         private void OnFileUpdated(FileUpdateInfo fileUpdateInfo)
         {
-            _logService.LogDebug($"MonitorService: FileUpdated event received for URL: {fileUpdateInfo.FullUrl}");
             var item = MonitoredItems.FirstOrDefault(x => x.Url == fileUpdateInfo.FullUrl);
-
             if (item != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    _logService.LogDebug($"MonitorService: Found matching item with URL: {item.Url}. Updating status on UI thread.");
                     item.StatusText = "Updated";
                     item.StatusColor = new SolidColorBrush(Colors.DodgerBlue);
                     item.LastChecked = $"Last Update: {fileUpdateInfo.Timestamp:yyyy-MMM-dd HH:mm}";
@@ -92,25 +83,13 @@ namespace PBE_AssetsManager.Services.Monitor
                     item.OldFilePath = fileUpdateInfo.OldFilePath;
                     item.NewFilePath = fileUpdateInfo.NewFilePath;
                 });
-
-                // Persisting settings can still happen on the background thread.
                 _appSettings.JsonDataModificationDates[fileUpdateInfo.FullUrl] = fileUpdateInfo.Timestamp;
                 AppSettings.SaveSettings(_appSettings);
-            }
-            else
-            {
-                _logService.LogWarning($"MonitorService: Could not find a matching monitored item for URL: {fileUpdateInfo.FullUrl}");
-                _logService.LogDebug("MonitorService: Currently monitored URLs:");
-                foreach (var monitoredItem in MonitoredItems)
-                {
-                    _logService.LogDebug($"- {monitoredItem.Url}");
-                }
             }
         }
 
         private string GetAliasForUrl(string url)
         {
-            // Simple alias generation, can be improved
             try
             {
                 var uri = new Uri(url);
@@ -129,10 +108,7 @@ namespace PBE_AssetsManager.Services.Monitor
 
         public void InvalidateAssetCacheForCategory(AssetCategory category)
         {
-            if (category != null)
-            {
-                _assetCache.Remove(category.Id);
-            }
+            if (category != null) _assetCache.Remove(category.Id);
         }
 
         public void LoadAssetCategories()
@@ -140,29 +116,17 @@ namespace PBE_AssetsManager.Services.Monitor
             AssetCategories = DefaultCategories.Get();
             foreach (var category in AssetCategories)
             {
-                if (_appSettings.AssetTrackerProgress.TryGetValue(category.Id, out long lastValid))
-                {
-                    category.LastValid = lastValid;
-                }
-                if (_appSettings.AssetTrackerFailedIds.TryGetValue(category.Id, out var failedIds))
-                {
-                    category.FailedUrls = new List<long>(failedIds); // Create a copy
-                }
-                if (_appSettings.AssetTrackerFoundIds.TryGetValue(category.Id, out var foundIds))
-                {
-                    category.FoundUrls = new List<long>(foundIds); // Create a copy
-                }
+                if (_appSettings.AssetTrackerProgress.TryGetValue(category.Id, out long lastValid)) category.LastValid = lastValid;
+                if (_appSettings.AssetTrackerFailedIds.TryGetValue(category.Id, out var failedIds)) category.FailedUrls = new List<long>(failedIds);
+                if (_appSettings.AssetTrackerFoundIds.TryGetValue(category.Id, out var foundIds)) category.FoundUrls = new List<long>(foundIds);
+                if (_appSettings.AssetTrackerUrlOverrides.TryGetValue(category.Id, out var overrides)) category.FoundUrlOverrides = new Dictionary<long, string>(overrides);
             }
         }
 
         public ObservableCollection<TrackedAsset> GetAssetListForCategory(AssetCategory category)
         {
             if (category == null) return new ObservableCollection<TrackedAsset>();
-
-            if (_assetCache.TryGetValue(category.Id, out var cachedList))
-            {
-                return cachedList;
-            }
+            if (_assetCache.TryGetValue(category.Id, out var cachedList)) return cachedList;
 
             var initialAssets = GenerateNewAssetList(category);
             var newList = new ObservableCollection<TrackedAsset>(initialAssets);
@@ -182,31 +146,27 @@ namespace PBE_AssetsManager.Services.Monitor
             for (int i = 0; i < 10; i++)
             {
                 long currentNumber = startNumber + i;
-                var url = $"{category.BaseUrl}{currentNumber}.{category.Extension}";
+                string url = category.FoundUrlOverrides.TryGetValue(currentNumber, out var overrideUrl) ? overrideUrl : $"{category.BaseUrl}{currentNumber}.{category.Extension}";
 
-                string initialStatus;
-                if (foundIds.Contains(currentNumber) || currentNumber <= category.LastValid)
+                try
                 {
-                    initialStatus = "OK";
-                }
-                else if (failedIds.Contains(currentNumber))
-                {
-                    initialStatus = "Not Found";
-                }
-                else
-                {
-                    initialStatus = "Pending";
-                }
+                    string status = foundIds.Contains(currentNumber) ? "OK" : failedIds.Contains(currentNumber) ? "Not Found" : "Pending";
+                    string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
+                    if (string.IsNullOrEmpty(displayName)) displayName = $"Asset ID: {currentNumber}";
 
-                assets.Add(new TrackedAsset
+                    assets.Add(new TrackedAsset
+                    {
+                        Url = url,
+                        DisplayName = displayName,
+                        Status = status,
+                        Thumbnail = status == "OK" ? url : null
+                    });
+                }
+                catch (UriFormatException)
                 {
-                    Url = url,
-                    DisplayName = Path.GetFileName(new Uri(url).AbsolutePath),
-                    Status = initialStatus,
-                    Thumbnail = initialStatus == "OK" ? url : null
-                });
+                    assets.Add(new TrackedAsset { Url = url, DisplayName = "Invalid URL format", Status = "Error" });
+                }
             }
-
             return assets;
         }
 
@@ -215,271 +175,126 @@ namespace PBE_AssetsManager.Services.Monitor
             var newAssets = new List<TrackedAsset>();
             if (category == null) return newAssets;
 
-            long lastNumber = 0;
-            if (currentAssets.Any())
-            {
-                var lastUrl = currentAssets.Last().Url;
-                lastNumber = GetAssetIdFromUrl(lastUrl) ?? 0;
-            }
-            else
-            {
-                lastNumber = category.Start - 1;
-            }
+            long lastNumber = currentAssets.Any() ? GetAssetIdFromUrl(currentAssets.Last().Url) ?? 0 : category.Start - 1;
 
             for (int i = 1; i <= amountToAdd; i++)
             {
                 long currentNumber = lastNumber + i;
                 var url = $"{category.BaseUrl}{currentNumber}.{category.Extension}";
-                newAssets.Add(new TrackedAsset
-                {
-                    Url = url,
-                    DisplayName = Path.GetFileName(new Uri(url).AbsolutePath),
-                    Status = "Pending"
-                });
+                newAssets.Add(new TrackedAsset { Url = url, DisplayName = Path.GetFileName(new Uri(url).AbsolutePath), Status = "Pending" });
             }
-
             return newAssets;
         }
 
         private long? GetAssetIdFromUrl(string url)
         {
             if (string.IsNullOrEmpty(url)) return null;
-
             var match = Regex.Match(url, @"(\d+)(?!.*\d)");
-            if (match.Success && long.TryParse(match.Value, out long assetId))
+            return match.Success && long.TryParse(match.Value, out long assetId) ? assetId : null;
+        }
+
+        private async Task<(bool IsSuccess, string FoundUrl)> PerformCheckAsync(long id, AssetCategory category)
+        {
+            string primaryUrl = $"{category.BaseUrl}{id}.{category.Extension}";
+            using var request = new HttpRequestMessage(HttpMethod.Head, primaryUrl);
+            var response = await _httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode) return (true, primaryUrl);
+
+            if (category.Id == "3" || category.Id == "11")
             {
-                return assetId;
+                string fallbackUrl = $"{category.BaseUrl}{id}.png";
+                using var fallbackRequest = new HttpRequestMessage(HttpMethod.Head, fallbackUrl);
+                var fallbackResponse = await _httpClient.SendAsync(fallbackRequest);
+                if (fallbackResponse.IsSuccessStatusCode) return (true, fallbackUrl);
             }
-            return null;
+
+            return (false, null);
         }
 
         public async Task CheckAssetsAsync(List<TrackedAsset> assetsToCheck, AssetCategory category, CancellationToken cancellationToken)
         {
-            bool stateChanged = false;
-
+            bool progressChanged = false;
             foreach (var asset in assetsToCheck)
             {
                 if (cancellationToken.IsCancellationRequested) break;
 
-                try
+                long? assetId = GetAssetIdFromUrl(asset.Url);
+                if (!assetId.HasValue) continue;
+
+                var (isSuccess, foundUrl) = await PerformCheckAsync(assetId.Value, category);
+
+                if (isSuccess)
                 {
-                    using (var request = new HttpRequestMessage(HttpMethod.Head, asset.Url))
-                    {
-                        var response = await _httpClient.SendAsync(request, cancellationToken);
-                        long? assetId = GetAssetIdFromUrl(asset.Url);
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            asset.Status = "OK";
-                            asset.Thumbnail = asset.Url;
-
-                            if (assetId.HasValue)
-                            {
-                                if (!category.FoundUrls.Contains(assetId.Value))
-                                {
-                                    category.FoundUrls.Add(assetId.Value);
-                                    stateChanged = true;
-                                }
-
-                                if (category.FailedUrls.Remove(assetId.Value))
-                                {
-                                    stateChanged = true;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            asset.Status = "Not Found";
-                            if (assetId.HasValue)
-                            {
-                                if (!category.FailedUrls.Contains(assetId.Value))
-                                {
-                                    category.FailedUrls.Add(assetId.Value);
-                                    stateChanged = true;
-                                }
-                            }
-                        }
-                    }
+                    asset.Status = "OK";
+                    asset.Thumbnail = foundUrl;
+                    if (!category.FoundUrls.Contains(assetId.Value)) { category.FoundUrls.Add(assetId.Value); progressChanged = true; }
+                    if (foundUrl != asset.Url) { category.FoundUrlOverrides[assetId.Value] = foundUrl; progressChanged = true; }
+                    if (category.FailedUrls.Remove(assetId.Value)) progressChanged = true;
                 }
-                catch (HttpRequestException)
+                else
                 {
                     asset.Status = "Not Found";
+                    if (!category.FailedUrls.Contains(assetId.Value)) { category.FailedUrls.Add(assetId.Value); progressChanged = true; }
                 }
             }
 
-            if (stateChanged)
-            {
-                if (category.FoundUrls.Any())
-                {
-                    category.LastValid = category.FoundUrls.Max();
-                }
-                _appSettings.AssetTrackerProgress[category.Id] = category.LastValid;
-                _appSettings.AssetTrackerFailedIds[category.Id] = category.FailedUrls;
-                _appSettings.AssetTrackerFoundIds[category.Id] = category.FoundUrls;
-
-                AppSettings.SaveSettings(_appSettings);
-            }
-        }
-
-
-
-        public async Task<bool> CheckSingleCategoryAsync(AssetCategory category, bool silent)
-        {
-            if (!AssetCategories.Contains(category))
-            {
-                AssetCategories.Add(category);
-            }
-            return await _CheckCategoryAsync(category, silent);
+            if (progressChanged) SaveCategoryProgress(category);
         }
 
         public async Task<bool> CheckAllAssetCategoriesAsync(bool silent)
         {
+            if (!AssetCategories.Any()) LoadAssetCategories();
             bool anyNewAssetFound = false;
-
-            if (!AssetCategories.Any())
-            {
-                LoadAssetCategories();
-            }
-
             foreach (var category in AssetCategories)
             {
-                if(await _CheckCategoryAsync(category, silent))
-                {
-                    anyNewAssetFound = true;
-                }
+                if (await _CheckCategoryAsync(category, silent)) anyNewAssetFound = true;
             }
-
-            if (anyNewAssetFound && !silent)
-            {
-                // Here we could trigger a more direct notification if needed
-            }
-
             return anyNewAssetFound;
         }
 
         private async Task<bool> _CheckCategoryAsync(AssetCategory category, bool silent)
         {
             CategoryCheckStarted?.Invoke(category);
-
             bool anyNewAssetFound = false;
-            bool progressChanged = false; // New flag
-            _logService.LogDebug($"Checking category: {category.Name}");
+            bool progressChanged = false;
 
-            // Phase 1: Re-check previously failed URLs (the "gaps")
-            if (category.FailedUrls.Any())
-            {
-                _logService.LogDebug($"Re-checking {category.FailedUrls.Count} previously failed URLs for {category.Name}.");
-                var tasks = category.FailedUrls.Select(async id =>
-                {
-                    var url = $"{category.BaseUrl}{id}.{category.Extension}";
-                    using var request = new HttpRequestMessage(HttpMethod.Head, url);
-                    var response = await _httpClient.SendAsync(request);
-                    return new { Id = id, IsSuccess = response.IsSuccessStatusCode, Url = url };
-                }).ToList();
-
-                var results = await Task.WhenAll(tasks);
-
-                var newlyFoundIds = results.Where(r => r.IsSuccess).Select(r => r.Id).ToList();
-                if (newlyFoundIds.Any())
-                {
-                    _logService.LogDebug($"Found {newlyFoundIds.Count} new assets in previously failed gaps for {category.Name}.");
-                    anyNewAssetFound = true;
-                    progressChanged = true; // A change occurred
-                    category.HasNewAssets = true;
-                    foreach (var id in newlyFoundIds)
-                    {
-                        category.FoundUrls.Add(id);
-                        category.FailedUrls.Remove(id);
-                        _logService.LogDebug($"Filled gap for category '{category.Name}': {category.BaseUrl}{id}.{category.Extension}");
-                    }
-                }
-            }
-
-            // Phase 2: Search for new assets beyond the highest known ID
-            const int maxConsecutiveErrors = 5;
-            int consecutiveErrors = 0;
+            var idsToCheck = new HashSet<long>(category.FailedUrls);
             long highestKnownId = 0;
             if (category.FoundUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FoundUrls.Max());
             if (category.FailedUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FailedUrls.Max());
+            long startNumber = highestKnownId > 0 ? highestKnownId + 1 : category.Start;
 
-            long currentNumber = highestKnownId > 0 ? highestKnownId + 1 : category.Start;
+            for (int i = 0; i < 10; i++) idsToCheck.Add(startNumber + i);
 
-            _logService.LogDebug($"Starting new asset search for {category.Name} from ID {currentNumber}.");
-
-            while (consecutiveErrors < maxConsecutiveErrors)
+            foreach (long id in idsToCheck.OrderBy(i => i))
             {
-                const int batchSize = 5;
-                var batchIds = Enumerable.Range(0, batchSize).Select(i => Convert.ToInt64(currentNumber) + i).ToList();
-
-                _logService.LogDebug($"Checking batch of {batchSize} from {batchIds.First()} to {batchIds.Last()}");
-
-                var tasks = batchIds.Select(async id =>
+                var (isSuccess, foundUrl) = await PerformCheckAsync(id, category);
+                if (isSuccess)
                 {
-                    var url = $"{category.BaseUrl}{id}.{category.Extension}";
-                    try
-                    {
-                        using var request = new HttpRequestMessage(HttpMethod.Head, url);
-                        var response = await _httpClient.SendAsync(request);
-                        return new { Id = id, IsSuccess = response.IsSuccessStatusCode, Url = url };
-                    }
-                    catch (Exception ex)
-                    {
-                        _logService.LogError(ex, $"Error checking asset URL: {url}");
-                        return new { Id = id, IsSuccess = false, Url = url };
-                    }
-                }).ToList();
-
-                var results = await Task.WhenAll(tasks);
-
-                // Process results in order to correctly calculate consecutive errors
-                foreach (var result in results.OrderBy(r => r.Id))
-                {
-                    if (consecutiveErrors >= maxConsecutiveErrors)
-                    {
-                        break; // Stop processing batch if limit was reached by a previous item in this same batch
-                    }
-
-                    if (result.IsSuccess)
-                    {
-                        if (!category.FoundUrls.Contains(result.Id))
-                        {
-                            category.FoundUrls.Add(result.Id);
-                            category.HasNewAssets = true;
-                            anyNewAssetFound = true;
-                            progressChanged = true; // A change occurred
-                            _logService.LogDebug($"New asset found for category '{category.Name}': {result.Url}");
-                        }
-                        consecutiveErrors = 0; // Reset on success
-                    }
-                    else
-                    {
-                        if (!category.FailedUrls.Contains(result.Id))
-                        {
-                            category.FailedUrls.Add(result.Id);
-                            progressChanged = true; // A change occurred
-                        }
-                        consecutiveErrors++;
-                    }
+                    if (!category.FoundUrls.Contains(id)) { category.FoundUrls.Add(id); anyNewAssetFound = true; progressChanged = true; }
+                    string primaryUrl = $"{category.BaseUrl}{id}.{category.Extension}";
+                    if (foundUrl != primaryUrl) { category.FoundUrlOverrides[id] = foundUrl; progressChanged = true; }
+                    if (category.FailedUrls.Remove(id)) progressChanged = true;
                 }
-
-                currentNumber += batchSize;
+                else
+                {
+                    if (!category.FailedUrls.Contains(id)) { category.FailedUrls.Add(id); progressChanged = true; }
+                }
             }
 
-            // Phase 3: Save the complete progress
-            if (progressChanged) // Use the new flag here
-            {
-                if (category.FoundUrls.Any())
-                {
-                    category.LastValid = category.FoundUrls.Max();
-                }
-                _appSettings.AssetTrackerProgress[category.Id] = category.LastValid;
-                _appSettings.AssetTrackerFailedIds[category.Id] = category.FailedUrls;
-                _appSettings.AssetTrackerFoundIds[category.Id] = category.FoundUrls;
-
-                AppSettings.SaveSettings(_appSettings);
-            }
+            if (progressChanged) SaveCategoryProgress(category);
             CategoryCheckCompleted?.Invoke(category);
             return anyNewAssetFound;
+        }
+
+        private void SaveCategoryProgress(AssetCategory category)
+        {
+            if (category.FoundUrls.Any()) category.LastValid = category.FoundUrls.Max();
+            _appSettings.AssetTrackerProgress[category.Id] = category.LastValid;
+            _appSettings.AssetTrackerFailedIds[category.Id] = category.FailedUrls;
+            _appSettings.AssetTrackerFoundIds[category.Id] = category.FoundUrls;
+            _appSettings.AssetTrackerUrlOverrides[category.Id] = category.FoundUrlOverrides;
+            AppSettings.SaveSettings(_appSettings);
         }
 
         #endregion

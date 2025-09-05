@@ -9,7 +9,7 @@ GitHub includes a **SHA-256** security code linked to the .rar package. You can 
 
 If both the **SHA-256** from **GitHub** and **VIRUSTOTAL** match, it means that the .rar package that was scanned by virustotal has not been modified at any point, so you can confidently verify that the scan was performed on the .rar package of the latest version. With each release, I will provide you with the URL of each virustotal scan with its details and the package name for the version that will appear just above with its details. Most importantly, **SHA-256**, don't forget to check every detail.
 
-*   **Latest Version v2.2.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/a83a4c44c4a030a2828409875b013bc870aa31baaff3c9d43ba09ba9ede9ec95/details)** 
+*   **Latest Version v2.3.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/26c66289016a37ae3500d06e71aee48531927c4f9c02e42c7b13c78ccdeec27d/details)** 
      *   *GITHUB* --> You cant get the sha-256 [here](https://github.com/Neinndall/PBE_AssetsManager/releases)
      *   *VIRUSTOTAL* --> You cant get the sha-256 in `details` from the link of VirusTotal in details
 
@@ -19,18 +19,51 @@ This tool is designed to automatically download and manage new assets from Leagu
 
 ## ✨ Key Features
 
-*   **Advanced WAD File Comparison:** Compare `.wad` archives between two PBE directories to identify new, modified, deleted, or renamed assets. Includes a side-by-side visual diff for image changes.
-*   **Portable Comparison Packages:** Save comparison results as a lightweight, self-contained package. This includes only the changed file chunks, allowing for easy sharing and review without the original PBE directories.
-*   **Powerful PBE File Explorer:** Browse game files with a familiar file-tree interface, featuring real-time search and lazy-loading for efficient navigation of large .wad archives.
-*   **Integrated Asset Preview:** Directly preview a wide range of file types: visualize `.bin` files as readable data, view textures (`.tex`, `.dds`), images (`.png`, `.svg`), text (`.json`, `.lua`, `.xml`), audio, and video.
-*   **Automated Hash-Based Downloading:** Efficiently compares local and server hashes to download only new or modified assets from Community Dragon, saving bandwidth.
-*   **Flexible Asset Filtering:** Customize downloads by excluding specific file extensions and applying custom rules for asset URLs, including complex patterns for `.bin` files.
-*   **Robust File & Settings Management:** Features automatic directory creation, smart cleanup, hash file backups, and persistent settings for a streamlined workflow.
-*   **In-App Update Checks:** Stay current with the latest version of PBE_AssetsManager through integrated GitHub update checks.
-*   **Modern & Responsive Architecture:**
-    *   Built with an event-driven approach and asynchronous operations to ensure a smooth, non-blocking user experience.
-    *   Utilizes Dependency Injection (DI) for a clean, maintainable, and testable codebase.
-    *   Features a dual-log system for simplified debugging, with separate logs for general information and detailed errors.
+*   **Advanced WAD File Comparison:** Compare `.wad` archives between two PBE directories to identify new, modified, deleted, or renamed assets. Includes a side-by-side visual diff for image changes (`ImageDiffWindow`).
+*   **Portable Comparison Packages:** Save comparison results asynchronously as a lightweight, self-contained package. This includes only the changed file chunks, allowing for easy sharing and review without the original PBE directories.
+*   **Powerful PBE File Explorer:** Browse game files with a familiar file-tree interface, featuring real-time search and lazy-loading. The integrated previewer supports a wide range of formats, including textures (`.tex`, `.dds`), images (`.png`, `.svg`), text, audio, video, and provides a readable visualization for binary `.bin` files.
+*   **3D Model Viewer:** A fully integrated tool to load and inspect 3D models (`.skn`), skeletons (`.skl`), and play animations (`.anm`) directly within the application.
+*   **Automated Asset Downloading:** Efficiently compares local and server hashes to download only new or modified assets from Community Dragon.
+*   **Flexible Asset Filtering:** Customize downloads by excluding file extensions and applying complex URL-based rules.
+*   **Modern & Responsive Architecture:** Built with an event-driven, asynchronous-first approach to ensure a smooth, non-blocking user experience. It leverages Dependency Injection (DI) for a clean and maintainable codebase.
+
+## 🦾 Advanced Functionality
+
+### Monitoring Suite (`MonitorWindow`)
+
+PBE_AssetsManager now includes a powerful suite of tools to automatically track changes in game assets without manual intervention.
+
+*   **File Watcher:** Monitor a list of remote JSON files for any updates. When a change is detected, the app automatically saves the old and new versions and logs the difference, allowing you to view the changes at any time.
+*   **Asset Tracker:** Keep a persistent list of specific assets you want to track. The tool will periodically check their status (e.g., "OK", "Not Found", "Pending") in the background. It even includes fallback logic for assets with multiple possible extensions (like `.jpg` and `.png`).
+*   **History View:** All detected changes from the File Watcher are saved in a persistent history. You can browse past changes, view the diffs, and manage the history log.
+
+### 3D Model Viewer (`ModelWindow`)
+
+Explore League of Legends 3D assets like never before.
+
+*   **Model & Skeleton Loading:** Load `.skn` (mesh) and `.skl` (skeleton) files to view character and environment models.
+*   **Animation Playback:** Apply `.anm` (animation) files to a loaded skeleton to see the model come to life with full skinning support.
+*   **Scene Control:** Manipulate the 3D camera, manage loaded parts, and inspect model geometry.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+*   [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.8-windows-x64-installer) (or higher) installed on your system.
+
+### Installation
+
+1.  **Download the latest release:** Visit the [Releases page](https://github.com/Neinndall/PBE_AssetsManager/releases) (replace with your actual releases URL) and download the `PBE_AssetsManager.zip` file.
+2.  **Extract the contents:** Unzip the downloaded file to your desired location (e.g., `C:\PBE_AssetsManager`).
+3.  **Run the application:** Navigate to the extracted folder and run `PBE_AssetsManager.exe`.
+
+## 📖 Usage
+
+1.  **Configure Settings:** Open the `Settings` tab to set up your preferences, including hash synchronization, auto-copy, and backup options.
+2.  **Select Directories:** In the `Home` tab, specify your "New Hashes Directory" and "Old Hashes Directory".
+3.  **Start Download:** Click the "Start Download" button to begin the asset extraction and download process. The application will compare hashes and download only the necessary files.
+4.  **Preview Assets:** Use the `Export` tab to preview specific asset types (images, audio, etc.) and download selected items.
+5.  **Explore & Monitor:** Use the `Explorer`, `Comparator`, `Monitor`, and `Model Viewer` tabs to access the advanced features of the application.
 
 ## 🚀 Getting Started
 

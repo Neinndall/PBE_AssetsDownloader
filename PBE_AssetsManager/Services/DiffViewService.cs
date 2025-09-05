@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PBE_AssetsManager.Services.Comparator;
 using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsManager.Views.Models;

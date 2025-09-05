@@ -1,5 +1,6 @@
 using LeagueToolkit.Core.Meta;
 using LeagueToolkit.Core.Meta.Properties;
+using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Services;
 using System.Collections.Generic;
 using System.Linq;

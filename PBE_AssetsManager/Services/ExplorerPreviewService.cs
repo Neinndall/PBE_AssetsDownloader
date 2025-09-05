@@ -18,6 +18,7 @@ using LeagueToolkit.Core.Meta.Properties;
 using System.Text.Json;
 using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Views.Helpers;
 
 namespace PBE_AssetsManager.Services

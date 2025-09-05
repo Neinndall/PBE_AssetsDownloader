@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Utils;
 
 namespace PBE_AssetsManager.Services

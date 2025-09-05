@@ -1,3 +1,4 @@
+using PBE_AssetsManager.Services.Comparator;
 using PBE_AssetsManager.Views.Dialogs;
 using System;
 using System.Collections.Generic;

@@ -141,31 +141,34 @@ namespace PBE_AssetsManager.Services.Monitor
 
             var foundIds = new HashSet<long>(category.FoundUrls);
             var failedIds = new HashSet<long>(category.FailedUrls);
-            long startNumber = category.LastValid > 0 ? Math.Max(category.Start, category.LastValid - 5) : category.Start;
+            long currentNumber = category.LastValid > 0 ? Math.Max(category.Start, category.LastValid - 5) : category.Start;
 
-            for (int i = 0; i < 10; i++)
+            while (assets.Count < 10)
             {
-                long currentNumber = startNumber + i;
-                string url = category.FoundUrlOverrides.TryGetValue(currentNumber, out var overrideUrl) ? overrideUrl : $"{category.BaseUrl}{currentNumber}.{category.Extension}";
-
-                try
+                if (!failedIds.Contains(currentNumber))
                 {
-                    string status = foundIds.Contains(currentNumber) ? "OK" : failedIds.Contains(currentNumber) ? "Not Found" : "Pending";
-                    string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
-                    if (string.IsNullOrEmpty(displayName)) displayName = $"Asset ID: {currentNumber}";
+                    string url = category.FoundUrlOverrides.TryGetValue(currentNumber, out var overrideUrl) ? overrideUrl : $"{category.BaseUrl}{currentNumber}.{category.Extension}";
 
-                    assets.Add(new TrackedAsset
+                    try
                     {
-                        Url = url,
-                        DisplayName = displayName,
-                        Status = status,
-                        Thumbnail = status == "OK" ? url : null
-                    });
+                        string status = foundIds.Contains(currentNumber) ? "OK" : "Pending";
+                        string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
+                        if (string.IsNullOrEmpty(displayName)) displayName = $"Asset ID: {currentNumber}";
+
+                        assets.Add(new TrackedAsset
+                        {
+                            Url = url,
+                            DisplayName = displayName,
+                            Status = status,
+                            Thumbnail = status == "OK" ? url : null
+                        });
+                    }
+                    catch (UriFormatException)
+                    {
+                        assets.Add(new TrackedAsset { Url = url, DisplayName = "Invalid URL format", Status = "Error" });
+                    }
                 }
-                catch (UriFormatException)
-                {
-                    assets.Add(new TrackedAsset { Url = url, DisplayName = "Invalid URL format", Status = "Error" });
-                }
+                currentNumber++;
             }
             return assets;
         }
@@ -176,12 +179,16 @@ namespace PBE_AssetsManager.Services.Monitor
             if (category == null) return newAssets;
 
             long lastNumber = currentAssets.Any() ? GetAssetIdFromUrl(currentAssets.Last().Url) ?? 0 : category.Start - 1;
+            var failedIds = new HashSet<long>(category.FailedUrls);
 
-            for (int i = 1; i <= amountToAdd; i++)
+            while (newAssets.Count < amountToAdd)
             {
-                long currentNumber = lastNumber + i;
-                var url = $"{category.BaseUrl}{currentNumber}.{category.Extension}";
-                newAssets.Add(new TrackedAsset { Url = url, DisplayName = Path.GetFileName(new Uri(url).AbsolutePath), Status = "Pending" });
+                lastNumber++;
+                if (!failedIds.Contains(lastNumber))
+                {
+                    var url = $"{category.BaseUrl}{lastNumber}.{category.Extension}";
+                    newAssets.Add(new TrackedAsset { Url = url, DisplayName = Path.GetFileName(new Uri(url).AbsolutePath), Status = "Pending" });
+                }
             }
             return newAssets;
         }

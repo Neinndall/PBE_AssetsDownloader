@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using PBE_AssetsManager.Views.Camera;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Models;
 using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Views

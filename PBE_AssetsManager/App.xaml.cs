@@ -2,6 +2,7 @@ using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Services.Comparator;
 using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Models;
 using PBE_AssetsManager.Utils;
 using Serilog;
 using System;

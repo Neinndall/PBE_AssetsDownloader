@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Services.Comparator
 {

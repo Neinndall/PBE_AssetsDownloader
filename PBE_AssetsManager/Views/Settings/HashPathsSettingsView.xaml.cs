@@ -1,6 +1,7 @@
 using System.Windows.Controls;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Utils;
 
 namespace PBE_AssetsManager.Views.Settings

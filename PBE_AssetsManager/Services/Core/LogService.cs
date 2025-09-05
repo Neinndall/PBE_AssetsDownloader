@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Serilog;
 
-namespace PBE_AssetsManager.Services
+namespace PBE_AssetsManager.Services.Core
 {
     public class LogService
     {

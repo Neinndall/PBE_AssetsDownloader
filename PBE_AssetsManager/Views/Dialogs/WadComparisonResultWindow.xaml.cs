@@ -3,6 +3,7 @@ using PBE_AssetsManager.Services.Comparator;
 using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Utils;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,7 @@ using System.Windows.Input;
 using PBE_AssetsManager.Views.Helpers;
 using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsManager.Services.Monitor;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {

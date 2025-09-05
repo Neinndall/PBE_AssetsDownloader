@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using NUglify;
 using NUglify.JavaScript;
 
-namespace PBE_AssetsManager.Services
+namespace PBE_AssetsManager.Services.Monitor
 {
     public sealed class JsBeautifierService : IDisposable
     {

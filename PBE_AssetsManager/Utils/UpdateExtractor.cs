@@ -7,6 +7,7 @@ using System.Windows;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Utils
 {

@@ -17,6 +17,7 @@ using System.Linq;
 using System.Windows.Media.Animation;
 using ICSharpCode.AvalonEdit.Document;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Views.Helpers;
 
 namespace PBE_AssetsManager.Views.Dialogs.Controls

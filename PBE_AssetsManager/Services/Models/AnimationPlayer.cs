@@ -9,6 +9,7 @@ using LeagueToolkit.Hashing;
 using LeagueToolkit.Core.Memory;
 using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using Quaternion = System.Numerics.Quaternion;
 using System.Linq;
 using System.Threading.Tasks;

@@ -1,6 +1,9 @@
 using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Services.Comparator;
+using PBE_AssetsManager.Services.Explorer;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Monitor;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Models;
 using System.Windows;

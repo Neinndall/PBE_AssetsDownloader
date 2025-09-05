@@ -20,8 +20,10 @@ using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Views.Helpers;
+using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Monitor;
 
-namespace PBE_AssetsManager.Services
+namespace PBE_AssetsManager.Services.Explorer
 {
     public class ExplorerPreviewService
     {

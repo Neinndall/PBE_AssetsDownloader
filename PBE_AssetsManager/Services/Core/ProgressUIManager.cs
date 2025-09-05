@@ -11,8 +11,9 @@ using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Utils;
 using Material.Icons.WPF;
 using Microsoft.Extensions.DependencyInjection;
+using PBE_AssetsManager.Services.Monitor;
 
-namespace PBE_AssetsManager.Services
+namespace PBE_AssetsManager.Services.Core
 {
     public class ProgressUIManager
     {

@@ -5,6 +5,7 @@ using System.Windows.Documents;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {

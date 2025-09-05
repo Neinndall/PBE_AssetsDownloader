@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Utils
 {

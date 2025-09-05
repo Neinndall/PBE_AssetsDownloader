@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
+using PBE_AssetsManager.Services.Monitor;
 
-namespace PBE_AssetsManager.Services
+namespace PBE_AssetsManager.Services.Core
 {
     public class UpdateCheckService
     {

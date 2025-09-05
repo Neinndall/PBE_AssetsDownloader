@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Web.WebView2.Core;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Explorer;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Models;
 

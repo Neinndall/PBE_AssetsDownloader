@@ -1,5 +1,6 @@
 using HelixToolkit.Wpf;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Services.Models;
 using PBE_AssetsManager.Views.Models;
 using System.Windows.Controls;

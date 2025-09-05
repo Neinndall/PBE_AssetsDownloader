@@ -13,6 +13,7 @@ using LeagueToolkit.Toolkit;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Windows;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Services.Models
 {

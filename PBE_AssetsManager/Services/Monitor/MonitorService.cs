@@ -13,8 +13,9 @@ using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Models;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using PBE_AssetsManager.Services.Core;
 
-namespace PBE_AssetsManager.Services
+namespace PBE_AssetsManager.Services.Monitor
 {
     public class MonitorService
     {

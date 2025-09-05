@@ -14,8 +14,9 @@ using PBE_AssetsManager.Views;
 using PBE_AssetsManager.Views.Dialogs;
 using PBE_AssetsManager.Views.Helpers;
 using PBE_AssetsManager.Services.Downloads;
+using PBE_AssetsManager.Services.Core;
 
-namespace PBE_AssetsManager.Services
+namespace PBE_AssetsManager.Services.Monitor
 {
     public class FileUpdateInfo
     {

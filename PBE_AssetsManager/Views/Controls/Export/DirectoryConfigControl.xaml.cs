@@ -1,5 +1,6 @@
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using System;
 using System.Windows;
 using System.Windows.Controls;

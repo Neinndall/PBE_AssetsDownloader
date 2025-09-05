@@ -14,6 +14,7 @@ using LeagueToolkit.Core.Renderer;
 using LeagueToolkit.Core.Wad;
 using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Services.Comparator
 {

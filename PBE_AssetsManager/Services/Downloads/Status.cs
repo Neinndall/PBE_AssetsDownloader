@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Monitor;
 
 namespace PBE_AssetsManager.Services.Downloads
 {

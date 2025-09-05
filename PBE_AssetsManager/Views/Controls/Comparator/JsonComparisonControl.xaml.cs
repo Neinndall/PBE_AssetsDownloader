@@ -1,5 +1,7 @@
 using Microsoft.Win32;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Monitor;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;

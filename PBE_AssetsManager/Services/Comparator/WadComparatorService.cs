@@ -8,6 +8,7 @@ using Serilog;
 using System.Threading.Tasks;
 using LeagueToolkit.Core.Wad;
 using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Services.Comparator
 {

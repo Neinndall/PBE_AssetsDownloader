@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Services.Downloads
 {

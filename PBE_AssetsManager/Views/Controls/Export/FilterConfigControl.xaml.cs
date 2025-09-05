@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Views.Controls.Export
 {

@@ -3,6 +3,7 @@ using System.Windows;
 using Serilog;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Views.Dialogs;
 using PBE_AssetsManager.Views.Settings;
 using Microsoft.Extensions.DependencyInjection;

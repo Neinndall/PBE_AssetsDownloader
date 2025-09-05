@@ -1,4 +1,6 @@
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Monitor;
 using PBE_AssetsManager.Views.Models;
 using System;
 using System.Collections.ObjectModel;

@@ -1,6 +1,7 @@
 using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using Microsoft.Win32;
 using System;
 using System.IO;

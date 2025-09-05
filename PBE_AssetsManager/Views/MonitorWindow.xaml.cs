@@ -1,4 +1,6 @@
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Monitor;
 using PBE_AssetsManager.Utils;
 using System;
 using System.Windows.Controls;

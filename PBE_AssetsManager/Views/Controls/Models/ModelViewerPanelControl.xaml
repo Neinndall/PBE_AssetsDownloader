@@ -102,13 +102,12 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource TextPrimary}"/>
                                     <Button Grid.Column="1" x:Name="DeleteModelButton"
-                                            Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                                            Style="{StaticResource DeleteIconButton}"
                                             Click="DeleteModelButton_Click"
                                             Tag="{Binding}"
-                                            Background="Transparent"
-                                            BorderThickness="0"
+                                            ToolTip="Delete Model"
                                             Margin="5,0,5,0">
-                                        <materialDesign:MaterialIcon Kind="TrashCan" Foreground="Red" Width="16" Height="16"/>
+                                        <materialDesign:MaterialIcon Kind="TrashCan" Width="15" Height="15"/>
                                     </Button>
                                 </Grid>
                             </DataTemplate>

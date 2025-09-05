@@ -323,6 +323,29 @@ namespace PBE_AssetsManager.Services.Monitor
             AppSettings.SaveSettings(_appSettings);
         }
 
+        public void RemoveAsset(AssetCategory category, TrackedAsset assetToRemove)
+        {
+            long? assetId = GetAssetIdFromUrl(assetToRemove.Url);
+            if (!assetId.HasValue) return;
+
+            bool changed = false;
+            if (category.FoundUrls.Remove(assetId.Value))
+            {
+                changed = true;
+            }
+
+            if (!category.FailedUrls.Contains(assetId.Value))
+            {
+                category.FailedUrls.Add(assetId.Value);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                SaveCategoryProgress(category);
+            }
+        }
+
         #endregion
     }
 }

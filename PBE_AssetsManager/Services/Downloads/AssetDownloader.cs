@@ -196,7 +196,6 @@ namespace PBE_AssetsManager.Services.Downloads
                     {
                         await response.Content.CopyToAsync(fs);
                     }
-                    _logService.LogSuccess($"Downloaded asset to {fullDestinationPath}");
                 }
                 else
                 {

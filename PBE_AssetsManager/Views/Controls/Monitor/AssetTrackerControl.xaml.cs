@@ -1,16 +1,19 @@
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services.Monitor;
 using PBE_AssetsManager.Views.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows;
 
 using System.Threading;
+using Microsoft.Win32;
 
 namespace PBE_AssetsManager.Views.Controls.Monitor
 {
@@ -18,6 +21,7 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
     {
         // Public properties for dependency injection from the container
         public MonitorService MonitorService { get; set; }
+        public AssetDownloader AssetDownloader { get; set; }
         public LogService LogService { get; set; }
         public CustomMessageBoxService CustomMessageBoxService { get; set; }
 
@@ -182,6 +186,60 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
                     MonitorService.InvalidateAssetCacheForCategory(category);
                     RefreshAssetList();
                 });
+            }
+        }
+
+        private async void SaveAssetButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (AssetDownloader == null) return;
+
+            var button = sender as Button;
+            var asset = button?.Tag as TrackedAsset;
+            if (asset == null) return;
+
+            string extension = Path.GetExtension(asset.Url);
+
+            var saveFileDialog = new SaveFileDialog
+            {
+                FileName = asset.DisplayName
+            };
+
+            if (!string.IsNullOrEmpty(extension))
+            {
+                saveFileDialog.Filter = $"Asset File (*{extension})|*{extension}|All files (*.*)|*.*";
+                saveFileDialog.DefaultExt = extension;
+            }
+            else
+            {
+                saveFileDialog.Filter = "All files (*.*)|*.*";
+            }
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    await AssetDownloader.DownloadAssetToCustomPathAsync(asset.Url, saveFileDialog.FileName);
+                    CustomMessageBoxService?.ShowSuccess("Success", $"Asset '{asset.DisplayName}' saved successfully.");
+                }
+                catch (Exception ex)
+                {
+                    LogService.LogError(ex, $"Failed to save asset '{asset.DisplayName}'.");
+                    CustomMessageBoxService?.ShowError("Error", $"Failed to save asset. Check logs for details.");
+                }
+            }
+        }
+
+        private void RemoveAssetButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var assetToRemove = button?.Tag as TrackedAsset;
+            if (assetToRemove == null || SelectedCategory == null) return;
+
+            var result = CustomMessageBoxService.ShowYesNo("Remove Asset", $"Are you sure you want to remove '{assetToRemove.DisplayName}'? This will mark it as 'Not Found' and it won't be shown as a valid asset anymore.");
+            if (result == true)
+            {
+                Assets.Remove(assetToRemove);
+                MonitorService.RemoveAsset(SelectedCategory, assetToRemove);
             }
         }
     }

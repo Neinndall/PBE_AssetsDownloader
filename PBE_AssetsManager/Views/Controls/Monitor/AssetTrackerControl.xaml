@@ -87,54 +87,73 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="3" Margin="20" Width="160" Height="160">
-                            <Grid>
-                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <StackPanel.Style>
-                                        <Style TargetType="StackPanel">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Status}" Value="OK">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Style>
+                        <StackPanel HorizontalAlignment="Center" Margin="20">
+                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="3" Width="160" Height="160">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="OK">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <materialDesign:MaterialIcon Width="13" Height="13" VerticalAlignment="Center" Margin="0,0,5,0">
-                                            <materialDesign:MaterialIcon.Style>
-                                                <Style TargetType="materialDesign:MaterialIcon">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Pending">
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                            <Setter Property="Kind" Value="ClockOutline" />
-                                                            <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Checking">
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                            <Setter Property="Kind" Value="Sync" />
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentBlue}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Not Found">
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                            <Setter Property="Kind" Value="CloseCircleOutline" />
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentRed}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </materialDesign:MaterialIcon.Style>
-                                        </materialDesign:MaterialIcon>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <materialDesign:MaterialIcon Width="13" Height="13" VerticalAlignment="Center" Margin="0,0,5,0">
+                                                <materialDesign:MaterialIcon.Style>
+                                                    <Style TargetType="materialDesign:MaterialIcon">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                <Setter Property="Kind" Value="ClockOutline" />
+                                                                <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Checking">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                <Setter Property="Kind" Value="Sync" />
+                                                                <Setter Property="Foreground" Value="{StaticResource AccentBlue}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Not Found">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                <Setter Property="Kind" Value="CloseCircleOutline" />
+                                                                <Setter Property="Foreground" Value="{StaticResource AccentRed}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </materialDesign:MaterialIcon.Style>
+                                            </materialDesign:MaterialIcon>
 
-                                        <TextBlock Text="{Binding Status}" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}" />
+                                            <TextBlock Text="{Binding Status}" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}" />
+                                        </StackPanel>
+
+                                        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" TextAlignment="Center" FontSize="10" Foreground="{StaticResource TextMuted}" Margin="0,5,0,0"/>
                                     </StackPanel>
-
-                                    <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" TextAlignment="Center" FontSize="10" Foreground="{StaticResource TextMuted}" Margin="0,5,0,0"/>
-                                </StackPanel>
-                                <Image Source="{Binding Thumbnail}" Stretch="Uniform"/>
-                            </Grid>
-                        </Border>
+                                    <Image Source="{Binding Thumbnail}" Stretch="Uniform"/>
+                                </Grid>
+                            </Border>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                <Button Name="SaveAssetButton"
+                                        Style="{StaticResource SaveIconButton}"
+                                        Click="SaveAssetButton_Click"
+                                        ToolTip="Save Asset"
+                                        Tag="{Binding}">
+                                    <materialDesign:MaterialIcon Kind="ContentSave" Width="15" Height="15"/>
+                                </Button>
+                                <Button Name="RemoveAssetButton"
+                                        Style="{StaticResource DeleteIconButton}"
+                                        Click="RemoveAssetButton_Click"
+                                        ToolTip="Remove Asset"
+                                        Margin="10,0,0,0"
+                                        Tag="{Binding}">
+                                    <materialDesign:MaterialIcon Kind="TrashCanOutline" Width="15" Height="15"/>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -1,5 +1,6 @@
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services.Monitor;
 using PBE_AssetsManager.Utils;
 using System;
@@ -12,6 +13,7 @@ namespace PBE_AssetsManager.Views
     {
         public MonitorWindow(
             MonitorService monitorService, 
+            AssetDownloader assetDownloader, // Add this
             IServiceProvider serviceProvider, 
             DiffViewService diffViewService, 
             AppSettings appSettings, 
@@ -38,6 +40,7 @@ namespace PBE_AssetsManager.Views
 
             // Setup and inject dependencies for AssetTrackerControl
             AssetTrackerControl.MonitorService = monitorService;
+            AssetTrackerControl.AssetDownloader = assetDownloader; // Add this
             AssetTrackerControl.LogService = logService;
             AssetTrackerControl.CustomMessageBoxService = customMessageBoxService;
         }

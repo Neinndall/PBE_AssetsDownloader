@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 
 namespace PBE_AssetsManager.Views.Models
 {
+    public enum CategoryStatus { Idle, Checking, CompletedSuccess }
+
     public class AssetCategory : INotifyPropertyChanged
     {
         public string Id { get; set; }
@@ -22,7 +24,20 @@ namespace PBE_AssetsManager.Views.Models
             get => _hasNewAssets;
             set
             {
+                if (_hasNewAssets == value) return;
                 _hasNewAssets = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private CategoryStatus _status;
+        public CategoryStatus Status
+        {
+            get => _status;
+            set
+            {
+                if (_status == value) return;
+                _status = value;
                 OnPropertyChanged();
             }
         }

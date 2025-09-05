@@ -42,13 +42,26 @@
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBlue}" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse">
                                         <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Fill" Value="Transparent"/> <!-- Explicitly set fill to transparent when collapsed -->
                                         <Style.Triggers>
+                                            <!-- Prioritize HasNewAssets if no other status is active -->
                                             <DataTrigger Binding="{Binding HasNewAssets}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible"/>
+                                                <Setter Property="Fill" Value="{StaticResource AccentBlue}"/>
+                                            </DataTrigger>
+                                            <!-- Checking status takes precedence -->
+                                            <DataTrigger Binding="{Binding Status}" Value="Checking">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Setter Property="Fill" Value="Blue"/>
+                                            </DataTrigger>
+                                            <!-- CompletedSuccess status takes precedence -->
+                                            <DataTrigger Binding="{Binding Status}" Value="CompletedSuccess">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Setter Property="Fill" Value="Green"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>

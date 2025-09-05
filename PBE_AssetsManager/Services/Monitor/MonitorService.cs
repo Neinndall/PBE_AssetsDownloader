@@ -213,32 +213,45 @@ namespace PBE_AssetsManager.Services.Monitor
 
         public async Task CheckAssetsAsync(List<TrackedAsset> assetsToCheck, AssetCategory category, CancellationToken cancellationToken)
         {
-            bool progressChanged = false;
-            foreach (var asset in assetsToCheck)
+            Application.Current.Dispatcher.Invoke(() => category.Status = CategoryStatus.Checking);
+            try
             {
-                if (cancellationToken.IsCancellationRequested) break;
-
-                long? assetId = GetAssetIdFromUrl(asset.Url);
-                if (!assetId.HasValue) continue;
-
-                var (isSuccess, foundUrl) = await PerformCheckAsync(assetId.Value, category);
-
-                if (isSuccess)
+                bool progressChanged = false;
+                foreach (var asset in assetsToCheck)
                 {
-                    asset.Status = "OK";
-                    asset.Thumbnail = foundUrl;
-                    if (!category.FoundUrls.Contains(assetId.Value)) { category.FoundUrls.Add(assetId.Value); progressChanged = true; }
-                    if (foundUrl != asset.Url) { category.FoundUrlOverrides[assetId.Value] = foundUrl; progressChanged = true; }
-                    if (category.FailedUrls.Remove(assetId.Value)) progressChanged = true;
+                    if (cancellationToken.IsCancellationRequested) break;
+
+                    long? assetId = GetAssetIdFromUrl(asset.Url);
+                    if (!assetId.HasValue) continue;
+
+                    var (isSuccess, foundUrl) = await PerformCheckAsync(assetId.Value, category);
+
+                    if (isSuccess)
+                    {
+                        asset.Status = "OK";
+                        asset.Thumbnail = foundUrl;
+                        if (!category.FoundUrls.Contains(assetId.Value)) { category.FoundUrls.Add(assetId.Value); progressChanged = true; }
+                        if (foundUrl != asset.Url) { category.FoundUrlOverrides[assetId.Value] = foundUrl; progressChanged = true; }
+                        if (category.FailedUrls.Remove(assetId.Value)) progressChanged = true;
+                    }
+                    else
+                    {
+                        asset.Status = "Not Found";
+                        if (!category.FailedUrls.Contains(assetId.Value)) { category.FailedUrls.Add(assetId.Value); progressChanged = true; }
+                    }
                 }
-                else
-                {
-                    asset.Status = "Not Found";
-                    if (!category.FailedUrls.Contains(assetId.Value)) { category.FailedUrls.Add(assetId.Value); progressChanged = true; }
-                }
+
+                if (progressChanged) SaveCategoryProgress(category);
             }
-
-            if (progressChanged) SaveCategoryProgress(category);
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    category.Status = CategoryStatus.CompletedSuccess;
+                    await Task.Delay(3000);
+                    category.Status = CategoryStatus.Idle;
+                });
+            }
         }
 
         public async Task<bool> CheckAllAssetCategoriesAsync(bool silent)
@@ -254,37 +267,50 @@ namespace PBE_AssetsManager.Services.Monitor
 
         private async Task<bool> _CheckCategoryAsync(AssetCategory category, bool silent)
         {
-            CategoryCheckStarted?.Invoke(category);
-            bool anyNewAssetFound = false;
-            bool progressChanged = false;
-
-            var idsToCheck = new HashSet<long>(category.FailedUrls);
-            long highestKnownId = 0;
-            if (category.FoundUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FoundUrls.Max());
-            if (category.FailedUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FailedUrls.Max());
-            long startNumber = highestKnownId > 0 ? highestKnownId + 1 : category.Start;
-
-            for (int i = 0; i < 10; i++) idsToCheck.Add(startNumber + i);
-
-            foreach (long id in idsToCheck.OrderBy(i => i))
+            Application.Current.Dispatcher.Invoke(() => category.Status = CategoryStatus.Checking);
+            try
             {
-                var (isSuccess, foundUrl) = await PerformCheckAsync(id, category);
-                if (isSuccess)
-                {
-                    if (!category.FoundUrls.Contains(id)) { category.FoundUrls.Add(id); anyNewAssetFound = true; progressChanged = true; }
-                    string primaryUrl = $"{category.BaseUrl}{id}.{category.Extension}";
-                    if (foundUrl != primaryUrl) { category.FoundUrlOverrides[id] = foundUrl; progressChanged = true; }
-                    if (category.FailedUrls.Remove(id)) progressChanged = true;
-                }
-                else
-                {
-                    if (!category.FailedUrls.Contains(id)) { category.FailedUrls.Add(id); progressChanged = true; }
-                }
-            }
+                CategoryCheckStarted?.Invoke(category);
+                bool anyNewAssetFound = false;
+                bool progressChanged = false;
 
-            if (progressChanged) SaveCategoryProgress(category);
-            CategoryCheckCompleted?.Invoke(category);
-            return anyNewAssetFound;
+                var idsToCheck = new HashSet<long>(category.FailedUrls);
+                long highestKnownId = 0;
+                if (category.FoundUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FoundUrls.Max());
+                if (category.FailedUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FailedUrls.Max());
+                long startNumber = highestKnownId > 0 ? highestKnownId + 1 : category.Start;
+
+                for (int i = 0; i < 10; i++) idsToCheck.Add(startNumber + i);
+
+                foreach (long id in idsToCheck.OrderBy(i => i))
+                {
+                    var (isSuccess, foundUrl) = await PerformCheckAsync(id, category);
+                    if (isSuccess)
+                    {
+                        if (!category.FoundUrls.Contains(id)) { category.FoundUrls.Add(id); anyNewAssetFound = true; progressChanged = true; }
+                        string primaryUrl = $"{category.BaseUrl}{id}.{category.Extension}";
+                        if (foundUrl != primaryUrl) { category.FoundUrlOverrides[id] = foundUrl; progressChanged = true; }
+                        if (category.FailedUrls.Remove(id)) progressChanged = true;
+                    }
+                    else
+                    {
+                        if (!category.FailedUrls.Contains(id)) { category.FailedUrls.Add(id); progressChanged = true; }
+                    }
+                }
+
+                if (progressChanged) SaveCategoryProgress(category);
+                CategoryCheckCompleted?.Invoke(category);
+                return anyNewAssetFound;
+            }
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    category.Status = CategoryStatus.CompletedSuccess;
+                    await Task.Delay(3000);
+                    category.Status = CategoryStatus.Idle;
+                });
+            }
         }
 
         private void SaveCategoryProgress(AssetCategory category)

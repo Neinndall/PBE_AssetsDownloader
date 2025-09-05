@@ -114,15 +114,8 @@ namespace PBE_AssetsManager.Services.Downloads
             try
             {
                 var response = await _httpClient.GetAsync(assetUrl);
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadAsStringAsync();
-                }
-                else
-                {
-                    _logService.LogError($"Failed to download text content from {assetUrl}. Status Code: {response.StatusCode} - {response.ReasonPhrase}");
-                    return null;
-                }
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
             }
             catch (Exception ex)
             {
@@ -163,19 +156,12 @@ namespace PBE_AssetsManager.Services.Downloads
             try
             {
                 var response = await _httpClient.GetAsync(assetUrl);
-                if (response.IsSuccessStatusCode)
+                response.EnsureSuccessStatusCode();
+                await using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    await using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        await response.Content.CopyToAsync(fileStream);
-                    }
-                    return localFilePath;
+                    await response.Content.CopyToAsync(fileStream);
                 }
-                else
-                {
-                    _logService.LogError($"Failed to download '{assetName}' from {assetUrl}. Status code: {response.StatusCode} - {response.ReasonPhrase}");
-                    return null;
-                }
+                return localFilePath;
             }
             catch (Exception ex)
             {
@@ -190,20 +176,16 @@ namespace PBE_AssetsManager.Services.Downloads
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullDestinationPath));
                 var response = await _httpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
+                response.EnsureSuccessStatusCode(); // This will throw on non-2xx status codes
+
+                await using (var fs = new FileStream(fullDestinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    await using (var fs = new FileStream(fullDestinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        await response.Content.CopyToAsync(fs);
-                    }
-                }
-                else
-                {
-                    _logService.LogError($"Failed to download asset from {url}. Status: {response.StatusCode}");
+                    await response.Content.CopyToAsync(fs);
                 }
             }
             catch (Exception ex)
             {
+                // Now this single block catches network errors, file errors, and HTTP errors (like 404)
                 _logService.LogError(ex, $"Failed to download asset from {url}");
                 throw; // Re-throw to be caught by the calling method
             }

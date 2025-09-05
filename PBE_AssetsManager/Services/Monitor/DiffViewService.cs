@@ -70,6 +70,7 @@ namespace PBE_AssetsManager.Services.Monitor
             {
                 _customMessageBoxService.ShowError("Comparison Error", $"An unexpected error occurred while preparing the file for comparison. Details: {ex.Message}", owner);
                 _logService.LogError(ex, "Error showing WAD diff");
+                throw;
             }
         }
         
@@ -129,6 +130,7 @@ namespace PBE_AssetsManager.Services.Monitor
             {
                 _customMessageBoxService.ShowError("Comparison Error", $"An unexpected error occurred while preparing the file for comparison. Details: {ex.Message}", owner);
                 _logService.LogError(ex, "Error showing file diff");
+                throw;
             }
         }
 

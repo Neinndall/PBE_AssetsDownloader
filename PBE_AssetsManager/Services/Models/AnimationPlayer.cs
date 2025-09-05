@@ -132,10 +132,7 @@ namespace PBE_AssetsManager.Services.Models
             }
             catch (Exception ex)
             {
-                _logService.LogError("---!!! CRASH CAUGHT !!!---");
-                _logService.LogError($"CRASH: Exception during skinning!");
-                _logService.LogError($"ERROR: {ex.GetType().Name} - {ex.Message}");
-                _logService.LogError($"StackTrace: {ex.StackTrace}");
+                _logService.LogError(ex, "CRASH: Exception during skinning!");
                 animation = null;
                 return;
             }

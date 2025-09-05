@@ -19,6 +19,7 @@ namespace PBE_AssetsManager.Utils
         public bool SaveDiffHistory { get; set; }
         public bool BackgroundUpdates { get; set; }
         public int UpdateCheckFrequency { get; set; }
+        public int AssetTrackerFrequency { get; set; }
 
         public string NewHashesPath { get; set; }
         public string OldHashesPath { get; set; }
@@ -119,6 +120,7 @@ namespace PBE_AssetsManager.Utils
                 SaveDiffHistory = false,
                 BackgroundUpdates = false,
                 UpdateCheckFrequency = 10, // Default to 10 minutes
+                AssetTrackerFrequency = 60, // Default to 60 minutes
 
                 NewHashesPath = null,
                 OldHashesPath = null,

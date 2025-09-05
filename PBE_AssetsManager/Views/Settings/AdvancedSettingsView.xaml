@@ -20,13 +20,74 @@
                          Margin="0,2,0,0"/>
         </StackPanel>
 
-        <Grid>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,80,0,0">
-                <materialDesign:MaterialIcon Kind="Tools" FontSize="24" Foreground="{StaticResource TextMuted}" Margin="0,0,10,0"/>
-                <TextBlock Text="This section is under construction. Soon..." 
-                           FontSize="14" 
-                           Foreground="{StaticResource TextMuted}"/>
+        <!-- Asset Tracker Card -->
+        <Border Style="{StaticResource SettingsCard}">
+            <StackPanel>
+                <!-- Card Header -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                    <materialDesign:MaterialIcon Kind="TimerCogOutline" 
+                                                   Foreground="{StaticResource AccentOrange}"
+                                                   FontSize="20" 
+                                                   Margin="0,0,12,0" 
+                                                   VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBlock Text="Asset Tracker" 
+                                     FontSize="18" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Configure background search frequency" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Enable CheckBox -->
+                <CheckBox x:Name="EnableAssetTrackerCheckBox"
+                          Content="Enable automatic background check"
+                          Style="{StaticResource ModernCheckBox}"
+                          Click="EnableAssetTracker_Click"/>
+                <TextBlock Text="When enabled, the application will periodically check for new assets."
+                             Foreground="{StaticResource TextMuted}" 
+                             FontSize="12" 
+                             Margin="27,0,0,16" 
+                             TextWrapping="Wrap"/>
+
+                <!-- Interval Settings Container -->
+                <StackPanel Margin="30,5,0,8">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=EnableAssetTrackerCheckBox}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    
+                    <TextBlock Text="Update Interval" 
+                                 Foreground="{StaticResource TextSecondary}" 
+                                 FontSize="12" 
+                                 Margin="0,0,0,4"/>
+                    <TextBlock Text="Specify the desired time between background searches."
+                                 Foreground="{StaticResource TextMuted}" 
+                                 FontSize="12" 
+                                 Margin="0,0,0,10"
+                                 TextWrapping="Wrap"/>
+                
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="IntervalValueTextBox"
+                                 Width="75"
+                                 Style="{StaticResource ModernTextBox}"
+                                 TextChanged="Interval_SettingChanged"/>
+                        <ComboBox x:Name="IntervalUnitComboBox"
+                                  Width="120"
+                                  Margin="10,0,0,0"
+                                  Style="{StaticResource ModernComboBox}"
+                                  SelectionChanged="Interval_SettingChanged"/>
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
-        </Grid>
+        </Border>
     </StackPanel>
 </UserControl>

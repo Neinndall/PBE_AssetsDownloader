@@ -102,6 +102,8 @@
                          FontSize="12" 
                          Margin="27,0,0,8" 
                          TextWrapping="Wrap"/>
+
+                
             </StackPanel>
         </Border>
 

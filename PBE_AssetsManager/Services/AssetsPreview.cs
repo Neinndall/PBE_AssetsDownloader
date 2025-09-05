@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Info;
 using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Services
 {

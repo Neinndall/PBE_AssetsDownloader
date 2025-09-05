@@ -1,4 +1,4 @@
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Views.Dialogs;
 using Material.Icons;
 using Material.Icons.WPF;

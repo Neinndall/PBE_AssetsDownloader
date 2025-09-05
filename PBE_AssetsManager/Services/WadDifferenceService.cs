@@ -11,7 +11,7 @@ using BCnEncoder.Shared;
 using LeagueToolkit.Core.Meta;
 using LeagueToolkit.Core.Renderer;
 using LeagueToolkit.Core.Wad;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Utils;
 
 namespace PBE_AssetsManager.Services

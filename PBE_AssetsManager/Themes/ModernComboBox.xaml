@@ -9,6 +9,7 @@
         <Setter Property="Background" Value="{StaticResource SidebarBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
         <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
@@ -95,7 +96,7 @@
                                         BorderThickness="1"
                                         BorderBrush="{StaticResource BorderColor}"
                                         CornerRadius="4"/>
-                                <ScrollViewer Margin="4" SnapsToDevicePixels="True">
+                                <ScrollViewer Margin="0" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
                             </Grid>

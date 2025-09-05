@@ -6,7 +6,7 @@ using System.Linq;
 using Serilog;
 using System.Threading.Tasks;
 using LeagueToolkit.Core.Wad;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Services
 {

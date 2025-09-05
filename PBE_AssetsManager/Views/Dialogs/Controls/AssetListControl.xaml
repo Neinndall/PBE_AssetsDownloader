@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:PBE_AssetsManager.Views.Dialogs.Controls"
-             xmlns:info="clr-namespace:PBE_AssetsManager.Info"
+             xmlns:models="clr-namespace:PBE_AssetsManager.Views.Models"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="400">
@@ -72,7 +72,7 @@
                          FontSize="13"
                          Foreground="{StaticResource TextPrimary}">
                     <ListBox.Resources>
-                        <DataTemplate DataType="{x:Type info:AssetInfo}">
+                        <DataTemplate DataType="{x:Type models:AssetInfo}">
                             <TextBlock Text="{Binding Name, StringFormat='  {0}'}" Margin="0,2"/>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type sys:String}">

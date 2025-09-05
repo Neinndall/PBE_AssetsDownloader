@@ -1,0 +1,147 @@
+using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Views.Models;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows.Controls;
+using System.Windows;
+
+using System.Threading;
+
+namespace PBE_AssetsManager.Views.Controls.Monitor
+{
+    public partial class AssetTrackerControl : UserControl
+    {
+        // Public properties for dependency injection from the container
+        public MonitorService MonitorService { get; set; }
+        public LogService LogService { get; set; }
+        public CustomMessageBoxService CustomMessageBoxService { get; set; }
+
+        // Internal state properties
+        public ObservableCollection<AssetCategory> Categories { get; set; }
+        public AssetCategory SelectedCategory { get; set; }
+        public ObservableCollection<TrackedAsset> Assets { get; set; }
+
+        public AssetTrackerControl()
+        {
+            InitializeComponent();
+            this.Loaded += AssetTrackerControl_Loaded;
+            Categories = new ObservableCollection<AssetCategory>();
+            Assets = new ObservableCollection<TrackedAsset>();
+        }
+
+        private void AssetTrackerControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (MonitorService == null) return;
+
+            MonitorService.LoadAssetCategories();
+
+            Categories.Clear();
+            foreach (var category in MonitorService.AssetCategories)
+            {
+                Categories.Add(category);
+            }
+
+            CategoryComboBox.ItemsSource = Categories;
+
+            if (Categories.Any())
+            {
+                CategoryComboBox.SelectedItem = Categories.First();
+            }
+        }
+
+        private void CategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Update the internal SelectedCategory property from the ComboBox's selection
+            SelectedCategory = CategoryComboBox.SelectedItem as AssetCategory;
+            RefreshAssetList();
+        }
+
+        private void RefreshAssetList()
+        {
+            Assets.Clear();
+            if (SelectedCategory == null || MonitorService == null) return;
+
+            var assetsFromService = MonitorService.GetAssetListForCategory(SelectedCategory);
+            foreach (var asset in assetsFromService)
+            {
+                Assets.Add(asset);
+            }
+            AssetsItemsControl.ItemsSource = Assets;
+
+
+        }
+
+        private void DownloadButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            // Logic to be implemented
+        }
+
+        private void LoadMoreButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MonitorService == null || SelectedCategory == null) return;
+
+            LoadMoreButton.IsEnabled = false;
+            try
+            {
+                var newAssets = MonitorService.GenerateMoreAssets(Assets, SelectedCategory, 5); // Generate 5 more
+                foreach (var asset in newAssets)
+                {
+                    Assets.Add(asset);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.LogError(ex, "An error occurred while loading more assets.");
+                CustomMessageBoxService?.ShowError("Error", "An error occurred while loading more assets. Please check the logs.");
+            }
+            finally
+            {
+                LoadMoreButton.IsEnabled = true;
+            }
+        }
+
+        private async void CheckButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MonitorService == null || SelectedCategory == null || !Assets.Any()) return;
+
+            var assetsToCheck = Assets.Where(a => a.Status == "Pending").ToList();
+            if (!assetsToCheck.Any())
+            {
+                CustomMessageBoxService?.ShowInfo("Info", "No pending assets to check.");
+                return;
+            }
+
+            CheckButton.IsEnabled = false;
+            LoadMoreButton.IsEnabled = false;
+
+            // Instantly update UI to show "Checking"
+            foreach (var asset in assetsToCheck)
+            {
+                asset.Status = "Checking";
+            }
+
+            try
+            {
+                // Process the assets in the background. The UI will update live thanks to INotifyPropertyChanged.
+                await MonitorService.CheckAssetsAsync(assetsToCheck, SelectedCategory, CancellationToken.None);
+
+                // Optional: Show a summary message after completion
+                var foundCount = assetsToCheck.Count(a => a.Status == "OK");
+                CustomMessageBoxService?.ShowInfo("Info", $"Check finished. Found {foundCount} new assets out of {assetsToCheck.Count} checked.");
+            }
+            catch (Exception ex)
+            {
+                LogService.LogError(ex, "An error occurred during asset check.");
+                CustomMessageBoxService?.ShowError("Error", "An error occurred during asset check. Please check the logs.");
+            }
+            finally
+            {
+                CheckButton.IsEnabled = true;
+                LoadMoreButton.IsEnabled = true;
+            }
+        }
+    }
+}

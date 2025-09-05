@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Views.Converters
 {

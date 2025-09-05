@@ -1,5 +1,5 @@
 using System;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Utils;
 using System.Collections.Generic;

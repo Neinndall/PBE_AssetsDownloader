@@ -13,17 +13,19 @@ namespace PBE_AssetsManager.Services
         private readonly JsonDataService _jsonDataService;
         private readonly UpdateManager _updateManager;
         private readonly LogService _logService;
+        private readonly MonitorService _monitorService;
         private Timer _updateTimer;
 
         public event Action<string, string> UpdatesFound;
 
-        public UpdateCheckService(AppSettings appSettings, Status status, JsonDataService jsonDataService, UpdateManager updateManager, LogService logService)
+        public UpdateCheckService(AppSettings appSettings, Status status, JsonDataService jsonDataService, UpdateManager updateManager, LogService logService, MonitorService monitorService)
         {
             _appSettings = appSettings;
             _status = status;
             _jsonDataService = jsonDataService;
             _updateManager = updateManager;
             _logService = logService;
+            _monitorService = monitorService;
         }
 
         public void Start()
@@ -55,16 +57,18 @@ namespace PBE_AssetsManager.Services
         {
             bool hashesUpdated = _appSettings.SyncHashesWithCDTB && await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB, silent);
             bool jsonUpdated = _appSettings.CheckJsonDataUpdates && await _jsonDataService.CheckJsonDataUpdatesAsync(silent);
+            bool assetsUpdated = _appSettings.CheckAssetUpdates && await _monitorService.CheckAllAssetCategoriesAsync(silent);
             var (appUpdateAvailable, newVersion) = await _updateManager.IsNewVersionAvailableAsync();
 
             string latestVersion = appUpdateAvailable ? newVersion : null;
 
-            if (appUpdateAvailable || jsonUpdated || (hashesUpdated && silent))
+            if (appUpdateAvailable || jsonUpdated || (hashesUpdated && silent) || assetsUpdated)
             {
                 var messages = new List<string>();
                 if (appUpdateAvailable) messages.Add($"Version {newVersion} is available!");
                 if (hashesUpdated && silent) messages.Add("New hashes are available.");
                 if (jsonUpdated) messages.Add("JSON files have been updated.");
+                if (assetsUpdated) messages.Add("New assets have been found.");
                 if (messages.Count > 0)
                 {
                     UpdatesFound?.Invoke(string.Join(" | ", messages), latestVersion);

@@ -81,6 +81,7 @@ namespace PBE_AssetsManager.Views
                 var defaultSettings = AppSettings.GetDefaultSettings();
                 _appSettings.SyncHashesWithCDTB = defaultSettings.SyncHashesWithCDTB;
                 _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
+                _appSettings.CheckAssetUpdates = defaultSettings.CheckAssetUpdates;
                 _appSettings.AutoCopyHashes = defaultSettings.AutoCopyHashes;
                 _appSettings.CreateBackUpOldHashes = defaultSettings.CreateBackUpOldHashes;
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
@@ -89,8 +90,8 @@ namespace PBE_AssetsManager.Views
                 _appSettings.SaveDiffHistory = defaultSettings.SaveDiffHistory;
                 _appSettings.BackgroundUpdates = defaultSettings.BackgroundUpdates;
                 _appSettings.UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
-                _appSettings.MonitoredJsonFiles = new(defaultSettings.MonitoredJsonFiles);
-                _appSettings.DiffHistory = new(defaultSettings.DiffHistory);
+                _appSettings.MonitoredJsonFiles = defaultSettings.MonitoredJsonFiles;
+                _appSettings.DiffHistory = defaultSettings.DiffHistory;
 
                 AppSettings.SaveSettings(_appSettings);
                 _customMessageBoxService.ShowInfo("Reset Successful", "Settings have been reset to default values.", this);

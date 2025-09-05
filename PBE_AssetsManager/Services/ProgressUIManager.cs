@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Utils;
 using Material.Icons.WPF;
 using Microsoft.Extensions.DependencyInjection;

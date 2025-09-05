@@ -1,12 +1,12 @@
-using PBE_AssetsManager.Info;
-using PBE_AssetsManager.Services;
-using PBE_AssetsManager.Utils;
 using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using PBE_AssetsManager.Views.Dialogs;
+using PBE_AssetsManager.Views.Models;
+using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Utils;
 
 namespace PBE_AssetsManager.Views.Controls.Monitor
 {
@@ -20,9 +20,10 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
         public HistoryViewControl()
         {
             InitializeComponent();
+            this.Loaded += HistoryViewControl_Loaded;
         }
 
-        public void LoadHistory()
+        private void HistoryViewControl_Loaded(object sender, RoutedEventArgs e)
         {
             if (AppSettings != null)
             {
@@ -70,7 +71,9 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
                         }
 
                         AppSettings.SaveSettings(AppSettings);
-                        LoadHistory(); // Refresh UI
+                        // Refresh UI by re-setting the ItemsSource
+                        DiffHistoryListView.ItemsSource = null;
+                        DiffHistoryListView.ItemsSource = AppSettings.DiffHistory;
                     }
                     catch (Exception ex)
                     {

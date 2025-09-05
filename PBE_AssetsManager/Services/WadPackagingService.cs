@@ -1,9 +1,9 @@
+using LeagueToolkit.Core.Wad;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using LeagueToolkit.Core.Wad;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 
 namespace PBE_AssetsManager.Services
 {

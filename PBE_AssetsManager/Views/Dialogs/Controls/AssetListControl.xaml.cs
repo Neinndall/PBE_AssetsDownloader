@@ -1,4 +1,4 @@
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

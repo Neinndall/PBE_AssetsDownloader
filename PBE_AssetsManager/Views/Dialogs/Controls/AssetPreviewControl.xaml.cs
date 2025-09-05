@@ -1,4 +1,4 @@
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Services;
 using Microsoft.Win32;
 using System;

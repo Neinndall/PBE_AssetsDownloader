@@ -19,7 +19,6 @@ namespace PBE_AssetsManager.Views
         )
         {
             InitializeComponent();
-
             FileExplorer.LogService = logService;
             FileExplorer.CustomMessageBoxService = customMessageBoxService;
             FileExplorer.HashResolverService = hashResolverService;

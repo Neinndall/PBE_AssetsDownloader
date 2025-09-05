@@ -30,9 +30,10 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
         public FileWatcherControl()
         {
             InitializeComponent();
+            this.Loaded += FileWatcherControl_Loaded;
         }
 
-        public void InitializeData()
+        private void FileWatcherControl_Loaded(object sender, RoutedEventArgs e)
         {
             if (MonitorService != null)
             {

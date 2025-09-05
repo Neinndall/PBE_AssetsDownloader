@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Views.Dialogs;
 using PBE_AssetsManager.Views.Helpers;
 

@@ -18,9 +18,6 @@ namespace PBE_AssetsManager.Views
             JsonDataService jsonDataService)
         {
             InitializeComponent();
-            
-            // The main DataContext is the window itself.
-            DataContext = this;
 
             // Inject all necessary dependencies into the FileWatcherControl
             FileWatcherControl.MonitorService = monitorService;
@@ -30,14 +27,17 @@ namespace PBE_AssetsManager.Views
             FileWatcherControl.AppSettings = appSettings;
             FileWatcherControl.LogService = logService;
             FileWatcherControl.CustomMessageBoxService = customMessageBoxService;
-            FileWatcherControl.InitializeData();
 
             // Setup and inject dependencies for HistoryViewControl
             HistoryViewControl.AppSettings = appSettings;
             HistoryViewControl.LogService = logService;
             HistoryViewControl.CustomMessageBoxService = customMessageBoxService;
             HistoryViewControl.DiffViewService = diffViewService;
-            HistoryViewControl.LoadHistory();
+
+            // Setup and inject dependencies for AssetTrackerControl
+            AssetTrackerControl.MonitorService = monitorService;
+            AssetTrackerControl.LogService = logService;
+            AssetTrackerControl.CustomMessageBoxService = customMessageBoxService;
         }
     }
 }

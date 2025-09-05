@@ -21,6 +21,7 @@ namespace PBE_AssetsManager.Views
     {
         private readonly ModelLoadingService _modelLoadingService;
         private readonly LogService _logService;
+        private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly CustomCameraController _cameraController;
         private SceneModel _sceneModel;
 
@@ -29,11 +30,12 @@ namespace PBE_AssetsManager.Views
         private readonly ObservableCollection<SceneModel> _loadedModels = new();
         private RigResource _skeleton;
 
-        public ModelWindow(ModelLoadingService modelLoadingService, LogService logService)
+        public ModelWindow(ModelLoadingService modelLoadingService, LogService logService, CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
             _modelLoadingService = modelLoadingService;
             _logService = logService;
+            _customMessageBoxService = customMessageBoxService;
             _cameraController = new CustomCameraController(ViewportControl.Viewport);
 
             ViewportControl.LogService = _logService;
@@ -149,7 +151,7 @@ namespace PBE_AssetsManager.Views
         {
             if (_skeleton == null)
             {
-                MessageBox.Show("Please load a skeleton (.skl) file first.", "Missing Skeleton", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _customMessageBoxService.ShowWarning("Missing Skeleton", "Please load a skeleton (.skl) file first.");
                 return;
             }
             using (var stream = File.OpenRead(filePath))

@@ -19,6 +19,7 @@ namespace PBE_AssetsManager.Views.Settings
 
             checkBoxSyncHashes.IsChecked = _appSettings.SyncHashesWithCDTB;
             checkBoxCheckJsonData.IsChecked = _appSettings.CheckJsonDataUpdates;
+            checkBoxCheckAssetUpdates.IsChecked = _appSettings.CheckAssetUpdates;
             checkBoxAutoCopy.IsChecked = _appSettings.AutoCopyHashes;
             checkBoxCreateBackUp.IsChecked = _appSettings.CreateBackUpOldHashes;
             checkBoxOnlyCheckDifferences.IsChecked = _appSettings.OnlyCheckDifferences;
@@ -33,6 +34,7 @@ namespace PBE_AssetsManager.Views.Settings
             
             _appSettings.SyncHashesWithCDTB = checkBoxSyncHashes.IsChecked ?? false;
             _appSettings.CheckJsonDataUpdates = checkBoxCheckJsonData.IsChecked ?? false;
+            _appSettings.CheckAssetUpdates = checkBoxCheckAssetUpdates.IsChecked ?? false;
             _appSettings.AutoCopyHashes = checkBoxAutoCopy.IsChecked ?? false;
             _appSettings.CreateBackUpOldHashes = checkBoxCreateBackUp.IsChecked ?? false;
             _appSettings.OnlyCheckDifferences = checkBoxOnlyCheckDifferences.IsChecked ?? false;

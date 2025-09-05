@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using Serilog;
 using System.Threading.Tasks;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Dialogs;
 

@@ -3,7 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using Newtonsoft.Json.Linq;
 
 namespace PBE_AssetsManager.Utils
@@ -15,6 +15,7 @@ namespace PBE_AssetsManager.Utils
         public bool CreateBackUpOldHashes { get; set; }
         public bool OnlyCheckDifferences { get; set; }
         public bool CheckJsonDataUpdates { get; set; }
+        public bool CheckAssetUpdates { get; set; }
         public bool SaveDiffHistory { get; set; }
         public bool BackgroundUpdates { get; set; }
         public int UpdateCheckFrequency { get; set; }
@@ -30,6 +31,9 @@ namespace PBE_AssetsManager.Utils
         // New structure for monitored files and directories
         public List<string> MonitoredJsonFiles { get; set; }
         public List<JsonDiffHistoryEntry> DiffHistory { get; set; }
+        public Dictionary<string, long> AssetTrackerProgress { get; set; }
+        public Dictionary<string, List<long>> AssetTrackerFailedIds { get; set; }
+        public Dictionary<string, List<long>> AssetTrackerFoundIds { get; set; }
 
         private const string ConfigFilePath = "config.json";
 
@@ -95,6 +99,9 @@ namespace PBE_AssetsManager.Utils
             settings.MonitoredJsonFiles ??= new List<string>();
             settings.JsonDataModificationDates ??= new Dictionary<string, DateTime>();
             settings.DiffHistory ??= new List<JsonDiffHistoryEntry>();
+            settings.AssetTrackerProgress ??= new Dictionary<string, long>();
+            settings.AssetTrackerFailedIds ??= new Dictionary<string, List<long>>();
+            settings.AssetTrackerFoundIds ??= new Dictionary<string, List<long>>();
 
             return settings;
         }
@@ -108,6 +115,7 @@ namespace PBE_AssetsManager.Utils
                 CreateBackUpOldHashes = false,
                 OnlyCheckDifferences = false,
                 CheckJsonDataUpdates = false,
+                CheckAssetUpdates = false,
                 SaveDiffHistory = false,
                 BackgroundUpdates = false,
                 UpdateCheckFrequency = 10, // Default to 10 minutes
@@ -119,7 +127,10 @@ namespace PBE_AssetsManager.Utils
 
                 JsonDataModificationDates = new Dictionary<string, DateTime>(),
                 MonitoredJsonFiles = new List<string>(),
-                DiffHistory = new List<JsonDiffHistoryEntry>()
+                DiffHistory = new List<JsonDiffHistoryEntry>(),
+                AssetTrackerProgress = new Dictionary<string, long>(),
+                AssetTrackerFailedIds = new Dictionary<string, List<long>>(),
+                AssetTrackerFoundIds = new Dictionary<string, List<long>>()
             };
         }
 

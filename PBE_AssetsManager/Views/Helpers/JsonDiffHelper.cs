@@ -1,6 +1,8 @@
 using DiffPlex.DiffBuilder.Model;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace PBE_AssetsManager.Views.Helpers
 {
@@ -20,27 +22,28 @@ namespace PBE_AssetsManager.Views.Helpers
             return (string.Join("\r\n", lines), lineTypes);
         }
 
-        public static string FormatJson(string json)
+        public static Task<string> FormatJsonAsync(object jsonInput)
         {
-            if (string.IsNullOrWhiteSpace(json)) return string.Empty;
+            if (jsonInput == null) 
+                return Task.FromResult(string.Empty);
 
-            // Heuristic to avoid re-formatting if the JSON is already indented.
-            // This significantly improves performance on large, already-formatted files.
-            if (json.Contains("\n") && json.Contains("{"))
+            return Task.Run(() =>
             {
-                return json;
-            }
-
-            try
-            {
-                var parsed = JsonConvert.DeserializeObject(json);
-                return JsonConvert.SerializeObject(parsed, Formatting.Indented);
-            }
-            catch
-            {
-                // In case of an error (e.g., invalid JSON), return the original string.
-                return json;
-            }
+                try
+                {
+                    string jsonString = jsonInput is string s ? s : JsonConvert.SerializeObject(jsonInput);
+                    var token = JToken.Parse(jsonString);
+                    return token.ToString(Formatting.Indented);
+                }
+                catch (JsonReaderException)
+                {
+                    return jsonInput.ToString();
+                }
+                catch (JsonSerializationException)
+                {
+                    return jsonInput.ToString();
+                }
+            });
         }
     }
 }

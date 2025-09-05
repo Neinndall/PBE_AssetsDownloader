@@ -1,0 +1,61 @@
+<UserControl x:Class="PBE_AssetsManager.Views.Controls.Explorer.FilePreviewerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PBE_AssetsManager.Views.Controls.Explorer"
+             xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="400">
+    <Grid x:Name="PreviewContainer" Margin="5">
+        <StackPanel x:Name="PreviewPlaceholder"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="Visible">
+            <StackPanel x:Name="SelectFileMessagePanel"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="FileUploadOutline"
+                                            Width="48" Height="48"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{StaticResource TextMuted}"
+                                            Opacity="0.5"/>
+                <TextBlock x:Name="SelectFileMessage"
+                           Text="SELECT A FILE"
+                           FontSize="18" 
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+                <TextBlock x:Name="SelectFileSubMessage"
+                           Text="Select a file from the tree to preview its content"
+                           FontSize="14"
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,0"
+                           Opacity="0.7"/>
+            </StackPanel>
+            <StackPanel x:Name="UnsupportedFileMessagePanel"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center"
+                        Visibility="Collapsed">
+                <materialIcons:MaterialIcon Kind="FileCancelOutline"
+                                            Width="48" Height="48"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{StaticResource TextMuted}"
+                                            Opacity="0.5"/>
+                <TextBlock x:Name="UnsupportedFileMessage"
+                           Text="Preview not available for this file type"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,0"/>
+            </StackPanel>
+        </StackPanel>
+        <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
+        <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+        <wv2:WebView2 x:Name="WebView2Preview" Visibility="Collapsed"/>
+    </Grid>
+</UserControl>

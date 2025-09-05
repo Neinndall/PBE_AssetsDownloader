@@ -1,4 +1,4 @@
-using PBE_AssetsManager.Info;
+using PBE_AssetsManager.Views.Models;
 using PBE_AssetsManager.Views.Dialogs;
 using Material.Icons;
 using Material.Icons.WPF;
@@ -42,11 +42,15 @@ namespace PBE_AssetsManager.Views.Converters
                 ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" => MaterialIconKind.ImageOutline,
                 ".dds" or ".tex" => MaterialIconKind.FileImageOutline,
                 ".json" => MaterialIconKind.CodeJson,
+                ".js" => MaterialIconKind.LanguageJavascript,
+                ".css" => MaterialIconKind.LanguageCss3,
+                ".html" => MaterialIconKind.LanguageHtml5,
                 ".txt" or ".log" => MaterialIconKind.FileDocumentOutline,
                 ".lua" => MaterialIconKind.LanguageLua,
                 ".xml" => MaterialIconKind.FileXmlBox,
-                ".bin" => MaterialIconKind.FileCogOutline,
-                ".skl" or ".skn" => MaterialIconKind.Human,
+                ".bin" => MaterialIconKind.FileCodeOutline,
+                ".skl" or ".skn" => MaterialIconKind.Person,
+                ".webm" or ".ogg" => MaterialIconKind.MoviePlayOutline,
                 _ => MaterialIconKind.FileOutline,
             };
         }

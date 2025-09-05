@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Utils
 {
@@ -16,76 +17,47 @@ namespace PBE_AssetsManager.Utils
             _directoriesCreator = directoriesCreator;
         }
 
-        public async Task<string> HandleCopyAsync(bool autoCopyHashes)
+        public async Task HandleCopyAsync(bool autoCopyHashes)
         {
             if (autoCopyHashes)
             {
-                return await CopyNewHashesToOlds();
-            }
-            else
-            {
-                return string.Empty;
+                await CopyNewHashesToOlds();
             }
         }
 
-        private async Task<string> CopyNewHashesToOlds()
+        private async Task CopyNewHashesToOlds()
         {
             string sourcePath = _directoriesCreator.HashesNewPath;
             string destinationPath = _directoriesCreator.HashesOldsPaths;
+            var filesToCopy = new[] { "hashes.game.txt", "hashes.lcu.txt" };
 
             try
             {
-                await Task.Run(() => DirectoryCopy(sourcePath, destinationPath, true));
+                Directory.CreateDirectory(destinationPath);
 
-                if (Directory.Exists(destinationPath))
+                await Task.Run(() =>
                 {
-                    _logService.Log("Hashes replaced successfully.");
-                    return "Hashes replaced successfully.";
-                }
-                else
-                {
-                    _logService.LogError($"Failed to replace hashes: destination directory not created.");
-                    return "Failed to replace hashes: destination directory not created.";
-                }
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError(ex, "An error occurred while copying hashes.");
-                return "An error occurred while copying hashes.";
-            }
-        }
-
-        private void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-        {
-            try
-            {
-                DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-                if (!dir.Exists)
-                    throw new DirectoryNotFoundException($"Source directory does not exist: {sourceDirName}");
-
-                Directory.CreateDirectory(destDirName);
-
-                FileInfo[] files = dir.GetFiles();
-                foreach (FileInfo file in files)
-                {
-                    string tempPath = Path.Combine(destDirName, file.Name);
-                    file.CopyTo(tempPath, true);
-                }
-
-                if (copySubDirs)
-                {
-                    DirectoryInfo[] subdirs = dir.GetDirectories();
-                    foreach (DirectoryInfo subdir in subdirs)
+                    foreach (var fileName in filesToCopy)
                     {
-                        string tempPath = Path.Combine(destDirName, subdir.Name);
-                        DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
+                        string sourceFile = Path.Combine(sourcePath, fileName);
+                        string destFile = Path.Combine(destinationPath, fileName);
+
+                        if (File.Exists(sourceFile))
+                        {
+                            File.Copy(sourceFile, destFile, true);
+                        }
+                        else
+                        {
+                            _logService.LogWarning($"Source hash file not found, skipping copy: {sourceFile}");
+                        }
                     }
-                }
+                });
+
+                _logService.Log("Specified hashes copied successfully.");
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, $"Error copying directory from '{sourceDirName}' to '{destDirName}'.");
-                throw new InvalidOperationException("Error copying directory", ex);
+                _logService.LogError(ex, "An error occurred while copying specific hashes.");
             }
         }
     }

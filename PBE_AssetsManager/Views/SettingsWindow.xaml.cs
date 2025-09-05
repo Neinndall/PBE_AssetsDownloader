@@ -3,6 +3,7 @@ using System.Windows;
 using Serilog;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Views.Dialogs;
 using PBE_AssetsManager.Views.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,7 +52,7 @@ namespace PBE_AssetsManager.Views
             // Apply settings to all views
             _generalSettingsView.ApplySettingsToUI(_appSettings);
             _hashPathsSettingsView.ApplySettingsToUI(_appSettings);
-            _advancedSettingsView.ApplySettingsToUI(_appSettings);
+            _advancedSettingsView.ApplySettingsToUI(_appSettings);     
             _logsSettingsView.ApplySettingsToUI(_appSettings);
             _logsSettingsView.SetLogService(_logService);
 
@@ -81,6 +82,7 @@ namespace PBE_AssetsManager.Views
                 var defaultSettings = AppSettings.GetDefaultSettings();
                 _appSettings.SyncHashesWithCDTB = defaultSettings.SyncHashesWithCDTB;
                 _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
+                _appSettings.CheckAssetUpdates = defaultSettings.CheckAssetUpdates;
                 _appSettings.AutoCopyHashes = defaultSettings.AutoCopyHashes;
                 _appSettings.CreateBackUpOldHashes = defaultSettings.CreateBackUpOldHashes;
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
@@ -89,9 +91,14 @@ namespace PBE_AssetsManager.Views
                 _appSettings.SaveDiffHistory = defaultSettings.SaveDiffHistory;
                 _appSettings.BackgroundUpdates = defaultSettings.BackgroundUpdates;
                 _appSettings.UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
-                _appSettings.MonitoredJsonDirectories = new(defaultSettings.MonitoredJsonDirectories);
-                _appSettings.MonitoredJsonFiles = new(defaultSettings.MonitoredJsonFiles);
-                _appSettings.DiffHistory = new(defaultSettings.DiffHistory);
+                _appSettings.MonitoredJsonFiles = defaultSettings.MonitoredJsonFiles;
+                _appSettings.DiffHistory = defaultSettings.DiffHistory;
+                _appSettings.AssetTrackerTimer = defaultSettings.AssetTrackerTimer;
+                _appSettings.AssetTrackerFrequency = defaultSettings.AssetTrackerFrequency;
+                _appSettings.AssetTrackerFoundIds = defaultSettings.AssetTrackerFoundIds;
+                _appSettings.AssetTrackerFailedIds = defaultSettings.AssetTrackerFailedIds;
+                _appSettings.AssetTrackerProgress = defaultSettings.AssetTrackerProgress;
+                _appSettings.AssetTrackerUrlOverrides = defaultSettings.AssetTrackerUrlOverrides;
 
                 AppSettings.SaveSettings(_appSettings);
                 _customMessageBoxService.ShowInfo("Reset Successful", "Settings have been reset to default values.", this);

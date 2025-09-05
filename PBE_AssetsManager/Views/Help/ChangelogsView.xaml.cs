@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Material.Icons;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Views.Help
 {

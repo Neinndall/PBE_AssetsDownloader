@@ -1,4 +1,11 @@
+using PBE_AssetsManager.Services.Hashes;
+using PBE_AssetsManager.Services.Comparator;
+using PBE_AssetsManager.Services.Downloads;
+using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Models;
+using PBE_AssetsManager.Services.Explorer;
+using PBE_AssetsManager.Services.Monitor;
 using PBE_AssetsManager.Utils;
 using Serilog;
 using System;
@@ -60,17 +67,29 @@ namespace PBE_AssetsManager
             services.AddSingleton<UpdateManager>();
             services.AddSingleton<UpdateExtractor>();
             services.AddSingleton<AssetsPreview>();
-            services.AddSingleton<HashesManager>();
             services.AddSingleton<Resources>();
             services.AddSingleton<DirectoryCleaner>();
             services.AddSingleton<BackupManager>();
             services.AddSingleton<HashCopier>();
-            services.AddSingleton<WadComparatorService>();
+            services.AddSingleton<UpdateCheckService>();
+            services.AddSingleton<ProgressUIManager>();
+            services.AddTransient<ExplorerPreviewService>();
+            services.AddSingleton<JsBeautifierService>();
+            services.AddSingleton<DiffViewService>();
+            services.AddSingleton<MonitorService>();
+
+            // Hashes Services
+            services.AddSingleton<HashesManager>();
             services.AddSingleton<HashResolverService>();
+
+            // Comparator Services
+            services.AddSingleton<WadComparatorService>();
             services.AddSingleton<WadDifferenceService>();
             services.AddSingleton<WadPackagingService>();
             services.AddSingleton<WadNodeLoaderService>();
-            services.AddTransient<ExplorerPreviewService>();
+
+            // Model Viewer Services
+            services.AddSingleton<ModelLoadingService>();
 
             // Main Application Logic Service
             services.AddTransient<ExtractionService>();
@@ -81,6 +100,8 @@ namespace PBE_AssetsManager
             services.AddTransient<ExportWindow>();
             services.AddTransient<ExplorerWindow>();
             services.AddTransient<ComparatorWindow>();
+            services.AddTransient<ModelWindow>();
+            services.AddTransient<MonitorWindow>();
             services.AddTransient<HelpWindow>();
             services.AddTransient<JsonDiffWindow>();
             services.AddTransient<PreviewAssetsWindow>();

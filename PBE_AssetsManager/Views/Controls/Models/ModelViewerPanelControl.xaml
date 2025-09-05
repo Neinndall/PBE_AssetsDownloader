@@ -1,0 +1,133 @@
+<UserControl x:Class="PBE_AssetsManager.Views.Controls.Models.ModelViewerPanelControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="250">
+    <UserControl.Resources>
+        <Style x:Key="MeshesAnimationsListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource CardBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Border Grid.Column="2"
+            Background="{StaticResource CardBackground}"
+            BorderBrush="{StaticResource BorderColor}"
+            BorderThickness="1"
+            Padding="10"
+            Margin="0,5,5,5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TabControl Grid.Row="0" Style="{StaticResource CustomTabControlStyle}">
+                <TabItem Header="Meshes">
+                    <ListBox x:Name="MeshesListBox" 
+                             Background="{StaticResource SidebarBackground}"
+                             BorderThickness="1"
+                             BorderBrush="{StaticResource BorderColor}"
+                             ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" Margin="10,0,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox Style="{StaticResource ModernCheckBox}" IsChecked="{Binding IsVisible, Mode=TwoWay}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center" Margin="2,0,0,0" Foreground="{StaticResource TextPrimary}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="Texture:" FontSize="10" Foreground="Gray" VerticalAlignment="Center"/>
+                                        <ComboBox Style="{StaticResource ModernComboBox}"
+                                                  ItemsSource="{Binding AvailableTextureNames}"
+                                                  SelectedItem="{Binding SelectedTextureName}"
+                                                  Width="165"
+                                                  Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+                <TabItem Header="Animations">
+                    <ListBox x:Name="AnimationsListBox"
+                             Background="{StaticResource SidebarBackground}"
+                             BorderThickness="1"
+                             BorderBrush="{StaticResource BorderColor}"
+                             ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" 
+                                        Margin="10,3,0,3" 
+                                        Foreground="{StaticResource TextPrimary}" 
+                                        Background="Transparent" 
+                                        IsHitTestVisible="False"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+                <TabItem Header="Models">
+                    <ListBox x:Name="ModelsListBox"
+                             Background="{StaticResource SidebarBackground}"
+                             BorderThickness="1"
+                             BorderBrush="{StaticResource BorderColor}"
+                             ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource TextPrimary}"/>
+                                    <Button Grid.Column="1" x:Name="DeleteModelButton"
+                                            Style="{StaticResource DeleteIconButton}"
+                                            Click="DeleteModelButton_Click"
+                                            Tag="{Binding}"
+                                            ToolTip="Delete Model"
+                                            Margin="5,0,5,0">
+                                        <materialDesign:MaterialIcon Kind="TrashCan" Width="15" Height="15"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+            </TabControl>
+            
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button x:Name="LoadModelButton"
+                        Content="Load Model"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="LoadModelButton_Click"/>
+
+                <Button x:Name="LoadAnimationButton"
+                        Content="Load Animations"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="LoadAnimationButton_Click"
+                        Margin="10,0,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

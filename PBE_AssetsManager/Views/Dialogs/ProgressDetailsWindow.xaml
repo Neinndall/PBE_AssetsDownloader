@@ -31,17 +31,7 @@
             <TextBlock x:Name="CurrentFileTextBlock" Text="Current file: " FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,4"/>
             <TextBlock x:Name="EstimatedTimeTextBlock" Text="Estimated time: Calculating..." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,12"/>
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
-                <RichTextBox x:Name="DetailedLogsRichTextBox" 
-                             IsReadOnly="True"
-                             Background="{StaticResource DarkBackground}"
-                             Foreground="{StaticResource TextPrimary}"
-                             FontFamily="Consolas, Courier New"
-                             FontSize="12"
-                             BorderThickness="0"
-                             Padding="0"/>
-            </ScrollViewer>
-        </StackPanel>
+            </StackPanel>
 
         <!-- Close Button -->
         <Button Grid.Row="2" Content="Close" HorizontalAlignment="Right" Margin="12" Width="80" Click="CloseButton_Click" Style="{StaticResource SecondaryButton}"/>

@@ -1,190 +1,91 @@
+using PBE_AssetsManager.Utils;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Extensions.DependencyInjection;
-using PBE_AssetsManager.Info;
-using PBE_AssetsManager.Services;
-using PBE_AssetsManager.Utils;
-using PBE_AssetsManager.Views.Dialogs;
 
 namespace PBE_AssetsManager.Views.Settings
 {
     public partial class AdvancedSettingsView : UserControl
     {
-        private AppSettings _appSettings;
-        private readonly LogService _logService;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly CustomMessageBoxService _customMessageBoxService;
+        private AppSettings _settings;
 
-        public AdvancedSettingsView(LogService logService, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService)
+        public AdvancedSettingsView()
         {
             InitializeComponent();
-            _logService = logService;
-            _serviceProvider = serviceProvider;
-            _customMessageBoxService = customMessageBoxService;
+            Loaded += AdvancedSettingsView_Loaded;
         }
 
-        public void ApplySettingsToUI(AppSettings appSettings)
+        private void AdvancedSettingsView_Loaded(object sender, RoutedEventArgs e)
         {
-            _appSettings = appSettings;
+            // The parent window will pass the settings via ApplySettingsToUI
+        }
 
-            var combinedList = new List<string>();
-            if (_appSettings.MonitoredJsonDirectories != null) combinedList.AddRange(_appSettings.MonitoredJsonDirectories);
-            if (_appSettings.MonitoredJsonFiles != null) combinedList.AddRange(_appSettings.MonitoredJsonFiles);
-
-            JsonFilesListBox.ItemsSource = null;
-            JsonFilesListBox.ItemsSource = combinedList;
-
-            DiffHistoryListView.ItemsSource = null;
-            DiffHistoryListView.ItemsSource = _appSettings.DiffHistory;
+        public void ApplySettingsToUI(AppSettings settings)
+        {
+            _settings = settings;
+            
+            IntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
+            EnableAssetTrackerCheckBox.IsChecked = _settings.AssetTrackerTimer;
+            LoadIntervalSettings();
         }
 
         public void SaveSettings()
         {
-            if (_appSettings == null) return;
+            if (_settings == null) return;
 
-            _appSettings.MonitoredJsonDirectories.Clear();
-            _appSettings.MonitoredJsonFiles.Clear();
-
-            if (JsonFilesListBox.ItemsSource is List<string> items)
+            _settings.AssetTrackerTimer = EnableAssetTrackerCheckBox.IsChecked ?? false;
+            if (!int.TryParse(IntervalValueTextBox.Text, out int value) || value < 0)
             {
-                foreach (string url in items)
-                {
-                    if (url.EndsWith("/"))
-                    {
-                        _appSettings.MonitoredJsonDirectories.Add(url);
-                    }
-                    else
-                    {
-                        _appSettings.MonitoredJsonFiles.Add(url);
-                    }
-                }
+                // On invalid input, perhaps default to a safe value or do nothing.
+                // For now, we'll just not save the interval.
+                return;
             }
-        }
-        
-        private void btnAddJsonFile_Click(object sender, RoutedEventArgs e)
-        {
-            var inputDialog = _serviceProvider.GetRequiredService<InputDialog>();
-            inputDialog.Initialize("Add JSON File URL", "Enter the URL of the JSON file or directory:", "");
-            inputDialog.Owner = Window.GetWindow(this);
 
-            if (inputDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(inputDialog.InputText))
+            string selectedUnit = IntervalUnitComboBox.SelectedItem as string;
+            if (selectedUnit == null) return;
+
+            int totalMinutes = 0;
+            switch (selectedUnit)
             {
-                var currentItems = (JsonFilesListBox.ItemsSource as List<string> ?? new List<string>());
-                currentItems.Add(inputDialog.InputText);
-                JsonFilesListBox.ItemsSource = null;
-                JsonFilesListBox.ItemsSource = currentItems;
+                case "Days":
+                    totalMinutes = value * 1440;
+                    break;
+                case "Hours":
+                    totalMinutes = value * 60;
+                    break;
+                case "Minutes":
+                    totalMinutes = value;
+                    break;
             }
+
+            _settings.AssetTrackerFrequency = totalMinutes;
         }
 
-        private void btnEditJsonFile_Click(object sender, RoutedEventArgs e)
+        private void LoadIntervalSettings()
         {
-            if (JsonFilesListBox.SelectedItem is string selectedUrl)
-            {
-                var inputDialog = _serviceProvider.GetRequiredService<InputDialog>();
-                inputDialog.Initialize("Edit JSON File URL", "Edit the URL:", selectedUrl);
-                inputDialog.Owner = Window.GetWindow(this);
+            int totalMinutes = _settings.AssetTrackerFrequency;
 
-                if (inputDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(inputDialog.InputText))
-                {
-                    if (JsonFilesListBox.ItemsSource is List<string> currentItems)
-                    {
-                        int index = currentItems.IndexOf(selectedUrl);
-                        if (index != -1)
-                        {
-                            currentItems[index] = inputDialog.InputText;
-                            JsonFilesListBox.ItemsSource = null;
-                            JsonFilesListBox.ItemsSource = currentItems;
-                        }
-                    }
-                }
+            if (totalMinutes <= 0)
+            {
+                IntervalValueTextBox.Text = "0";
+                IntervalUnitComboBox.SelectedItem = "Minutes";
+                return;
+            }
+
+            if (totalMinutes > 0 && totalMinutes % 1440 == 0)
+            {
+                IntervalValueTextBox.Text = (totalMinutes / 1440).ToString();
+                IntervalUnitComboBox.SelectedItem = "Days";
+            }
+            else if (totalMinutes > 0 && totalMinutes % 60 == 0)
+            {
+                IntervalValueTextBox.Text = (totalMinutes / 60).ToString();
+                IntervalUnitComboBox.SelectedItem = "Hours";
             }
             else
             {
-                _customMessageBoxService.ShowWarning("Warning", "Please select a URL to edit.", Window.GetWindow(this));
-            }
-        }
-
-        private void btnRemoveJsonFile_Click(object sender, RoutedEventArgs e)
-        {
-            if (JsonFilesListBox.SelectedItem is string selectedUrl)
-            {
-                if (_customMessageBoxService.ShowYesNo("Confirm Removal", $"Are you sure you want to remove '{selectedUrl}'?", Window.GetWindow(this)) == true)
-                {
-                    if (JsonFilesListBox.ItemsSource is List<string> currentItems)
-                    {
-                        currentItems.Remove(selectedUrl);
-                        JsonFilesListBox.ItemsSource = null;
-                        JsonFilesListBox.ItemsSource = currentItems;
-                    }
-                }
-            }
-            else
-            {
-                _customMessageBoxService.ShowWarning("Warning", "Please select a URL to remove.", Window.GetWindow(this));
-            }
-        }
-
-        private void btnViewDiff_Click(object sender, RoutedEventArgs e)
-        {
-            if (DiffHistoryListView.SelectedItem is JsonDiffHistoryEntry selectedEntry)
-            {
-                try
-                {
-                    var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                    _ = diffWindow.LoadAndDisplayDiffAsync(selectedEntry.OldFilePath, selectedEntry.NewFilePath);
-                    diffWindow.Show();
-                }
-                catch (Exception ex)
-                {
-                    _logService.LogError(ex, $"Error opening diff for {selectedEntry.FileName}.");
-                    _customMessageBoxService.ShowError("Error", "Could not open diff view. Please check the logs for details.", Window.GetWindow(this));
-                }
-            }
-            else
-            {
-                _customMessageBoxService.ShowWarning("Warning", "Please select a history entry to view.", Window.GetWindow(this));
-            }
-        }
-
-        private void btnRemoveSelected_Click(object sender, RoutedEventArgs e)
-        {
-            if (DiffHistoryListView.SelectedItem is JsonDiffHistoryEntry selectedEntry)
-            {
-                if (_customMessageBoxService.ShowYesNo("Confirm Deletion", $"Are you sure you want to delete the history entry for '{selectedEntry.FileName}' from {selectedEntry.Timestamp}? This will delete the backup files and cannot be undone.", Window.GetWindow(this)) == true)
-                {
-                    try
-                    {
-                        // Get the directory from one of the file paths
-                        string historyDirectoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
-
-                        // Delete the physical directory
-                        if (!string.IsNullOrEmpty(historyDirectoryPath) && Directory.Exists(historyDirectoryPath))
-                        {
-                            Directory.Delete(historyDirectoryPath, true);
-                        }
-
-                        // Remove from settings and refresh UI
-                        _appSettings.DiffHistory.Remove(selectedEntry);
-                        
-                        // We need to re-bind the list to make the UI update correctly after removal.
-                        DiffHistoryListView.ItemsSource = null;
-                        DiffHistoryListView.ItemsSource = _appSettings.DiffHistory;
-                    }
-                    catch (Exception ex)
-                    {
-                        string directoryPath = Path.GetDirectoryName(selectedEntry.OldFilePath);
-                        _logService.LogError(ex, $"Error deleting history for {selectedEntry.FileName}.");
-                        _customMessageBoxService.ShowInfo("Error", "Could not delete history entry. Please check the logs for details.", Window.GetWindow(this), CustomMessageBoxIcon.Error);
-                    }
-                }
-            }
-            else
-            {
-                _customMessageBoxService.ShowInfo("No Selection", "Please select a history entry to delete.", Window.GetWindow(this), CustomMessageBoxIcon.Warning);
+                IntervalValueTextBox.Text = totalMinutes.ToString();
+                IntervalUnitComboBox.SelectedItem = "Minutes";
             }
         }
     }

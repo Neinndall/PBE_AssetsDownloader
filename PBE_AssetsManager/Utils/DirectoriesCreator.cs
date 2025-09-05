@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Services;
+using PBE_AssetsManager.Services.Core;
 
 namespace PBE_AssetsManager.Utils
 {
@@ -44,7 +45,7 @@ namespace PBE_AssetsManager.Utils
         {
             _logService = logService;
 
-            string date = DateTime.Now.ToString("dd-M-yyyy.H.mm.ss");
+            string date = DateTime.Now.ToString("ddMMyyyy_HHmmss");
             SubAssetsDownloadedPath = Path.Combine("AssetsDownloaded", date);
             ResourcesPath = Path.Combine("Resources", date);
 

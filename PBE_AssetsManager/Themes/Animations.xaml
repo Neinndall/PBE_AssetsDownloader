@@ -6,10 +6,10 @@
     <Storyboard x:Key="ExpandSidebar">
         <DoubleAnimation Storyboard.TargetProperty="Width" 
                          To="180" 
-                         Duration="0:0:0.28">
+                         Duration="0:0:0.26">
             <DoubleAnimation.EasingFunction>
-                <!-- Cambio a QuinticEase para mayor suavidad -->
-                <QuinticEase EasingMode="EaseOut"/>
+                <!-- Cambio a SineEase para mayor suavidad -->
+                <SineEase EasingMode="EaseOut"/>
             </DoubleAnimation.EasingFunction>
         </DoubleAnimation>
     </Storyboard>
@@ -17,10 +17,10 @@
     <Storyboard x:Key="CollapseSidebar">
         <DoubleAnimation Storyboard.TargetProperty="Width" 
                          To="64" 
-                         Duration="0:0:0.26">
+                         Duration="0:0:0.24">
             <DoubleAnimation.EasingFunction>
-                <!-- QuinticEase para colapso más natural -->
-                <QuinticEase EasingMode="EaseOut"/>
+                <!-- SineEase para colapso más natural -->
+                <SineEase EasingMode="EaseIn"/>
             </DoubleAnimation.EasingFunction>
         </DoubleAnimation>
     </Storyboard>
@@ -30,5 +30,28 @@
         <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
                          From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever"/>
     </Storyboard>
+
+    <!-- Estilo para el texto de los botones de la barra lateral -->
+    <Style x:Key="SidebarMenuTextStyle" TargetType="TextBlock">
+        <Setter Property="Opacity" Value="0"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsExpanded, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                <DataTrigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.16"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </DataTrigger.EnterActions>
+                <DataTrigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.08" BeginTime="0:0:0.05"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </DataTrigger.ExitActions>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
         
 </ResourceDictionary>

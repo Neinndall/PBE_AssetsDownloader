@@ -14,7 +14,7 @@ namespace PBE_AssetsManager.Utils
                 new AssetCategory { Id = "3", Name = "Bundles Skins", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 89900041, Extension = "jpg" },
                 new AssetCategory { Id = "4", Name = "Bundles Showcase", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 69901023, Extension = "png" },
                 new AssetCategory { Id = "5", Name = "Battle Passes", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/eventpass/", Start = 52, Extension = "png" },
-                new AssetCategory { Id = "6", Name = "Currency", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/storeCards/", Start = 36, Extension = "png" },
+                new AssetCategory { Id = "6", Name = "Currency", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/storeCards/Currency/", Start = 36, Extension = "png" },
                 new AssetCategory { Id = "7", Name = "TFT Battle Passes", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/eventpass/", Start = 3333049, Extension = "png" },
                 new AssetCategory { Id = "8", Name = "Capsules and Orbs", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/hextechCrafting/", Start = 777, Extension = "png" },
                 new AssetCategory { Id = "9", Name = "Chibis", BaseUrl = "https://d392eissrffsyf.cloudfront.net/storeImages/bundles/", Start = 33300247, Extension = "png" },

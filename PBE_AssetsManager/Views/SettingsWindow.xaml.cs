@@ -97,6 +97,7 @@ namespace PBE_AssetsManager.Views
                 _appSettings.AssetTrackerFrequency = defaultSettings.AssetTrackerFrequency;
                 _appSettings.AssetTrackerFoundIds = defaultSettings.AssetTrackerFoundIds;
                 _appSettings.AssetTrackerFailedIds = defaultSettings.AssetTrackerFailedIds;
+                _appSettings.AssetTrackerUserRemovedIds = defaultSettings.AssetTrackerUserRemovedIds;
                 _appSettings.AssetTrackerProgress = defaultSettings.AssetTrackerProgress;
                 _appSettings.AssetTrackerUrlOverrides = defaultSettings.AssetTrackerUrlOverrides;
 

@@ -255,8 +255,8 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             var result = CustomMessageBoxService.ShowYesNo("Info", $"Are you sure you want to remove '{assetToRemove.DisplayName}'? This action is permanent and the asset will not appear again in this category.");
             if (result == true)
             {
-                Assets.Remove(assetToRemove);
                 MonitorService.RemoveAsset(SelectedCategory, assetToRemove);
+                RefreshAssetList();
             }
         }
     }

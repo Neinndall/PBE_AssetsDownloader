@@ -42,8 +42,6 @@ namespace PBE_AssetsManager.Views
 
             ViewportControl.LogService = _logService;
 
-            SetupScene();
-
             // ItemSources
             PanelControl.AnimationsListBoxControl.ItemsSource = _animationNames;
             PanelControl.ModelsListBoxControl.ItemsSource = _loadedModels;
@@ -135,6 +133,7 @@ namespace PBE_AssetsManager.Views
             {
                 if (isInitialLoad)
                 {
+                    SetupScene();
                     EmptyStatePanel.Visibility = Visibility.Collapsed;
                     MainContentGrid.Visibility = Visibility.Visible;
                 }

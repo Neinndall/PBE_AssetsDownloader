@@ -2,28 +2,29 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Animaciones para el Sidebar -->
+    <!-- Expansión más fluida con mejor timing -->
     <Storyboard x:Key="ExpandSidebar">
         <DoubleAnimation Storyboard.TargetName="SidebarColumn" 
                          Storyboard.TargetProperty="MinWidth" 
                          To="180" 
-                         Duration="0:0:0.24">
+                         Duration="0:0:0.28">
             <DoubleAnimation.EasingFunction>
-                <CubicEase EasingMode="EaseOut"/>
+                <!-- Cambio a QuinticEase para mayor suavidad -->
+                <QuinticEase EasingMode="EaseOut"/>
             </DoubleAnimation.EasingFunction>
         </DoubleAnimation>
     </Storyboard>
     
-    <!-- Storyboard para colapsar sidebar -->
     <Storyboard x:Key="CollapseSidebar">
-            <DoubleAnimation Storyboard.TargetName="SidebarColumn" 
-                             Storyboard.TargetProperty="MinWidth" 
-                             To="64" 
-                             Duration="0:0:0.24">
-                <DoubleAnimation.EasingFunction>
-                    <CubicEase EasingMode="EaseOut"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetName="SidebarColumn" 
+                         Storyboard.TargetProperty="MinWidth" 
+                         To="64" 
+                         Duration="0:0:0.26">
+            <DoubleAnimation.EasingFunction>
+                <!-- QuinticEase para colapso más natural -->
+                <QuinticEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
     </Storyboard>
     
         <!-- Animación para el icono giratorio de progreso -->

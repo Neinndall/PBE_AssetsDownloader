@@ -28,7 +28,7 @@ namespace PBE_AssetsManager.Views.Controls
     private void MenuButton_Click(object sender, RoutedEventArgs e)
     {
       // Obtener el tag del botón clickeado
-      var button = sender as Button;
+      var button = sender as RadioButton;
       if (button?.Tag is string viewTag)
       {
         NavigationRequested?.Invoke(viewTag);

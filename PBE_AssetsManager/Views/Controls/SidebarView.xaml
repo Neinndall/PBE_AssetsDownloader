@@ -23,7 +23,7 @@
                         VerticalAlignment="Top" 
                         Margin="8,16,8,0">
 
-                <Button x:Name="HomeButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Home" Margin="0,0,0,4">
+                <RadioButton x:Name="HomeButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Home" Margin="0,0,0,4" IsChecked="True" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -57,9 +57,9 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
 
-                <Button x:Name="ExportButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Export" Margin="2,0,0,4">
+                <RadioButton x:Name="ExportButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Export" Margin="2,0,0,4" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -92,9 +92,9 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
 
-                <Button x:Name="ExplorerButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Explorer" Margin="2,0,0,4">
+                <RadioButton x:Name="ExplorerButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Explorer" Margin="2,0,0,4" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -127,9 +127,9 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
 
-                <Button x:Name="JsonDiffToolButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Comparator" Margin="2,0,0,4">
+                <RadioButton x:Name="JsonDiffToolButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Comparator" Margin="2,0,0,4" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -162,9 +162,9 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
 
-                <Button x:Name="ModelsButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Models" Margin="2,0,0,4">
+                <RadioButton x:Name="ModelsButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Models" Margin="2,0,0,4" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -197,9 +197,9 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
 
-                <Button x:Name="MonitorButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Monitor" Margin="2,0,0,4">
+                <RadioButton x:Name="MonitorButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Monitor" Margin="2,0,0,4" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -232,9 +232,9 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
 
-                <Button x:Name="SettingsButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Settings" Margin="0,0,0,4">
+                <RadioButton x:Name="SettingsButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Settings" Margin="0,0,0,4" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -267,9 +267,9 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
 
-                <Button x:Name="HelpButton" Style="{StaticResource SidebarMenuButton}" Click="MenuButton_Click" Tag="Help" Margin="0,0,0,4">
+                <RadioButton x:Name="HelpButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Help" Margin="0,0,0,4" GroupName="SidebarNavigation">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -302,7 +302,7 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                </Button>
+                </RadioButton>
             </StackPanel>
 
             <Border Grid.Row="1" Margin="8,0,8,8">

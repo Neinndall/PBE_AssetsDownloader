@@ -88,6 +88,7 @@ namespace PBE_AssetsManager.Views
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
                 _appSettings.NewHashesPath = defaultSettings.NewHashesPath;
                 _appSettings.OldHashesPath = defaultSettings.OldHashesPath;
+                _appSettings.PbeDirectory = defaultSettings.PbeDirectory;
                 _appSettings.SaveDiffHistory = defaultSettings.SaveDiffHistory;
                 _appSettings.BackgroundUpdates = defaultSettings.BackgroundUpdates;
                 _appSettings.UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
@@ -102,7 +103,7 @@ namespace PBE_AssetsManager.Views
                 _appSettings.AssetTrackerUserRemovedIds = defaultSettings.AssetTrackerUserRemovedIds;
 
                 AppSettings.SaveSettings(_appSettings);
-                _customMessageBoxService.ShowInfo("Reset Successful", "Settings have been reset to default values.", this);
+                _customMessageBoxService.ShowInfo("Info", "Settings have been reset to default values.", this);
 
                 // Apply settings to all views
                 _generalSettingsView.ApplySettingsToUI(_appSettings);

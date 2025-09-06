@@ -15,6 +15,12 @@ namespace PBE_AssetsManager.Views.Settings
         {
             InitializeComponent();
             _logService = logService;
+            this.Loaded += HashPathsSettingsView_Loaded;
+        }
+
+        private void HashPathsSettingsView_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            ApplySettingsToUI(AppSettings.LoadSettings());
         }
 
         public void ApplySettingsToUI(AppSettings appSettings)
@@ -62,7 +68,7 @@ namespace PBE_AssetsManager.Views.Settings
         }
         
         
-    private void btnBrowsePbe_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void btnBrowsePbe_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {

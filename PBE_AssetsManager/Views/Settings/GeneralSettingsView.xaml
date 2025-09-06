@@ -32,6 +32,46 @@
                          Margin="0,2,0,0"/>
         </StackPanel>
 
+        <!-- Data & History Card -->
+        <Border Style="{StaticResource SettingsCard}">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                    <materialDesign:MaterialIcon Kind="Database" 
+                                                   Foreground="{StaticResource AccentPurple}"
+                                                   FontSize="20" 
+                                                   Margin="0,0,12,0" 
+                                                   VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBlock Text="Data and History" 
+                                     FontSize="18" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Manage data synchronization and saving differences" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <CheckBox x:Name="checkBoxSyncHashes" 
+                        Content="Synchronization with CDTB" 
+                        Style="{StaticResource ModernCheckBox}"/>
+                <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
+                         Foreground="{StaticResource TextMuted}" 
+                         FontSize="12" 
+                         Margin="27,0,0,8" 
+                         TextWrapping="Wrap"/>
+
+                <CheckBox x:Name="checkBoxSaveDiffHistory" 
+                        Content="Save differences history"
+                        Style="{StaticResource ModernCheckBox}"/>
+                <TextBlock Text="Save a history of all JSON file differences detected during updates"
+                         Foreground="{StaticResource TextMuted}"
+                         FontSize="12"
+                         Margin="27,0,0,8"
+                         TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
         <!-- Automatic Checks Card -->
         <Border Style="{StaticResource SettingsCard}">
             <StackPanel>
@@ -104,46 +144,6 @@
                          TextWrapping="Wrap"/>
 
                 
-            </StackPanel>
-        </Border>
-
-        <!-- Data & History Card -->
-        <Border Style="{StaticResource SettingsCard}">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <materialDesign:MaterialIcon Kind="Database" 
-                                                   Foreground="{StaticResource AccentPurple}"
-                                                   FontSize="20" 
-                                                   Margin="0,0,12,0" 
-                                                   VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBlock Text="Data and History" 
-                                     FontSize="18" 
-                                     FontWeight="SemiBold"
-                                     Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Manage data synchronization and saving differences" 
-                                     FontSize="12" 
-                                     Foreground="{StaticResource TextMuted}"/>
-                    </StackPanel>
-                </StackPanel>
-                
-                <CheckBox x:Name="checkBoxSyncHashes" 
-                        Content="Synchronization with CDTB" 
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="27,0,0,8" 
-                         TextWrapping="Wrap"/>
-
-                <CheckBox x:Name="checkBoxSaveDiffHistory" 
-                        Content="Save differences history"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Save a history of all JSON file differences detected during updates"
-                         Foreground="{StaticResource TextMuted}"
-                         FontSize="12"
-                         Margin="27,0,0,8"
-                         TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
 

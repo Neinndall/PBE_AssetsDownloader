@@ -23,7 +23,7 @@
                                 Margin="0,0,12,0">
                             <Path x:Name="CheckMark"
                                   Data="M0,4 L4,9 L13,0"
-                                  Stroke="{StaticResource AccentBlue}"
+                                  Stroke="{StaticResource AccentBrush}"
                                   StrokeThickness="2"
                                   Visibility="Collapsed"/>
                         </Border>
@@ -31,12 +31,12 @@
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="CheckBorder" Property="Background" Value="{StaticResource AccentBlue}"/>
-                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                            <Setter TargetName="CheckBorder" Property="Background" Value="{StaticResource AccentBrush}"/>
+                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                             <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

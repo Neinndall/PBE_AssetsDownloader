@@ -26,7 +26,7 @@
                             <Setter TargetName="ExpanderPath" Property="Data" Value="M 5,7 L 9,11 L 13,7"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ExpanderPath" Property="Stroke" Value="{StaticResource AccentBlue}"/>
+                            <Setter TargetName="ExpanderPath" Property="Stroke" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

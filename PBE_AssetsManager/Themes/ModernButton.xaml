@@ -41,7 +41,7 @@
                             <Setter Property="Background" TargetName="border" Value="{StaticResource HoverColor}"/>
                         </MultiTrigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Background" TargetName="border" Value="{StaticResource AccentBlue}"/>
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
                             <Setter Property="Background" TargetName="border" Value="{StaticResource AccentPressedBrush}"/>

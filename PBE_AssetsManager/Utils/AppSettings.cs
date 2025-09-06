@@ -38,6 +38,8 @@ namespace PBE_AssetsManager.Utils
         public Dictionary<string, List<long>> AssetTrackerFoundIds { get; set; }
         public Dictionary<string, Dictionary<long, string>> AssetTrackerUrlOverrides { get; set; }
 
+        public Dictionary<string, List<long>> AssetTrackerUserRemovedIds { get; set; }
+
         private const string ConfigFilePath = "config.json";
 
         public static AppSettings LoadSettings()
@@ -106,6 +108,7 @@ namespace PBE_AssetsManager.Utils
             settings.AssetTrackerFailedIds ??= new Dictionary<string, List<long>>();
             settings.AssetTrackerFoundIds ??= new Dictionary<string, List<long>>();
             settings.AssetTrackerUrlOverrides ??= new Dictionary<string, Dictionary<long, string>>();
+            settings.AssetTrackerUserRemovedIds ??= new Dictionary<string, List<long>>();
 
             return settings;
         }
@@ -138,6 +141,7 @@ namespace PBE_AssetsManager.Utils
                 AssetTrackerFailedIds = new Dictionary<string, List<long>>(),
                 AssetTrackerFoundIds = new Dictionary<string, List<long>>(),
                 AssetTrackerUrlOverrides = new Dictionary<string, Dictionary<long, string>>(),
+                AssetTrackerUserRemovedIds = new Dictionary<string, List<long>>(),
             };
         }
 

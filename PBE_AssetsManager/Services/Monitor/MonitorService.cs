@@ -118,6 +118,7 @@ namespace PBE_AssetsManager.Services.Monitor
             {
                 if (_appSettings.AssetTrackerProgress.TryGetValue(category.Id, out long lastValid)) category.LastValid = lastValid;
                 if (_appSettings.AssetTrackerFailedIds.TryGetValue(category.Id, out var failedIds)) category.FailedUrls = new List<long>(failedIds);
+                if (_appSettings.AssetTrackerUserRemovedIds.TryGetValue(category.Id, out var removedIds)) category.UserRemovedUrls = new List<long>(removedIds);
                 if (_appSettings.AssetTrackerFoundIds.TryGetValue(category.Id, out var foundIds)) category.FoundUrls = new List<long>(foundIds);
                 if (_appSettings.AssetTrackerUrlOverrides.TryGetValue(category.Id, out var overrides)) category.FoundUrlOverrides = new Dictionary<long, string>(overrides);
             }
@@ -139,20 +140,30 @@ namespace PBE_AssetsManager.Services.Monitor
             var assets = new List<TrackedAsset>();
             if (category == null) return assets;
 
+            // Combine found and failed URLs, but EXCLUDE user-removed ones.
             var allIds = new HashSet<long>(category.FoundUrls);
             allIds.UnionWith(category.FailedUrls);
+            allIds.ExceptWith(category.UserRemovedUrls); // Exclude removed URLs
 
             if (!allIds.Any())
             {
                 long startId = category.Start > 0 ? category.Start : 1;
-                for (int i = 0; i < 10; i++)
+                int count = 0;
+                long currentId = startId -1;
+                while(count < 10)
                 {
-                    allIds.Add(startId + i);
+                    currentId++;
+                    if (category.UserRemovedUrls.Contains(currentId)) continue; // Skip removed
+                    allIds.Add(currentId);
+                    count++;
                 }
             }
 
             foreach (long id in allIds.OrderBy(i => i))
             {
+                // This check is redundant now but safe to keep.
+                if (category.UserRemovedUrls.Contains(id)) continue;
+
                 string url = category.FoundUrlOverrides.TryGetValue(id, out var overrideUrl) ? overrideUrl : $"{category.BaseUrl}{id}.{category.Extension}";
                 string status = "Pending";
                 if (category.FoundUrls.Contains(id))
@@ -203,12 +214,14 @@ namespace PBE_AssetsManager.Services.Monitor
 
             var existingIds = new HashSet<long>(currentAssets.Select(a => GetAssetIdFromUrl(a.Url) ?? -1));
             var failedIds = new HashSet<long>(category.FailedUrls);
+            var removedIds = new HashSet<long>(category.UserRemovedUrls); // Get removed IDs
 
             int count = 0;
             while (count < amountToAdd)
             {
                 lastNumber++;
-                if (failedIds.Contains(lastNumber) || existingIds.Contains(lastNumber)) continue;
+                // Check against all three lists
+                if (failedIds.Contains(lastNumber) || existingIds.Contains(lastNumber) || removedIds.Contains(lastNumber)) continue;
 
                 var url = $"{category.BaseUrl}{lastNumber}.{category.Extension}";
                 try
@@ -318,7 +331,18 @@ namespace PBE_AssetsManager.Services.Monitor
                 if (category.FailedUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FailedUrls.Max());
                 long startNumber = highestKnownId > 0 ? highestKnownId + 1 : category.Start;
 
-                for (int i = 0; i < 10; i++) idsToCheck.Add(startNumber + i);
+                for (int i = 0; i < 10; i++)
+                {
+                    long currentId = startNumber + i;
+                    // Do not add user-removed IDs to the check list
+                    if (!category.UserRemovedUrls.Contains(currentId))
+                    {
+                        idsToCheck.Add(currentId);
+                    }
+                }
+
+                // Also ensure we don't check any removed IDs that might have been in the failed list
+                idsToCheck.ExceptWith(category.UserRemovedUrls);
 
                 foreach (long id in idsToCheck.OrderBy(i => i))
                 {
@@ -356,6 +380,7 @@ namespace PBE_AssetsManager.Services.Monitor
             if (category.FoundUrls.Any()) category.LastValid = category.FoundUrls.Max();
             _appSettings.AssetTrackerProgress[category.Id] = category.LastValid;
             _appSettings.AssetTrackerFailedIds[category.Id] = category.FailedUrls;
+            _appSettings.AssetTrackerUserRemovedIds[category.Id] = category.UserRemovedUrls;
             _appSettings.AssetTrackerFoundIds[category.Id] = category.FoundUrls;
             _appSettings.AssetTrackerUrlOverrides[category.Id] = category.FoundUrlOverrides;
             AppSettings.SaveSettings(_appSettings);
@@ -367,19 +392,26 @@ namespace PBE_AssetsManager.Services.Monitor
             if (!assetId.HasValue) return;
 
             bool changed = false;
+            // Remove from found lists
             if (category.FoundUrls.Remove(assetId.Value))
             {
                 changed = true;
             }
-
-            if (!category.FailedUrls.Contains(assetId.Value))
+            if (category.FoundUrlOverrides.Remove(assetId.Value))
             {
-                category.FailedUrls.Add(assetId.Value);
+                changed = true;
+            }
+
+            // Add to the permanent user-removed list
+            if (!category.UserRemovedUrls.Contains(assetId.Value))
+            {
+                category.UserRemovedUrls.Add(assetId.Value);
                 changed = true;
             }
 
             if (changed)
             {
+                InvalidateAssetCacheForCategory(category);
                 SaveCategoryProgress(category);
             }
         }

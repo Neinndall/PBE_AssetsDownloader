@@ -74,14 +74,30 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             Assets.Clear();
             if (SelectedCategory == null || MonitorService == null) return;
 
-            var assetsFromService = MonitorService.GetAssetListForCategory(SelectedCategory);
+            // Get all assets from the service, but only take the ones that are not "Not Found"
+            var assetsFromService = MonitorService.GetAssetListForCategory(SelectedCategory)
+                                                  .Where(a => a.Status != "Not Found")
+                                                  .OrderBy(a => a.DisplayName);
+
             foreach (var asset in assetsFromService)
             {
                 Assets.Add(asset);
             }
+
+            // Check if we need to fill up with pending assets
+            const int maxAssets = 10;
+            int assetsNeeded = maxAssets - Assets.Count;
+
+            if (assetsNeeded > 0)
+            {
+                var newAssets = MonitorService.GenerateMoreAssets(Assets, SelectedCategory, assetsNeeded);
+                foreach (var asset in newAssets)
+                {
+                    Assets.Add(asset);
+                }
+            }
+
             AssetsItemsControl.ItemsSource = Assets;
-
-
         }
 
         private void DownloadButton_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -105,7 +121,7 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             catch (Exception ex)
             {
                 LogService.LogError(ex, "An error occurred while loading more assets.");
-                CustomMessageBoxService?.ShowError("Error", "An error occurred while loading more assets. Please check the logs.");
+                CustomMessageBoxService.ShowError("Error", "An error occurred while loading more assets. Please check the logs.");
             }
             finally
             {
@@ -120,7 +136,7 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             var assetsToCheck = Assets.Where(a => a.Status == "Pending").ToList();
             if (!assetsToCheck.Any())
             {
-                var result = CustomMessageBoxService.ShowYesNo("No Pending Assets", "There are no pending assets to check. Do you want to load more?");
+                var result = CustomMessageBoxService.ShowYesNo("Info", "There are no pending assets to check. Do you want to load more?");
                 if (result != true) return;
 
                 LoadMoreButton_Click(this, new RoutedEventArgs());
@@ -141,12 +157,12 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
                 await MonitorService.CheckAssetsAsync(assetsToCheck, SelectedCategory, CancellationToken.None);
 
                 var foundCount = assetsToCheck.Count(a => a.Status == "OK");
-                CustomMessageBoxService?.ShowInfo("Info", $"Check finished. Found {foundCount} new assets out of {assetsToCheck.Count} checked.");
+                CustomMessageBoxService.ShowInfo("Info", $"Check finished. Found {foundCount} new assets out of {assetsToCheck.Count} checked.");
             }
             catch (Exception ex)
             {
                 LogService.LogError(ex, "An error occurred during asset check.");
-                CustomMessageBoxService?.ShowError("Error", "An error occurred during asset check. Please check the logs.");
+                CustomMessageBoxService.ShowError("Error", "An error occurred during asset check. Please check the logs.");
             }
             finally
             {
@@ -220,12 +236,12 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
                 try
                 {
                     await AssetDownloader.DownloadAssetToCustomPathAsync(asset.Url, saveFileDialog.FileName);
-                    CustomMessageBoxService?.ShowSuccess("Success", $"Asset '{asset.DisplayName}' saved successfully.");
+                    CustomMessageBoxService.ShowSuccess("Success", $"Asset '{asset.DisplayName}' saved successfully.");
                 }
                 catch (Exception ex)
                 {
                     LogService.LogError(ex, $"Failed to save asset '{asset.DisplayName}'.");
-                    CustomMessageBoxService?.ShowError("Error", $"Failed to save asset. Check logs for details.");
+                    CustomMessageBoxService.ShowError("Error", $"Failed to save asset. Check logs for details.");
                 }
             }
         }
@@ -236,7 +252,7 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             var assetToRemove = button?.Tag as TrackedAsset;
             if (assetToRemove == null || SelectedCategory == null) return;
 
-            var result = CustomMessageBoxService.ShowYesNo("Remove Asset", $"Are you sure you want to remove '{assetToRemove.DisplayName}'? This will mark it as 'Not Found' and it won't be shown as a valid asset anymore.");
+            var result = CustomMessageBoxService.ShowYesNo("Info", $"Are you sure you want to remove '{assetToRemove.DisplayName}'? This action is permanent and the asset will not appear again in this category.");
             if (result == true)
             {
                 Assets.Remove(assetToRemove);

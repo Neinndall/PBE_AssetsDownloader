@@ -78,9 +78,8 @@
         </StackPanel>
 
         <!-- Asset Grid -->
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <ItemsControl Name="AssetsItemsControl" Margin="-20 0">
-                <ItemsControl.ItemsPanel>
+        <ItemsControl Name="AssetsItemsControl" Margin="-20 0">
+            <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid IsItemsHost="True" Columns="4"/>
                     </ItemsPanelTemplate>
@@ -157,8 +156,5 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </ScrollViewer>
-
-
-    </DockPanel>
+        </DockPanel>
 </UserControl>

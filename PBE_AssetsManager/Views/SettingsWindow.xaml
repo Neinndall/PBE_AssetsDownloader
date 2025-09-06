@@ -30,7 +30,7 @@
                         <TextBlock Text="⚙️ SETTINGS" 
                                   FontSize="16" 
                                   FontWeight="Bold"
-                                  Foreground="{StaticResource AccentBlue}"/>
+                                  Foreground="{StaticResource AccentBrush}"/>
                         <TextBlock Text="Configuration Panel" 
                                   FontSize="11" 
                                   Foreground="{StaticResource TextMuted}"

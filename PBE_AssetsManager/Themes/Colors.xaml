@@ -3,7 +3,8 @@
 
     <!-- Lo usamos para Styles.xaml / SidebarMenuButton -->
     <SolidColorBrush x:Key="AccentBrush" Color="#FF5577CC"/> 
-    <SolidColorBrush x:Key="AccentPressedBrush" Color="#FF2E3B5C"/>
+    <SolidColorBrush x:Key="ModernButtonHoverBrush" Color="#FF6A88D9"/>
+    <SolidColorBrush x:Key="ModernButtonPressedBrush" Color="#FF405DAB"/>
     
     <!-- Modern Dark Theme Colors -->
     <SolidColorBrush x:Key="DarkBackground" Color="#FF1E1E1E"/>

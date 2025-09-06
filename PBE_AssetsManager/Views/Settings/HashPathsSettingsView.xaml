@@ -110,7 +110,7 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <materialDesign:MaterialIcon Kind="FolderSearch" 
-                                                   Foreground="{StaticResource AccentBlue}"
+                                                   Foreground="{StaticResource AccentBrush}"
                                                    FontSize="20" 
                                                    Margin="0,0,12,0" 
                                                    VerticalAlignment="Center"/>
@@ -118,7 +118,7 @@
                         <TextBlock Text="PBE Directory" 
                                      FontSize="18" 
                                      FontWeight="SemiBold"
-                                     Foreground="{StaticResource AccentBlue}"/>
+                                     Foreground="{StaticResource AccentBrush}"/>
                         <TextBlock Text="Default directory for the WAD Explorer" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>

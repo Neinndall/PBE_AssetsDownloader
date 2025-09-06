@@ -129,7 +129,7 @@
                 ToolTip="">
             <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Loading"
                                         Width="16" Height="16"
-                                        Foreground="{StaticResource AccentBlue}"
+                                        Foreground="{StaticResource AccentBrush}"
                                         VerticalAlignment="Center">
                 <materialIcons:MaterialIcon.RenderTransform>
                     <RotateTransform CenterX="8" CenterY="8"/>

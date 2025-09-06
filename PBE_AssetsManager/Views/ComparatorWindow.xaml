@@ -32,13 +32,13 @@
                                              Width="54"
                                              Margin="0,0,10,0"
                                              VerticalAlignment="Center"
-                                             Foreground="{StaticResource AccentBlue}"
+                                             Foreground="{StaticResource AccentBrush}"
                                              Grid.Column="0"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Text="COMPARATOR" 
                                FontSize="26" 
                                FontWeight="Bold"
-                               Foreground="{StaticResource AccentBlue}"
+                               Foreground="{StaticResource AccentBrush}"
                                Margin="0,2,0,0"/>
                     <TextBlock Text="Manually compare JSON files or WAD files."
                                FontSize="12" 

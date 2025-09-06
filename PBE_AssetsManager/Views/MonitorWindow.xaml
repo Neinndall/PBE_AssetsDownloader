@@ -31,13 +31,13 @@
                                              Width="54"
                                              Margin="0,0,10,0"
                                              VerticalAlignment="Center"
-                                             Foreground="{StaticResource AccentPurple}"
+                                             Foreground="{StaticResource AccentBrush}"
                                              Grid.Column="0"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Text="MONITOR CENTER" 
                                FontSize="26" 
                                FontWeight="Bold"
-                               Foreground="{StaticResource AccentPurple}"
+                               Foreground="{StaticResource AccentBrush}"
                                Margin="0,2,0,0"/>
                     <TextBlock Text="Monitor remote files and asset updates."
                                FontSize="12" 

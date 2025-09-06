@@ -16,7 +16,7 @@
                                              FontSize="20"
                                              Margin="0,0,12,0"
                                              VerticalAlignment="Center"
-                                             Foreground="{StaticResource AccentBlue}"/>
+                                             Foreground="{StaticResource AccentBrush}"/>
                 <StackPanel>
                     <TextBlock Text="Manual JSON Comparison" 
                                FontSize="18" 

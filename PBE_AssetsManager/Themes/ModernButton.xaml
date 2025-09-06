@@ -44,7 +44,7 @@
                             <Setter Property="Background" TargetName="border" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="true">
-                            <Setter Property="Background" TargetName="border" Value="{StaticResource AccentPressedBrush}"/>
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource ModernButtonPressedBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -80,9 +80,9 @@
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Border" Property="Background" Value="{StaticResource HoverColor}"/>
-                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
-                            <Setter TargetName="Text" Property="Foreground" Value="{StaticResource AccentBlue}"/>
-                            <Setter TargetName="Icon" Property="Foreground" Value="{StaticResource AccentBlue}"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            <Setter TargetName="Text" Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                            <Setter TargetName="Icon" Property="Foreground" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="False">
                             <Setter TargetName="Text" Property="Foreground" Value="{StaticResource TextSecondary}"/>
@@ -96,7 +96,7 @@
 
     <!-- Modern Button Style -->
     <Style x:Key="ModernButton" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="14,8"/>
@@ -114,10 +114,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#FF1F7FCC"/>
+                            <Setter Property="Background" Value="{StaticResource ModernButtonHoverBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="#FF0E5A99"/>
+                            <Setter Property="Background" Value="{StaticResource ModernButtonPressedBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -145,7 +145,7 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="{StaticResource HoverColor}"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -204,11 +204,11 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{StaticResource HoverColor}"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
-                            <Setter Property="Foreground" Value="{StaticResource AccentBlue}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource ModernButtonPressedBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -239,12 +239,12 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{StaticResource HoverColor}"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
-                            <Setter Property="Foreground" Value="{StaticResource AccentBlue}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBlue}"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource AccentBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
                             <Setter Property="Foreground" Value="White"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -281,7 +281,7 @@
     </Style>
 
     <Style x:Key="SaveIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
         <Setter Property="Foreground" Value="White"/>
     </Style>
 

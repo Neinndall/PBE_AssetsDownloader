@@ -30,7 +30,7 @@
                     <TextBlock Text="ASSETS PREVIEW" 
                                FontSize="24" 
                                FontWeight="Bold"
-                               Foreground="{StaticResource AccentBlue}"/>
+                               Foreground="{StaticResource AccentBrush}"/>
                     <TextBlock Text="Browse and preview available assets" 
                                FontSize="14" 
                                Foreground="{StaticResource TextMuted}"/>

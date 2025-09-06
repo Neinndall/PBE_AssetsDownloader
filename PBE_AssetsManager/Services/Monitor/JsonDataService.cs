@@ -328,7 +328,7 @@ namespace PBE_AssetsManager.Services.Monitor
             {
                 // Save settings only if there was an update to persist the LastUpdated date
                 AppSettings.SaveSettings(_appSettings);
-                if (!silent) _logService.LogSuccess("Local game data dates updated.");
+                if (!silent) _logService.LogSuccess("JSON files are updated.");
             }
             else
             {

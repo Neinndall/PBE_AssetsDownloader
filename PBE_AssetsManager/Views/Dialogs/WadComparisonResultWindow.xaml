@@ -30,12 +30,12 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:MaterialIcon Kind="Compare" FontSize="24" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource AccentBlue}"/>
+                    <materialDesign:MaterialIcon Kind="Compare" FontSize="24" Margin="0,0,12,0" VerticalAlignment="Center" Foreground="{StaticResource AccentBrush}"/>
                     <StackPanel>
                         <TextBlock Text="WAD COMPARISON RESULTS" 
                                    FontSize="24" 
                                    FontWeight="Bold"
-                                   Foreground="{StaticResource AccentBlue}"/>
+                                   Foreground="{StaticResource AccentBrush}"/>
                         <TextBlock x:Name="summaryTextBlock"
                                    Text="Loading results..." 
                                    FontSize="14" 

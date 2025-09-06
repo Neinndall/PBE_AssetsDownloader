@@ -21,7 +21,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="{StaticResource AccentBlue}" CornerRadius="5,5,0,0" MouseDown="TitleBar_MouseDown">
+            <Border Grid.Row="0" Background="{StaticResource AccentBrush}" CornerRadius="5,5,0,0" MouseDown="TitleBar_MouseDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>

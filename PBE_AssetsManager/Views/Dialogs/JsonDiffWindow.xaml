@@ -42,7 +42,7 @@
                         <!-- Icono -->
                         <icons:MaterialIcon x:Name="ProgressIcon" 
                                             Kind="Sync" 
-                                            Foreground="{StaticResource AccentBlue}" 
+                                            Foreground="{StaticResource AccentBrush}" 
                                             Width="24" 
                                             Height="24" 
                                             RenderTransformOrigin="0.5,0.5"

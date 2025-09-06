@@ -30,7 +30,7 @@
                         <TextBlock Text="🔧 HELP" 
                                   FontSize="16" 
                                   FontWeight="Bold"
-                                  Foreground="{StaticResource AccentBlue}"/>
+                                  Foreground="{StaticResource AccentBrush}"/>
                         <TextBlock Text="Support and Information" 
                                   FontSize="11" 
                                   Foreground="{StaticResource TextMuted}"

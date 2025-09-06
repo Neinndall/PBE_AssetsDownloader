@@ -39,7 +39,7 @@
                                                  Width="54"
                                                  Margin="0,0,10,0"
                                                  VerticalAlignment="Center"
-                                                 Foreground="{StaticResource AccentBlue}"
+                                                 Foreground="{StaticResource AccentBrush}"
                                                  Grid.Column="0"/>
 
                     <!-- Título + Subtítulo -->
@@ -47,7 +47,7 @@
                         <TextBlock Text="EXPORT" 
                                    FontSize="26" 
                                    FontWeight="Bold"
-                                   Foreground="{StaticResource AccentBlue}"
+                                   Foreground="{StaticResource AccentBrush}"
                                    Margin="0,2,0,0"/>
                         <TextBlock Text="Filter, preview and download specific assets using the resources folder."
                                    FontSize="12" 

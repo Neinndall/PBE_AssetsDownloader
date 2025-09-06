@@ -4,8 +4,7 @@
 
     <!-- Expansión más fluida con mejor timing -->
     <Storyboard x:Key="ExpandSidebar">
-        <DoubleAnimation Storyboard.TargetName="SidebarColumn" 
-                         Storyboard.TargetProperty="MinWidth" 
+        <DoubleAnimation Storyboard.TargetProperty="Width" 
                          To="180" 
                          Duration="0:0:0.28">
             <DoubleAnimation.EasingFunction>
@@ -16,8 +15,7 @@
     </Storyboard>
     
     <Storyboard x:Key="CollapseSidebar">
-        <DoubleAnimation Storyboard.TargetName="SidebarColumn" 
-                         Storyboard.TargetProperty="MinWidth" 
+        <DoubleAnimation Storyboard.TargetProperty="Width" 
                          To="64" 
                          Duration="0:0:0.26">
             <DoubleAnimation.EasingFunction>

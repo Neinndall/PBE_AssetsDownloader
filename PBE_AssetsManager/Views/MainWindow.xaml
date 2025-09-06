@@ -18,33 +18,9 @@
         <!-- Main Layout Grid -->
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="SidebarColumn" Width="64" MinWidth="64"/>
+                <ColumnDefinition x:Name="SidebarColumn" Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
-            <Grid.Triggers>
-                <EventTrigger RoutedEvent="Border.MouseEnter" SourceName="Sidebar">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <StaticResource ResourceKey="ExpandSidebar"/>
-                            <BooleanAnimationUsingKeyFrames Storyboard.TargetName="Sidebar" Storyboard.TargetProperty="IsExpanded">
-                                <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="True"/>
-                            </BooleanAnimationUsingKeyFrames>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-
-                <EventTrigger RoutedEvent="Border.MouseLeave" SourceName="Sidebar">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <StaticResource ResourceKey="CollapseSidebar"/>
-                            <BooleanAnimationUsingKeyFrames Storyboard.TargetName="Sidebar" Storyboard.TargetProperty="IsExpanded">
-                                <DiscreteBooleanKeyFrame KeyTime="0:0:0.16" Value="False"/>
-                            </BooleanAnimationUsingKeyFrames>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Grid.Triggers>
 
             <!-- Sidebar -->
             <controls:SidebarView x:Name="Sidebar"

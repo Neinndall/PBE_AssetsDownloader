@@ -7,7 +7,31 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="730" d:DesignWidth="180"
-             Background="Transparent"> <Border x:Name="SidebarContainer" 
+             x:Name="sidebarView"
+             Width="64"
+             Background="Transparent">
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+            <BeginStoryboard>
+                <Storyboard>
+                    <StaticResource ResourceKey="ExpandSidebar"/>
+                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="sidebarView" Storyboard.TargetProperty="IsExpanded">
+                        <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="True"/>
+                    </BooleanAnimationUsingKeyFrames>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+            <BeginStoryboard>
+                <Storyboard>
+                    <StaticResource ResourceKey="CollapseSidebar"/>
+                    <BooleanAnimationUsingKeyFrames Storyboard.TargetName="sidebarView" Storyboard.TargetProperty="IsExpanded">
+                        <DiscreteBooleanKeyFrame KeyTime="0:0:0.16" Value="False"/>
+                    </BooleanAnimationUsingKeyFrames>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers> <Border x:Name="SidebarContainer" 
              Background="{StaticResource CardBackground}"
              BorderBrush="{StaticResource BorderColor}"
              BorderThickness="0,0,1,0"

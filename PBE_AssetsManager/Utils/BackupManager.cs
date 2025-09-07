@@ -56,7 +56,7 @@ namespace PBE_AssetsManager.Utils
             }
         }
 
-        public async Task CreatePbeDirectoryBackupAsync(string sourcePbePath, string destinationBackupPath)
+        public async Task CreateLolDirectoryBackupAsync(string sourceLolPath, string destinationBackupPath)
         {
             await Task.Run(() =>
             {
@@ -68,11 +68,11 @@ namespace PBE_AssetsManager.Utils
                     }
 
                     _logService.Log("Starting directory backup...");
-                    CopyDirectoryRecursive(sourcePbePath, destinationBackupPath);
+                    CopyDirectoryRecursive(sourceLolPath, destinationBackupPath);
                 }
                 catch (Exception ex)
                 {
-                    _logService.LogError(ex, $"PBE_AssetsManager.Utils.BackupManager.CreatePbeDirectoryBackupAsync Exception for source: {sourcePbePath}, destination: {destinationBackupPath}");
+                    _logService.LogError(ex, $"PBE_AssetsManager.Utils.BackupManager.CreateLolDirectoryBackupAsync Exception for source: {sourceLolPath}, destination: {destinationBackupPath}");
                     throw; // Re-throw the exception after logging
                 }
             });

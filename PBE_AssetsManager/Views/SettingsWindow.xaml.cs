@@ -88,7 +88,7 @@ namespace PBE_AssetsManager.Views
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
                 _appSettings.NewHashesPath = defaultSettings.NewHashesPath;
                 _appSettings.OldHashesPath = defaultSettings.OldHashesPath;
-                _appSettings.PbeDirectory = defaultSettings.PbeDirectory;
+                _appSettings.LolDirectory = defaultSettings.LolDirectory;
                 _appSettings.SaveDiffHistory = defaultSettings.SaveDiffHistory;
                 _appSettings.BackgroundUpdates = defaultSettings.BackgroundUpdates;
                 _appSettings.UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;

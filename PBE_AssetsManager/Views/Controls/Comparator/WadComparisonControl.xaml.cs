@@ -51,8 +51,8 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
 
         public event EventHandler<LoadWadComparisonEventArgs> LoadWadComparisonRequested;
 
-        private string _oldPbePath;
-        private string _newPbePath;
+        private string _oldLolPath;
+        private string _newLolPath;
 
         public WadComparisonControl()
         {
@@ -68,7 +68,7 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
             }
         }
 
-        private void WadComparatorService_ComparisonCompleted(List<ChunkDiff> allDiffs, string oldPbePath, string newPbePath)
+        private void WadComparatorService_ComparisonCompleted(List<ChunkDiff> allDiffs, string oldLolPath, string newLolPath)
         {
             Dispatcher.Invoke(() =>
             {
@@ -88,55 +88,55 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
                         NewCompressionType = (d.Type == ChunkDiffType.Removed) ? null : d.NewChunk.Compression
                     }).ToList();
 
-                    var resultWindow = new WadComparisonResultWindow(serializableDiffs, ServiceProvider, CustomMessageBoxService, DirectoriesCreator, AssetDownloaderService, LogService, WadDifferenceService, WadPackagingService, DiffViewService, oldPbePath, newPbePath);
+                    var resultWindow = new WadComparisonResultWindow(serializableDiffs, ServiceProvider, CustomMessageBoxService, DirectoriesCreator, AssetDownloaderService, LogService, WadDifferenceService, WadPackagingService, DiffViewService, oldLolPath, newLolPath);
                     resultWindow.Owner = Window.GetWindow(this);
                     resultWindow.Show();
                 }
             });
         }
 
-        private async void createPbeBackupButton_Click(object sender, RoutedEventArgs e)
+        private async void createLolBackupButton_Click(object sender, RoutedEventArgs e)
         {
-            string sourcePbePath = AppSettings.PbeDirectory;
+            string sourceLolPath = AppSettings.LolDirectory;
 
-            if (string.IsNullOrEmpty(sourcePbePath))
+            if (string.IsNullOrEmpty(sourceLolPath))
             {
-                CustomMessageBoxService.ShowWarning("Warning", "PBE directory is not configured. Please set it in Settings > Default Paths.", Window.GetWindow(this));
+                CustomMessageBoxService.ShowWarning("Warning", "LoL directory is not configured. Please set it in Settings > Default Paths.", Window.GetWindow(this));
                 return;
             }
 
-            if (!Directory.Exists(sourcePbePath))
+            if (!Directory.Exists(sourceLolPath))
             {
-                CustomMessageBoxService.ShowError("Error", $"The configured PBE directory does not exist: {sourcePbePath}", Window.GetWindow(this));
+                CustomMessageBoxService.ShowError("Error", $"The configured LoL directory does not exist: {sourceLolPath}", Window.GetWindow(this));
                 return;
             }
 
-            string destinationBackupPath = sourcePbePath + "_old";
+            string destinationBackupPath = sourceLolPath + "_old";
 
-            createPbeBackupButton.IsEnabled = false;
+            createLolBackupButton.IsEnabled = false;
             try
             {
-                await BackupManager.CreatePbeDirectoryBackupAsync(sourcePbePath, destinationBackupPath);
-                CustomMessageBoxService.ShowInfo("Info", "PBE directory backup completed successfully.", Window.GetWindow(this));
-                LogService.LogSuccess("PBE directory backup completed successfully.");
+                await BackupManager.CreateLolDirectoryBackupAsync(sourceLolPath, destinationBackupPath);
+                CustomMessageBoxService.ShowInfo("Info", "LoL directory backup completed successfully.", Window.GetWindow(this));
+                LogService.LogSuccess("LoL directory backup completed successfully.");
             }
             catch (DirectoryNotFoundException ex)
             {
-                LogService.LogError(ex, "Error creating PBE directory backup");
+                LogService.LogError(ex, "Error creating LoL directory backup");
                 CustomMessageBoxService.ShowError("Error", ex.Message, Window.GetWindow(this));
             }
             catch (Exception ex)
             {
-                LogService.LogError(ex, "Error creating PBE directory backup");
+                LogService.LogError(ex, "Error creating LoL directory backup");
                 CustomMessageBoxService.ShowError("Error", $"An unexpected error occurred while creating the backup: {ex.Message}", Window.GetWindow(this));
             }
             finally
             {
-                createPbeBackupButton.IsEnabled = true;
+                createLolBackupButton.IsEnabled = true;
             }
         }
 
-        private void btnSelectOldPbeDirectory_Click(object sender, RoutedEventArgs e)
+        private void btnSelectOldLolDirectory_Click(object sender, RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
@@ -144,13 +144,13 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
                 folderBrowserDialog.Title = "Select Old Directory";
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    oldPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
+                    oldLolDirectoryTextBox.Text = folderBrowserDialog.FileName;
                     LogService.LogDebug($"Old Directory selected: {folderBrowserDialog.FileName}");
                 }
             }
         }
 
-        private void btnSelectNewPbeDirectory_Click(object sender, RoutedEventArgs e)
+        private void btnSelectNewLolDirectory_Click(object sender, RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
@@ -158,7 +158,7 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
                 folderBrowserDialog.Title = "Select New Directory";
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    newPbeDirectoryTextBox.Text = folderBrowserDialog.FileName;
+                    newLolDirectoryTextBox.Text = folderBrowserDialog.FileName;
                     LogService.LogDebug($"New Directory selected: {folderBrowserDialog.FileName}");
                 }
             }
@@ -199,15 +199,15 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
             {
                 if (wadComparatorTabControl.SelectedIndex == 0) // By Directory
                 {
-                    if (string.IsNullOrEmpty(oldPbeDirectoryTextBox.Text) || string.IsNullOrEmpty(newPbeDirectoryTextBox.Text))
+                    if (string.IsNullOrEmpty(oldLolDirectoryTextBox.Text) || string.IsNullOrEmpty(newLolDirectoryTextBox.Text))
                     {
                         CustomMessageBoxService.ShowWarning("Warning", "Please select both directories.", Window.GetWindow(this));
                         compareWadButton.IsEnabled = true;
                         return;
                     }
-                    _oldPbePath = oldPbeDirectoryTextBox.Text;
-                    _newPbePath = newPbeDirectoryTextBox.Text;
-                    await WadComparatorService.CompareWadsAsync(_oldPbePath, _newPbePath);
+                    _oldLolPath = oldLolDirectoryTextBox.Text;
+                    _newLolPath = newLolDirectoryTextBox.Text;
+                    await WadComparatorService.CompareWadsAsync(_oldLolPath, _newLolPath);
                 }
                 else // By File
                 {
@@ -269,8 +269,8 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
                 else
                 {
                     CustomMessageBoxService.ShowWarning("Warning", "Could not find the 'wad_chunks' directory. Viewing differences might fail if the original PBE directories are not present.", Window.GetWindow(this));
-                    oldPathToUse = loadedResult.OldPbePath;
-                    newPathToUse = loadedResult.NewPbePath;
+                    oldPathToUse = loadedResult.OldLolPath;
+                    newPathToUse = loadedResult.NewLolPath;
                 }
 
                 LoadWadComparisonRequested?.Invoke(this, new LoadWadComparisonEventArgs(loadedResult.Diffs, oldPathToUse, newPathToUse, jsonPath));

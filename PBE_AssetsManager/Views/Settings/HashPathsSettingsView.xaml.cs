@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Controls;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Services;
@@ -15,12 +16,6 @@ namespace PBE_AssetsManager.Views.Settings
         {
             InitializeComponent();
             _logService = logService;
-            this.Loaded += HashPathsSettingsView_Loaded;
-        }
-
-        private void HashPathsSettingsView_Loaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            ApplySettingsToUI(AppSettings.LoadSettings());
         }
 
         public void ApplySettingsToUI(AppSettings appSettings)
@@ -28,7 +23,7 @@ namespace PBE_AssetsManager.Views.Settings
             _appSettings = appSettings;
             textBoxNewHashPath.Text = _appSettings.NewHashesPath;
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
-            textBoxPbePath.Text = _appSettings.PbeDirectory;
+            textBoxLolPath.Text = _appSettings.LolDirectory;
         }
 
         public void SaveSettings()
@@ -36,10 +31,10 @@ namespace PBE_AssetsManager.Views.Settings
             if (_appSettings == null) return;
             _appSettings.NewHashesPath = textBoxNewHashPath.Text;
             _appSettings.OldHashesPath = textBoxOldHashPath.Text;
-            _appSettings.PbeDirectory = textBoxPbePath.Text;
+            _appSettings.LolDirectory = textBoxLolPath.Text;
         }
 
-        private void btnBrowseNew_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void btnBrowseNew_Click(object sender, RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
@@ -53,7 +48,7 @@ namespace PBE_AssetsManager.Views.Settings
             }
         }
 
-        private void btnBrowseOld_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void btnBrowseOld_Click(object sender, RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
@@ -68,16 +63,17 @@ namespace PBE_AssetsManager.Views.Settings
         }
         
         
-        private void btnBrowsePbe_Click(object sender, System.Windows.RoutedEventArgs e)
+        
+        private void btnBrowseLol_Click(object sender, RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())
             {
                 folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select PBE Directory for Explorer";
+                folderBrowserDialog.Title = "Select LoL Directory";
 
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    textBoxPbePath.Text = folderBrowserDialog.FileName;
+                    textBoxLolPath.Text = folderBrowserDialog.FileName;
                 }
             }
         }

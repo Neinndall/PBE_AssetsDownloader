@@ -174,8 +174,8 @@ namespace PBE_AssetsManager.Views.Dialogs
                 };
                 var comparisonResult = new WadComparisonData
                 {
-                    OldPbePath = _oldPbePath,
-                    NewPbePath = _newPbePath,
+                    OldLolPath = _oldPbePath,
+                    NewLolPath = _newPbePath,
                     Diffs = _serializableDiffs
                 };
                 var json = JsonSerializer.Serialize(comparisonResult, options);

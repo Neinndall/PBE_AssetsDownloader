@@ -24,7 +24,7 @@ namespace PBE_AssetsManager.Utils
 
         public string NewHashesPath { get; set; }
         public string OldHashesPath { get; set; }
-        public string PbeDirectory { get; set; }
+        public string LolDirectory { get; set; }
         public Dictionary<string, long> HashesSizes { get; set; }
 
         // This will become redundant after migration
@@ -131,7 +131,7 @@ namespace PBE_AssetsManager.Utils
 
                 NewHashesPath = null,
                 OldHashesPath = null,
-                PbeDirectory = null,
+                LolDirectory = null,
                 HashesSizes = new Dictionary<string, long>(),
 
                 JsonDataModificationDates = new Dictionary<string, DateTime>(),

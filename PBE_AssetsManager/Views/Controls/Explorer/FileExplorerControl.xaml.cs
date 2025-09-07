@@ -37,9 +37,9 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
         private void FileExplorerControl_Loaded(object sender, RoutedEventArgs e)
         {
             var settings = AppSettings.LoadSettings();
-            if (!string.IsNullOrEmpty(settings.PbeDirectory) && Directory.Exists(settings.PbeDirectory))
+            if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
             {
-                LoadInitialDirectory(settings.PbeDirectory);
+                LoadInitialDirectory(settings.LolDirectory);
             }
             else
             {
@@ -48,11 +48,11 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
             }
         }
 
-        private void SelectPbeDirButton_Click(object sender, RoutedEventArgs e)
+        private void SelectLolDirButton_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
             {
-                Title = "Select the PBE Directory",
+                Title = "Select the League of Legends Directory",
                 Filter = "All files (*.*)|*.*",
                 CheckFileExists = false,
                 ValidateNames = false,
@@ -61,13 +61,13 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string pbeDirectory = Path.GetDirectoryName(openFileDialog.FileName);
-                if (Directory.Exists(pbeDirectory))
+                string lolDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                if (Directory.Exists(lolDirectory))
                 {
-                    LoadInitialDirectory(pbeDirectory);
+                    LoadInitialDirectory(lolDirectory);
 
                     var settings = AppSettings.LoadSettings();
-                    settings.PbeDirectory = pbeDirectory;
+                    settings.LolDirectory = lolDirectory;
                     AppSettings.SaveSettings(settings);
                 }
                 else

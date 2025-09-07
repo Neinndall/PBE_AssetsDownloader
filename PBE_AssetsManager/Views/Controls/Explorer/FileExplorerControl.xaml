@@ -91,13 +91,13 @@
                                             HorizontalAlignment="Center"
                                             Foreground="{StaticResource TextMuted}"
                                             Opacity="0.8"/>
-                <TextBlock Text="Select a PBE Directory"
+                <TextBlock Text="Select a LoL Directory"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Foreground="{StaticResource TextMuted}"
                            HorizontalAlignment="Center"
                            Margin="0,16,0,0"/>
-                <TextBlock Text="Choose the root folder of a PBE installation to browse its WAD files."
+                <TextBlock Text="Choose the root folder of a League of Legends installation to browse its WAD files."
                            TextWrapping="Wrap"
                            FontSize="14"
                            Foreground="{StaticResource TextMuted}"
@@ -105,15 +105,15 @@
                            TextAlignment="Center"
                            Margin="0,8,0,0"
                            Opacity="0.7"/>
-                <Button x:Name="SelectPbeDirButton"
+                <Button x:Name="SelectLolDirButton"
                         Content="Select Directory..."
                         Style="{StaticResource SecondaryButton}"
-                        Click="SelectPbeDirButton_Click"
+                        Click="SelectLolDirButton_Click"
                         Padding="16,0"
                         Height="36"
                         HorizontalAlignment="Center"
                         Margin="0,20,0,0"
-                        ToolTip="Select the root directory of a PBE installation to browse its WAD files."/>
+                        ToolTip="Select the root directory of a League of Legends installation to browse its WAD files."/>
             </StackPanel>
             <StackPanel x:Name="LoadingIndicator"
                         HorizontalAlignment="Center"

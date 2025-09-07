@@ -40,8 +40,8 @@ namespace PBE_AssetsManager.Views.Models
 
     public class WadComparisonData
     {
-        public string OldPbePath { get; set; }
-        public string NewPbePath { get; set; }
+        public string OldLolPath { get; set; }
+        public string NewLolPath { get; set; }
         public List<SerializableChunkDiff> Diffs { get; set; }
     }
 }

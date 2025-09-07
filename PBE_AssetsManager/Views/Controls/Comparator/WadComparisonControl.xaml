@@ -60,7 +60,7 @@
                                     <ColumnDefinition Width="12"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="newPbeDirectoryTextBox" 
+                                <TextBox x:Name="newLolDirectoryTextBox" 
                                              Grid.Column="0"
                                              Height="36"
                                              IsReadOnly="True"
@@ -71,7 +71,7 @@
                                             Padding="16,0"
                                             Height="36"
                                             Style="{StaticResource SecondaryButton}"
-                                            Click="btnSelectNewPbeDirectory_Click"
+                                            Click="btnSelectNewLolDirectory_Click"
                                             ToolTip="Browse for directory"/>
                             </Grid>
                         </Grid>
@@ -104,7 +104,7 @@
                                     <ColumnDefinition Width="12"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="oldPbeDirectoryTextBox" 
+                                <TextBox x:Name="oldLolDirectoryTextBox" 
                                              Grid.Column="0"
                                              Height="36"
                                              IsReadOnly="True"
@@ -115,7 +115,7 @@
                                             Padding="16,0"
                                             Height="36"
                                             Style="{StaticResource SecondaryButton}"
-                                            Click="btnSelectOldPbeDirectory_Click"
+                                            Click="btnSelectOldLolDirectory_Click"
                                             ToolTip="Browse for directory"/>
                             </Grid>
                         </Grid>
@@ -240,13 +240,13 @@
                                Margin="0,2,0,12"/>
 
                     <StackPanel Orientation="Horizontal">
-                        <Button x:Name="createPbeBackupButton" 
-                            Content="Create PBE Backup"
+                        <Button x:Name="createLolBackupButton" 
+                            Content="Create LoL Backup"
                             Height="36"
                             Padding="16,0"
                             Style="{StaticResource SecondaryButton}"
-                            Click="createPbeBackupButton_Click"
-                            ToolTip="Create a backup of the current PBE directory"
+                            Click="createLolBackupButton_Click"
+                            ToolTip="Create a backup of the current LoL directory"
                             Margin="0,0,12,0"/>
                         <Button x:Name="loadButton" 
                             Content="Load Results"

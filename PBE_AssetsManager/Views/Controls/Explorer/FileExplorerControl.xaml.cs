@@ -65,10 +65,6 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
                 if (Directory.Exists(lolDirectory))
                 {
                     LoadInitialDirectory(lolDirectory);
-
-                    var settings = AppSettings.LoadSettings();
-                    settings.LolDirectory = lolDirectory;
-                    AppSettings.SaveSettings(settings);
                 }
                 else
                 {

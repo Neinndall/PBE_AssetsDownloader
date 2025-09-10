@@ -58,6 +58,7 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
         {
             InitializeComponent();
             Loaded += WadComparisonControl_Loaded;
+            Unloaded += WadComparisonControl_Unloaded;
         }
 
         private void WadComparisonControl_Loaded(object sender, RoutedEventArgs e)
@@ -65,6 +66,14 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
             if (WadComparatorService != null)
             {
                 WadComparatorService.ComparisonCompleted += WadComparatorService_ComparisonCompleted;
+            }
+        }
+
+        private void WadComparisonControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (WadComparatorService != null)
+            {
+                WadComparatorService.ComparisonCompleted -= WadComparatorService_ComparisonCompleted;
             }
         }
 

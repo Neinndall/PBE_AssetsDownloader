@@ -226,7 +226,7 @@
                                              FontSize="20" 
                                              Margin="0,0,12,0" 
                                              VerticalAlignment="Top"
-                                             Foreground="{StaticResource AccentOrange}"/>
+                                             Foreground="{StaticResource AccentBrush}"/>
 
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Actions" 

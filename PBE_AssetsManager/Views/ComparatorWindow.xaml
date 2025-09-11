@@ -56,7 +56,7 @@
                       Padding="32,24,32,0">
             <StackPanel>
                 <comparator:JsonComparisonControl x:Name="JsonComparisonControl" />
-                <comparator:WadComparisonControl x:Name="WadComparisonControl" Margin="0,24,0,0"/>
+                <comparator:WadComparisonControl x:Name="WadComparisonControl"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>

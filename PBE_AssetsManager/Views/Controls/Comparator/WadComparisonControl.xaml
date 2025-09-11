@@ -11,7 +11,7 @@
     <Border Style="{StaticResource SettingsCard}">
         <StackPanel>
             <!-- Header con icono y título -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,15" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,16" VerticalAlignment="Center">
                 <materialDesign:MaterialIcon Kind="Compare"
                                              FontSize="20"
                                              Margin="0,0,12,0"
@@ -32,8 +32,7 @@
                 <!-- Tab: By Directory -->
                 <TabItem Header="By Directory" Style="{StaticResource CustomTabItemStyle}">
                     <StackPanel Margin="0,20,0,0">
-                        <!-- New PBE Directory -->
-                        <Grid Margin="0,0,0,24">
+                        <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -126,7 +125,7 @@
                 <TabItem Header="By File" Style="{StaticResource CustomTabItemStyle}">
                     <StackPanel Margin="0,20,0,0">
                         <!-- New WAD File -->
-                        <Grid Margin="0,0,0,24">
+                        <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -217,7 +216,7 @@
             </TabControl>
 
             <!-- Actions -->
-            <Grid Margin="0,24,0,0">
+            <Grid Margin="0,16,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>

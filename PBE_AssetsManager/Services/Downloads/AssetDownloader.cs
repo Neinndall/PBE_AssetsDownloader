@@ -122,11 +122,11 @@ namespace PBE_AssetsManager.Services.Downloads
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    _logService.LogWarning($"Asset not found: {assetUrl}");
+                    Log.Information($"Asset not found: {assetUrl}");
                 }
                 else
                 {
-                    _logService.LogWarning($"HTTP error downloading text content from {assetUrl}. Status: {response.StatusCode}");
+                   _logService.LogWarning($"HTTP error downloading text content from {assetUrl}. Status: {response.StatusCode}");
                 }
                 return null;
 

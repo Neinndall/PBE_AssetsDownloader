@@ -131,7 +131,7 @@ namespace PBE_AssetsManager.Services.Downloads
                         return new PreviewData
                         {
                             ContentType = AssetContentType.NotFound,
-                            Message = result.ErrorMessage
+                            Message = "Asset Not Found in the Server"
                         };
                     }
                     catch (Exception ex)
@@ -141,7 +141,7 @@ namespace PBE_AssetsManager.Services.Downloads
                         return new PreviewData
                         {
                             ContentType = AssetContentType.NotFound,
-                            Message = "Could not verify image availability."
+                            Message = "Asset Not Found in the Server"
                         };
                     }
 
@@ -163,7 +163,7 @@ namespace PBE_AssetsManager.Services.Downloads
                         return new PreviewData
                         {
                             ContentType = AssetContentType.NotFound,
-                            Message = "Could not download text content."
+                            Message = "Asset Not Found in the Server"
                         };
                     }
                     catch (Exception ex)
@@ -173,7 +173,7 @@ namespace PBE_AssetsManager.Services.Downloads
                         return new PreviewData
                         {
                             ContentType = AssetContentType.NotFound,
-                            Message = "Could not download text content."
+                            Message = "Asset Not Found in the Server"
                         };
                     }
 
@@ -185,7 +185,7 @@ namespace PBE_AssetsManager.Services.Downloads
                         return new PreviewData
                         {
                             ContentType = AssetContentType.NotFound,
-                            Message = "Asset could not be found or downloaded."
+                            Message = "Asset Not Found in the Server"
                         };
                     }
 

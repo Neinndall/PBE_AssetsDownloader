@@ -42,7 +42,8 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
                     genericFileNamePanel.Visibility = Visibility.Visible;
                     string currentPath = diff.NewPath ?? diff.OldPath;
                     genericFileNameTextBlock.Text = !string.IsNullOrEmpty(currentPath) ? Path.GetFileName(currentPath) : "N/A";
-                    pathTextBlock.Text = Path.GetDirectoryName(currentPath) ?? "N/A";
+                    var directoryPath = Path.GetDirectoryName(currentPath);
+                    pathTextBlock.Text = !string.IsNullOrEmpty(directoryPath) ? directoryPath : "N/A";
                 }
 
                 changeTypeTextBlock.Text = diff.Type.ToString();

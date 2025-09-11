@@ -74,9 +74,8 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             Assets.Clear();
             if (SelectedCategory == null || MonitorService == null) return;
 
-            // Get all assets from the service, but only take the ones that are not "Not Found"
+            // Get all assets from the service
             var assetsFromService = MonitorService.GetAssetListForCategory(SelectedCategory)
-                                                  .Where(a => a.Status != "Not Found")
                                                   .OrderBy(a => a.DisplayName);
 
             foreach (var asset in assetsFromService)
@@ -133,15 +132,16 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
         {
             if (MonitorService == null || SelectedCategory == null) return;
 
-            var assetsToCheck = Assets.Where(a => a.Status == "Pending").ToList();
+            var assetsToCheck = Assets.Where(a => a.Status == "Pending" || a.Status == "Not Found").ToList();
             if (!assetsToCheck.Any())
             {
-                var result = CustomMessageBoxService.ShowYesNo("Info", "There are no pending assets to check. Do you want to load more?");
+                var result = CustomMessageBoxService.ShowYesNo("Info", "There are no pending or failed assets to check. Do you want to load more?");
                 if (result != true) return;
 
                 LoadMoreButton_Click(this, new RoutedEventArgs());
-                assetsToCheck = Assets.Where(a => a.Status == "Pending").ToList();
-                if (!assetsToCheck.Any()) return; // Nothing more was loaded
+                // After loading more, we re-evaluate what to check from the updated Assets collection
+                assetsToCheck = Assets.Where(a => a.Status == "Pending" || a.Status == "Not Found").ToList();
+                if (!assetsToCheck.Any()) return; // Nothing more was loaded or found
             }
 
             CheckButton.IsEnabled = false;

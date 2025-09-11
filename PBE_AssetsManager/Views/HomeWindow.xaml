@@ -74,7 +74,7 @@
                                        FontSize="18" 
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Configure the hash directories to start the download process" 
+                            <TextBlock Text="Configure the hash directories to start" 
                                        FontSize="12" 
                                        Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>

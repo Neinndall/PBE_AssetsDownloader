@@ -87,11 +87,18 @@
                                      Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <CheckBox x:Name="chk_es_ES" Content="es_ES" IsChecked="{Binding IsEsEsSelected}" Style="{StaticResource ModernCheckBox}" Margin="0,0,15,0"/>
-                    <CheckBox x:Name="chk_es_MX" Content="es_MX" IsChecked="{Binding IsEsMxSelected}" Style="{StaticResource ModernCheckBox}" Margin="0,0,15,0"/>
-                    <CheckBox x:Name="chk_en_US" Content="en_US" IsChecked="{Binding IsEnUsSelected}" Style="{StaticResource ModernCheckBox}"/>
-                </StackPanel>
+                <ItemsControl ItemsSource="{Binding AvailableLocales}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Code}" IsChecked="{Binding IsSelected}" Style="{StaticResource ModernCheckBox}" Margin="0,0,15,0"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </Border>
 

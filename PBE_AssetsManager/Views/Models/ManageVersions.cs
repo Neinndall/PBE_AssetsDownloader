@@ -36,38 +36,7 @@ namespace PBE_AssetsManager.Views.Models
             }
         }
 
-        private bool _isEsEsSelected = true;
-        public bool IsEsEsSelected
-        {
-            get { return _isEsEsSelected; }
-            set
-            {
-                _isEsEsSelected = value;
-                OnPropertyChanged(nameof(IsEsEsSelected));
-            }
-        }
-
-        private bool _isEsMxSelected = true;
-        public bool IsEsMxSelected
-        {
-            get { return _isEsMxSelected; }
-            set
-            {
-                _isEsMxSelected = value;
-                OnPropertyChanged(nameof(IsEsMxSelected));
-            }
-        }
-
-        private bool _isEnUsSelected = true;
-        public bool IsEnUsSelected
-        {
-            get { return _isEnUsSelected; }
-            set
-            {
-                _isEnUsSelected = value;
-                OnPropertyChanged(nameof(IsEnUsSelected));
-            }
-        }
+        public ObservableCollection<LocaleOption> AvailableLocales { get; set; }
 
         public ManageVersions(VersionService versionService, LogService logService)
         {
@@ -75,6 +44,13 @@ namespace PBE_AssetsManager.Views.Models
             _logService = logService;
             LeagueClientVersions = new ObservableCollection<VersionFileInfo>();
             LoLGameClientVersions = new ObservableCollection<VersionFileInfo>();
+            AvailableLocales = new ObservableCollection<LocaleOption>
+            {
+                new LocaleOption { Code = "es-ES", IsSelected = false },
+                new LocaleOption { Code = "es-MX", IsSelected = false },
+                new LocaleOption { Code = "en-US", IsSelected = false },
+                new LocaleOption { Code = "tr-TR", IsSelected = false }
+            };
         }
 
         public async Task LoadVersionFilesAsync()

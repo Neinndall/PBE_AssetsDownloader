@@ -126,7 +126,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="22*"/>
                         <ColumnDefinition Width="22*"/>
-                        <ColumnDefinition Width="56*"/>
+                        <ColumnDefinition Width="58*"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
                         <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
@@ -135,7 +135,7 @@
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="25,0,0,0">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
@@ -163,21 +163,23 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="22*"/>
                                     <ColumnDefinition Width="22*"/>
-                                    <ColumnDefinition Width="56*"/>
+                                    <ColumnDefinition Width="58*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" 
                                            Text="{Binding FileName}"
                                            Style="{StaticResource CellTextStyle}"
                                            FontWeight="Medium"
-                                           Margin="10,0,0,0" />
+                                           Margin="2,0,2,0" />
                                 <TextBlock Grid.Column="1" 
                                            Text="{Binding Date}" 
                                            Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" />
+                                           FontWeight="Medium" 
+                                           Margin="2,0,2,0" />
                                 <TextBlock Grid.Column="2" 
                                            Text="{Binding Content}" 
                                            Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" />
+                                           FontWeight="Medium" 
+                                           Margin="2,0,2,0" />
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -207,9 +209,9 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="23*"/>
-                        <ColumnDefinition Width="23*"/>
-                        <ColumnDefinition Width="57*"/>
+                        <ColumnDefinition Width="22*"/>
+                        <ColumnDefinition Width="22*"/>
+                        <ColumnDefinition Width="58*"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
                         <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
@@ -218,7 +220,7 @@
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="25,0,0,0">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
@@ -244,23 +246,25 @@
                         <DataTemplate>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="23*"/>
-                                    <ColumnDefinition Width="23*"/>
-                                    <ColumnDefinition Width="57*"/>
+                                    <ColumnDefinition Width="22*"/>
+                                    <ColumnDefinition Width="22*"/>
+                                    <ColumnDefinition Width="58*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" 
                                            Text="{Binding FileName}"
                                            Style="{StaticResource CellTextStyle}"
                                            FontWeight="Medium"
-                                           Margin="10,0,0,0" />
+                                           Margin="2,0,2,0" />
                                 <TextBlock Grid.Column="1" 
                                            Text="{Binding Date}" 
                                            Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" />
+                                           FontWeight="Medium" 
+                                           Margin="2,0,2,0" />
                                 <TextBlock Grid.Column="2" 
                                            Text="{Binding Content}" 
                                            Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" />
+                                           FontWeight="Medium" 
+                                           Margin="2,0,2,0" />
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>

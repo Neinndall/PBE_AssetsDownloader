@@ -41,7 +41,6 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
         {
             if (VersionService != null && LogService != null)
             {
-                LogService.Log("Initiated version fetch.");
                 await VersionService.FetchAllVersionsAsync();
                 if (_viewModel != null)
                 {

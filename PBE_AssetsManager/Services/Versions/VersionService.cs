@@ -85,7 +85,6 @@ namespace PBE_AssetsManager.Services.Versions
                         }
                     }
                 }
-                _logService.Log($"Successfully fetched releases for region {region}.");
             }
             catch (Exception ex)
             {
@@ -115,7 +114,6 @@ namespace PBE_AssetsManager.Services.Versions
                         }
                     }
                 }
-                _logService.Log("Successfully fetched client configurations.");
                 return configs;
             }
             catch (Exception ex)

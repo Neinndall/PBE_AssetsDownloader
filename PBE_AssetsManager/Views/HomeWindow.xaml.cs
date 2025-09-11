@@ -27,23 +27,21 @@ namespace PBE_AssetsManager.Views
             _customMessageBoxService = customMessageBoxService;
 
             // Inject dependencies into child controls
-            DirectorySelection.LogService = _logService;
-            DirectorySelection.AppSettings = _appSettings;
+            HomeControl.LogService = _logService;
+            HomeControl.AppSettings = _appSettings;
 
-            // Handle events from child controls
-            ActionsControl.StartRequested += ActionsControl_StartRequested;
         }
 
         public void UpdateSettings(AppSettings newSettings, bool wasResetToDefaults)
         {
             _appSettings = newSettings;
-            DirectorySelection.UpdateSettings(newSettings, wasResetToDefaults);
+            HomeControl.UpdateSettings(newSettings, wasResetToDefaults);
         }
 
-        private async void ActionsControl_StartRequested(object sender, System.EventArgs e)
+        private async void startButton_Click(object sender, System.EventArgs e)
         {
-            string oldHashesPath = DirectorySelection.OldHashesPath;
-            string newHashesPath = DirectorySelection.NewHashesPath;
+            string oldHashesPath = HomeControl.OldHashesPath;
+            string newHashesPath = HomeControl.NewHashesPath;
 
             if (string.IsNullOrEmpty(oldHashesPath) || string.IsNullOrEmpty(newHashesPath))
             {

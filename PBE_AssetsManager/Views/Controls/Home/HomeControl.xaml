@@ -55,7 +55,7 @@
         </Grid>
 
         <!-- Old Hash Directory -->
-        <Grid Margin="0,0,0,24">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -99,41 +99,6 @@
                                         Click="btnSelectOldHashesDirectory_Click"
                                         ToolTip="Browse for directory"/>
             </Grid>
-        </Grid>
-
-        <!-- Actions -->
-        <Grid Margin="0,0,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
-                                         FontSize="20" 
-                                         Margin="0,0,12,0" 
-                                         VerticalAlignment="Top"
-                                         Foreground="{StaticResource AccentOrange}"/>
-
-            <StackPanel Grid.Column="1">
-                <TextBlock Text="Actions" 
-                                           FontWeight="Medium"
-                                           FontSize="14"
-                                           Foreground="{StaticResource TextPrimary}"/>
-                <TextBlock Text="Start the asset download process" 
-                                           FontSize="12" 
-                                           Foreground="{StaticResource TextMuted}"
-                                           Margin="0,2,0,12"/>
-
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="startButton" 
-                                        Content="▶️ Start Download" 
-                                        Height="36"
-                                        Width="150"
-                                        Style="{StaticResource ModernButton}"
-                                        Click="startButton_Click"
-                                        ToolTip="Start the download process"/>
-                </StackPanel>
-            </StackPanel>
         </Grid>
     </StackPanel>
 </UserControl>

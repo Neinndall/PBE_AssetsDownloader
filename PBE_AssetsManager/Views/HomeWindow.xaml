@@ -60,7 +60,6 @@
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="32,24,32,0">
-            
             <StackPanel>
                 <!-- Directory Configuration Header Card -->
                 <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
@@ -83,12 +82,44 @@
                 </Border>
 
                 <!-- Content Card -->
-                <Border Style="{StaticResource SettingsCard}">
-                    <StackPanel>
-                        <homeControls:DirectorySelectionControl x:Name="DirectorySelection"/>
+                <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+                    <homeControls:HomeControl x:Name="HomeControl"/>
+                </Border>
+
+                <!-- Actions Header Card -->
+                <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="0">
+                            <materialDesign:MaterialIcon Kind="Flash" 
+                                                       FontSize="20" 
+                                                       Foreground="{StaticResource AccentBrush}"
+                                                       Margin="0,0,12,0"
+                                                       VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Text="Actions" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="Start the asset download process" 
+                                           FontSize="12" 
+                                           Foreground="{StaticResource TextMuted}"/>
+                            </StackPanel>
+                        </StackPanel>
                         
-                        <homeControls:HomeActionsControl x:Name="ActionsControl" Margin="0,0,0,0"/>
-                    </StackPanel>
+                        <Button x:Name="startButton" 
+                                Grid.Column="1"
+                                Content="▶️ Start Download" 
+                                Height="36"
+                                Width="150"
+                                Style="{StaticResource ModernButton}"
+                                Click="startButton_Click"
+                                ToolTip="Start the download process"/>
+                    </Grid>
                 </Border>
             </StackPanel>
         </ScrollViewer>

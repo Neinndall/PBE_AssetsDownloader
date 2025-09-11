@@ -10,8 +10,6 @@ namespace PBE_AssetsManager.Views.Controls.Home
 {
     public partial class HomeControl : UserControl
     {
-        public event EventHandler StartRequested;
-
         public LogService LogService { get; set; }
         public AppSettings AppSettings { get; set; }
 
@@ -82,9 +80,5 @@ namespace PBE_AssetsManager.Views.Controls.Home
             }
         }
 
-        private void startButton_Click(object sender, RoutedEventArgs e)
-        {
-            StartRequested?.Invoke(this, EventArgs.Empty);
-        }
     }
 }

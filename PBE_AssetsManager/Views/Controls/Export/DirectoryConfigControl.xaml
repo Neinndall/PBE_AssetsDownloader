@@ -8,26 +8,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              FontFamily="Consolas, Courier New">
-    <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,24">
+    <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
         <StackPanel>
-            <!-- Header con icono y título -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
-                <materialDesign:MaterialIcon Kind="Folder"
-                                             FontSize="20"
-                                             Margin="0,0,12,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource AccentBrush}"/>
-                <StackPanel>
-                    <TextBlock Text="Directory Configuration" 
-                               FontSize="18" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Set up your source and destination folders" 
-                               FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"/>
-                </StackPanel>
-            </StackPanel>
-
             <!-- Differences Folder -->
             <Grid Margin="0,0,0,24">
                 <Grid.ColumnDefinitions>

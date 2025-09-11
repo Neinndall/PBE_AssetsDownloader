@@ -6,8 +6,7 @@
              xmlns:local="clr-namespace:PBE_AssetsManager.Views"
              xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:comparator="clr-namespace:PBE_AssetsManager.Views.Controls.Comparator"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             mc:Ignorable="d"
              FontFamily="Consolas, Courier New">
     <Grid>
         <Grid.RowDefinitions>

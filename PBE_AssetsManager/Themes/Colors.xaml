@@ -26,8 +26,6 @@
     <SolidColorBrush x:Key="ScrollBarThumbBackground" Color="#505050" />
     <SolidColorBrush x:Key="ScrollBarThumbHoverBackground" Color="#707070" />
     <SolidColorBrush x:Key="ScrollBarThumbPressedBackground" Color="#909090" />
-    <SolidColorBrush x:Key="ScrollBarArrowColor" Color="#BBBBBB" />
-    <SolidColorBrush x:Key="ScrollBarArrowHoverColor" Color="White" />
 
     <!-- Diff Viewer -->
     <!-- Background colors for the text editor lines -->

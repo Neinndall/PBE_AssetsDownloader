@@ -10,15 +10,15 @@
                         <Path x:Name="Arrow" 
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"
-                              Fill="{StaticResource ScrollBarArrowColor}"
+                              Fill="{StaticResource ScrollBarThumbBackground}"
                               Data="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource ScrollBarArrowHoverColor}"/>
+                            <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource ScrollBarThumbHoverBackground}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource ScrollBarArrowHoverColor}"/>
+                            <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource ScrollBarThumbHoverBackground}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -74,8 +74,8 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <RepeatButton Grid.Row="0" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineUpCommand}" Content="M 0 6 L 6 0 L 12 6 Z"/>
-            <Track x:Name="PART_Track" Grid.Row="1" IsDirectionReversed="true">
+            <RepeatButton Grid.Row="0" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineUpCommand}" Content="M 0 4 L 4 0 L 8 4 Z" Margin="0,2,0,0"/>
+            <Track x:Name="PART_Track" Grid.Row="1" IsDirectionReversed="true" Margin="0,2">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.PageUpCommand}" Background="Transparent"/>
                 </Track.DecreaseRepeatButton>
@@ -86,7 +86,7 @@
                     <RepeatButton Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.PageDownCommand}" Background="Transparent"/>
                 </Track.IncreaseRepeatButton>
             </Track>
-            <RepeatButton Grid.Row="2" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineDownCommand}" Content="M 0 0 L 6 6 L 12 0 Z"/>
+            <RepeatButton Grid.Row="2" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineDownCommand}" Content="M 0 0 L 4 4 L 8 0 Z" Margin="0,0,0,2"/>
         </Grid>
     </ControlTemplate>
 

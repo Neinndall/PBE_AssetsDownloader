@@ -8,8 +8,8 @@
         xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         mc:Ignorable="d"
         Title="PBE_AssetsManager"
-        Height="730" Width="950"
-        MinHeight="730" MinWidth="950"
+        Width="950" Height="750" 
+        MinWidth="950" MinHeight="750" 
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New">
@@ -26,12 +26,12 @@
             <controls:SidebarView x:Name="Sidebar"
                                   Grid.Column="0"/>
 
-            <!-- Main Content Area -->
+            <!-- Main Content Area and Logger -->
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" MinHeight="200"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="220" MinHeight="100"/>
+                    <RowDefinition Height="160" MinHeight="38"/>
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0"

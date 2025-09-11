@@ -124,18 +124,18 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24*"/>
                         <ColumnDefinition Width="22*"/>
-                        <ColumnDefinition Width="22*"/>
-                        <ColumnDefinition Width="58*"/>
+                        <ColumnDefinition Width="54*"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
                             <materialDesign:MaterialIcon Kind="FileDocument" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="File Name" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="28,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="35,0,0,0">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
@@ -147,44 +147,46 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-                <ListView x:Name="LeagueClientVersionsListView" 
-                          ItemsSource="{Binding LeagueClientVersions}"
-                          Style="{StaticResource ModernListView}"
-                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ModernListViewItem}">
-                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="22*"/>
-                                    <ColumnDefinition Width="22*"/>
-                                    <ColumnDefinition Width="58*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" 
-                                           Text="{Binding FileName}"
-                                           Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium"
-                                           Margin="2,0,2,0" />
-                                <TextBlock Grid.Column="1" 
-                                           Text="{Binding Date}" 
-                                           Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" 
-                                           Margin="2,0,2,0" />
-                                <TextBlock Grid.Column="2" 
-                                           Text="{Binding Content}" 
-                                           Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" 
-                                           Margin="2,0,2,0" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </StackPanel>
+                                <ListView x:Name="LeagueClientVersionsListView"
+                                          ItemsSource="{Binding LeagueClientVersions}"
+                                          Style="{StaticResource ModernListView}"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ModernListViewItem}">
+                                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="24*"/>
+                                                    <ColumnDefinition Width="22*"/>
+                                                    <ColumnDefinition Width="54*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding FileName}"
+                                                               Style="{StaticResource CellTextStyle}"
+                                                               FontWeight="Medium"
+                                                               TextAlignment="Center" />
+                                                </Border>
+                                                <Border Grid.Column="1" Margin="5,0,10,0">
+                                                    <TextBlock Text="{Binding Date}" 
+                                                               Style="{StaticResource CellTextStyle}"
+                                                               FontWeight="Medium"
+                                                               TextAlignment="Center" />
+                                                </Border>
+                                                <Border Grid.Column="2" Margin="10,0,5,0">
+                                                    <TextBlock Text="{Binding Content}" 
+                                                               Style="{StaticResource CellTextStyle}"
+                                                               FontWeight="Medium"
+                                                               TextAlignment="Center" />
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>            </StackPanel>
         </Border>
 
         <!-- LoL Game Client Versions List -->
@@ -209,18 +211,18 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24*"/>
                         <ColumnDefinition Width="22*"/>
-                        <ColumnDefinition Width="22*"/>
-                        <ColumnDefinition Width="58*"/>
+                        <ColumnDefinition Width="54*"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
                             <materialDesign:MaterialIcon Kind="FileDocument" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="File Name" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="28,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="35,0,0,0">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
@@ -246,25 +248,28 @@
                         <DataTemplate>
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24*"/>
                                     <ColumnDefinition Width="22*"/>
-                                    <ColumnDefinition Width="22*"/>
-                                    <ColumnDefinition Width="58*"/>
+                                    <ColumnDefinition Width="54*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" 
-                                           Text="{Binding FileName}"
-                                           Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium"
-                                           Margin="2,0,2,0" />
-                                <TextBlock Grid.Column="1" 
-                                           Text="{Binding Date}" 
-                                           Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" 
-                                           Margin="2,0,2,0" />
-                                <TextBlock Grid.Column="2" 
-                                           Text="{Binding Content}" 
-                                           Style="{StaticResource CellTextStyle}"
-                                           FontWeight="Medium" 
-                                           Margin="2,0,2,0" />
+                                <Border Grid.Column="0" Margin="0,0,10,0">
+                                    <TextBlock Text="{Binding FileName}"
+                                               Style="{StaticResource CellTextStyle}"
+                                               FontWeight="Medium"
+                                               TextAlignment="Center" />
+                                </Border>
+                                <Border Grid.Column="1" Margin="5,0,10,0">
+                                    <TextBlock Text="{Binding Date}"
+                                               Style="{StaticResource CellTextStyle}"
+                                               FontWeight="Medium"
+                                               TextAlignment="Center" />
+                                </Border>
+                                <Border Grid.Column="2" Margin="10,0,5,0">
+                                    <TextBlock Text="{Binding Content}"
+                                               Style="{StaticResource CellTextStyle}"
+                                               FontWeight="Medium"
+                                               TextAlignment="Center" />
+                                </Border>
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>

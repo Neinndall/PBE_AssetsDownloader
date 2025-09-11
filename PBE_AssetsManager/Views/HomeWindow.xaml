@@ -102,8 +102,8 @@
                                                        VerticalAlignment="Center"/>
                             <StackPanel>
                                 <TextBlock Text="Actions" 
-                                           FontSize="18" 
-                                           FontWeight="SemiBold"
+                                           FontSize="14" 
+                                           FontWeight="Medium"
                                            Foreground="{StaticResource TextPrimary}"/>
                                 <TextBlock Text="Start the asset download process" 
                                            FontSize="12" 

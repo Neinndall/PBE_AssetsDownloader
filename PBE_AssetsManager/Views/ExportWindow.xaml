@@ -88,6 +88,7 @@
                 <export:DirectoryConfigControl x:Name="DirectoryConfig"/>
                 <export:FilterConfigControl x:Name="FilterConfig"/>
                 <export:ExportActionsControl x:Name="ExportActions"/>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>

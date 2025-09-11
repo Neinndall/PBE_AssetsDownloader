@@ -10,45 +10,44 @@
     <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
-                                         FontSize="20" 
-                                         Margin="0,0,12,0" 
-                                         VerticalAlignment="Top"
-                                         Foreground="{StaticResource AccentOrange}"/>
-
-            <StackPanel Grid.Column="1">
-                <TextBlock Text="Actions" 
-                           FontWeight="Medium"
-                           FontSize="14"
-                           Foreground="{StaticResource TextPrimary}"/>
-                <TextBlock Text="Preview or download the selected assets" 
-                           FontSize="12" 
-                           Foreground="{StaticResource TextMuted}"
-                           Margin="0,2,0,12"/>
-
-                <!-- Buttons -->
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnPreviewAssets" 
-                            Content="🔍 Preview Assets" 
-                            Height="36"
-                            Width="160"
-                            Margin="0,0,16,0"
-                            Style="{StaticResource ModernButton}"
-                            Click="btnPreviewAssets_Click"
-                            ToolTip="Preview selected assets before download"/>
-
-                    <Button x:Name="BtnDownloadSelectedAssets" 
-                            Content="⬇️ Download Assets" 
-                            Height="36"
-                            Width="160"
-                            Style="{StaticResource ModernButton}"
-                            Click="BtnDownloadSelectedAssets_Click"
-                            ToolTip="Download the selected assets"/>
+            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                <materialDesign:MaterialIcon Kind="Flash" 
+                                           FontSize="20" 
+                                           Foreground="{StaticResource AccentBrush}"
+                                           Margin="0,0,12,0"
+                                           VerticalAlignment="Center"/>
+                <StackPanel>
+            <TextBlock Text="Actions" 
+                       FontSize="14" 
+                       FontWeight="Medium"
+                       Foreground="{StaticResource TextPrimary}"/>                    
+                       <TextBlock Text="Preview or download the selected assets" 
+                       FontSize="12" 
+                       Foreground="{StaticResource TextMuted}"/>
                 </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Column="1">
+                <Button x:Name="btnPreviewAssets" 
+                        Content="🔍 Preview Assets" 
+                        Height="36"
+                        Width="160"
+                        Margin="0,0,16,0"
+                        Style="{StaticResource ModernButton}"
+                        Click="btnPreviewAssets_Click"
+                        ToolTip="Preview selected assets before download"/>
+
+                <Button x:Name="BtnDownloadSelectedAssets" 
+                        Content="⬇️ Download Assets" 
+                        Height="36"
+                        Width="160"
+                        Style="{StaticResource ModernButton}"
+                        Click="BtnDownloadSelectedAssets_Click"
+                        ToolTip="Download the selected assets"/>
             </StackPanel>
         </Grid>
     </Border>

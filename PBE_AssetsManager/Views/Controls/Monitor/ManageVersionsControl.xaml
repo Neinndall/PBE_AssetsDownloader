@@ -47,11 +47,43 @@
                 <TextBlock Text="Click the button to start the process of fetching and saving all available versions. This may take a moment and the results will be saved to the AppData folder."
                              TextWrapping="Wrap" 
                              Foreground="{StaticResource TextMuted}" />
-                <Button Content="Get Versions" 
-                        Click="FetchVersions_Click" 
-                        Style="{StaticResource ModernButton}" 
-                        HorizontalAlignment="Left" 
-                        Margin="0,15,0,0"/>
+                <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                    <Button Content="Get Versions" 
+                            Click="FetchVersions_Click" 
+                            Style="{StaticResource ModernButton}" 
+                            HorizontalAlignment="Left"/>
+                    <Button Content="Get League-Client" 
+                            Click="GetLeagueClient_Click" 
+                            Style="{StaticResource SecondaryButton}" 
+                            HorizontalAlignment="Left" 
+                            Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Locales Card -->
+        <Border Style="{StaticResource SettingsCard}" Margin="0,15,0,0">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <materialDesign:MaterialIcon Kind="Translate" 
+                                                   Foreground="{StaticResource AccentOrange}"
+                                                   FontSize="18" 
+                                                   Margin="0,0,10,0" 
+                                                   VerticalAlignment="Center"/>
+                    <TextBlock Text="Locales" 
+                                 FontSize="16" 
+                                 FontWeight="SemiBold"
+                                 Foreground="{StaticResource TextPrimary}"/>
+                </StackPanel>
+                <TextBlock Text="Select the locales to be downloaded by the 'Get League-Client' action."
+                             TextWrapping="Wrap" 
+                             Foreground="{StaticResource TextMuted}" 
+                             Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="chk_es_ES" Content="es_ES" IsChecked="{Binding IsEsEsSelected}" Style="{StaticResource ModernCheckBox}" Margin="0,0,15,0"/>
+                    <CheckBox x:Name="chk_es_MX" Content="es_MX" IsChecked="{Binding IsEsMxSelected}" Style="{StaticResource ModernCheckBox}" Margin="0,0,15,0"/>
+                    <CheckBox x:Name="chk_en_US" Content="en_US" IsChecked="{Binding IsEnUsSelected}" Style="{StaticResource ModernCheckBox}"/>
+                </StackPanel>
             </StackPanel>
         </Border>
 
@@ -96,9 +128,13 @@
                 <ListView x:Name="LeagueClientVersionsListView" 
                           ItemsSource="{Binding LeagueClientVersions}"
                           Style="{StaticResource ModernListView}"
-                          ItemContainerStyle="{StaticResource ModernListViewItem}"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ModernListViewItem}">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -163,9 +199,13 @@
                 <ListView x:Name="LoLGameClientVersionsListView" 
                           ItemsSource="{Binding LoLGameClientVersions}"
                           Style="{StaticResource ModernListView}"
-                          ItemContainerStyle="{StaticResource ModernListViewItem}"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem" BasedOn="{StaticResource ModernListViewItem}">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid>

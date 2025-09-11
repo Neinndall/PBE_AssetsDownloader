@@ -180,6 +180,12 @@ namespace PBE_AssetsManager.Services.Versions
 
         private async Task ExtractAndRunManifestDownloader(string manifestUrl, string outputDir)
         {
+            string arguments = $"\"{manifestUrl}\" -f {TargetFilename} -o \"{outputDir}\" -t 4";
+            await RunManifestDownloaderAsync(arguments);
+        }
+
+        private async Task RunManifestDownloaderAsync(string arguments)
+        {
             string resourceName = "PBE_AssetsManager.Resources.ManifestDownloader.ManifestDownloader.exe";
             string tempExePath = Path.Combine(Path.GetTempPath(), "ManifestDownloader.exe");
 
@@ -202,7 +208,7 @@ namespace PBE_AssetsManager.Services.Versions
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = tempExePath,
-                    Arguments = $"\"{manifestUrl}\" -f {TargetFilename} -o \"{outputDir}\" -t 4",
+                    Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
@@ -211,11 +217,20 @@ namespace PBE_AssetsManager.Services.Versions
 
                 using (Process process = Process.Start(startInfo))
                 {
+                    // Asynchronous reading of the output streams to prevent deadlocks
+                    var outputTask = process.StandardOutput.ReadToEndAsync();
+                    var errorTask = process.StandardError.ReadToEndAsync();
+
                     await process.WaitForExitAsync();
+
+                    string error = await errorTask;
+
                     if (process.ExitCode != 0)
                     {
-                        string stderr = await process.StandardError.ReadToEndAsync();
-                        _logService.LogError($"ManifestDownloader.exe failed with exit code {process.ExitCode}: {stderr}");
+                        if (!string.IsNullOrWhiteSpace(error))
+                            _logService.LogError($"ManifestDownloader.exe failed with exit code {process.ExitCode}: {error}");
+                        else
+                            _logService.LogError($"ManifestDownloader.exe failed with exit code {process.ExitCode}");
                     }
                 }
             }
@@ -244,6 +259,22 @@ namespace PBE_AssetsManager.Services.Versions
                 _logService.LogError(ex, $"Error extracting version from {filePath}");
                 return null;
             }
+        }
+
+        public async Task DownloadPluginsAsync(string manifestUrl, string lolDirectory, List<string> locales)
+        {
+            if (string.IsNullOrEmpty(manifestUrl) || string.IsNullOrEmpty(lolDirectory) || locales == null || !locales.Any())
+            {
+                _logService.LogWarning("DownloadPluginsAsync called with invalid parameters.");
+                return;
+            }
+
+            string localesArgument = string.Join(" ", locales);
+            string arguments = $"\"{manifestUrl}\" -o \"{lolDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
+
+            _logService.Log("Starting plugin download with ManifestDownloader...");
+            await RunManifestDownloaderAsync(arguments);
+            _logService.LogSuccess("Plugin download process finished.");
         }
 
         public async Task<List<VersionFileInfo>> GetVersionFilesAsync()
@@ -275,7 +306,6 @@ namespace PBE_AssetsManager.Services.Versions
                         });
                     }
                 }
-                _logService.Log($"Successfully loaded {versionFiles.Count} version files.");
             }
             catch (Exception ex)
             {

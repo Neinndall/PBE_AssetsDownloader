@@ -36,6 +36,39 @@ namespace PBE_AssetsManager.Views.Models
             }
         }
 
+        private bool _isEsEsSelected = true;
+        public bool IsEsEsSelected
+        {
+            get { return _isEsEsSelected; }
+            set
+            {
+                _isEsEsSelected = value;
+                OnPropertyChanged(nameof(IsEsEsSelected));
+            }
+        }
+
+        private bool _isEsMxSelected = true;
+        public bool IsEsMxSelected
+        {
+            get { return _isEsMxSelected; }
+            set
+            {
+                _isEsMxSelected = value;
+                OnPropertyChanged(nameof(IsEsMxSelected));
+            }
+        }
+
+        private bool _isEnUsSelected = true;
+        public bool IsEnUsSelected
+        {
+            get { return _isEnUsSelected; }
+            set
+            {
+                _isEnUsSelected = value;
+                OnPropertyChanged(nameof(IsEnUsSelected));
+            }
+        }
+
         public ManageVersions(VersionService versionService, LogService logService)
         {
             _versionService = versionService;
@@ -58,12 +91,11 @@ namespace PBE_AssetsManager.Views.Models
                     LeagueClientVersions.Add(file);
                 }
 
-                foreach (var file in allFiles.Where(f => f.Category != "league-client"))
+                var gameClientCategories = new[] { "lol-game-client" }; // Can be expanded with more categories
+                foreach (var file in allFiles.Where(f => gameClientCategories.Contains(f.Category)))
                 {
                     LoLGameClientVersions.Add(file);
                 }
-
-                _logService.Log($"Loaded {LeagueClientVersions.Count} League Client versions and {LoLGameClientVersions.Count} other game versions.");
             }
         }
 

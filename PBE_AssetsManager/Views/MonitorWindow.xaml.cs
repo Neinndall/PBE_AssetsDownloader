@@ -50,6 +50,8 @@ namespace PBE_AssetsManager.Views
             // Setup and inject dependencies for ManageVersionsControl
             ManageVersionsControl.VersionService = versionService;
             ManageVersionsControl.LogService = logService;
+            ManageVersionsControl.AppSettings = appSettings; // Add this
+            ManageVersionsControl.CustomMessageBoxService = customMessageBoxService; // Add this
         }
     }
 }

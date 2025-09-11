@@ -30,55 +30,66 @@
         </Border>
 
         <!-- Action Card -->
-        <Border Style="{StaticResource SettingsCard}">
+        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
             <StackPanel>
-                <!-- Card Header -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                    <materialDesign:MaterialIcon Kind="PackageDown" 
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <materialDesign:MaterialIcon Kind="PackageDown"
                                                    Foreground="{StaticResource AccentOrange}"
-                                                   FontSize="18" 
-                                                   Margin="0,0,10,0" 
+                                                   FontSize="20"
+                                                   Margin="0,0,12,0"
                                                    VerticalAlignment="Center"/>
-                    <TextBlock Text="Fetch Versions" 
-                                 FontSize="16" 
-                                 FontWeight="SemiBold"
-                                 Foreground="{StaticResource TextPrimary}"/>
+                    <StackPanel>
+                        <TextBlock Text="Fetch Versions"
+                                     FontSize="18"
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Fetch manifests and download specific client versions."
+                                     TextWrapping="Wrap"
+                                     FontSize="12"
+                                     Foreground="{StaticResource TextMuted}"
+                                     Margin="0,2,0,0"/>
+                    </StackPanel>
                 </StackPanel>
-                <TextBlock Text="Click the button to start the process of fetching and saving all available versions. This may take a moment and the results will be saved to the AppData folder."
-                             TextWrapping="Wrap" 
-                             Foreground="{StaticResource TextMuted}" />
                 <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
-                    <Button Content="Get Versions" 
-                            Click="FetchVersions_Click" 
-                            Style="{StaticResource ModernButton}" 
+                    <Button Content="Get Versions"
+                            Click="FetchVersions_Click"
+                            Style="{StaticResource ModernButton}"
                             HorizontalAlignment="Left"/>
-                    <Button Content="Get League-Client" 
-                            Click="GetLeagueClient_Click" 
-                            Style="{StaticResource SecondaryButton}" 
-                            HorizontalAlignment="Left" 
+                    <Button Content="Get League-Client"
+                            Click="GetLeagueClient_Click"
+                            Style="{StaticResource SecondaryButton}"
+                            HorizontalAlignment="Left"
+                            Margin="10,0,0,0"/>
+                    <Button Content="Get LoL-Game-Client"
+                            Click="GetLoLGameClient_Click"
+                            Style="{StaticResource SecondaryButton}"
+                            HorizontalAlignment="Left"
                             Margin="10,0,0,0"/>
                 </StackPanel>
             </StackPanel>
         </Border>
 
         <!-- Locales Card -->
-        <Border Style="{StaticResource SettingsCard}" Margin="0,15,0,0">
+        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
             <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                    <materialDesign:MaterialIcon Kind="Translate" 
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <materialDesign:MaterialIcon Kind="Translate"
                                                    Foreground="{StaticResource AccentOrange}"
-                                                   FontSize="18" 
-                                                   Margin="0,0,10,0" 
+                                                   FontSize="20"
+                                                   Margin="0,0,12,0"
                                                    VerticalAlignment="Center"/>
-                    <TextBlock Text="Locales" 
-                                 FontSize="16" 
-                                 FontWeight="SemiBold"
-                                 Foreground="{StaticResource TextPrimary}"/>
+                    <StackPanel>
+                        <TextBlock Text="Locales"
+                                     FontSize="18"
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Select the locales for both 'Get League-Client' and 'Get LoL-Game-Client' actions."
+                                     TextWrapping="Wrap"
+                                     FontSize="12"
+                                     Foreground="{StaticResource TextMuted}"
+                                     Margin="0,2,0,0"/>
+                    </StackPanel>
                 </StackPanel>
-                <TextBlock Text="Select the locales to be downloaded by the 'Get League-Client' action."
-                             TextWrapping="Wrap" 
-                             Foreground="{StaticResource TextMuted}" 
-                             Margin="0,0,0,10"/>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="chk_es_ES" Content="es_ES" IsChecked="{Binding IsEsEsSelected}" Style="{StaticResource ModernCheckBox}" Margin="0,0,15,0"/>
                     <CheckBox x:Name="chk_es_MX" Content="es_MX" IsChecked="{Binding IsEsMxSelected}" Style="{StaticResource ModernCheckBox}" Margin="0,0,15,0"/>
@@ -88,7 +99,7 @@
         </Border>
 
         <!-- League Client Versions List -->
-        <Border Style="{StaticResource SettingsCard}" Margin="0,15,0,15">
+        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <materialDesign:MaterialIcon Kind="DesktopClassic" 
@@ -101,7 +112,7 @@
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Versions of the League of Legends client (LeagueClient.exe)" 
+                        <TextBlock Text="Versions of the League of Legends client" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
@@ -172,7 +183,7 @@
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Versions of other game assets (e.g., lol-game-client-sln)" 
+                        <TextBlock Text="Versions of the LoL game client" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>

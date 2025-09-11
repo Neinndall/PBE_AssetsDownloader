@@ -83,6 +83,35 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             await VersionService.DownloadPluginsAsync(selectedVersion.Content, AppSettings.LolDirectory, locales);
         }
 
+        private async void GetLoLGameClient_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedVersion = _viewModel?.LoLGameClientVersions.FirstOrDefault(v => v.IsSelected);
+            if (selectedVersion == null)
+            {
+                CustomMessageBoxService.ShowWarning("No Version Selected", "Please select a LoL Game Client version from the list first.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(AppSettings.LolDirectory))
+            {
+                CustomMessageBoxService.ShowError("Directory Not Found", "League of Legends directory is not configured. Please set it in Settings > Default Paths.");
+                return;
+            }
+
+            var locales = new List<string>();
+            if (_viewModel.IsEsEsSelected) locales.Add("es_ES");
+            if (_viewModel.IsEsMxSelected) locales.Add("es_MX");
+            if (_viewModel.IsEnUsSelected) locales.Add("en_US");
+
+            if (locales.Count == 0)
+            {
+                CustomMessageBoxService.ShowWarning("No Locales Selected", "Please select at least one locale to download.");
+                return;
+            }
+
+            await VersionService.DownloadGameClientAsync(selectedVersion.Content, AppSettings.LolDirectory, locales);
+        }
+
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)

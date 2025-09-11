@@ -277,6 +277,23 @@ namespace PBE_AssetsManager.Services.Versions
             _logService.LogSuccess("Plugin download process finished.");
         }
 
+        public async Task DownloadGameClientAsync(string manifestUrl, string lolDirectory, List<string> locales)
+        {
+            if (string.IsNullOrEmpty(manifestUrl) || string.IsNullOrEmpty(lolDirectory) || locales == null || !locales.Any())
+            {
+                _logService.LogWarning("DownloadGameClientAsync called with invalid parameters.");
+                return;
+            }
+
+            string gameDirectory = Path.Combine(lolDirectory, "Game");
+            string localesArgument = string.Join(" ", locales);
+            string arguments = $"\"{manifestUrl}\" -o \"{gameDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
+
+            _logService.Log("Starting game client download with ManifestDownloader...");
+            await RunManifestDownloaderAsync(arguments);
+            _logService.LogSuccess("Game client download process finished.");
+        }
+
         public async Task<List<VersionFileInfo>> GetVersionFilesAsync()
         {
             var versionFiles = new List<VersionFileInfo>();

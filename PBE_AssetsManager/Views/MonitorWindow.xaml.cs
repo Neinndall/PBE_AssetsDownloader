@@ -47,9 +47,9 @@ namespace PBE_AssetsManager.Views
             AssetTrackerControl.LogService = logService;
             AssetTrackerControl.CustomMessageBoxService = customMessageBoxService;
 
-            // Setup and inject dependencies for UpdateVersionsControl
-            UpdateVersionsControl.VersionService = versionService;
-            UpdateVersionsControl.LogService = logService;
+            // Setup and inject dependencies for ManageVersionsControl
+            ManageVersionsControl.VersionService = versionService;
+            ManageVersionsControl.LogService = logService;
         }
     }
 }

@@ -6,12 +6,12 @@ using System.Windows.Controls;
 
 namespace PBE_AssetsManager.Views.Controls.Monitor
 {
-    public partial class UpdateVersionsControl : UserControl
+    public partial class ManageVersionsControl : UserControl
     {
         public VersionService VersionService { get; set; }
         public LogService LogService { get; set; }
 
-        public UpdateVersionsControl()
+        public ManageVersionsControl()
         {
             InitializeComponent();
         }

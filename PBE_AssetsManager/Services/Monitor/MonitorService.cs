@@ -103,13 +103,9 @@ namespace PBE_AssetsManager.Services.Monitor
 
         #region Asset Tracker
 
-        private readonly Dictionary<string, ObservableCollection<TrackedAsset>> _assetCache = new Dictionary<string, ObservableCollection<TrackedAsset>>();
         public List<AssetCategory> AssetCategories { get; private set; } = new List<AssetCategory>();
 
-        public void InvalidateAssetCacheForCategory(AssetCategory category)
-        {
-            if (category != null) _assetCache.Remove(category.Id);
-        }
+
 
         public void LoadAssetCategories()
         {
@@ -127,12 +123,9 @@ namespace PBE_AssetsManager.Services.Monitor
         public ObservableCollection<TrackedAsset> GetAssetListForCategory(AssetCategory category)
         {
             if (category == null) return new ObservableCollection<TrackedAsset>();
-            if (_assetCache.TryGetValue(category.Id, out var cachedList)) return cachedList;
 
-            var initialAssets = GenerateNewAssetList(category);
-            var newList = new ObservableCollection<TrackedAsset>(initialAssets);
-            _assetCache[category.Id] = newList;
-            return newList;
+            var assets = GenerateNewAssetList(category);
+            return new ObservableCollection<TrackedAsset>(assets);
         }
 
         private List<TrackedAsset> GenerateNewAssetList(AssetCategory category)
@@ -140,41 +133,13 @@ namespace PBE_AssetsManager.Services.Monitor
             var assets = new List<TrackedAsset>();
             if (category == null) return assets;
 
-            // Combine found and failed URLs, but EXCLUDE user-removed ones.
-            var allIds = new HashSet<long>(category.FoundUrls);
-            allIds.UnionWith(category.FailedUrls);
-            allIds.ExceptWith(category.UserRemovedUrls); // Exclude removed URLs
+            // 1. Add all "OK" assets first, sorted by ID
+            var foundIds = new HashSet<long>(category.FoundUrls);
+            foundIds.ExceptWith(category.UserRemovedUrls);
 
-            if (!allIds.Any())
+            foreach (long id in foundIds.OrderBy(i => i))
             {
-                long startId = category.Start > 0 ? category.Start : 1;
-                int count = 0;
-                long currentId = startId -1;
-                while(count < 10)
-                {
-                    currentId++;
-                    if (category.UserRemovedUrls.Contains(currentId)) continue; // Skip removed
-                    allIds.Add(currentId);
-                    count++;
-                }
-            }
-
-            foreach (long id in allIds.OrderBy(i => i))
-            {
-                // This check is redundant now but safe to keep.
-                if (category.UserRemovedUrls.Contains(id)) continue;
-
                 string url = category.FoundUrlOverrides.TryGetValue(id, out var overrideUrl) ? overrideUrl : $"{category.BaseUrl}{id}.{category.Extension}";
-                string status = "Pending";
-                if (category.FoundUrls.Contains(id))
-                {
-                    status = "OK";
-                }
-                else if (category.FailedUrls.Contains(id))
-                {
-                    status = "Not Found";
-                }
-
                 try
                 {
                     string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
@@ -184,15 +149,74 @@ namespace PBE_AssetsManager.Services.Monitor
                     {
                         Url = url,
                         DisplayName = displayName,
-                        Status = status,
-                        Thumbnail = status == "OK" ? url : null
+                        Status = "OK",
+                        Thumbnail = url
                     });
                 }
-                catch (UriFormatException)
+                catch (UriFormatException) { /* Skip invalid URLs */ }
+            }
+
+            // 2. Prepare the list of 10 "Checkable" assets (Failed + Pending)
+            var checkableAssets = new List<TrackedAsset>();
+            var failedIds = new HashSet<long>(category.FailedUrls);
+            failedIds.ExceptWith(category.UserRemovedUrls);
+
+            foreach (long id in failedIds.OrderBy(i => i))
+            {
+                string url = $"{category.BaseUrl}{id}.{category.Extension}";
+                try
                 {
-                    assets.Add(new TrackedAsset { Url = url, DisplayName = "Invalid URL format", Status = "Error" });
+                    string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
+                    if (string.IsNullOrEmpty(displayName)) displayName = $"Asset ID: {id}";
+                    checkableAssets.Add(new TrackedAsset
+                    {
+                        Url = url,
+                        DisplayName = displayName,
+                        Status = "Not Found"
+                    });
+                }
+                catch (UriFormatException) { /* Skip invalid URLs */ }
+            }
+
+            // 3. Fill up to 10 with "Pending"
+            int needed = 10 - checkableAssets.Count;
+            if (needed > 0)
+            {
+                long lastKnownId = 0;
+                var allKnownIds = new HashSet<long>(foundIds);
+                allKnownIds.UnionWith(failedIds);
+                allKnownIds.UnionWith(category.UserRemovedUrls);
+
+                if (allKnownIds.Any())
+                {
+                    lastKnownId = allKnownIds.Max();
+                }
+                else
+                {
+                    lastKnownId = category.Start > 0 ? category.Start - 1 : 0;
+                }
+
+                int count = 0;
+                while (count < needed)
+                {
+                    lastKnownId++;
+                    if (allKnownIds.Contains(lastKnownId)) continue;
+
+                    string url = $"{category.BaseUrl}{lastKnownId}.{category.Extension}";
+                    try
+                    {
+                        string displayName = Path.GetFileName(new Uri(url).AbsolutePath);
+                        if (string.IsNullOrEmpty(displayName)) displayName = $"Asset ID: {lastKnownId}";
+                        checkableAssets.Add(new TrackedAsset { Url = url, DisplayName = displayName, Status = "Pending" });
+                        count++;
+                    }
+                    catch (UriFormatException) { /* Skip invalid URLs */ }
                 }
             }
+
+            // 4. Add the checkable assets to the main list
+            assets.AddRange(checkableAssets);
+
             return assets;
         }
 
@@ -213,6 +237,7 @@ namespace PBE_AssetsManager.Services.Monitor
             }
 
             var existingIds = new HashSet<long>(currentAssets.Select(a => GetAssetIdFromUrl(a.Url) ?? -1));
+            var foundIds = new HashSet<long>(category.FoundUrls); // Get Found IDs
             var failedIds = new HashSet<long>(category.FailedUrls);
             var removedIds = new HashSet<long>(category.UserRemovedUrls); // Get removed IDs
 
@@ -220,8 +245,8 @@ namespace PBE_AssetsManager.Services.Monitor
             while (count < amountToAdd)
             {
                 lastNumber++;
-                // Check against all three lists
-                if (failedIds.Contains(lastNumber) || existingIds.Contains(lastNumber) || removedIds.Contains(lastNumber)) continue;
+                // Check against all lists to prevent duplicates
+                if (foundIds.Contains(lastNumber) || failedIds.Contains(lastNumber) || existingIds.Contains(lastNumber) || removedIds.Contains(lastNumber)) continue;
 
                 var url = $"{category.BaseUrl}{lastNumber}.{category.Extension}";
                 try
@@ -411,7 +436,6 @@ namespace PBE_AssetsManager.Services.Monitor
 
             if (changed)
             {
-                InvalidateAssetCacheForCategory(category);
                 SaveCategoryProgress(category);
             }
         }

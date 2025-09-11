@@ -74,26 +74,12 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             Assets.Clear();
             if (SelectedCategory == null || MonitorService == null) return;
 
-            // Get all assets from the service
-            var assetsFromService = MonitorService.GetAssetListForCategory(SelectedCategory)
-                                                  .OrderBy(a => a.DisplayName);
+            // The service now returns the exact list we need to display
+            var assetsFromService = MonitorService.GetAssetListForCategory(SelectedCategory);
 
             foreach (var asset in assetsFromService)
             {
                 Assets.Add(asset);
-            }
-
-            // Check if we need to fill up with pending assets
-            const int maxAssets = 10;
-            int assetsNeeded = maxAssets - Assets.Count;
-
-            if (assetsNeeded > 0)
-            {
-                var newAssets = MonitorService.GenerateMoreAssets(Assets, SelectedCategory, assetsNeeded);
-                foreach (var asset in newAssets)
-                {
-                    Assets.Add(asset);
-                }
             }
 
             AssetsItemsControl.ItemsSource = Assets;
@@ -200,7 +186,6 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    MonitorService.InvalidateAssetCacheForCategory(category);
                     RefreshAssetList();
                 });
             }

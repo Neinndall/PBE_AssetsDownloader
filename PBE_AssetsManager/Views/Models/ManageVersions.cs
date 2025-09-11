@@ -46,10 +46,10 @@ namespace PBE_AssetsManager.Views.Models
             LoLGameClientVersions = new ObservableCollection<VersionFileInfo>();
             AvailableLocales = new ObservableCollection<LocaleOption>
             {
-                new LocaleOption { Code = "es-ES", IsSelected = false },
-                new LocaleOption { Code = "es-MX", IsSelected = false },
-                new LocaleOption { Code = "en-US", IsSelected = false },
-                new LocaleOption { Code = "tr-TR", IsSelected = false }
+                new LocaleOption { Code = "es_ES", IsSelected = false },
+                new LocaleOption { Code = "es_MX", IsSelected = false },
+                new LocaleOption { Code = "en_US", IsSelected = false },
+                new LocaleOption { Code = "tr_TR", IsSelected = false }
             };
         }
 

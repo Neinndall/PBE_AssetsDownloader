@@ -87,7 +87,7 @@
                                      Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
-                <ItemsControl ItemsSource="{Binding AvailableLocales}">
+                <ItemsControl ItemsSource="{Binding AvailableLocales}" Margin="32,0,0,0">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal"/>

@@ -29,7 +29,7 @@
             </StackPanel>
 
             <!-- Asset Types Selection -->
-            <Grid Margin="0,0,0,24">
+            <Grid Margin="0,0,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -56,47 +56,40 @@
                                    Margin="0,2,0,0"/>
                     </StackPanel>
 
-                    <!-- Lista de CheckBoxes dentro de un borde -->
-                    <Border Background="{StaticResource DarkBackground}"
-                            BorderBrush="{StaticResource BorderColor}"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="15"
-                            Margin="0,0,25,0">
-                        <StackPanel>
-                            <CheckBox x:Name="chkAll"
-                                      Content="All"
-                                      FontSize="14"
-                                      FontWeight="Medium"
-                                      Style="{StaticResource ModernCheckBox}"
-                                      Margin="0,0,0,8"
-                                      IsChecked="True"/>
-                            <CheckBox x:Name="chkImages"
-                                      Content="Images"
-                                      Tag="Images"
-                                      FontSize="14"
-                                      Style="{StaticResource ModernCheckBox}"
-                                      Margin="0,0,0,8"/>
-                            <CheckBox x:Name="chkAudios"
-                                      Content="Audios"
-                                      Tag="Audios"
-                                      FontSize="14"
-                                      Style="{StaticResource ModernCheckBox}"
-                                      Margin="0,0,0,8"/>
-                            <CheckBox x:Name="chkPlugins"
-                                      Content="Plugins"
-                                      Tag="Plugins"
-                                      FontSize="14"
-                                      Style="{StaticResource ModernCheckBox}"
-                                      Margin="0,0,0,8"/>
-                            <CheckBox x:Name="chkGame"
-                                      Content="Game"
-                                      Tag="Game"
-                                      FontSize="14"
-                                      Style="{StaticResource ModernCheckBox}"
-                                      Margin="0,0,0,0"/>
-                        </StackPanel>
-                    </Border>
+                    <!-- Lista de CheckBoxes en horizontal -->
+                    <WrapPanel Margin="0,0,25,0">
+                        <CheckBox x:Name="chkAll"
+                                  Content="All"
+                                  IsChecked="True"
+                                  FontSize="14"
+                                  FontWeight="Medium"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  Margin="0,0,15,0"/>
+                        <CheckBox x:Name="chkImages"
+                                  Content="Images"
+                                  Tag="Images"
+                                  FontSize="14"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  Margin="0,0,15,0"/>
+                        <CheckBox x:Name="chkAudios"
+                                  Content="Audios"
+                                  Tag="Audios"
+                                  FontSize="14"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  Margin="0,0,15,0"/>
+                        <CheckBox x:Name="chkPlugins"
+                                  Content="Plugins"
+                                  Tag="Plugins"
+                                  FontSize="14"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  Margin="0,0,15,0"/>
+                        <CheckBox x:Name="chkGame"
+                                  Content="Game"
+                                  Tag="Game"
+                                  FontSize="14"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  Margin="0,0,15,0"/>
+                    </WrapPanel>
                 </StackPanel>
             </Grid>
         </StackPanel>

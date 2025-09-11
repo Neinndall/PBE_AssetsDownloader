@@ -161,7 +161,7 @@
                     </Border>
                 </Grid>
                 <ListView x:Name="LoLGameClientVersionsListView" 
-                          ItemsSource="{Binding OtherGameVersions}"
+                          ItemsSource="{Binding LoLGameClientVersions}"
                           Style="{StaticResource ModernListView}"
                           ItemContainerStyle="{StaticResource ModernListViewItem}"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"

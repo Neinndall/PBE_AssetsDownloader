@@ -22,7 +22,7 @@ namespace PBE_AssetsManager.Views
             CustomMessageBoxService customMessageBoxService,
             JsonDataService jsonDataService,
             VersionService versionService,
-            DirectoriesCreator directoriesCreator) // Add this
+            DirectoriesCreator directoriesCreator)
         {
             InitializeComponent();
 

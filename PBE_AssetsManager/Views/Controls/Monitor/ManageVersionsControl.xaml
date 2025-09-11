@@ -135,7 +135,7 @@
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="25,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="28,0,0,0">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
@@ -220,7 +220,7 @@
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="25,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="28,0,0,0">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>

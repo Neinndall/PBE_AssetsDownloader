@@ -299,7 +299,6 @@ namespace PBE_AssetsManager.Services.Versions
         {
             var versionFiles = new List<VersionFileInfo>();
             string versionsRootPath = _directoriesCreator.VersionsPath;
-            var dateTimeRegex = new Regex(@"(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2}-\d{2})");
 
             if (!Directory.Exists(versionsRootPath))
             {
@@ -317,18 +316,8 @@ namespace PBE_AssetsManager.Services.Versions
                     {
                         string fileName = Path.GetFileName(filePath);
                         string content = await File.ReadAllTextAsync(filePath);
-                        Match match = dateTimeRegex.Match(fileName);
-                        string date = string.Empty;
-
-                        if (match.Success)
-                        {
-                            string[] dateParts = match.Groups[1].Value.Split('-'); // YYYY-MM-DD
-                            string[] timeParts = match.Groups[2].Value.Split('-'); // HH-MM-SS
-                            if (dateParts.Length == 3 && timeParts.Length == 3)
-                            {
-                                date = $"{dateParts[2]}/{dateParts[1]}/{dateParts[0]} {timeParts[0]}:{timeParts[1]}:{timeParts[2]}";
-                            }
-                        }
+                        DateTime creationTime = File.GetCreationTime(filePath);
+                        string date = creationTime.ToString("dd/MM/yyyy HH:mm:ss");
 
                         versionFiles.Add(new VersionFileInfo
                         {

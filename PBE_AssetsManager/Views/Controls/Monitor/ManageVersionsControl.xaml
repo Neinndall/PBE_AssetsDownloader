@@ -124,9 +124,9 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="23*"/>
-                        <ColumnDefinition Width="23*"/>
-                        <ColumnDefinition Width="57*"/>
+                        <ColumnDefinition Width="22*"/>
+                        <ColumnDefinition Width="22*"/>
+                        <ColumnDefinition Width="56*"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
                         <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
@@ -161,9 +161,9 @@
                         <DataTemplate>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="23*"/>
-                                    <ColumnDefinition Width="23*"/>
-                                    <ColumnDefinition Width="57*"/>
+                                    <ColumnDefinition Width="22*"/>
+                                    <ColumnDefinition Width="22*"/>
+                                    <ColumnDefinition Width="56*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" 
                                            Text="{Binding FileName}"

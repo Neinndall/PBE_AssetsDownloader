@@ -74,11 +74,11 @@
                                                    Margin="0,0,12,0"
                                                    VerticalAlignment="Center"/>
                         <StackPanel>
-                            <TextBlock Text="Export Configuration" 
+                            <TextBlock Text="Export Setup" 
                                        FontSize="18" 
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Set up your source, destination and filters for the export" 
+                            <TextBlock Text="Define directories and filters for your custom asset export" 
                                        FontSize="12" 
                                        Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>

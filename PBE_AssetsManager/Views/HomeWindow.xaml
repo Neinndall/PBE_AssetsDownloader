@@ -70,11 +70,11 @@
                                                    Margin="0,0,12,0"
                                                    VerticalAlignment="Center"/>
                         <StackPanel>
-                            <TextBlock Text="Directory Configuration" 
+                            <TextBlock Text="Home Setup" 
                                        FontSize="18" 
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimary}"/>
-                            <TextBlock Text="Configure source and destination directories for hashes" 
+                            <TextBlock Text="Configure the hash directories to start the download process" 
                                        FontSize="12" 
                                        Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>

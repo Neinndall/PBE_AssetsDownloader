@@ -8,116 +8,119 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              FontFamily="Consolas, Courier New">
-    <Border Style="{StaticResource SettingsCard}">
-        <StackPanel>
-            <!-- Header con icono y título -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
-                <materialDesign:MaterialIcon Kind="FileCompare"
-                                             FontSize="20"
-                                             Margin="0,0,12,0"
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource AccentBrush}"/>
-                <StackPanel>
-                    <TextBlock Text="Manual JSON Comparison" 
-                               FontSize="18" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Select two JSON files to compare" 
-                               FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"/>
+    <StackPanel>
+        <Border Style="{StaticResource SettingsCard}">
+            <StackPanel>
+                <!-- Header con icono y título -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
+                    <materialDesign:MaterialIcon Kind="FileCompare"
+                                                 FontSize="20"
+                                                 Margin="0,0,12,0"
+                                                 VerticalAlignment="Center"
+                                                 Foreground="{StaticResource AccentBrush}"/>
+                    <StackPanel>
+                        <TextBlock Text="Manual JSON Comparison" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Select two JSON files to compare" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
                 </StackPanel>
+
+                <!-- New File -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <materialDesign:MaterialIcon Grid.Column="0" Kind="FilePlusOutline" 
+                                                 FontSize="20" 
+                                                 Margin="0,0,12,0" 
+                                                 VerticalAlignment="Top"
+                                                 Foreground="{StaticResource AccentGreen}"/>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                        <TextBlock Text="New File" 
+                                   FontWeight="Medium"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Select the new JSON file to compare" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <Grid Grid.Column="1" Margin="0,42,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="newFileTextBox" 
+                                 Grid.Column="0"
+                                 Height="36"
+                                 IsReadOnly="True"
+                                 Style="{StaticResource ModernTextBox}"/>
+                        <Button Grid.Column="2"
+                                Content="Browse"
+                                Padding="16,0"
+                                Height="36"
+                                Style="{StaticResource SecondaryButton}"
+                                Click="btnSelectNew_Click"/>
+                    </Grid>
+                </Grid>
+
+                <!-- Original File -->
+                <Grid Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <materialDesign:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" 
+                                                 FontSize="20" 
+                                                 Margin="0,0,12,0" 
+                                                 VerticalAlignment="Top"
+                                                 Foreground="{StaticResource AccentOrange}"/>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                        <TextBlock Text="Old File" 
+                                   FontWeight="Medium"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Select the old JSON file to compare" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <Grid Grid.Column="1" Margin="0,42,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="originalFileTextBox" 
+                                 Grid.Column="0"
+                                 Height="36"
+                                 IsReadOnly="True"
+                                 Style="{StaticResource ModernTextBox}"/>
+                        <Button Grid.Column="2"
+                                Content="Browse"
+                                Padding="16,0"
+                                Height="36"
+                                Style="{StaticResource SecondaryButton}"
+                                Click="btnSelectOriginal_Click"/>
+                    </Grid>
+                </Grid>
             </StackPanel>
-
-            <!-- New File -->
-            <Grid Margin="0,0,0,16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="FilePlusOutline" 
-                                             FontSize="20" 
-                                             Margin="0,0,12,0" 
-                                             VerticalAlignment="Top"
-                                             Foreground="{StaticResource AccentGreen}"/>
-
-                <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                    <TextBlock Text="New File" 
-                               FontWeight="Medium"
-                               FontSize="14"
-                               Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Select the new JSON file to compare" 
-                               FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"
-                               Margin="0,2,0,0"/>
-                </StackPanel>
-
-                <Grid Grid.Column="1" Margin="0,42,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="newFileTextBox" 
-                             Grid.Column="0"
-                             Height="36"
-                             IsReadOnly="True"
-                             Style="{StaticResource ModernTextBox}"/>
-                    <Button Grid.Column="2"
-                            Content="Browse"
-                            Padding="16,0"
-                            Height="36"
-                            Style="{StaticResource SecondaryButton}"
-                            Click="btnSelectNew_Click"/>
-                </Grid>
-            </Grid>
-
-            <!-- Original File -->
-            <Grid Margin="0,0,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" 
-                                             FontSize="20" 
-                                             Margin="0,0,12,0" 
-                                             VerticalAlignment="Top"
-                                             Foreground="{StaticResource AccentOrange}"/>
-
-                <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                    <TextBlock Text="Old File" 
-                               FontWeight="Medium"
-                               FontSize="14"
-                               Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Select the old JSON file to compare" 
-                               FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"
-                               Margin="0,2,0,0"/>
-                </StackPanel>
-
-                <Grid Grid.Column="1" Margin="0,42,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="originalFileTextBox" 
-                             Grid.Column="0"
-                             Height="36"
-                             IsReadOnly="True"
-                             Style="{StaticResource ModernTextBox}"/>
-                    <Button Grid.Column="2"
-                            Content="Browse"
-                            Padding="16,0"
-                            Height="36"
-                            Style="{StaticResource SecondaryButton}"
-                            Click="btnSelectOriginal_Click"/>
-                </Grid>
-            </Grid>
-
+        </Border>
+        <Border Style="{StaticResource SettingsCard}">
             <!-- Actions -->
-            <Grid Margin="0,16,0,0">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -148,6 +151,6 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
-        </StackPanel>
-    </Border>
+        </Border>
+    </StackPanel>
 </UserControl>

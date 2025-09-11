@@ -2,20 +2,23 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Utils;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace PBE_AssetsManager.Views.Controls.Home
 {
-    public partial class DirectorySelectionControl : UserControl
+    public partial class HomeControl : UserControl
     {
+        public event EventHandler StartRequested;
+
         public LogService LogService { get; set; }
         public AppSettings AppSettings { get; set; }
 
         public string NewHashesPath => newHashesTextBox.Text;
         public string OldHashesPath => oldHashesTextBox.Text;
 
-        public DirectorySelectionControl()
+        public HomeControl()
         {
             InitializeComponent();
             this.Loaded += DirectorySelectionControl_Loaded;
@@ -77,6 +80,11 @@ namespace PBE_AssetsManager.Views.Controls.Home
                     LogService.LogDebug($"Old Hashes Directory selected: {folderBrowserDialog.FileName}");
                 }
             }
+        }
+
+        private void startButton_Click(object sender, RoutedEventArgs e)
+        {
+            StartRequested?.Invoke(this, EventArgs.Empty);
         }
     }
 }

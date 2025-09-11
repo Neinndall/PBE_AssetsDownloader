@@ -41,7 +41,7 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
         {
             if (VersionService != null && LogService != null)
             {
-                LogService.Log("User initiated version fetch.");
+                LogService.Log("Initiated version fetch.");
                 await VersionService.FetchAllVersionsAsync();
                 if (_viewModel != null)
                 {
@@ -59,24 +59,24 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             var selectedVersion = _viewModel?.LeagueClientVersions.FirstOrDefault(v => v.IsSelected);
             if (selectedVersion == null)
             {
-                CustomMessageBoxService.ShowWarning("No Version Selected", "Please select a League Client version from the list first.");
+                CustomMessageBoxService.ShowWarning("Warning", "Please select a League Client version from the list first.");
                 return;
             }
 
             if (string.IsNullOrEmpty(AppSettings.LolDirectory))
             {
-                CustomMessageBoxService.ShowError("Directory Not Found", "League of Legends directory is not configured. Please set it in Settings > Default Paths.");
+                CustomMessageBoxService.ShowError("Error", "League of Legends directory is not configured. Please set it in Settings > Default Paths.");
                 return;
             }
 
-            var locales = new List<string>();
-            if (_viewModel.IsEsEsSelected) locales.Add("es_ES");
-            if (_viewModel.IsEsMxSelected) locales.Add("es_MX");
-            if (_viewModel.IsEnUsSelected) locales.Add("en_US");
+            var locales = _viewModel.AvailableLocales
+                .Where(l => l.IsSelected)
+                .Select(l => l.Code)
+                .ToList();
 
             if (locales.Count == 0)
             {
-                CustomMessageBoxService.ShowWarning("No Locales Selected", "Please select at least one locale to download.");
+                CustomMessageBoxService.ShowWarning("Warning", "Please select at least one locale to download.");
                 return;
             }
 
@@ -88,24 +88,24 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             var selectedVersion = _viewModel?.LoLGameClientVersions.FirstOrDefault(v => v.IsSelected);
             if (selectedVersion == null)
             {
-                CustomMessageBoxService.ShowWarning("No Version Selected", "Please select a LoL Game Client version from the list first.");
+                CustomMessageBoxService.ShowWarning("Warning", "Please select a LoL Game Client version from the list first.");
                 return;
             }
 
             if (string.IsNullOrEmpty(AppSettings.LolDirectory))
             {
-                CustomMessageBoxService.ShowError("Directory Not Found", "League of Legends directory is not configured. Please set it in Settings > Default Paths.");
+                CustomMessageBoxService.ShowError("Error", "League of Legends directory is not configured. Please set it in Settings > Default Paths.");
                 return;
             }
 
-            var locales = new List<string>();
-            if (_viewModel.IsEsEsSelected) locales.Add("es_ES");
-            if (_viewModel.IsEsMxSelected) locales.Add("es_MX");
-            if (_viewModel.IsEnUsSelected) locales.Add("en_US");
+            var locales = _viewModel.AvailableLocales
+                .Where(l => l.IsSelected)
+                .Select(l => l.Code)
+                .ToList();
 
             if (locales.Count == 0)
             {
-                CustomMessageBoxService.ShowWarning("No Locales Selected", "Please select at least one locale to download.");
+                CustomMessageBoxService.ShowWarning("Warning", "Please select at least one locale to download.");
                 return;
             }
 

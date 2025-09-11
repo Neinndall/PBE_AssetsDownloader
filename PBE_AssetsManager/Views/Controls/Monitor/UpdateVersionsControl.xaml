@@ -5,13 +5,55 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PBE_AssetsManager.Views.Controls.Monitor"
+             xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <StackPanel>
-            <TextBlock Text="League of Legends Version Fetcher" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
-            <TextBlock Text="Click the button below to fetch the latest version information from Riot's servers." TextWrapping="Wrap" Margin="0,0,0,20"/>
-            <Button Content="Fetch Versions" Click="FetchVersions_Click" Style="{StaticResource ModernButton}" HorizontalAlignment="Left"/>
-        </StackPanel>
-    </Grid>
+    <StackPanel Margin="15">
+        <!-- Header -->
+        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:MaterialIcon Kind="CloudDownloadOutline" 
+                                           FontSize="20" 
+                                           Foreground="{StaticResource AccentBrush}"
+                                           Margin="0,0,12,0"
+                                           VerticalAlignment="Center"/>
+                <StackPanel>
+                    <TextBlock Text="Update Versions" 
+                               FontSize="18" 
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock Text="Fetch and save version information from Riot's servers."
+                               FontSize="12" 
+                               Foreground="{StaticResource TextMuted}"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Action Card -->
+        <Border Style="{StaticResource SettingsCard}">
+            <StackPanel>
+                <!-- Card Header -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <materialDesign:MaterialIcon Kind="PackageDown" 
+                                                   Foreground="{StaticResource AccentOrange}"
+                                                   FontSize="18" 
+                                                   Margin="0,0,10,0" 
+                                                   VerticalAlignment="Center"/>
+                    <TextBlock Text="Fetch Versions" 
+                                 FontSize="16" 
+                                 FontWeight="SemiBold"
+                                 Foreground="{StaticResource TextPrimary}"/>
+                </StackPanel>
+                <TextBlock Text="Click the button to start the process of fetching and saving all available versions. This may take a moment and the results will be saved to the AppData folder."
+                             TextWrapping="Wrap" 
+                             Foreground="{StaticResource TextMuted}" />
+                <Button Content="Get Versions" 
+                        Click="FetchVersions_Click" 
+                        Style="{StaticResource ModernButton}" 
+                        HorizontalAlignment="Left" 
+                        Margin="0,15,0,0"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
 </UserControl>

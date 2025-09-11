@@ -271,7 +271,7 @@ namespace PBE_AssetsManager.Services.Versions
             string localesArgument = string.Join(" ", locales);
             string arguments = $"\"{manifestUrl}\" -o \"{lolDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
 
-            _logService.Log("Starting plugin download with ManifestDownloader...");
+            _logService.Log("Starting updating the plugins...");
             await RunManifestDownloaderAsync(arguments);
             _logService.LogSuccess("Plugin download process finished.");
         }
@@ -288,7 +288,7 @@ namespace PBE_AssetsManager.Services.Versions
             string localesArgument = string.Join(" ", locales);
             string arguments = $"\"{manifestUrl}\" -o \"{gameDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
 
-            _logService.Log("Starting game client download with ManifestDownloader...");
+            _logService.Log("Starting updating the game client...");
             await RunManifestDownloaderAsync(arguments);
             _logService.LogSuccess("Game client download process finished.");
         }

@@ -24,13 +24,21 @@
             </Setter>
         </Style>
 
-        <!-- Estilo para los headers de las columnas -->
+        <!-- Estilo para los headers de las columnas edit: BorderThickness: Izquierda, Arriba, Derecha, Abajo -->
         <Style x:Key="FirstModernGridViewColumnHeader" TargetType="Border">
             <Setter Property="Background" Value="{StaticResource CardBackground}"/>
             <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-            <Setter Property="BorderThickness" Value="1,1,2,1"/>
+            <Setter Property="BorderThickness" Value="1,1,0,1"/>
             <Setter Property="Padding" Value="16,4"/>
             <Setter Property="CornerRadius" Value="4,0,0,4"/>
+        </Style>
+
+        <Style x:Key="HalfModernGridViewColumnHeader" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="1,1,1,1"/>
+            <Setter Property="Padding" Value="16,4"/>
+            <Setter Property="CornerRadius" Value="0"/>
         </Style>
 
         <Style x:Key="LastModernGridViewColumnHeader" TargetType="Border">

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using PBE_AssetsManager.Views.Models; // Add this
 using PBE_AssetsManager.Services.Core;
@@ -298,6 +299,7 @@ namespace PBE_AssetsManager.Services.Versions
         {
             var versionFiles = new List<VersionFileInfo>();
             string versionsRootPath = _directoriesCreator.VersionsPath;
+            var dateTimeRegex = new Regex(@"(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2}-\d{2})");
 
             if (!Directory.Exists(versionsRootPath))
             {
@@ -315,11 +317,25 @@ namespace PBE_AssetsManager.Services.Versions
                     {
                         string fileName = Path.GetFileName(filePath);
                         string content = await File.ReadAllTextAsync(filePath);
+                        Match match = dateTimeRegex.Match(fileName);
+                        string date = string.Empty;
+
+                        if (match.Success)
+                        {
+                            string[] dateParts = match.Groups[1].Value.Split('-'); // YYYY-MM-DD
+                            string[] timeParts = match.Groups[2].Value.Split('-'); // HH-MM-SS
+                            if (dateParts.Length == 3 && timeParts.Length == 3)
+                            {
+                                date = $"{dateParts[2]}/{dateParts[1]}/{dateParts[0]} {timeParts[0]}:{timeParts[1]}:{timeParts[2]}";
+                            }
+                        }
+
                         versionFiles.Add(new VersionFileInfo
                         {
                             FileName = fileName,
                             Content = content,
-                            Category = category
+                            Category = category,
+                            Date = date
                         });
                     }
                 }

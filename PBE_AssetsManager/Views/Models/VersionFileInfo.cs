@@ -6,6 +6,7 @@ namespace PBE_AssetsManager.Views.Models
     {
         public string FileName { get; set; }
         public string Content { get; set; }
+        public string Date { get; set; }
         public string Category { get; set; } // To group files like 'league-client', 'lol-game-client'
 
         private bool _isSelected;

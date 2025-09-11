@@ -2,6 +2,7 @@ using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Services.Downloads;
 using PBE_AssetsManager.Services.Monitor;
+using PBE_AssetsManager.Services.Versions;
 using PBE_AssetsManager.Utils;
 using System;
 using System.Windows.Controls;
@@ -19,7 +20,9 @@ namespace PBE_AssetsManager.Views
             AppSettings appSettings, 
             LogService logService, 
             CustomMessageBoxService customMessageBoxService,
-            JsonDataService jsonDataService)
+            JsonDataService jsonDataService,
+            VersionService versionService,
+            DirectoriesCreator directoriesCreator) // Add this
         {
             InitializeComponent();
 
@@ -43,6 +46,10 @@ namespace PBE_AssetsManager.Views
             AssetTrackerControl.AssetDownloader = assetDownloader; // Add this
             AssetTrackerControl.LogService = logService;
             AssetTrackerControl.CustomMessageBoxService = customMessageBoxService;
+
+            // Setup and inject dependencies for UpdateVersionsControl
+            UpdateVersionsControl.VersionService = versionService;
+            UpdateVersionsControl.LogService = logService;
         }
     }
 }

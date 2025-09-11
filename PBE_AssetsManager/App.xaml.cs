@@ -6,6 +6,7 @@ using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Models;
 using PBE_AssetsManager.Services.Explorer;
 using PBE_AssetsManager.Services.Monitor;
+using PBE_AssetsManager.Services.Versions;
 using PBE_AssetsManager.Utils;
 using Serilog;
 using System;
@@ -78,6 +79,9 @@ namespace PBE_AssetsManager
             services.AddSingleton<JsBeautifierService>();
             services.AddSingleton<DiffViewService>();
             services.AddSingleton<MonitorService>();
+
+            // Versions Service
+            services.AddSingleton<VersionService>();
 
             // Hashes Services
             services.AddSingleton<HashesManager>();

@@ -20,6 +20,7 @@ namespace PBE_AssetsManager.Utils
         public string SubAssetsDownloadedPath { get; private set; }
         public string BackUpOldHashesPath { get; private set; }
         public string WadComparisonSavePath { get; private set; }
+        public string VersionsPath { get; private set; } // Add this
 
         public string AppDirectory { get; private set; }
         public string CurrentConfigFilePath { get; private set; }
@@ -83,6 +84,9 @@ namespace PBE_AssetsManager.Utils
             WadComparisonFullPath = Path.Combine(WadComparisonSavePath, WadComparisonDirName);
             OldChunksPath = Path.Combine(WadComparisonFullPath, "wad_chunks", "old");
             NewChunksPath = Path.Combine(WadComparisonFullPath, "wad_chunks", "new");
+
+            VersionsPath = Path.Combine(appFolderPath, "Versions");
+            Directory.CreateDirectory(VersionsPath);
         }
 
         public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);

@@ -63,6 +63,9 @@
                 <TabItem Header="Asset Tracker" Style="{StaticResource CustomTabItemStyle}">
                     <monitorControls:AssetTrackerControl x:Name="AssetTrackerControl"/>
                 </TabItem>
+                <TabItem Header="Update Versions" Style="{StaticResource CustomTabItemStyle}">
+                    <monitorControls:UpdateVersionsControl x:Name="UpdateVersionsControl"/>
+                </TabItem>
             </TabControl>
         </ScrollViewer>
     </Grid>

@@ -43,6 +43,7 @@
   <ItemGroup>
     <EmbeddedResource Include="changelogs.txt" />
     <EmbeddedResource Include="Resources\JsonSyntaxHighlighting.xshd" />
+    <EmbeddedResource Include="Resources\ManifestDownloader\ManifestDownloader.exe" />
   </ItemGroup>
 
   <ItemGroup>

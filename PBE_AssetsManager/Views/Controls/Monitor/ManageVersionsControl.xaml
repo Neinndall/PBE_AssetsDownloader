@@ -9,7 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Margin="15">
         <!-- Header -->
-        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,16">
+        <Border Style="{StaticResource SettingsCard}">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:MaterialIcon Kind="CloudDownloadOutline" 
                                            FontSize="20" 
@@ -29,7 +29,7 @@
         </Border>
 
         <!-- Action Card -->
-        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+        <Border Style="{StaticResource SettingsCard}">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <materialDesign:MaterialIcon Kind="PackageDown"
@@ -68,7 +68,7 @@
         </Border>
 
         <!-- Locales Card -->
-        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+        <Border Style="{StaticResource SettingsCard}">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <materialDesign:MaterialIcon Kind="Translate"
@@ -103,7 +103,7 @@
         </Border>
 
         <!-- League Client Versions List -->
-        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+        <Border Style="{StaticResource SettingsCard}">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <materialDesign:MaterialIcon Kind="DesktopClassic" 

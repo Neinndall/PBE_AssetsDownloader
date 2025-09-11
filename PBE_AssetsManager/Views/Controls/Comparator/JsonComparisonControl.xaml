@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              FontFamily="Consolas, Courier New">
-    <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,24">
+    <Border Style="{StaticResource SettingsCard}">
         <StackPanel>
             <!-- Header con icono y título -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">

@@ -20,7 +20,7 @@
         <!-- Header con título -->
         <Border Grid.Row="0" 
                 Style="{StaticResource SettingsCard}"
-                Margin="0,0,0,15">
+                Margin="0,0,0,16">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:MaterialIcon Kind="FileFind" 
                                            FontSize="20" 
@@ -34,8 +34,7 @@
                               Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Monitor remote JSON files for updates" 
                               FontSize="12" 
-                              Foreground="{StaticResource TextMuted}"
-                              Margin="0,2,0,0"/>
+                              Foreground="{StaticResource TextMuted}"/>
                 </StackPanel>
             </StackPanel>
         </Border>

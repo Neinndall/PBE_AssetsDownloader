@@ -9,7 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Margin="15">
         <!-- Header -->
-        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+        <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,16">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:MaterialIcon Kind="CloudDownloadOutline" 
                                            FontSize="20" 
@@ -23,8 +23,7 @@
                                Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Fetch and save version information from Riot's servers."
                                FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"
-                               Margin="0,2,0,0"/>
+                               Foreground="{StaticResource TextMuted}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -32,7 +31,7 @@
         <!-- Action Card -->
         <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
             <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <materialDesign:MaterialIcon Kind="PackageDown"
                                                    Foreground="{StaticResource AccentOrange}"
                                                    FontSize="20"
@@ -40,14 +39,13 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="Fetch Versions"
-                                     FontSize="18"
-                                     FontWeight="SemiBold"
+                                     FontSize="14"
+                                     FontWeight="Medium"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Fetch manifests and download specific client versions."
                                      TextWrapping="Wrap"
                                      FontSize="12"
-                                     Foreground="{StaticResource TextMuted}"
-                                     Margin="0,2,0,0"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
@@ -72,7 +70,7 @@
         <!-- Locales Card -->
         <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
             <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                     <materialDesign:MaterialIcon Kind="Translate"
                                                    Foreground="{StaticResource AccentOrange}"
                                                    FontSize="20"
@@ -80,14 +78,13 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="Locales"
-                                     FontSize="18"
-                                     FontWeight="SemiBold"
+                                     FontSize="14"
+                                     FontWeight="Medium"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Select the locales for both 'Get League-Client' and 'Get LoL-Game-Client' actions."
                                      TextWrapping="Wrap"
                                      FontSize="12"
-                                     Foreground="{StaticResource TextMuted}"
-                                     Margin="0,2,0,0"/>
+                                     Foreground="{StaticResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -109,8 +106,8 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="League Client Versions" 
-                                     FontSize="18" 
-                                     FontWeight="SemiBold"
+                                     FontSize="14" 
+                                     FontWeight="Medium"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Versions of the League of Legends client" 
                                      FontSize="12" 
@@ -180,8 +177,8 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="LoL Game Client Versions" 
-                                     FontSize="18" 
-                                     FontWeight="SemiBold"
+                                     FontSize="14" 
+                                     FontWeight="Medium"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Versions of the LoL game client" 
                                      FontSize="12" 

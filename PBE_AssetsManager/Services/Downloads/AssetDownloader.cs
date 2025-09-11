@@ -114,10 +114,24 @@ namespace PBE_AssetsManager.Services.Downloads
             try
             {
                 var response = await _httpClient.GetAsync(assetUrl);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _logService.LogWarning($"Asset not found: {assetUrl}");
+                }
+                else
+                {
+                    _logService.LogWarning($"HTTP error downloading text content from {assetUrl}. Status: {response.StatusCode}");
+                }
+                return null;
+
             }
-            catch (Exception ex)
+            catch (Exception ex) // This will now catch network errors, timeouts, etc.
             {
                 _logService.LogError(ex, $"Error downloading text content from {assetUrl}");
                 return null;

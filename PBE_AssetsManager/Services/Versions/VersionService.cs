@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PBE_AssetsManager.Views.Models; // Add this
 using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Utils;
 
@@ -243,6 +244,45 @@ namespace PBE_AssetsManager.Services.Versions
                 _logService.LogError(ex, $"Error extracting version from {filePath}");
                 return null;
             }
+        }
+
+        public async Task<List<VersionFileInfo>> GetVersionFilesAsync()
+        {
+            var versionFiles = new List<VersionFileInfo>();
+            string versionsRootPath = _directoriesCreator.VersionsPath;
+
+            if (!Directory.Exists(versionsRootPath))
+            {
+                _logService.LogWarning($"Versions directory not found: {versionsRootPath}");
+                return versionFiles;
+            }
+
+            try
+            {
+                foreach (string directory in Directory.EnumerateDirectories(versionsRootPath, "*", SearchOption.AllDirectories))
+                {
+                    string category = new DirectoryInfo(directory).Name; // Get the last part of the directory name as category
+
+                    foreach (string filePath in Directory.EnumerateFiles(directory, "*.txt"))
+                    {
+                        string fileName = Path.GetFileName(filePath);
+                        string content = await File.ReadAllTextAsync(filePath);
+                        versionFiles.Add(new VersionFileInfo
+                        {
+                            FileName = fileName,
+                            Content = content,
+                            Category = category
+                        });
+                    }
+                }
+                _logService.Log($"Successfully loaded {versionFiles.Count} version files.");
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, $"Error loading version files from {versionsRootPath}");
+            }
+
+            return versionFiles;
         }
     }
 }

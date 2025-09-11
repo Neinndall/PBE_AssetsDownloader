@@ -30,6 +30,8 @@ namespace PBE_AssetsManager.Views
             HomeControl.LogService = _logService;
             HomeControl.AppSettings = _appSettings;
 
+            // Handle events from child controls
+            HomeControl.StartRequested += ActionsControl_StartRequested;
         }
 
         public void UpdateSettings(AppSettings newSettings, bool wasResetToDefaults)
@@ -38,7 +40,7 @@ namespace PBE_AssetsManager.Views
             HomeControl.UpdateSettings(newSettings, wasResetToDefaults);
         }
 
-        private async void startButton_Click(object sender, System.EventArgs e)
+        private async void ActionsControl_StartRequested(object sender, System.EventArgs e)
         {
             string oldHashesPath = HomeControl.OldHashesPath;
             string newHashesPath = HomeControl.NewHashesPath;

@@ -7,98 +7,138 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
-        <!-- New Hash Directory -->
-        <Grid Margin="0,0,0,24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <Border Style="{StaticResource SettingsCard}">
+            <StackPanel>
+                <!-- New Hash Directory -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-            <!-- Icono -->
-            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderPlus" 
-                                         FontSize="20" 
-                                         Margin="0,0,12,0" 
-                                         VerticalAlignment="Top"
-                                         Foreground="{StaticResource AccentGreen}"/>
-            <!-- Textos -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                <TextBlock Text="New Hash Directory" 
-                                   FontWeight="Medium"
-                                   FontSize="14"
-                                   Foreground="{StaticResource TextPrimary}"/>
-                <TextBlock Text="Select the directory containing new hash files" 
-                                   FontSize="12" 
-                                   Foreground="{StaticResource TextMuted}"
-                                   Margin="0,2,0,0"/>
-            </StackPanel>
-            <!-- Cuadro alineado -->
-            <Grid Grid.Column="1" Margin="0,42,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="12"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBox x:Name="newHashesTextBox" 
-                                         Grid.Column="0"
-                                         Height="36"
-                                         IsReadOnly="True"
-                                         Style="{StaticResource ModernTextBox}"
-                                         ToolTip="Select the directory containing new hash files"/>
-                <Button Grid.Column="2"
-                                        Content="Browse"
-                                        Width="80" 
-                                        Height="36"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Click="btnSelectNewHashesDirectory_Click"
-                                        ToolTip="Browse for directory"/>
-            </Grid>
-        </Grid>
-
-        <!-- Old Hash Directory -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Icono -->
-            <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderMinus" 
-                                                         FontSize="20" 
-                                                         Margin="0,0,12,0" 
-                                                         VerticalAlignment="Top"
-                                                         Foreground="{StaticResource AccentOrange}"/>
-            <!-- Textos -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                <TextBlock Text="Old Hashes Directory" 
+                    <!-- Icono -->
+                    <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderPlus" 
+                                                 FontSize="20" 
+                                                 Margin="0,0,12,0" 
+                                                 VerticalAlignment="Top"
+                                                 Foreground="{StaticResource AccentGreen}"/>
+                    <!-- Textos -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                        <TextBlock Text="New Hash Directory" 
                                            FontWeight="Medium"
                                            FontSize="14"
                                            Foreground="{StaticResource TextPrimary}"/>
-                <TextBlock Text="Select the directory containing old hash files" 
+                        <TextBlock Text="Select the directory containing new hash files" 
                                            FontSize="12" 
                                            Foreground="{StaticResource TextMuted}"
                                            Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <!-- Cuadro alineado -->
+                    <Grid Grid.Column="1" Margin="0,42,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="newHashesTextBox" 
+                                                 Grid.Column="0"
+                                                 Height="36"
+                                                 IsReadOnly="True"
+                                                 Style="{StaticResource ModernTextBox}"
+                                                 ToolTip="Select the directory containing new hash files"/>
+                        <Button Grid.Column="2"
+                                                Content="Browse"
+                                                Width="80" 
+                                                Height="36"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Click="btnSelectNewHashesDirectory_Click"
+                                                ToolTip="Browse for directory"/>
+                    </Grid>
+                </Grid>
+
+                <!-- Old Hash Directory -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Icono -->
+                    <materialDesign:MaterialIcon Grid.Column="0" Kind="FolderMinus" 
+                                                                 FontSize="20" 
+                                                                 Margin="0,0,12,0" 
+                                                                 VerticalAlignment="Top"
+                                                                 Foreground="{StaticResource AccentOrange}"/>
+                    <!-- Textos -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                        <TextBlock Text="Old Hashes Directory" 
+                                                   FontWeight="Medium"
+                                                   FontSize="14"
+                                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Select the directory containing old hash files" 
+                                                   FontSize="12" 
+                                                   Foreground="{StaticResource TextMuted}"
+                                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <!-- Cuadro alineado -->
+                    <Grid Grid.Column="1" Margin="0,42,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="oldHashesTextBox" 
+                                                 Grid.Column="0"
+                                                 Height="36"
+                                                 IsReadOnly="True"
+                                                 Style="{StaticResource ModernTextBox}"
+                                                 ToolTip="Select the directory containing old hash files"/>
+                        <Button Grid.Column="2"
+                                                Content="Browse"
+                                                Width="80" 
+                                                Height="36"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Click="btnSelectOldHashesDirectory_Click"
+                                                ToolTip="Browse for directory"/>
+                    </Grid>
+                </Grid>
             </StackPanel>
-            <!-- Cuadro alineado -->
-            <Grid Grid.Column="1" Margin="0,42,0,0">
+        </Border>
+
+        <Border Style="{StaticResource SettingsCard}">
+            <!-- Actions -->
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="12"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBox x:Name="oldHashesTextBox" 
-                                         Grid.Column="0"
-                                         Height="36"
-                                         IsReadOnly="True"
-                                         Style="{StaticResource ModernTextBox}"
-                                         ToolTip="Select the directory containing old hash files"/>
-                <Button Grid.Column="2"
-                                        Content="Browse"
-                                        Width="80" 
-                                        Height="36"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Click="btnSelectOldHashesDirectory_Click"
-                                        ToolTip="Browse for directory"/>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <materialDesign:MaterialIcon Kind="Flash" 
+                                               FontSize="20" 
+                                               Foreground="{StaticResource AccentBrush}"
+                                               Margin="0,0,12,0"
+                                               VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBlock Text="Actions" 
+                                   FontSize="14" 
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Start the asset download process" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Button x:Name="startButton" 
+                        Grid.Column="1"
+                        Content="▶️ Start Download" 
+                        Height="36"
+                        Width="150"
+                        Style="{StaticResource ModernButton}"
+                        Click="startButton_Click"
+                        ToolTip="Start the download process"/>
             </Grid>
-        </Grid>
+        </Border>
     </StackPanel>
 </UserControl>

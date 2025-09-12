@@ -31,10 +31,5 @@ namespace PBE_AssetsManager.Views
         {
             HelpContentArea.Content = view;
         }
-
-        private void buttonClose_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
     }
 }

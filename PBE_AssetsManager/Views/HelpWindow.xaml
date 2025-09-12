@@ -112,13 +112,6 @@
                               Style="{StaticResource SecondaryButton}" 
                               Margin="0,0,12,0"
                               Visibility="Collapsed"/>
-                        
-                        <Button x:Name="btnClose" 
-                              Content="Close" 
-                              Height="36" 
-                              Width="80"
-                              Click="buttonClose_Click"
-                              Style="{StaticResource ModernButton}"/>
                     </StackPanel>
                 </Grid>
             </Border>

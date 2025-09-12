@@ -14,6 +14,7 @@ using System.Windows;
 
 using System.Threading;
 using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace PBE_AssetsManager.Views.Controls.Monitor
 {
@@ -85,9 +86,54 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
             AssetsItemsControl.ItemsSource = Assets;
         }
 
-        private void DownloadButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        private async void DownloadButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            // Logic to be implemented
+            if (AssetDownloader == null)
+            {
+                CustomMessageBoxService.ShowError("Error", "Download service is not available.");
+                return;
+            }
+
+            var assetsToDownload = Assets.Where(a => a.Status == "OK").ToList();
+
+            if (!assetsToDownload.Any())
+            {
+                CustomMessageBoxService.ShowInfo("Info", "No assets to download.");
+                return;
+            }
+
+            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            {
+                folderBrowserDialog.IsFolderPicker = true;
+                folderBrowserDialog.Title = $"Select folder to save the assets";
+                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    string destinationPath = folderBrowserDialog.FileName;
+                    int downloadedCount = 0;
+                    try
+                    {
+                        DownloadButton.IsEnabled = false;
+                        foreach (var asset in assetsToDownload)
+                        {
+                            string fileName = Path.GetFileName(new Uri(asset.Url).AbsolutePath);
+                            string fullDestinationPath = Path.Combine(destinationPath, fileName);
+                            await AssetDownloader.DownloadAssetToCustomPathAsync(asset.Url, fullDestinationPath);
+                            downloadedCount++;
+                        }
+                        CustomMessageBoxService.ShowSuccess("Success", $"Successfully saved {downloadedCount} assets.");
+                        LogService.LogSuccess($"Successfully saved {downloadedCount} assets to '{destinationPath}'.");
+                    }
+                    catch (Exception ex)
+                    {
+                        CustomMessageBoxService.ShowError("Error", "An error occurred during download. Please check the logs for details.");
+                        LogService.LogError(ex, "An error occurred during bulk asset download.");
+                    }
+                    finally
+                    {
+                        DownloadButton.IsEnabled = true;
+                    }
+                }
+            }
         }
 
         private void LoadMoreButton_Click(object sender, RoutedEventArgs e)

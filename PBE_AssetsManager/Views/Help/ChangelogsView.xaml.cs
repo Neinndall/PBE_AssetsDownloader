@@ -90,7 +90,8 @@ namespace PBE_AssetsManager.Views.Help
                         trimmedLine.Equals("New Features", StringComparison.OrdinalIgnoreCase) ||
                         trimmedLine.Equals("Improvements", StringComparison.OrdinalIgnoreCase) ||
                         trimmedLine.Equals("Changes", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.Equals("Bug Fixes", StringComparison.OrdinalIgnoreCase);
+                        trimmedLine.Equals("Bug Fixes", StringComparison.OrdinalIgnoreCase) ||
+                        trimmedLine.Equals("Notes", StringComparison.OrdinalIgnoreCase);
 
                     // Detectar subtítulos de update (Major, Medium, Hotfix)
                     bool isUpdateTitle =
@@ -110,6 +111,7 @@ namespace PBE_AssetsManager.Views.Help
                             "Improvements" => (MaterialIconKind.Flash, new SolidColorBrush(Colors.LightBlue)),
                             "Changes" => (MaterialIconKind.Build, new SolidColorBrush(Colors.LightGreen)),
                             "Bug Fixes" => (MaterialIconKind.Bug, new SolidColorBrush(Colors.OrangeRed)),
+                            "Notes" => (MaterialIconKind.NotebookOutline, new SolidColorBrush(Colors.Purple)),
                             _ => (MaterialIconKind.Pencil, (SolidColorBrush)System.Windows.Application.Current.FindResource("TextSecondary"))
                         };
                     }

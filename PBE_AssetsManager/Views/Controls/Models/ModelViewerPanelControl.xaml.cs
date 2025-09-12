@@ -15,6 +15,7 @@ namespace PBE_AssetsManager.Views.Controls.Models
         public event EventHandler<string> ModelFileLoaded;
         public event EventHandler<string> AnimationSelected;
         public event EventHandler<SceneModel> ModelDeleted;
+        public event EventHandler AnimationStopRequested;
 
         public ListBox MeshesListBoxControl => MeshesListBox;
         public ListBox AnimationsListBoxControl => AnimationsListBox;
@@ -23,15 +24,6 @@ namespace PBE_AssetsManager.Views.Controls.Models
         public ModelViewerPanelControl()
         {
             InitializeComponent();
-            AnimationsListBox.SelectionChanged += AnimationsListBox_SelectionChanged;
-        }
-
-        private void AnimationsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (AnimationsListBox.SelectedItem is string selectedAnimationName)
-            {
-                AnimationSelected?.Invoke(this, selectedAnimationName);
-            }
         }
 
         private void DeleteModelButton_Click(object sender, RoutedEventArgs e)
@@ -72,6 +64,19 @@ namespace PBE_AssetsManager.Views.Controls.Models
                     AnimationFileLoaded?.Invoke(this, fileName);
                 }
             }
+        }
+        private void PlayButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string animationName)
+            {
+                AnimationsListBox.SelectedItem = animationName;
+                AnimationSelected?.Invoke(this, animationName);
+            }
+        }
+
+        private void StopButton_Click(object sender, RoutedEventArgs e)
+        {
+            AnimationStopRequested?.Invoke(this, EventArgs.Empty);
         }
     }
 }

@@ -9,7 +9,7 @@
     <UserControl.Resources>
         <Style x:Key="MeshesAnimationsListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Padding" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
@@ -78,11 +78,30 @@
                              ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}" 
-                                        Margin="10,3,0,3" 
-                                        Foreground="{StaticResource TextPrimary}" 
-                                        Background="Transparent" 
-                                        IsHitTestVisible="False"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource TextPrimary}"/>
+                                    <Button Grid.Column="1" x:Name="PlayButton"
+                                            Style="{StaticResource PlayIconButton}"
+                                            Click="PlayButton_Click"
+                                            Tag="{Binding}"
+                                            ToolTip="Play Animation"
+                                            Margin="5,0,0,0">
+                                        <materialDesign:MaterialIcon Kind="Play" Width="14" Height="14"/>
+                                    </Button>
+                                    <Button Grid.Column="2" x:Name="StopButton"
+                                            Style="{StaticResource StopIconButton}"
+                                            Click="StopButton_Click"
+                                            Tag="{Binding}"
+                                            ToolTip="Stop Animation"
+                                            Margin="5,0,5,0">
+                                        <materialDesign:MaterialIcon Kind="Stop" Width="14" Height="14"/>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -107,7 +126,7 @@
                                             Tag="{Binding}"
                                             ToolTip="Delete Model"
                                             Margin="5,0,5,0">
-                                        <materialDesign:MaterialIcon Kind="TrashCan" Width="15" Height="15"/>
+                                        <materialDesign:MaterialIcon Kind="TrashCan" Width="14" Height="14"/>
                                     </Button>
                                 </Grid>
                             </DataTemplate>

@@ -51,6 +51,12 @@ namespace PBE_AssetsManager.Views
             PanelControl.ModelFileLoaded += PanelControl_ModelFileLoaded;
             PanelControl.ModelDeleted += PanelControl_ModelDeleted;
             PanelControl.AnimationSelected += AnimationsListBox_SelectionChanged;
+            PanelControl.AnimationStopRequested += PanelControl_AnimationStopRequested;
+        }
+
+        private void PanelControl_AnimationStopRequested(object sender, System.EventArgs e)
+        {
+            ViewportControl.StopAnimation();
         }
 
         private void SetupScene()

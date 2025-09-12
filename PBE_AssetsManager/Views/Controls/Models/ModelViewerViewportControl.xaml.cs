@@ -52,6 +52,11 @@ namespace PBE_AssetsManager.Views.Controls.Models
             _stopwatch.Restart();
         }
 
+        public void StopAnimation()
+        {
+            _currentAnimation = null;
+        }
+
         public void SetSkeleton(RigResource skeleton)
         {
             _skeleton = skeleton;

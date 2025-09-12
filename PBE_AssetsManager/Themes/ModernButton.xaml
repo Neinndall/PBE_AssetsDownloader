@@ -254,8 +254,8 @@
     </Style>
 
     <Style x:Key="IconButton" TargetType="Button">
-        <Setter Property="Width" Value="26"/>
-        <Setter Property="Height" Value="26"/>
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -264,7 +264,7 @@
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="border" 
                             Background="{TemplateBinding Background}" 
-                            CornerRadius="13">
+                            CornerRadius="12">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -288,6 +288,16 @@
     <Style x:Key="DeleteIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
         <Setter Property="Background" Value="{StaticResource AccentRed}"/>
         <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <Style x:Key="PlayIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="Green"/>
+    </Style>
+
+    <Style x:Key="StopIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="Red"/>
     </Style>
 
 </ResourceDictionary>

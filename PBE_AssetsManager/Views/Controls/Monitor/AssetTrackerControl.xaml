@@ -140,7 +140,7 @@
                                         Click="SaveAssetButton_Click"
                                         ToolTip="Save Asset"
                                         Tag="{Binding}">
-                                    <materialDesign:MaterialIcon Kind="ContentSave" Width="15" Height="15"/>
+                                    <materialDesign:MaterialIcon Kind="ContentSave" Width="14" Height="14"/>
                                 </Button>
                                 <Button Name="RemoveAssetButton"
                                         Style="{StaticResource DeleteIconButton}"
@@ -148,7 +148,7 @@
                                         ToolTip="Remove Asset"
                                         Margin="10,0,0,0"
                                         Tag="{Binding}">
-                                    <materialDesign:MaterialIcon Kind="TrashCanOutline" Width="15" Height="15"/>
+                                    <materialDesign:MaterialIcon Kind="TrashCanOutline" Width="14" Height="14"/>
                                 </Button>
                             </StackPanel>
                         </StackPanel>

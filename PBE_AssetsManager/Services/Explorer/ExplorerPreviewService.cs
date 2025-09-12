@@ -22,6 +22,7 @@ using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Views.Helpers;
 using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Services.Monitor;
+using System.Reflection;
 
 namespace PBE_AssetsManager.Services.Explorer
 {
@@ -41,6 +42,8 @@ namespace PBE_AssetsManager.Services.Explorer
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly HashResolverService _hashResolverService;
         private readonly JsBeautifierService _jsBeautifierService;
+
+        private string _customScrollbarCss;
 
         // Constructor for DI
         public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService, JsBeautifierService jsBeautifierService)
@@ -66,6 +69,40 @@ namespace PBE_AssetsManager.Services.Explorer
             _selectFileMessagePanel = selectFileMessagePanel;
             _unsupportedFileMessagePanel = unsupportedFileMessagePanel;
             _unsupportedFileMessage = unsupportedFileMessage;
+        }
+
+        private string GetScrollbarCss()
+        {
+            if (_customScrollbarCss == null)
+            {
+                try
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var resourceName = "PBE_AssetsManager.Themes.WebViewScrollbar.css";
+
+                    using (var stream = assembly.GetManifestResourceStream(resourceName))
+                    {
+                        if (stream == null)
+                        {
+                            _logService.LogWarning($"Embedded resource '{resourceName}' not found. Using default scrollbar style.");
+                            _customScrollbarCss = string.Empty;
+                        }
+                        else
+                        {
+                            using (var reader = new StreamReader(stream))
+                            {
+                                _customScrollbarCss = reader.ReadToEnd();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError(ex, "Failed to load embedded resource WebViewScrollbar.css.");
+                    _customScrollbarCss = string.Empty;
+                }
+            }
+            return _customScrollbarCss;
         }
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
@@ -154,22 +191,6 @@ namespace PBE_AssetsManager.Services.Explorer
             else { await ShowUnsupportedPreviewAsync(extension); }
         }
 
-        private const string CustomScrollbarCss = @"
-            ::-webkit-scrollbar {
-                width: 12px;
-            }
-            ::-webkit-scrollbar-track {
-                background: #252526;
-            }
-            ::-webkit-scrollbar-thumb {
-                background-color: #505050;
-                border-radius: 6px;
-                border: 3px solid #252526;
-            }
-            ::-webkit-scrollbar-thumb:hover {
-                background-color: #707070;
-            }";
-
         private async Task ShowBinPreviewAsync(byte[] data)
         {
             try
@@ -184,7 +205,8 @@ namespace PBE_AssetsManager.Services.Explorer
                         var formattedJson = await JsonDiffHelper.FormatJsonAsync(binDict);
                         
                         var escapedHtml = System.Net.WebUtility.HtmlEncode(formattedJson);
-                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.4; }} {CustomScrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
+                        var scrollbarCss = GetScrollbarCss();
+                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
                     }
                     catch (Exception ex)
                     {
@@ -282,7 +304,8 @@ namespace PBE_AssetsManager.Services.Explorer
             try
             {
                 string svgContent = Encoding.UTF8.GetString(data);
-                var htmlContent = $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }} svg {{ width: 90%; height: 90%; object-fit: contain; }} {CustomScrollbarCss}</style></head><body>{svgContent}</body></html>";
+                var scrollbarCss = GetScrollbarCss();
+                var htmlContent = $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }} svg {{ width: 90%; height: 90%; object-fit: contain; }} {scrollbarCss}</style></head><body>{svgContent}</body></html>";
                 
                 await _webView2Preview.EnsureCoreWebView2Async();
                 SetPreviewer(Previewer.WebView);
@@ -316,7 +339,8 @@ namespace PBE_AssetsManager.Services.Explorer
                         }
 
                         var escapedHtml = System.Net.WebUtility.HtmlEncode(formattedText);
-                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; padding: 10px; }} pre {{ margin: 0; word-wrap: break-word; white-space: pre-wrap; line-height: 1.4; }} {CustomScrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
+                        var scrollbarCss = GetScrollbarCss();
+                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
                     }
                     catch (Exception ex)
                     {

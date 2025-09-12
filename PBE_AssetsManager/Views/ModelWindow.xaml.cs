@@ -79,7 +79,7 @@ namespace PBE_AssetsManager.Views
                         _skeleton = new RigResource(stream);
                         ViewportControl.SetSkeleton(_skeleton);
                     }
-                    _logService.Log($"Loaded skeleton: {Path.GetFileName(openFileDialog.FileName)}");
+                    _logService.LogDebug($"Loaded skeleton: {Path.GetFileName(openFileDialog.FileName)}");
                 }
                 else if (extension == ".skn")
                 {

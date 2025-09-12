@@ -61,12 +61,16 @@ namespace PBE_AssetsManager.Views.Controls.Models
             var openFileDialog = new OpenFileDialog
             {
                 Filter = "Animation files (*.anm)|*.anm|All files (*.*)|*.*",
-                Title = "Select an Animation File"
+                Title = "Select Animation Files",
+                Multiselect = true
             };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                AnimationFileLoaded?.Invoke(this, openFileDialog.FileName);
+                foreach (string fileName in openFileDialog.FileNames)
+                {
+                    AnimationFileLoaded?.Invoke(this, fileName);
+                }
             }
         }
     }

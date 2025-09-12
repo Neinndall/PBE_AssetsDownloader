@@ -51,7 +51,7 @@ namespace PBE_AssetsManager.Services.Models
                         loadedTextures[Path.GetFileNameWithoutExtension(texPath)] = loadedTex;
                     }
                 }
-                _logService.Log($"Loaded model: {Path.GetFileNameWithoutExtension(filePath)}");
+                _logService.LogDebug($"Loaded model: {Path.GetFileNameWithoutExtension(filePath)}");
                 return CreateSceneModel(skinnedMesh, loadedTextures, Path.GetFileNameWithoutExtension(filePath));
             }
             catch (Exception ex)

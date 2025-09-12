@@ -56,7 +56,7 @@ namespace PBE_AssetsManager.Views
 
         private void PanelControl_AnimationStopRequested(object sender, System.EventArgs e)
         {
-            ViewportControl.StopAnimation();
+            ViewportControl.TogglePauseResume();
         }
 
         private void SetupScene()

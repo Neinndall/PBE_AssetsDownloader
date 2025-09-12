@@ -254,8 +254,8 @@
     </Style>
 
     <Style x:Key="IconButton" TargetType="Button">
-        <Setter Property="Width" Value="20"/>
-        <Setter Property="Height" Value="20"/>
+        <Setter Property="Width" Value="21"/>
+        <Setter Property="Height" Value="21"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -295,8 +295,7 @@
         <Setter Property="Foreground" Value="Green"/>
     </Style>
 
-    <Style x:Key="StopIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Background" Value="White"/>
+    <Style x:Key="PauseIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
         <Setter Property="Foreground" Value="Red"/>
     </Style>
 

@@ -94,12 +94,12 @@
                                         <materialDesign:MaterialIcon Kind="Play" Width="14" Height="14"/>
                                     </Button>
                                     <Button Grid.Column="2" x:Name="StopButton"
-                                            Style="{StaticResource StopIconButton}"
+                                            Style="{StaticResource PauseIconButton}"
                                             Click="StopButton_Click"
                                             Tag="{Binding}"
-                                            ToolTip="Stop Animation"
+                                            ToolTip="Pause/Resume"
                                             Margin="5,0,5,0">
-                                        <materialDesign:MaterialIcon Kind="Stop" Width="14" Height="14"/>
+                                        <materialDesign:MaterialIcon Kind="Pause" Width="14" Height="14"/>
                                     </Button>
                                 </Grid>
                             </DataTemplate>

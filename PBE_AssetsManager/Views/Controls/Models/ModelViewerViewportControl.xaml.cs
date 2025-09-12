@@ -30,6 +30,7 @@ namespace PBE_AssetsManager.Views.Controls.Models
         private IAnimationAsset _currentAnimation;
         private RigResource _skeleton;
         private SceneModel _sceneModel;
+        public bool IsAnimationPaused { get; private set; }
 
         public ModelViewerViewportControl()
         {
@@ -50,11 +51,22 @@ namespace PBE_AssetsManager.Views.Controls.Models
         {
             _currentAnimation = animation;
             _stopwatch.Restart();
+            IsAnimationPaused = false;
         }
 
-        public void StopAnimation()
+        public void TogglePauseResume()
         {
-            _currentAnimation = null;
+            if (_currentAnimation == null) return;
+
+            IsAnimationPaused = !IsAnimationPaused;
+            if (IsAnimationPaused)
+            {
+                _stopwatch.Stop();
+            }
+            else
+            {
+                _stopwatch.Start();
+            }
         }
 
         public void SetSkeleton(RigResource skeleton)

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Controls; // Added
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -31,13 +33,15 @@ namespace PBE_AssetsManager.Services.Core
             public string Message { get; }
             public LogLevel Level { get; }
             public Exception Exception { get; }
+            public string ClickablePath { get; }
             public DateTime Timestamp { get; }
 
-            public LogEntry(string message, LogLevel level, Exception exception = null)
+            public LogEntry(string message, LogLevel level, Exception exception = null, string clickablePath = null)
             {
                 Message = message;
                 Level = level;
                 Exception = exception;
+                ClickablePath = clickablePath;
                 Timestamp = DateTime.Now;
             }
         }
@@ -119,6 +123,44 @@ namespace PBE_AssetsManager.Services.Core
             // This method now only logs to the fatal error file, not to the UI.
         }
 
+        private void LogInteractive(LogLevel level, string message, string clickablePath)
+        {
+            var logEntry = new LogEntry(message, level, clickablePath: clickablePath);
+            switch (level)
+            {
+                case LogLevel.Warning:
+                    _logger.Warning(message);
+                    break;
+                case LogLevel.Error:
+                    _logger.Error(message);
+                    break;
+                default:
+                    _logger.Information(message);
+                    break;
+            }
+            WriteLog(logEntry);
+        }
+
+        public void LogInteractiveSuccess(string message, string clickablePath)
+        {
+            LogInteractive(LogLevel.Success, message, clickablePath);
+        }
+
+        public void LogInteractiveWarning(string message, string clickablePath)
+        {
+            LogInteractive(LogLevel.Warning, message, clickablePath);
+        }
+
+        public void LogInteractiveError(string message, string clickablePath)
+        {
+            LogInteractive(LogLevel.Error, message, clickablePath);
+        }
+
+        public void LogInteractiveInfo(string message, string clickablePath)
+        {
+            LogInteractive(LogLevel.Info, message, clickablePath);
+        }
+
         private void WriteLog(LogEntry logEntry)
         {
             if (_outputRichTextBox == null)
@@ -178,11 +220,46 @@ namespace PBE_AssetsManager.Services.Core
 
             var timestampRun = new Run($"[{logEntry.Timestamp:HH:mm:ss}] ") { Foreground = Brushes.LightGray };
             var levelRun = new Run($"[{levelTag}] ") { Foreground = levelColor, FontWeight = FontWeights.Bold };
-            var messageRun = new Run(logEntry.Message);
 
             paragraph.Inlines.Add(timestampRun);
             paragraph.Inlines.Add(levelRun);
-            paragraph.Inlines.Add(messageRun);
+
+            if (!string.IsNullOrEmpty(logEntry.ClickablePath) && (File.Exists(logEntry.ClickablePath) || Directory.Exists(logEntry.ClickablePath)))
+            {
+                int pathIndex = logEntry.Message.IndexOf(logEntry.ClickablePath, StringComparison.OrdinalIgnoreCase);
+                if (pathIndex != -1)
+                {
+                    // Text before the path
+                    paragraph.Inlines.Add(new Run(logEntry.Message.Substring(0, pathIndex)));
+
+                    // The hyperlink
+                    var link = new Hyperlink(new Run(logEntry.ClickablePath));
+                    link.NavigateUri = new Uri(logEntry.ClickablePath);
+                    link.RequestNavigate += (sender, e) => {
+                        try
+                        {
+                            Process.Start("explorer.exe", $"/select,\"{e.Uri.LocalPath}\"");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error(ex, "Failed to open file path from log.");
+                        }
+                        e.Handled = true;
+                    };
+                    paragraph.Inlines.Add(link);
+
+                    // Text after the path
+                    paragraph.Inlines.Add(new Run(logEntry.Message.Substring(pathIndex + logEntry.ClickablePath.Length)));
+                }
+                else
+                {
+                    paragraph.Inlines.Add(new Run(logEntry.Message));
+                }
+            }
+            else
+            {
+                paragraph.Inlines.Add(new Run(logEntry.Message));
+            }
 
             if (logEntry.Exception != null)
             {

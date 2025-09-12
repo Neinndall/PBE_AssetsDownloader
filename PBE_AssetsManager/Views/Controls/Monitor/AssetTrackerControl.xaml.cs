@@ -121,7 +121,7 @@ namespace PBE_AssetsManager.Views.Controls.Monitor
                             downloadedCount++;
                         }
                         CustomMessageBoxService.ShowSuccess("Success", $"Successfully saved {downloadedCount} assets.");
-                        LogService.LogSuccess($"Successfully saved {downloadedCount} assets to '{destinationPath}'.");
+                        LogService.LogInteractiveSuccess($"Successfully saved {downloadedCount} assets to '{destinationPath}'.", destinationPath);
                     }
                     catch (Exception ex)
                     {

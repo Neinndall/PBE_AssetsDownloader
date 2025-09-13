@@ -15,7 +15,7 @@ namespace PBE_AssetsManager.Utils
         public bool CreateBackUpOldHashes { get; set; }
         public bool OnlyCheckDifferences { get; set; }
         public bool CheckJsonDataUpdates { get; set; }
-        public bool CheckAssetUpdates { get; set; }
+
         public bool AssetTrackerTimer { get; set; }
         public bool SaveDiffHistory { get; set; }
         public bool BackgroundUpdates { get; set; }
@@ -123,7 +123,7 @@ namespace PBE_AssetsManager.Utils
                 CreateBackUpOldHashes = false,
                 OnlyCheckDifferences = false,
                 CheckJsonDataUpdates = false,
-                CheckAssetUpdates = false,
+
                 AssetTrackerTimer = false,
                 SaveDiffHistory = false,
                 BackgroundUpdates = false,

@@ -163,10 +163,6 @@ namespace PBE_AssetsManager.Services.Core
         public async Task CheckForAllUpdatesAsync(bool silent = false)
         {
             await CheckForGeneralUpdatesAsync(silent);
-            if (_appSettings.CheckAssetUpdates)
-            {
-                await CheckForAssetsAsync();
-            }
             if (_appSettings.CheckPbeStatus)
             {
                 await CheckForPbeStatusAsync();

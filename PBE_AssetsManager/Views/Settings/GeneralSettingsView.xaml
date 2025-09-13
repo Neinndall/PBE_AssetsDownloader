@@ -138,17 +138,7 @@
                          Margin="27,0,0,8" 
                          TextWrapping="Wrap"/>
 
-                <CheckBox x:Name="checkBoxCheckAssetUpdates" 
-                        Content="Check for asset updates" 
-                        IsChecked="{Binding CheckAssetUpdates, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Automatically check for new sequential assets (emotes, banners, etc.)"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="27,0,0,8" 
-                         TextWrapping="Wrap"/>
 
-                
             </StackPanel>
         </Border>
 

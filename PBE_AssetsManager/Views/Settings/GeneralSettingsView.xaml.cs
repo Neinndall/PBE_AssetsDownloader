@@ -16,6 +16,9 @@ namespace PBE_AssetsManager.Views.Settings
         public void ApplySettingsToUI(AppSettings appSettings)
         {
             _appSettings = appSettings;
+            // By setting the DataContext to null and then back to the settings object,
+            // we force WPF to re-evaluate all the bindings.
+            DataContext = null;
             DataContext = _appSettings;
         }
 

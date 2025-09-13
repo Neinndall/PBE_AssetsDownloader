@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -40,6 +42,7 @@ namespace PBE_AssetsManager.Views
         private readonly MonitorService _monitorService;
 
         private string _latestAppVersionAvailable;
+        private readonly List<string> _notificationMessages = new List<string>();
 
         public MainWindow(
             IServiceProvider serviceProvider,
@@ -132,8 +135,20 @@ namespace PBE_AssetsManager.Views
         {
             Dispatcher.Invoke(() =>
             {
-                UpdateNotificationIcon.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-                if (show) NotificationTextBlock.Text = message;
+                if (show)
+                {
+                    if (!_notificationMessages.Contains(message))
+                    {
+                        _notificationMessages.Add(message);
+                    }
+                }
+                else
+                {
+                    _notificationMessages.Clear();
+                }
+
+                UpdateNotificationIcon.Visibility = _notificationMessages.Any() ? Visibility.Visible : Visibility.Collapsed;
+                NotificationTextBlock.Text = string.Join(Environment.NewLine, _notificationMessages);
             });
         }
 

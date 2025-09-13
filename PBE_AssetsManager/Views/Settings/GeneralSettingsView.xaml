@@ -8,15 +8,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
-    <UserControl.Resources>
-        <x:Array x:Key="UpdateFrequencies" Type="{x:Type System:Int32}">
-            <System:Int32>1</System:Int32>
-            <System:Int32>10</System:Int32>
-            <System:Int32>30</System:Int32>
-            <System:Int32>60</System:Int32>
-        </x:Array>
-    </UserControl.Resources>
-
     <StackPanel>
         <!-- Page Header -->
         <StackPanel Margin="0,0,0,32">
@@ -124,8 +115,12 @@
                                       Width="150" 
                                       HorizontalAlignment="Left"
                                       Style="{StaticResource ModernComboBox}"
-                                      ItemsSource="{StaticResource UpdateFrequencies}"
-                                      SelectedItem="{Binding UpdateCheckFrequency, Mode=TwoWay}"/>
+                                      SelectedItem="{Binding UpdateCheckFrequency, Mode=TwoWay}">
+                                <System:Int32>1</System:Int32>
+                                <System:Int32>10</System:Int32>
+                                <System:Int32>30</System:Int32>
+                                <System:Int32>60</System:Int32>
+                            </ComboBox>
                         </StackPanel>
 
                         <CheckBox x:Name="checkBoxCheckJsonData" 

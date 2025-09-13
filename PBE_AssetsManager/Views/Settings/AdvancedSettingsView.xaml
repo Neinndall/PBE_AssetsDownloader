@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="850">
     <StackPanel>
@@ -81,7 +82,11 @@
                         <ComboBox x:Name="IntervalUnitComboBox"
                                   Width="120"
                                   Margin="10,0,0,0"
-                                  Style="{StaticResource ModernComboBox}"/>
+                                  Style="{StaticResource ModernComboBox}">
+                            <System:String>Minutes</System:String>
+                            <System:String>Hours</System:String>
+                            <System:String>Days</System:String>
+                        </ComboBox>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

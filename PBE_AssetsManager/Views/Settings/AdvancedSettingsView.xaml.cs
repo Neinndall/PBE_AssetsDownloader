@@ -28,7 +28,6 @@ namespace PBE_AssetsManager.Views.Settings
             DataContext = null;
             DataContext = _settings;
 
-            IntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
             LoadIntervalSettings();
         }
 

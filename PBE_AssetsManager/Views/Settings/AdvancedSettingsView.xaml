@@ -44,6 +44,7 @@
                 <!-- Enable CheckBox -->
                 <CheckBox x:Name="EnableAssetTrackerCheckBox"
                           Content="Enable automatic background check"
+                          IsChecked="{Binding AssetTrackerTimer, Mode=TwoWay}"
                           Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="When enabled, the application will periodically check for new assets."
                              Foreground="{StaticResource TextMuted}" 
@@ -109,6 +110,7 @@
 
                 <!-- Enable CheckBox -->
                 <CheckBox x:Name="EnablePbeStatusCheckBox"
+                          IsChecked="{Binding CheckPbeStatus, Mode=TwoWay}"
                           Content="Enable PBE status notifications"
                           Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="When enabled, the application will periodically check for PBE updates."

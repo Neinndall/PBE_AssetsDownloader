@@ -92,6 +92,7 @@ namespace PBE_AssetsManager.Views
                 _appSettings.SaveDiffHistory = defaultSettings.SaveDiffHistory;
                 _appSettings.BackgroundUpdates = defaultSettings.BackgroundUpdates;
                 _appSettings.UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
+                _appSettings.JsonDataModificationDates = defaultSettings.JsonDataModificationDates;
                 _appSettings.MonitoredJsonFiles = defaultSettings.MonitoredJsonFiles;
                 _appSettings.DiffHistory = defaultSettings.DiffHistory;
                 _appSettings.AssetTrackerTimer = defaultSettings.AssetTrackerTimer;
@@ -101,6 +102,7 @@ namespace PBE_AssetsManager.Views
                 _appSettings.AssetTrackerProgress = defaultSettings.AssetTrackerProgress;
                 _appSettings.AssetTrackerUrlOverrides = defaultSettings.AssetTrackerUrlOverrides;
                 _appSettings.AssetTrackerUserRemovedIds = defaultSettings.AssetTrackerUserRemovedIds;
+                _appSettings.CheckPbeStatus = defaultSettings.CheckPbeStatus;
 
                 AppSettings.SaveSettings(_appSettings);
                 _customMessageBoxService.ShowInfo("Info", "Settings have been reset to default values.", this);

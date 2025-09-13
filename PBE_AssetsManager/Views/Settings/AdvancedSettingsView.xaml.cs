@@ -23,10 +23,9 @@ namespace PBE_AssetsManager.Views.Settings
         public void ApplySettingsToUI(AppSettings settings)
         {
             _settings = settings;
-            
+            DataContext = _settings;
+
             IntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
-            EnableAssetTrackerCheckBox.IsChecked = _settings.AssetTrackerTimer;
-            EnablePbeStatusCheckBox.IsChecked = _settings.CheckPbeStatus;
             LoadIntervalSettings();
         }
 
@@ -34,8 +33,6 @@ namespace PBE_AssetsManager.Views.Settings
         {
             if (_settings == null) return;
 
-            _settings.AssetTrackerTimer = EnableAssetTrackerCheckBox.IsChecked ?? false;
-            _settings.CheckPbeStatus = EnablePbeStatusCheckBox.IsChecked ?? false;
             if (!int.TryParse(IntervalValueTextBox.Text, out int value) || value < 0)
             {
                 // On invalid input, perhaps default to a safe value or do nothing.

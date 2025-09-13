@@ -54,6 +54,7 @@
                 
                 <CheckBox x:Name="checkBoxSyncHashes" 
                         Content="Synchronization with CDTB" 
+                        IsChecked="{Binding SyncHashesWithCDTB, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
                          Foreground="{StaticResource TextMuted}" 
@@ -63,6 +64,7 @@
 
                 <CheckBox x:Name="checkBoxSaveDiffHistory" 
                         Content="Save differences history"
+                        IsChecked="{Binding SaveDiffHistory, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Save a history of all JSON file differences detected during updates"
                          Foreground="{StaticResource TextMuted}"
@@ -94,6 +96,7 @@
 
                 <CheckBox x:Name="checkBoxBackgroundUpdates" 
                         Content="Background updates" 
+                        IsChecked="{Binding BackgroundUpdates, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Periodically check for updates while the application is running"
                          Foreground="{StaticResource TextMuted}" 
@@ -121,11 +124,13 @@
                               Width="150" 
                               HorizontalAlignment="Left"
                               Style="{StaticResource ModernComboBox}"
-                              ItemsSource="{StaticResource UpdateFrequencies}"/>
+                              ItemsSource="{StaticResource UpdateFrequencies}"
+                              SelectedItem="{Binding UpdateCheckFrequency, Mode=TwoWay}"/>
                 </StackPanel>
 
                 <CheckBox x:Name="checkBoxCheckJsonData" 
                         Content="Check for files updates" 
+                        IsChecked="{Binding CheckJsonDataUpdates, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Check for updates to JSON files and their differences"
                          Foreground="{StaticResource TextMuted}" 
@@ -135,7 +140,7 @@
 
                 <CheckBox x:Name="checkBoxCheckAssetUpdates" 
                         Content="Check for asset updates" 
-                        IsChecked="{Binding CheckAssetUpdates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        IsChecked="{Binding CheckAssetUpdates, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Automatically check for new sequential assets (emotes, banners, etc.)"
                          Foreground="{StaticResource TextMuted}" 
@@ -169,6 +174,7 @@
                 
                 <CheckBox x:Name="checkBoxAutoCopy" 
                         Content="Auto-replace outdated hashes" 
+                        IsChecked="{Binding AutoCopyHashes, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Automatically replace old hash files with newer versions"
                          Foreground="{StaticResource TextMuted}" 
@@ -178,6 +184,7 @@
                 
                 <CheckBox x:Name="checkBoxCreateBackUp" 
                         Content="Create backups before replacing" 
+                        IsChecked="{Binding CreateBackUpOldHashes, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Backup existing files to prevent data loss during updates"
                          Foreground="{StaticResource TextMuted}" 
@@ -209,6 +216,7 @@
                 
                 <CheckBox x:Name="checkBoxOnlyCheckDifferences" 
                         Content="Scan-only mode (no downloads)" 
+                        IsChecked="{Binding OnlyCheckDifferences, Mode=TwoWay}"
                         Style="{StaticResource ModernCheckBox}"/>
                 <TextBlock Text="Only identify differences without downloading or modifying files"
                          Foreground="{StaticResource TextMuted}" 

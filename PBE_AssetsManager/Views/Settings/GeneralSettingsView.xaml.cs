@@ -16,31 +16,13 @@ namespace PBE_AssetsManager.Views.Settings
         public void ApplySettingsToUI(AppSettings appSettings)
         {
             _appSettings = appSettings;
-
-            checkBoxSyncHashes.IsChecked = _appSettings.SyncHashesWithCDTB;
-            checkBoxCheckJsonData.IsChecked = _appSettings.CheckJsonDataUpdates;
-            checkBoxCheckAssetUpdates.IsChecked = _appSettings.CheckAssetUpdates;
-            checkBoxAutoCopy.IsChecked = _appSettings.AutoCopyHashes;
-            checkBoxCreateBackUp.IsChecked = _appSettings.CreateBackUpOldHashes;
-            checkBoxOnlyCheckDifferences.IsChecked = _appSettings.OnlyCheckDifferences;
-            checkBoxSaveDiffHistory.IsChecked = _appSettings.SaveDiffHistory;
-            checkBoxBackgroundUpdates.IsChecked = _appSettings.BackgroundUpdates;
-            comboBoxUpdateFrequency.SelectedItem = _appSettings.UpdateCheckFrequency;
+            DataContext = _appSettings;
         }
 
         public void SaveSettings()
-        {
+        {   
+            // Are now throught bindings isCheck
             if (_appSettings == null) return;
-            
-            _appSettings.SyncHashesWithCDTB = checkBoxSyncHashes.IsChecked ?? false;
-            _appSettings.CheckJsonDataUpdates = checkBoxCheckJsonData.IsChecked ?? false;
-            _appSettings.CheckAssetUpdates = checkBoxCheckAssetUpdates.IsChecked ?? false;
-            _appSettings.AutoCopyHashes = checkBoxAutoCopy.IsChecked ?? false;
-            _appSettings.CreateBackUpOldHashes = checkBoxCreateBackUp.IsChecked ?? false;
-            _appSettings.OnlyCheckDifferences = checkBoxOnlyCheckDifferences.IsChecked ?? false;
-            _appSettings.SaveDiffHistory = checkBoxSaveDiffHistory.IsChecked ?? false;
-            _appSettings.BackgroundUpdates = checkBoxBackgroundUpdates.IsChecked ?? false;
-            _appSettings.UpdateCheckFrequency = (int)(comboBoxUpdateFrequency.SelectedItem ?? 10);
         }
     }
 }

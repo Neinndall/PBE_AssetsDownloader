@@ -98,6 +98,11 @@ namespace PBE_AssetsManager.Services.Core
             }
         }
 
+        /// <summary>
+        /// Checks for new assets in the Asset Tracker functionality.
+        /// This method is used by its dedicated background timer (_assetTrackerTimer).
+        /// It fires an 'UpdatesFound' event as soon as a new asset is detected.
+        /// </summary>
         private async Task CheckForAssetsAsync()
         {
             await _monitorService.CheckAllAssetCategoriesAsync(true, () =>
@@ -106,6 +111,11 @@ namespace PBE_AssetsManager.Services.Core
             });
         }
 
+        /// <summary>
+        /// Checks for PBE status changes from Riot's endpoint.
+        /// This method is used by its dedicated background timer (_pbeStatusTimer).
+        /// It fires an 'UpdatesFound' event if the status has changed.
+        /// </summary>
         private async Task CheckForPbeStatusAsync()
         {
             string pbeStatusMessage = await _pbeStatusService.CheckPbeStatusAsync();
@@ -115,28 +125,41 @@ namespace PBE_AssetsManager.Services.Core
             }
         }
 
+        /// <summary>
+        /// Checks for general updates: new application version, hashes, and monitored JSON files.
+        /// This method is used by the background timer for general updates (_updateTimer).
+        /// It fires individual 'UpdatesFound' events for each discovery.
+        /// </summary>
         public async Task CheckForGeneralUpdatesAsync(bool silent = false)
         {
-            bool hashesUpdated = _appSettings.SyncHashesWithCDTB && await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB, silent);
-            bool jsonUpdated = _appSettings.CheckJsonDataUpdates && await _jsonDataService.CheckJsonDataUpdatesAsync(silent);
+            if (_appSettings.SyncHashesWithCDTB)
+            {
+                await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB, silent, () =>
+                {
+                    if (silent)
+                    {
+                        UpdatesFound?.Invoke("New hashes are available!", null);
+                    }
+                });
+            }
+
+            if (_appSettings.CheckJsonDataUpdates)
+            {
+                await _jsonDataService.CheckJsonDataUpdatesAsync(silent, () => { UpdatesFound?.Invoke("JSON files have been updated!", null); });
+            }
             var (appUpdateAvailable, newVersion) = await _updateManager.IsNewVersionAvailableAsync();
 
-            string latestVersion = appUpdateAvailable ? newVersion : null;
-
-            if (appUpdateAvailable || jsonUpdated || (hashesUpdated && silent))
+            if (appUpdateAvailable)
             {
-                var messages = new List<string>();
-                if (appUpdateAvailable) messages.Add($"Version {newVersion} is available!");
-                if (hashesUpdated && silent) messages.Add("New hashes are available!");
-                if (jsonUpdated) messages.Add("JSON files have been updated!");
-                if (messages.Count > 0)
-                {
-                    UpdatesFound?.Invoke(string.Join(" | ", messages), latestVersion);
-                }
+                UpdatesFound?.Invoke($"Version {newVersion} is available!", newVersion);
             }
         }
 
-        // This method is called once on application startup for a one-time check of everything.
+        /// <summary>
+        /// Orchestrator method called ONLY ONCE on application startup.
+        /// It invokes all the individual check methods to perform a complete initial scan.
+        /// Each individual check method is responsible for firing its own notification event.
+        /// </summary>
         public async Task CheckForAllUpdatesAsync(bool silent = false)
         {
             await CheckForGeneralUpdatesAsync(silent);

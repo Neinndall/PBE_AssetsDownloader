@@ -154,7 +154,7 @@ namespace PBE_AssetsManager.Services.Monitor
             return result;
         }
 
-        public async Task<bool> CheckJsonDataUpdatesAsync(bool silent = false)
+        public async Task<bool> CheckJsonDataUpdatesAsync(bool silent = false, Action onUpdateFound = null)
         {
             if (!_appSettings.CheckJsonDataUpdates || (_appSettings.MonitoredJsonFiles == null))
             {
@@ -164,6 +164,7 @@ namespace PBE_AssetsManager.Services.Monitor
             if (!silent) _logService.Log("Checking for JSON file updates...");
             var serverJsonDataEntries = new Dictionary<string, (DateTime Date, string FullUrl)>();
             bool anyUrlProcessed = false;
+            bool notificationSent = false; // Flag to ensure we only notify once
 
             // Process MonitoredJsonFiles
             if (_appSettings.MonitoredJsonFiles != null)
@@ -237,6 +238,12 @@ namespace PBE_AssetsManager.Services.Monitor
 
                 if (lastUpdated != serverDate)
                 {
+                    if (!notificationSent)
+                    {
+                        onUpdateFound?.Invoke();
+                        notificationSent = true;
+                    }
+
                     _appSettings.JsonDataModificationDates[fullUrl] = serverDate; // Update the date in the AppSettings object
                     wasUpdated = true;
 

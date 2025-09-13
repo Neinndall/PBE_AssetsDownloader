@@ -37,9 +37,9 @@ namespace PBE_AssetsManager.Services.Downloads
             _jsonDataService = jsonDataService;
         }
 
-        public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB, bool silent = false)
+        public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB, bool silent = false, Action onUpdateFound = null)
         {
-            bool isUpdated = await IsUpdatedAsync(silent);
+            bool isUpdated = await IsUpdatedAsync(silent, onUpdateFound);
             if (isUpdated)
             {
                 if (!silent) _logService.Log("Server updated. Starting hash synchronization...");
@@ -52,7 +52,7 @@ namespace PBE_AssetsManager.Services.Downloads
             return false;
         }
 
-        public async Task<bool> IsUpdatedAsync(bool silent = false)
+        public async Task<bool> IsUpdatedAsync(bool silent = false, Action onUpdateFound = null)
         {
             try
             {
@@ -67,14 +67,27 @@ namespace PBE_AssetsManager.Services.Downloads
 
                 var localSizes = _appSettings.HashesSizes ?? new Dictionary<string, long>();
                 bool updated = false;
-        
-                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, GAME_HASHES_FILENAME);
-                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, LCU_HASHES_FILENAME);
-                
-                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINENTRIES);
-                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINFIELDS);
-                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINHASHES);
-                updated |= UpdateHashSizeIfDifferent(serverSizes, localSizes, HASHES_BINTYPES);
+                bool notificationSent = false;
+
+                void CheckAndUpdate(string filename)
+                {
+                    if (UpdateHashSizeIfDifferent(serverSizes, localSizes, filename))
+                    {
+                        updated = true;
+                        if (!notificationSent)
+                        {
+                            onUpdateFound?.Invoke();
+                            notificationSent = true;
+                        }
+                    }
+                }
+
+                CheckAndUpdate(GAME_HASHES_FILENAME);
+                CheckAndUpdate(LCU_HASHES_FILENAME);
+                CheckAndUpdate(HASHES_BINENTRIES);
+                CheckAndUpdate(HASHES_BINFIELDS);
+                CheckAndUpdate(HASHES_BINHASHES);
+                CheckAndUpdate(HASHES_BINTYPES);
 
                 if (updated)
                 {

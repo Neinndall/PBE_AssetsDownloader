@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
-             xmlns:System="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="850">
     <StackPanel>
@@ -21,108 +20,103 @@
                          Margin="0,2,0,0"/>
         </StackPanel>
 
-        <!-- Asset Tracker Card -->
+        <!-- Unified Settings Card -->
         <Border Style="{StaticResource SettingsCard}">
             <StackPanel>
-                <!-- Card Header -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <materialDesign:MaterialIcon Kind="TimerCogOutline" 
+                <!-- Asset Tracker Section -->
+                <StackPanel Margin="0,0,0,24">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="TimerCogOutline" 
                                                    Foreground="{StaticResource AccentOrange}"
                                                    FontSize="20" 
                                                    Margin="0,0,12,0" 
                                                    VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBlock Text="Asset Tracker" 
+                        <StackPanel>
+                            <TextBlock Text="Asset Tracker" 
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Configure background search frequency" 
+                            <TextBlock Text="Configure background search frequency" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Margin="10,0,0,0">
+                        <CheckBox x:Name="EnableAssetTrackerCheckBox"
+                                  Content="Enable automatic background check"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="When enabled, the application will periodically check for new assets."
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,8" 
+                                     TextWrapping="Wrap"/>
+
+                        <!-- Interval Settings Container -->
+                        <StackPanel Margin="27,5,0,8">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=EnableAssetTrackerCheckBox}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <TextBlock Text="Update Interval" 
+                                         Foreground="{StaticResource TextSecondary}" 
+                                         FontSize="12" 
+                                         Margin="0,0,0,4"/>
+                            <TextBlock Text="Specify the desired time between background searches."
+                                         Foreground="{StaticResource TextMuted}" 
+                                         FontSize="12" 
+                                         Margin="0,0,0,10"
+                                         TextWrapping="Wrap"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox x:Name="IntervalValueTextBox"
+                                         Width="75"
+                                         Style="{StaticResource ModernTextBox}"/>
+                                <ComboBox x:Name="IntervalUnitComboBox"
+                                          Width="120"
+                                          Margin="10,0,0,0"
+                                          Style="{StaticResource ModernComboBox}"/>
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Enable CheckBox -->
-                <CheckBox x:Name="EnableAssetTrackerCheckBox"
-                          Content="Enable automatic background check"
-                          IsChecked="{Binding AssetTrackerTimer, Mode=TwoWay}"
-                          Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="When enabled, the application will periodically check for new assets."
-                             Foreground="{StaticResource TextMuted}" 
-                             FontSize="12" 
-                             Margin="27,0,0,16" 
-                             TextWrapping="Wrap"/>
-
-                <!-- Interval Settings Container -->
-                <StackPanel Margin="30,5,0,8">
-                    <StackPanel.Style>
-                        <Style TargetType="StackPanel">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=EnableAssetTrackerCheckBox}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </StackPanel.Style>
-                    
-                    <TextBlock Text="Update Interval" 
-                                 Foreground="{StaticResource TextSecondary}" 
-                                 FontSize="12" 
-                                 Margin="0,0,0,4"/>
-                    <TextBlock Text="Specify the desired time between background searches."
-                                 Foreground="{StaticResource TextMuted}" 
-                                 FontSize="12" 
-                                 Margin="0,0,0,10"
-                                 TextWrapping="Wrap"/>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBox x:Name="IntervalValueTextBox"
-                                 Width="75"
-                                 Style="{StaticResource ModernTextBox}"/>
-                        <ComboBox x:Name="IntervalUnitComboBox"
-                                  Width="120"
-                                  Margin="10,0,0,0"
-                                  Style="{StaticResource ModernComboBox}">
-                            <System:String>Minutes</System:String>
-                            <System:String>Hours</System:String>
-                            <System:String>Days</System:String>
-                        </ComboBox>
-                    </StackPanel>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <!-- PBE Status Checker Card -->
-        <Border Style="{StaticResource SettingsCard}">
-            <StackPanel>
-                <!-- Card Header -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <materialDesign:MaterialIcon Kind="LanPending" 
+                <!-- PBE Status Checker Section -->
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="LanPending" 
                                                    Foreground="{StaticResource AccentPurple}"
                                                    FontSize="20" 
                                                    Margin="0,0,12,0" 
                                                    VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBlock Text="PBE Status" 
+                        <StackPanel>
+                            <TextBlock Text="PBE Status" 
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Get notifications about PBE status" 
+                            <TextBlock Text="Get notifications about PBE status" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Margin="10,0,0,0">
+                        <CheckBox x:Name="EnablePbeStatusCheckBox"
+                                  Content="PBE status notifications"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="When enabled, the application will periodically check for PBE updates."
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,8" 
+                                     TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
-
-                <!-- Enable CheckBox -->
-                <CheckBox x:Name="EnablePbeStatusCheckBox"
-                          IsChecked="{Binding CheckPbeStatus, Mode=TwoWay}"
-                          Content="Enable PBE status notifications"
-                          Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="When enabled, the application will periodically check for PBE updates."
-                             Foreground="{StaticResource TextMuted}" 
-                             FontSize="12" 
-                             Margin="27,0,0,16" 
-                             TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
     </StackPanel>

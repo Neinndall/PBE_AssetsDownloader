@@ -32,7 +32,5 @@ namespace PBE_AssetsManager.Views.Settings
         {
             // This view doesn't save any settings, but it needs to implement the interface.
         }
-
-        
     }
 }

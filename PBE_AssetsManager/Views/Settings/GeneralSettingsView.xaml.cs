@@ -8,24 +8,37 @@ namespace PBE_AssetsManager.Views.Settings
     {
         private AppSettings _appSettings;
 
-        public GeneralSettingsView() 
+        public GeneralSettingsView()
         {
             InitializeComponent();
         }
-
+        
         public void ApplySettingsToUI(AppSettings appSettings)
         {
             _appSettings = appSettings;
-            // By setting the DataContext to null and then back to the settings object,
-            // we force WPF to re-evaluate all the bindings.
-            DataContext = null;
-            DataContext = _appSettings;
+            
+            checkBoxSyncHashes.IsChecked = _appSettings.SyncHashesWithCDTB;
+            checkBoxCheckJsonData.IsChecked = _appSettings.CheckJsonDataUpdates;
+            checkBoxAutoCopy.IsChecked = _appSettings.AutoCopyHashes;
+            checkBoxCreateBackUp.IsChecked = _appSettings.CreateBackUpOldHashes;
+            checkBoxOnlyCheckDifferences.IsChecked = _appSettings.OnlyCheckDifferences;
+            checkBoxSaveDiffHistory.IsChecked = _appSettings.SaveDiffHistory;
+            checkBoxBackgroundUpdates.IsChecked = _appSettings.BackgroundUpdates;
+            comboBoxUpdateFrequency.SelectedItem = _appSettings.UpdateCheckFrequency;
         }
 
         public void SaveSettings()
         {   
-            // Are now throught bindings isCheck
             if (_appSettings == null) return;
+            
+            _appSettings.SyncHashesWithCDTB = checkBoxSyncHashes.IsChecked ?? false;
+            _appSettings.CheckJsonDataUpdates = checkBoxCheckJsonData.IsChecked ?? false;
+            _appSettings.AutoCopyHashes = checkBoxAutoCopy.IsChecked ?? false;
+            _appSettings.CreateBackUpOldHashes = checkBoxCreateBackUp.IsChecked ?? false;
+            _appSettings.OnlyCheckDifferences = checkBoxOnlyCheckDifferences.IsChecked ?? false;
+            _appSettings.SaveDiffHistory = checkBoxSaveDiffHistory.IsChecked ?? false;
+            _appSettings.BackgroundUpdates = checkBoxBackgroundUpdates.IsChecked ?? false;
+            _appSettings.UpdateCheckFrequency = (int)(comboBoxUpdateFrequency.SelectedItem ?? 10);
         }
     }
 }

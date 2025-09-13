@@ -49,11 +49,11 @@ namespace PBE_AssetsManager.Views
             _advancedSettingsView = _serviceProvider.GetRequiredService<AdvancedSettingsView>();
             _logsSettingsView = _serviceProvider.GetRequiredService<LogsSettingsView>();
 
-            // Apply settings to all views
-            _generalSettingsView.ApplySettingsToUI(_appSettings);
-            _hashPathsSettingsView.ApplySettingsToUI(_appSettings);
+            // Apply settings to all views                        
+            _generalSettingsView.ApplySettingsToUI(_appSettings);      
+            _hashPathsSettingsView.ApplySettingsToUI(_appSettings);    
             _advancedSettingsView.ApplySettingsToUI(_appSettings);     
-            _logsSettingsView.ApplySettingsToUI(_appSettings);
+            _logsSettingsView.ApplySettingsToUI(_appSettings);         
             _logsSettingsView.SetLogService(_logService);
 
             SetupNavigation();
@@ -79,37 +79,16 @@ namespace PBE_AssetsManager.Views
 
             if (result == true)
             {
-                var defaultSettings = AppSettings.GetDefaultSettings();
-                _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
-                _appSettings.AutoCopyHashes = defaultSettings.AutoCopyHashes;
-                _appSettings.CreateBackUpOldHashes = defaultSettings.CreateBackUpOldHashes;
-                _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
-                _appSettings.NewHashesPath = defaultSettings.NewHashesPath;
-                _appSettings.OldHashesPath = defaultSettings.OldHashesPath;
-                _appSettings.LolDirectory = defaultSettings.LolDirectory;
-                _appSettings.SaveDiffHistory = defaultSettings.SaveDiffHistory;
-                _appSettings.BackgroundUpdates = defaultSettings.BackgroundUpdates;
-                _appSettings.UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
-                _appSettings.JsonDataModificationDates = defaultSettings.JsonDataModificationDates;
-                _appSettings.MonitoredJsonFiles = defaultSettings.MonitoredJsonFiles;
-                _appSettings.DiffHistory = defaultSettings.DiffHistory;
-                _appSettings.AssetTrackerTimer = defaultSettings.AssetTrackerTimer;
-                _appSettings.AssetTrackerFrequency = defaultSettings.AssetTrackerFrequency;
-                _appSettings.AssetTrackerFoundIds = defaultSettings.AssetTrackerFoundIds;
-                _appSettings.AssetTrackerFailedIds = defaultSettings.AssetTrackerFailedIds;
-                _appSettings.AssetTrackerProgress = defaultSettings.AssetTrackerProgress;
-                _appSettings.AssetTrackerUrlOverrides = defaultSettings.AssetTrackerUrlOverrides;
-                _appSettings.AssetTrackerUserRemovedIds = defaultSettings.AssetTrackerUserRemovedIds;
-                _appSettings.CheckPbeStatus = defaultSettings.CheckPbeStatus;
+                _appSettings.ResetToDefaults();
 
                 AppSettings.SaveSettings(_appSettings);
                 _customMessageBoxService.ShowInfo("Info", "Settings have been reset to default values.", this);
 
-                // Apply settings to all views
-                _generalSettingsView.ApplySettingsToUI(_appSettings);
+                // Apply settings to all views                         
+                _generalSettingsView.ApplySettingsToUI(_appSettings);  
                 _hashPathsSettingsView.ApplySettingsToUI(_appSettings);
-                _advancedSettingsView.ApplySettingsToUI(_appSettings);
-                _logsSettingsView.ApplySettingsToUI(_appSettings);
+                _advancedSettingsView.ApplySettingsToUI(_appSettings); 
+                _logsSettingsView.ApplySettingsToUI(_appSettings);     
 
                 SettingsChanged?.Invoke(this, new SettingsChangedEventArgs { WasResetToDefaults = true });
             }
@@ -128,5 +107,5 @@ namespace PBE_AssetsManager.Views
 
             SettingsChanged?.Invoke(this, new SettingsChangedEventArgs { WasResetToDefaults = false });
         }
-    }    
+    }
 }

@@ -23,18 +23,17 @@ namespace PBE_AssetsManager.Views.Settings
         public void ApplySettingsToUI(AppSettings settings)
         {
             _settings = settings;
-            // By setting the DataContext to null and then back to the settings object,
-            // we force WPF to re-evaluate all the bindings.
-            DataContext = null;
-            DataContext = _settings;
-
-            LoadIntervalSettings();
+            IntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
+            LoadIntervalSettings(); 
         }
 
         public void SaveSettings()
         {
             if (_settings == null) return;
 
+            _settings.AssetTrackerTimer = EnableAssetTrackerCheckBox.IsChecked ?? false;
+            _settings.CheckPbeStatus = EnablePbeStatusCheckBox.IsChecked ?? false;
+            
             if (!int.TryParse(IntervalValueTextBox.Text, out int value) || value < 0)
             {
                 // On invalid input, perhaps default to a safe value or do nothing.

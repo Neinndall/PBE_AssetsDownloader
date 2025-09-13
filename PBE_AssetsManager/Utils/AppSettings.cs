@@ -55,7 +55,6 @@ namespace PBE_AssetsManager.Utils
             var json = File.ReadAllText(ConfigFilePath);
             var settings = JsonConvert.DeserializeObject<AppSettings>(json) ?? GetDefaultSettings();
 
-            // Migration block to handle old formats.
             var jObject = JObject.Parse(json);
             bool needsResave = false;
 
@@ -70,7 +69,6 @@ namespace PBE_AssetsManager.Utils
                     if (token is JObject itemObject &&
                         itemObject.TryGetValue("Url", StringComparison.OrdinalIgnoreCase, out var urlToken))
                     {
-                        // Old object format: {"Url": "...", "LastUpdated": "..."}
                         string url = urlToken.ToString();
                         if (!string.IsNullOrWhiteSpace(url))
                         {
@@ -82,12 +80,11 @@ namespace PBE_AssetsManager.Utils
                                 newDates[url] = date;
                             }
 
-                            needsResave = true; // Mark for resave to migrate format
+                            needsResave = true;
                         }
                     }
                     else if (token.Type == JTokenType.String)
                     {
-                        // Current/new format: "...url..."
                         newUrls.Add(token.ToString());
                     }
                 }
@@ -101,7 +98,6 @@ namespace PBE_AssetsManager.Utils
                 SaveSettings(settings);
             }
 
-            // Ensure lists are not null
             settings.MonitoredJsonFiles ??= new List<string>();
             settings.JsonDataModificationDates ??= new Dictionary<string, DateTime>();
             settings.DiffHistory ??= new List<JsonDiffHistoryEntry>();
@@ -123,19 +119,16 @@ namespace PBE_AssetsManager.Utils
                 CreateBackUpOldHashes = false,
                 OnlyCheckDifferences = false,
                 CheckJsonDataUpdates = false,
-
                 AssetTrackerTimer = false,
                 SaveDiffHistory = false,
                 BackgroundUpdates = false,
                 CheckPbeStatus = false,
-                UpdateCheckFrequency = 10, // Default to 10 minutes
-                AssetTrackerFrequency = 60, // Default to 60 minutes
-
+                UpdateCheckFrequency = 10,
+                AssetTrackerFrequency = 60,
                 NewHashesPath = null,
                 OldHashesPath = null,
                 LolDirectory = null,
                 HashesSizes = new Dictionary<string, long>(),
-
                 JsonDataModificationDates = new Dictionary<string, DateTime>(),
                 MonitoredJsonFiles = new List<string>(),
                 DiffHistory = new List<JsonDiffHistoryEntry>(),
@@ -151,6 +144,34 @@ namespace PBE_AssetsManager.Utils
         {
             var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
             File.WriteAllText(ConfigFilePath, json);
+        }
+
+        public void ResetToDefaults()
+        {
+            var defaultSettings = GetDefaultSettings();
+
+            CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
+            AutoCopyHashes = defaultSettings.AutoCopyHashes;
+            CreateBackUpOldHashes = defaultSettings.CreateBackUpOldHashes;
+            OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;
+            NewHashesPath = defaultSettings.NewHashesPath;
+            OldHashesPath = defaultSettings.OldHashesPath;
+            LolDirectory = defaultSettings.LolDirectory;
+            SaveDiffHistory = defaultSettings.SaveDiffHistory;
+            BackgroundUpdates = defaultSettings.BackgroundUpdates;
+            CheckPbeStatus = defaultSettings.CheckPbeStatus;
+            UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
+            JsonDataModificationDates = defaultSettings.JsonDataModificationDates;
+            MonitoredJsonFiles = defaultSettings.MonitoredJsonFiles;
+            DiffHistory = defaultSettings.DiffHistory;
+            AssetTrackerTimer = defaultSettings.AssetTrackerTimer;
+            AssetTrackerFrequency = defaultSettings.AssetTrackerFrequency;
+            AssetTrackerFoundIds = defaultSettings.AssetTrackerFoundIds;
+            AssetTrackerFailedIds = defaultSettings.AssetTrackerFailedIds;
+            AssetTrackerProgress = defaultSettings.AssetTrackerProgress;
+            AssetTrackerUrlOverrides = defaultSettings.AssetTrackerUrlOverrides;
+            AssetTrackerUserRemovedIds = defaultSettings.AssetTrackerUserRemovedIds;
+            // SyncHashesWithCDTB and HashesSizes are intentionally not reset.
         }
     }
 }

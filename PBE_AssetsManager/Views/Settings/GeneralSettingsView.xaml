@@ -8,6 +8,15 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
+    <UserControl.Resources>
+        <x:Array x:Key="UpdateFrequencies" Type="{x:Type System:Int32}">
+            <System:Int32>1</System:Int32>
+            <System:Int32>10</System:Int32>
+            <System:Int32>30</System:Int32>
+            <System:Int32>60</System:Int32>
+        </x:Array>
+    </UserControl.Resources>
+
     <StackPanel>
         <!-- Page Header -->
         <StackPanel Margin="0,0,0,32">
@@ -43,10 +52,9 @@
                                      Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Margin="32,0,0,0">
+                    <StackPanel Margin="10,0,0,0">
                         <CheckBox x:Name="checkBoxSyncHashes" 
                                   Content="Synchronization with CDTB" 
-                                  IsChecked="{Binding SyncHashesWithCDTB, Mode=TwoWay}"
                                   Style="{StaticResource ModernCheckBox}"/>
                         <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
                                      Foreground="{StaticResource TextMuted}" 
@@ -56,7 +64,6 @@
 
                         <CheckBox x:Name="checkBoxSaveDiffHistory" 
                                   Content="Save differences history"
-                                  IsChecked="{Binding SaveDiffHistory, Mode=TwoWay}"
                                   Style="{StaticResource ModernCheckBox}"/>
                         <TextBlock Text="Save a history of all JSON file differences detected during updates"
                                      Foreground="{StaticResource TextMuted}"
@@ -84,10 +91,9 @@
                                      Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Margin="32,0,0,0">
+                    <StackPanel Margin="10,0,0,0">
                         <CheckBox x:Name="checkBoxBackgroundUpdates" 
                                   Content="Background updates" 
-                                  IsChecked="{Binding BackgroundUpdates, Mode=TwoWay}"
                                   Style="{StaticResource ModernCheckBox}"/>
                         <TextBlock Text="Periodically check for updates while the application is running"
                                      Foreground="{StaticResource TextMuted}" 
@@ -115,17 +121,11 @@
                                       Width="150" 
                                       HorizontalAlignment="Left"
                                       Style="{StaticResource ModernComboBox}"
-                                      SelectedItem="{Binding UpdateCheckFrequency, Mode=TwoWay}">
-                                <System:Int32>1</System:Int32>
-                                <System:Int32>10</System:Int32>
-                                <System:Int32>30</System:Int32>
-                                <System:Int32>60</System:Int32>
-                            </ComboBox>
+                                      ItemsSource="{StaticResource UpdateFrequencies}"/>
                         </StackPanel>
 
                         <CheckBox x:Name="checkBoxCheckJsonData" 
                                   Content="Check for files updates" 
-                                  IsChecked="{Binding CheckJsonDataUpdates, Mode=TwoWay}"
                                   Style="{StaticResource ModernCheckBox}"/>
                         <TextBlock Text="Check for updates to JSON files and their differences"
                                      Foreground="{StaticResource TextMuted}" 
@@ -153,10 +153,9 @@
                                      Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Margin="32,0,0,0">
+                    <StackPanel Margin="10,0,0,0">
                         <CheckBox x:Name="checkBoxAutoCopy" 
                                   Content="Auto-replace outdated hashes" 
-                                  IsChecked="{Binding AutoCopyHashes, Mode=TwoWay}"
                                   Style="{StaticResource ModernCheckBox}"/>
                         <TextBlock Text="Automatically replace old hash files with newer versions"
                                      Foreground="{StaticResource TextMuted}" 
@@ -166,7 +165,6 @@
 
                         <CheckBox x:Name="checkBoxCreateBackUp" 
                                   Content="Create backups before replacing" 
-                                  IsChecked="{Binding CreateBackUpOldHashes, Mode=TwoWay}"
                                   Style="{StaticResource ModernCheckBox}"/>
                         <TextBlock Text="Backup existing files to prevent data loss during updates"
                                      Foreground="{StaticResource TextMuted}" 
@@ -194,10 +192,9 @@
                                      Foreground="{StaticResource TextMuted}"/>
                         </StackPanel>
                     </StackPanel>
-                    <StackPanel Margin="32,0,0,0">
+                    <StackPanel Margin="10,0,0,0">
                         <CheckBox x:Name="checkBoxOnlyCheckDifferences" 
                                   Content="Scan-only mode (no downloads)" 
-                                  IsChecked="{Binding OnlyCheckDifferences, Mode=TwoWay}"
                                   Style="{StaticResource ModernCheckBox}"/>
                         <TextBlock Text="Only identify differences without downloading or modifying files"
                                      Foreground="{StaticResource TextMuted}" 

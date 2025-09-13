@@ -46,7 +46,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="textBoxNewHashPath" 
+                        <TextBox x:Name="textBoxNewHashPath"
                                        Grid.Column="0"
                                        Height="36"
                                        IsReadOnly="True"
@@ -61,8 +61,6 @@
                                       Style="{StaticResource SecondaryButton}"/>
                     </Grid>
                 </StackPanel>
-
-                
 
                 <!-- Old Hash Directory -->
                 <StackPanel Margin="0,24,0,0">
@@ -87,7 +85,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="textBoxOldHashPath" 
+                        <TextBox x:Name="textBoxOldHashPath"
                                        Grid.Column="0"
                                        Height="36"
                                        IsReadOnly="True"
@@ -131,7 +129,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     
-                    <TextBox x:Name="textBoxLolPath" 
+                    <TextBox x:Name="textBoxLolPath"
                                    Grid.Column="0"
                                    Height="36"
                                    IsReadOnly="True"

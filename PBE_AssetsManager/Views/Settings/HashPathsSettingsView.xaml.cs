@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Utils;
 
@@ -12,12 +11,12 @@ namespace PBE_AssetsManager.Views.Settings
         private AppSettings _appSettings;
         private readonly LogService _logService;
 
-        public HashPathsSettingsView(LogService logService) 
+        public HashPathsSettingsView(LogService logService)
         {
             InitializeComponent();
             _logService = logService;
         }
-
+        
         public void ApplySettingsToUI(AppSettings appSettings)
         {
             _appSettings = appSettings;
@@ -25,7 +24,7 @@ namespace PBE_AssetsManager.Views.Settings
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
             textBoxLolPath.Text = _appSettings.LolDirectory;
         }
-
+        
         public void SaveSettings()
         {
             if (_appSettings == null) return;
@@ -61,9 +60,7 @@ namespace PBE_AssetsManager.Views.Settings
                 }
             }
         }
-        
-        
-        
+
         private void btnBrowseLol_Click(object sender, RoutedEventArgs e)
         {
             using (var folderBrowserDialog = new CommonOpenFileDialog())

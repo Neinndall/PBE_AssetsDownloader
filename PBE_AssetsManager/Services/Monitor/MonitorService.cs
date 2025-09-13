@@ -352,23 +352,35 @@ namespace PBE_AssetsManager.Services.Monitor
                 bool notificationSent = false; // Flag to ensure we only notify once
 
                 var idsToCheck = new HashSet<long>(category.FailedUrls);
-                long highestKnownId = 0;
-                if (category.FoundUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FoundUrls.Max());
-                if (category.FailedUrls.Any()) highestKnownId = Math.Max(highestKnownId, category.FailedUrls.Max());
-                long startNumber = highestKnownId > 0 ? highestKnownId + 1 : category.Start;
+                idsToCheck.ExceptWith(category.UserRemovedUrls);
 
-                for (int i = 0; i < 10; i++)
+                int needed = 10 - idsToCheck.Count;
+                if (needed > 0)
                 {
-                    long currentId = startNumber + i;
-                    // Do not add user-removed IDs to the check list
-                    if (!category.UserRemovedUrls.Contains(currentId))
+                    var allKnownIds = new HashSet<long>(category.FoundUrls);
+                    allKnownIds.UnionWith(category.FailedUrls);
+                    allKnownIds.UnionWith(category.UserRemovedUrls);
+
+                    long lastKnownId = 0;
+                    if (allKnownIds.Any())
                     {
-                        idsToCheck.Add(currentId);
+                        lastKnownId = allKnownIds.Max();
+                    }
+                    else
+                    {
+                        lastKnownId = category.Start > 0 ? category.Start - 1 : 0;
+                    }
+
+                    int count = 0;
+                    while (count < needed)
+                    {
+                        lastKnownId++;
+                        if (allKnownIds.Contains(lastKnownId)) continue;
+                        
+                        idsToCheck.Add(lastKnownId);
+                        count++;
                     }
                 }
-
-                // Also ensure we don't check any removed IDs that might have been in the failed list
-                idsToCheck.ExceptWith(category.UserRemovedUrls);
 
                 foreach (long id in idsToCheck.OrderBy(i => i))
                 {

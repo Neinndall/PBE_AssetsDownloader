@@ -20,6 +20,7 @@ namespace PBE_AssetsManager.Services.Core
         private Timer _updateTimer;
         private Timer _assetTrackerTimer;
         private Timer _pbeStatusTimer;
+        private bool _isCheckingAssets = false;
 
         public event Action<string, string> UpdatesFound;
 
@@ -105,10 +106,24 @@ namespace PBE_AssetsManager.Services.Core
         /// </summary>
         private async Task CheckForAssetsAsync()
         {
-            await _monitorService.CheckAllAssetCategoriesAsync(true, () =>
+            if (_isCheckingAssets)
             {
-                UpdatesFound?.Invoke("New assets have been found!", null);
-            });
+                _logService.LogDebug("Asset check is already in progress. Skipping this run.");
+                return;
+            }
+
+            _isCheckingAssets = true;
+            try
+            {
+                await _monitorService.CheckAllAssetCategoriesAsync(true, () =>
+                {
+                    UpdatesFound?.Invoke("New assets have been found!", null);
+                });
+            }
+            finally
+            {
+                _isCheckingAssets = false;
+            }
         }
 
         /// <summary>

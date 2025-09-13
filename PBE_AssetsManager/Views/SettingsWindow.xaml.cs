@@ -81,7 +81,6 @@ namespace PBE_AssetsManager.Views
             {
                 var defaultSettings = AppSettings.GetDefaultSettings();
                 _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
-                _appSettings.CheckAssetUpdates = defaultSettings.CheckAssetUpdates;
                 _appSettings.AutoCopyHashes = defaultSettings.AutoCopyHashes;
                 _appSettings.CreateBackUpOldHashes = defaultSettings.CreateBackUpOldHashes;
                 _appSettings.OnlyCheckDifferences = defaultSettings.OnlyCheckDifferences;

@@ -11,10 +11,9 @@
     <UserControl.Resources>
         <x:Array x:Key="UpdateFrequencies" Type="{x:Type System:Int32}">
             <System:Int32>1</System:Int32>
-            <System:Int32>5</System:Int32>
             <System:Int32>10</System:Int32>
-            <System:Int32>15</System:Int32>
             <System:Int32>30</System:Int32>
+            <System:Int32>60</System:Int32>
         </x:Array>
     </UserControl.Resources>
 
@@ -32,187 +31,186 @@
                          Margin="0,2,0,0"/>
         </StackPanel>
 
-        <!-- Data & History Card -->
+        <!-- Unified Settings Card -->
         <Border Style="{StaticResource SettingsCard}">
             <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <materialDesign:MaterialIcon Kind="Database" 
+                <!-- Data & History Section -->
+                <StackPanel Margin="0,0,0,24">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="Database" 
                                                    Foreground="{StaticResource AccentPurple}"
                                                    FontSize="20" 
                                                    Margin="0,0,12,0" 
                                                    VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBlock Text="Data and History" 
+                        <StackPanel>
+                            <TextBlock Text="Data and History" 
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Manage data synchronization and saving differences" 
+                            <TextBlock Text="Manage data synchronization and saving differences" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="32,0,0,0">
+                        <CheckBox x:Name="checkBoxSyncHashes" 
+                                  Content="Synchronization with CDTB" 
+                                  IsChecked="{Binding SyncHashesWithCDTB, Mode=TwoWay}"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,8" 
+                                     TextWrapping="Wrap"/>
+
+                        <CheckBox x:Name="checkBoxSaveDiffHistory" 
+                                  Content="Save differences history"
+                                  IsChecked="{Binding SaveDiffHistory, Mode=TwoWay}"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="Save a history of all JSON file differences detected during updates"
+                                     Foreground="{StaticResource TextMuted}"
+                                     FontSize="12"
+                                     Margin="27,0,0,8"
+                                     TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
-                
-                <CheckBox x:Name="checkBoxSyncHashes" 
-                        Content="Synchronization with CDTB" 
-                        IsChecked="{Binding SyncHashesWithCDTB, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Automatically sync with the latest hash database from CDTB servers"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="27,0,0,8" 
-                         TextWrapping="Wrap"/>
 
-                <CheckBox x:Name="checkBoxSaveDiffHistory" 
-                        Content="Save differences history"
-                        IsChecked="{Binding SaveDiffHistory, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Save a history of all JSON file differences detected during updates"
-                         Foreground="{StaticResource TextMuted}"
-                         FontSize="12"
-                         Margin="27,0,0,8"
-                         TextWrapping="Wrap"/>
-            </StackPanel>
-        </Border>
-
-        <!-- Automatic Checks Card -->
-        <Border Style="{StaticResource SettingsCard}">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <materialDesign:MaterialIcon Kind="Sync" 
+                <!-- Automatic Checks Section -->
+                <StackPanel Margin="0,0,0,24">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="Sync" 
                                                    Foreground="{StaticResource AccentBrush}"
                                                    FontSize="20" 
                                                    Margin="0,0,12,0" 
                                                    VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBlock Text="Automatic Checks" 
+                        <StackPanel>
+                            <TextBlock Text="Automatic Checks" 
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Configure what to look for and how often" 
+                            <TextBlock Text="Configure what to look for and how often" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="32,0,0,0">
+                        <CheckBox x:Name="checkBoxBackgroundUpdates" 
+                                  Content="Background updates" 
+                                  IsChecked="{Binding BackgroundUpdates, Mode=TwoWay}"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="Periodically check for updates while the application is running"
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,8" 
+                                     TextWrapping="Wrap"/>
+
+                        <!-- Frequency Selector - Visible only when background updates are enabled -->
+                        <StackPanel Margin="27,5,0,8">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=checkBoxBackgroundUpdates}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="Update check frequency:" 
+                                       Foreground="{StaticResource TextSecondary}" 
+                                       FontSize="12" 
+                                       Margin="0,0,0,4"/>
+                            <ComboBox x:Name="comboBoxUpdateFrequency" 
+                                      Width="150" 
+                                      HorizontalAlignment="Left"
+                                      Style="{StaticResource ModernComboBox}"
+                                      ItemsSource="{StaticResource UpdateFrequencies}"
+                                      SelectedItem="{Binding UpdateCheckFrequency, Mode=TwoWay}"/>
+                        </StackPanel>
+
+                        <CheckBox x:Name="checkBoxCheckJsonData" 
+                                  Content="Check for files updates" 
+                                  IsChecked="{Binding CheckJsonDataUpdates, Mode=TwoWay}"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="Check for updates to JSON files and their differences"
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,8" 
+                                     TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
 
-                <CheckBox x:Name="checkBoxBackgroundUpdates" 
-                        Content="Background updates" 
-                        IsChecked="{Binding BackgroundUpdates, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Periodically check for updates while the application is running"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="27,0,0,8" 
-                         TextWrapping="Wrap"/>
-
-                <!-- Frequency Selector - Visible only when background updates are enabled -->
-                <StackPanel Margin="30,5,0,8">
-                    <StackPanel.Style>
-                        <Style TargetType="StackPanel">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=checkBoxBackgroundUpdates}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </StackPanel.Style>
-                    <TextBlock Text="Update check frequency:" 
-                               Foreground="{StaticResource TextSecondary}" 
-                               FontSize="12" 
-                               Margin="0,0,0,4"/>
-                    <ComboBox x:Name="comboBoxUpdateFrequency" 
-                              Width="150" 
-                              HorizontalAlignment="Left"
-                              Style="{StaticResource ModernComboBox}"
-                              ItemsSource="{StaticResource UpdateFrequencies}"
-                              SelectedItem="{Binding UpdateCheckFrequency, Mode=TwoWay}"/>
-                </StackPanel>
-
-                <CheckBox x:Name="checkBoxCheckJsonData" 
-                        Content="Check for files updates" 
-                        IsChecked="{Binding CheckJsonDataUpdates, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Check for updates to JSON files and their differences"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="27,0,0,8" 
-                         TextWrapping="Wrap"/>
-
-
-            </StackPanel>
-        </Border>
-
-        <!-- File Management Card -->
-        <Border Style="{StaticResource SettingsCard}">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <materialDesign:MaterialIcon Kind="FolderSync" 
+                <!-- File Management Section -->
+                <StackPanel Margin="0,0,0,24">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="FolderSync" 
                                                    Foreground="{StaticResource AccentGreen}"
                                                    FontSize="20" 
                                                    Margin="0,0,12,0" 
                                                    VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBlock Text="File Management" 
+                        <StackPanel>
+                            <TextBlock Text="File Management" 
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Control how hash files are handled during updates" 
+                            <TextBlock Text="Control how hash files are handled during updates" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="32,0,0,0">
+                        <CheckBox x:Name="checkBoxAutoCopy" 
+                                  Content="Auto-replace outdated hashes" 
+                                  IsChecked="{Binding AutoCopyHashes, Mode=TwoWay}"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="Automatically replace old hash files with newer versions"
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,8" 
+                                     TextWrapping="Wrap"/>
+
+                        <CheckBox x:Name="checkBoxCreateBackUp" 
+                                  Content="Create backups before replacing" 
+                                  IsChecked="{Binding CreateBackUpOldHashes, Mode=TwoWay}"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="Backup existing files to prevent data loss during updates"
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,8" 
+                                     TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
-                
-                <CheckBox x:Name="checkBoxAutoCopy" 
-                        Content="Auto-replace outdated hashes" 
-                        IsChecked="{Binding AutoCopyHashes, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Automatically replace old hash files with newer versions"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="27,0,0,8" 
-                         TextWrapping="Wrap"/>
-                
-                <CheckBox x:Name="checkBoxCreateBackUp" 
-                        Content="Create backups before replacing" 
-                        IsChecked="{Binding CreateBackUpOldHashes, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Backup existing files to prevent data loss during updates"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="27,0,0,8" 
-                         TextWrapping="Wrap"/>
-            </StackPanel>
-        </Border>
 
-        <!-- Scan Mode Card -->
-        <Border Style="{StaticResource SettingsCard}">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                    <materialDesign:MaterialIcon Kind="Magnify" 
+                <!-- Scan Mode Section -->
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="Magnify" 
                                                    Foreground="{StaticResource TextPrimary}"
                                                    FontSize="20" 
                                                    Margin="0,0,12,0" 
                                                    VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBlock Text="Scan Mode" 
+                        <StackPanel>
+                            <TextBlock Text="Scan Mode" 
                                      FontSize="18" 
                                      FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Configure scanning behavior" 
+                            <TextBlock Text="Configure scanning behavior" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="32,0,0,0">
+                        <CheckBox x:Name="checkBoxOnlyCheckDifferences" 
+                                  Content="Scan-only mode (no downloads)" 
+                                  IsChecked="{Binding OnlyCheckDifferences, Mode=TwoWay}"
+                                  Style="{StaticResource ModernCheckBox}"/>
+                        <TextBlock Text="Only identify differences without downloading or modifying files"
+                                     Foreground="{StaticResource TextMuted}" 
+                                     FontSize="12" 
+                                     Margin="27,0,0,0" 
+                                     TextWrapping="Wrap"/>
                     </StackPanel>
                 </StackPanel>
-                
-                <CheckBox x:Name="checkBoxOnlyCheckDifferences" 
-                        Content="Scan-only mode (no downloads)" 
-                        IsChecked="{Binding OnlyCheckDifferences, Mode=TwoWay}"
-                        Style="{StaticResource ModernCheckBox}"/>
-                <TextBlock Text="Only identify differences without downloading or modifying files"
-                         Foreground="{StaticResource TextMuted}" 
-                         FontSize="12" 
-                         Margin="30,0,0,0" 
-                         TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
     </StackPanel>

@@ -19,6 +19,7 @@ namespace PBE_AssetsManager.Utils
         public bool AssetTrackerTimer { get; set; }
         public bool SaveDiffHistory { get; set; }
         public bool BackgroundUpdates { get; set; }
+        public bool CheckPbeStatus { get; set; }
         public int UpdateCheckFrequency { get; set; }
         public int AssetTrackerFrequency { get; set; }
 
@@ -126,6 +127,7 @@ namespace PBE_AssetsManager.Utils
                 AssetTrackerTimer = false,
                 SaveDiffHistory = false,
                 BackgroundUpdates = false,
+                CheckPbeStatus = false,
                 UpdateCheckFrequency = 10, // Default to 10 minutes
                 AssetTrackerFrequency = 60, // Default to 60 minutes
 

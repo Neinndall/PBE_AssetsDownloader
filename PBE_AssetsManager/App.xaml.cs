@@ -58,6 +58,7 @@ namespace PBE_AssetsManager
             services.AddSingleton<ILogger>(logger);
             
             // Core Services
+            services.AddSingleton<PbeStatusService>();
             services.AddSingleton<LogService>();
             services.AddSingleton<HttpClient>();
             services.AddSingleton<DirectoriesCreator>();

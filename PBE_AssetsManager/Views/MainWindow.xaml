@@ -87,9 +87,15 @@
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
                                     Margin="0,0,30,39"
-                                    ToolTip=""
                                     Visibility="Collapsed"
                                     MouseLeftButtonDown="UpdateNotificationIcon_MouseLeftButtonDown">
+            <materialIcons:MaterialIcon.ToolTip>
+                <ToolTip>
+                    <TextBlock x:Name="NotificationTextBlock"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                </ToolTip>
+            </materialIcons:MaterialIcon.ToolTip>
             <materialIcons:MaterialIcon.Effect>
                 <DropShadowEffect Color="Black" ShadowDepth="1" BlurRadius="3" Opacity="0.5"/>
             </materialIcons:MaterialIcon.Effect>

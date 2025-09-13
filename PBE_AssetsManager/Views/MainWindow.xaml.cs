@@ -133,7 +133,7 @@ namespace PBE_AssetsManager.Views
             Dispatcher.Invoke(() =>
             {
                 UpdateNotificationIcon.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-                if (show) UpdateNotificationIcon.ToolTip = message;
+                if (show) NotificationTextBlock.Text = message;
             });
         }
 

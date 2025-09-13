@@ -16,12 +16,14 @@ namespace PBE_AssetsManager.Services.Core
         private readonly UpdateManager _updateManager;
         private readonly LogService _logService;
         private readonly MonitorService _monitorService;
+        private readonly PbeStatusService _pbeStatusService;
         private Timer _updateTimer;
         private Timer _assetTrackerTimer;
+        private Timer _pbeStatusTimer;
 
         public event Action<string, string> UpdatesFound;
 
-        public UpdateCheckService(AppSettings appSettings, Status status, JsonDataService jsonDataService, UpdateManager updateManager, LogService logService, MonitorService monitorService)
+        public UpdateCheckService(AppSettings appSettings, Status status, JsonDataService jsonDataService, UpdateManager updateManager, LogService logService, MonitorService monitorService, PbeStatusService pbeStatusService)
         {
             _appSettings = appSettings;
             _status = status;
@@ -29,6 +31,7 @@ namespace PBE_AssetsManager.Services.Core
             _updateManager = updateManager;
             _logService = logService;
             _monitorService = monitorService;
+            _pbeStatusService = pbeStatusService;
         }
 
         public void Start()
@@ -60,6 +63,20 @@ namespace PBE_AssetsManager.Services.Core
                 _assetTrackerTimer.Enabled = true;
                 _logService.LogDebug($"Asset Tracker timer started. Frequency: {_appSettings.AssetTrackerFrequency} minutes.");
             }
+
+            // Start PBE Status timer
+            if (_appSettings.CheckPbeStatus)
+            {
+                if (_pbeStatusTimer == null)
+                {
+                    _pbeStatusTimer = new Timer();
+                    _pbeStatusTimer.Elapsed += async (sender, e) => await CheckForPbeStatusAsync();
+                    _pbeStatusTimer.AutoReset = true;
+                }
+                _pbeStatusTimer.Interval = _appSettings.UpdateCheckFrequency * 60 * 1000; // Use the same frequency
+                _pbeStatusTimer.Enabled = true;
+                _logService.LogDebug($"PBE Status timer started. Frequency: {_appSettings.UpdateCheckFrequency} minutes.");
+            }
         }
 
         public void Stop()
@@ -74,6 +91,11 @@ namespace PBE_AssetsManager.Services.Core
                 _assetTrackerTimer.Enabled = false;
                 _logService.LogDebug("Asset Tracker timer stopped.");
             }
+            if (_pbeStatusTimer != null)
+            {
+                _pbeStatusTimer.Enabled = false;
+                _logService.LogDebug("PBE Status timer stopped.");
+            }
         }
 
         private async Task CheckForAssetsAsync()
@@ -82,6 +104,15 @@ namespace PBE_AssetsManager.Services.Core
             if (assetsUpdated)
             {
                 UpdatesFound?.Invoke("New assets have been found.", null);
+            }
+        }
+
+        private async Task CheckForPbeStatusAsync()
+        {
+            string pbeStatusMessage = await _pbeStatusService.CheckPbeStatusAsync();
+            if (!string.IsNullOrEmpty(pbeStatusMessage))
+            {
+                UpdatesFound?.Invoke(pbeStatusMessage, null);
             }
         }
 
@@ -106,13 +137,17 @@ namespace PBE_AssetsManager.Services.Core
             }
         }
 
-        // This method can be called for a manual, one-time check of everything.
+        // This method is called once on application startup for a one-time check of everything.
         public async Task CheckForAllUpdatesAsync(bool silent = false)
         {
             await CheckForGeneralUpdatesAsync(silent);
             if (_appSettings.CheckAssetUpdates)
             {
                 await CheckForAssetsAsync();
+            }
+            if (_appSettings.CheckPbeStatus)
+            {
+                await CheckForPbeStatusAsync();
             }
         }
     }

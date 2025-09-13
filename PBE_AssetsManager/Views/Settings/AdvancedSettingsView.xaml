@@ -85,5 +85,38 @@
                 </StackPanel>
             </StackPanel>
         </Border>
+
+        <!-- PBE Status Checker Card -->
+        <Border Style="{StaticResource SettingsCard}">
+            <StackPanel>
+                <!-- Card Header -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                    <materialDesign:MaterialIcon Kind="LanPending" 
+                                                   Foreground="{StaticResource AccentPurple}"
+                                                   FontSize="20" 
+                                                   Margin="0,0,12,0" 
+                                                   VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBlock Text="PBE Status" 
+                                     FontSize="18" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Get notifications about PBE status" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Enable CheckBox -->
+                <CheckBox x:Name="EnablePbeStatusCheckBox"
+                          Content="Enable PBE status notifications"
+                          Style="{StaticResource ModernCheckBox}"/>
+                <TextBlock Text="When enabled, the application will periodically check for PBE updates."
+                             Foreground="{StaticResource TextMuted}" 
+                             FontSize="12" 
+                             Margin="27,0,0,16" 
+                             TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

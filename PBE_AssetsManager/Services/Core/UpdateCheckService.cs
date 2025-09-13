@@ -100,11 +100,10 @@ namespace PBE_AssetsManager.Services.Core
 
         private async Task CheckForAssetsAsync()
         {
-            bool assetsUpdated = await _monitorService.CheckAllAssetCategoriesAsync(true);
-            if (assetsUpdated)
+            await _monitorService.CheckAllAssetCategoriesAsync(true, () =>
             {
-                UpdatesFound?.Invoke("New assets have been found.", null);
-            }
+                UpdatesFound?.Invoke("New assets have been found!", null);
+            });
         }
 
         private async Task CheckForPbeStatusAsync()
@@ -128,8 +127,8 @@ namespace PBE_AssetsManager.Services.Core
             {
                 var messages = new List<string>();
                 if (appUpdateAvailable) messages.Add($"Version {newVersion} is available!");
-                if (hashesUpdated && silent) messages.Add("New hashes are available.");
-                if (jsonUpdated) messages.Add("JSON files have been updated.");
+                if (hashesUpdated && silent) messages.Add("New hashes are available!");
+                if (jsonUpdated) messages.Add("JSON files have been updated!");
                 if (messages.Count > 0)
                 {
                     UpdatesFound?.Invoke(string.Join(" | ", messages), latestVersion);

@@ -330,18 +330,18 @@ namespace PBE_AssetsManager.Services.Monitor
             }
         }
 
-        public async Task<bool> CheckAllAssetCategoriesAsync(bool silent)
+        public async Task<bool> CheckAllAssetCategoriesAsync(bool silent, Action onUpdatesFound = null)
         {
             if (!AssetCategories.Any()) LoadAssetCategories();
             bool anyNewAssetFound = false;
             foreach (var category in AssetCategories)
             {
-                if (await _CheckCategoryAsync(category, silent)) anyNewAssetFound = true;
+                if (await _CheckCategoryAsync(category, silent, onUpdatesFound)) anyNewAssetFound = true;
             }
             return anyNewAssetFound;
         }
 
-        private async Task<bool> _CheckCategoryAsync(AssetCategory category, bool silent)
+        private async Task<bool> _CheckCategoryAsync(AssetCategory category, bool silent, Action onUpdatesFound = null)
         {
             Application.Current.Dispatcher.Invoke(() => category.Status = CategoryStatus.Checking);
             try
@@ -349,6 +349,7 @@ namespace PBE_AssetsManager.Services.Monitor
                 CategoryCheckStarted?.Invoke(category);
                 bool anyNewAssetFound = false;
                 bool progressChanged = false;
+                bool notificationSent = false; // Flag to ensure we only notify once
 
                 var idsToCheck = new HashSet<long>(category.FailedUrls);
                 long highestKnownId = 0;
@@ -374,7 +375,17 @@ namespace PBE_AssetsManager.Services.Monitor
                     var (isSuccess, foundUrl) = await PerformCheckAsync(id, category);
                     if (isSuccess)
                     {
-                        if (!category.FoundUrls.Contains(id)) { category.FoundUrls.Add(id); anyNewAssetFound = true; progressChanged = true; }
+                        if (!category.FoundUrls.Contains(id))
+                        {
+                            category.FoundUrls.Add(id);
+                            anyNewAssetFound = true;
+                            progressChanged = true;
+                            if (!notificationSent)
+                            {
+                                onUpdatesFound?.Invoke();
+                                notificationSent = true;
+                            }
+                        }
                         string primaryUrl = $"{category.BaseUrl}{id}.{category.Extension}";
                         if (foundUrl != primaryUrl) { category.FoundUrlOverrides[id] = foundUrl; progressChanged = true; }
                         if (category.FailedUrls.Remove(id)) progressChanged = true;

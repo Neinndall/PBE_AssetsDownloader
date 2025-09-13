@@ -148,7 +148,7 @@ namespace PBE_AssetsManager.Views
                 }
 
                 UpdateNotificationIcon.Visibility = _notificationMessages.Any() ? Visibility.Visible : Visibility.Collapsed;
-                NotificationTextBlock.Text = string.Join(Environment.NewLine, _notificationMessages);
+                NotificationTextBlock.Text = string.Join(" | ", _notificationMessages);
             });
         }
 

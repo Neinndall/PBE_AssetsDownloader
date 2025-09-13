@@ -80,7 +80,6 @@ namespace PBE_AssetsManager.Views
             if (result == true)
             {
                 var defaultSettings = AppSettings.GetDefaultSettings();
-                _appSettings.SyncHashesWithCDTB = defaultSettings.SyncHashesWithCDTB;
                 _appSettings.CheckJsonDataUpdates = defaultSettings.CheckJsonDataUpdates;
                 _appSettings.CheckAssetUpdates = defaultSettings.CheckAssetUpdates;
                 _appSettings.AutoCopyHashes = defaultSettings.AutoCopyHashes;

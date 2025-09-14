@@ -52,19 +52,22 @@ namespace PBE_AssetsManager.Services.Monitor
 
             try
             {
+                var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
+                diffWindow.Owner = owner;
+                diffWindow.ShowLoading(true);
+                diffWindow.Show();
+
                 var (dataType, oldData, newData, oldPath, newPath) = await _wadDifferenceService.PrepareDifferenceDataAsync(diff, oldPbePath, newPbePath);
                 var (oldText, newText) = await ProcessDataAsync(dataType, oldData, newData);
 
                 if (oldText == newText)
                 {
+                    diffWindow.Close();
                     _customMessageBoxService.ShowInfo("Info", "No differences found. The two files are identical.", owner);
                     return;
                 }
 
-                var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                diffWindow.Owner = owner;
                 await diffWindow.LoadAndDisplayDiffAsync(oldText, newText, oldPath, newPath);
-                diffWindow.Show();
             }
             catch (Exception ex)
             {
@@ -112,19 +115,22 @@ namespace PBE_AssetsManager.Services.Monitor
 
             try
             {
+                var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
+                diffWindow.Owner = owner;
+                diffWindow.ShowLoading(true);
+                diffWindow.Show();
+
                 var (dataType, oldData, newData) = await _wadDifferenceService.PrepareFileDifferenceDataAsync(oldFilePath, newFilePath);
                 var (oldText, newText) = await ProcessDataAsync(dataType, oldData, newData);
 
                 if (oldText == newText)
                 {
+                    diffWindow.Close();
                     _customMessageBoxService.ShowInfo("Info", "No differences found. The two files are identical.", owner);
                     return;
                 }
                 
-                var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
-                diffWindow.Owner = owner;
                 await diffWindow.LoadAndDisplayDiffAsync(oldText, newText, Path.GetFileName(oldFilePath), Path.GetFileName(newFilePath));
-                diffWindow.Show();
             }
             catch (Exception ex)
             {

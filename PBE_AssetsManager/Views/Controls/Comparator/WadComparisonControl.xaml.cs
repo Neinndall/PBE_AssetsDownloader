@@ -16,6 +16,7 @@ using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Services.Monitor;
 using PBE_AssetsManager.Utils;
+using PBE_AssetsManager.Services.Hashes;
 
 namespace PBE_AssetsManager.Views.Controls.Comparator
 {
@@ -48,6 +49,7 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
         public AppSettings AppSettings { get; set; }
         public IServiceProvider ServiceProvider { get; set; }
         public DiffViewService DiffViewService { get; set; }
+        public HashResolverService HashResolverService { get; set; }
 
         public event EventHandler<LoadWadComparisonEventArgs> LoadWadComparisonRequested;
 
@@ -97,7 +99,7 @@ namespace PBE_AssetsManager.Views.Controls.Comparator
                         NewCompressionType = (d.Type == ChunkDiffType.Removed) ? null : d.NewChunk.Compression
                     }).ToList();
 
-                    var resultWindow = new WadComparisonResultWindow(serializableDiffs, ServiceProvider, CustomMessageBoxService, DirectoriesCreator, AssetDownloaderService, LogService, WadDifferenceService, WadPackagingService, DiffViewService, oldLolPath, newLolPath);
+                    var resultWindow = new WadComparisonResultWindow(serializableDiffs, ServiceProvider, CustomMessageBoxService, DirectoriesCreator, AssetDownloaderService, LogService, WadDifferenceService, WadPackagingService, DiffViewService, HashResolverService, oldLolPath, newLolPath);
                     resultWindow.Owner = Window.GetWindow(this);
                     resultWindow.Show();
                 }

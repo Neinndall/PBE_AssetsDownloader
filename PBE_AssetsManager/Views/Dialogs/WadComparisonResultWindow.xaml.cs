@@ -17,6 +17,7 @@ using PBE_AssetsManager.Views.Helpers;
 using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using PBE_AssetsManager.Services.Monitor;
+using PBE_AssetsManager.Services.Hashes;
 
 namespace PBE_AssetsManager.Views.Dialogs
 {
@@ -49,11 +50,12 @@ namespace PBE_AssetsManager.Views.Dialogs
         private readonly WadDifferenceService _wadDifferenceService;
         private readonly WadPackagingService _wadPackagingService;
         private readonly DiffViewService _diffViewService;
+        private readonly HashResolverService _hashResolverService;
         private readonly string _oldPbePath;
         private readonly string _newPbePath;
         private readonly string _sourceJsonPath; // Path to the loaded wadcomparison.json
 
-        public WadComparisonResultWindow(List<ChunkDiff> diffs, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, DiffViewService diffViewService, string oldPbePath, string newPbePath)
+        public WadComparisonResultWindow(List<ChunkDiff> diffs, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, DiffViewService diffViewService, HashResolverService hashResolverService, string oldPbePath, string newPbePath)
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
@@ -64,6 +66,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             _wadDifferenceService = wadDifferenceService;
             _wadPackagingService = wadPackagingService;
             _diffViewService = diffViewService;
+            _hashResolverService = hashResolverService;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
             _sourceJsonPath = null; // Not loaded from a file
@@ -83,7 +86,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             PopulateResults(_serializableDiffs);
         }
 
-        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, DiffViewService diffViewService, string oldPbePath = null, string newPbePath = null, string sourceJsonPath = null)
+        public WadComparisonResultWindow(List<SerializableChunkDiff> serializableDiffs, IServiceProvider serviceProvider, CustomMessageBoxService customMessageBoxService, DirectoriesCreator directoriesCreator, AssetDownloader assetDownloaderService, LogService logService, WadDifferenceService wadDifferenceService, WadPackagingService wadPackagingService, DiffViewService diffViewService, HashResolverService hashResolverService, string oldPbePath = null, string newPbePath = null, string sourceJsonPath = null)
         {
             InitializeComponent();
             _serviceProvider = serviceProvider;
@@ -94,6 +97,7 @@ namespace PBE_AssetsManager.Views.Dialogs
             _wadDifferenceService = wadDifferenceService;
             _wadPackagingService = wadPackagingService;
             _diffViewService = diffViewService;
+            _hashResolverService = hashResolverService;
             _serializableDiffs = serializableDiffs;
             _oldPbePath = oldPbePath;
             _newPbePath = newPbePath;
@@ -188,6 +192,35 @@ namespace PBE_AssetsManager.Views.Dialogs
             {
                 _customMessageBoxService.ShowError("Error", $"Failed to save results: {ex.Message}", this);
                 _logService.LogError(ex, "Failed to save comparison results.");
+            }
+        }
+
+        private async void ReloadHashesButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await _hashResolverService.LoadHashesAsync();
+                await _hashResolverService.LoadBinHashesAsync();
+
+                foreach (var diff in _serializableDiffs)
+                {
+                    if (diff.OldPathHash != 0)
+                    {
+                        diff.OldPath = _hashResolverService.ResolveHash(diff.OldPathHash);
+                    }
+                    if (diff.NewPathHash != 0)
+                    {
+                        diff.NewPath = _hashResolverService.ResolveHash(diff.NewPathHash);
+                    }
+                }
+
+                PopulateResults(_serializableDiffs);
+                _customMessageBoxService.ShowSuccess("Success", "Hashes have been reloaded and the result tree has been refreshed.", this);
+            }
+            catch (Exception ex)
+            {
+                _customMessageBoxService.ShowError("Error", $"Failed to reload hashes: {ex.Message}", this);
+                _logService.LogError(ex, "Failed to reload hashes.");
             }
         }
 

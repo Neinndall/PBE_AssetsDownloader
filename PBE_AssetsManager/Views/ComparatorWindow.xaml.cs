@@ -7,6 +7,7 @@ using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Controls.Comparator;
 using System;
 using System.Windows.Controls;
+using PBE_AssetsManager.Services.Hashes;
 
 namespace PBE_AssetsManager.Views
 {
@@ -25,7 +26,8 @@ namespace PBE_AssetsManager.Views
             BackupManager backupManager,
             AppSettings appSettings,
             DiffViewService diffViewService,
-            IServiceProvider serviceProvider
+            IServiceProvider serviceProvider,
+            HashResolverService hashResolverService
             )
         {
             InitializeComponent();
@@ -47,6 +49,7 @@ namespace PBE_AssetsManager.Views
             WadComparisonControl.AppSettings = appSettings;
             WadComparisonControl.ServiceProvider = serviceProvider;
             WadComparisonControl.DiffViewService = diffViewService;
+            WadComparisonControl.HashResolverService = hashResolverService;
         }
     }
 }

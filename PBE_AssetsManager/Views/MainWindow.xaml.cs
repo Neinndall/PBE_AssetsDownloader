@@ -223,7 +223,7 @@ namespace PBE_AssetsManager.Views
 
         private void OnLoadWadComparisonRequested(object sender, LoadWadComparisonEventArgs e)
         {
-            var resultWindow = new WadComparisonResultWindow(e.Diffs, _serviceProvider, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, _wadPackagingService, _diffViewService, e.OldPath, e.NewPath, e.JsonPath);
+            var resultWindow = new WadComparisonResultWindow(e.Diffs, _serviceProvider, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, _wadPackagingService, _diffViewService, _hashResolverService, e.OldPath, e.NewPath, e.JsonPath);
             resultWindow.Show();
         }
 

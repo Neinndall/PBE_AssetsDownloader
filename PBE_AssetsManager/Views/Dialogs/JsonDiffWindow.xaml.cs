@@ -14,6 +14,7 @@ namespace PBE_AssetsManager.Views.Dialogs
         public JsonDiffWindow(CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
+            JsonDiffControl.Visibility = Visibility.Collapsed;
             JsonDiffControl.CustomMessageBoxService = customMessageBoxService;
             JsonDiffControl.ComparisonFinished += (sender, success) =>
             {
@@ -46,6 +47,7 @@ namespace PBE_AssetsManager.Views.Dialogs
 
         public async Task LoadAndDisplayDiffAsync(string oldText, string newText, string oldFileName, string newFileName)
         {
+            JsonDiffControl.Visibility = Visibility.Visible;
             await JsonDiffControl.LoadAndDisplayDiffAsync(oldText, newText, oldFileName, newFileName);
             ShowLoading(false);
         }

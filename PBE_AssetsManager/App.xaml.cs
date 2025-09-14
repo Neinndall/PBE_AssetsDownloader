@@ -93,6 +93,7 @@ namespace PBE_AssetsManager
             services.AddSingleton<WadDifferenceService>();
             services.AddSingleton<WadPackagingService>();
             services.AddSingleton<WadNodeLoaderService>();
+            services.AddSingleton<WadExtractionService>();
 
             // Model Viewer Services
             services.AddSingleton<ModelLoadingService>();

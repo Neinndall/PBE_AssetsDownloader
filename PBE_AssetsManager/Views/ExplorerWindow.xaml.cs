@@ -18,6 +18,7 @@ namespace PBE_AssetsManager.Views
             CustomMessageBoxService customMessageBoxService,
             HashResolverService hashResolverService,
             WadNodeLoaderService wadNodeLoaderService,
+            WadExtractionService wadExtractionService,
             DirectoriesCreator directoriesCreator,
             ExplorerPreviewService explorerPreviewService,
             JsBeautifierService jsBeautifierService
@@ -28,6 +29,7 @@ namespace PBE_AssetsManager.Views
             FileExplorer.CustomMessageBoxService = customMessageBoxService;
             FileExplorer.HashResolverService = hashResolverService;
             FileExplorer.WadNodeLoaderService = wadNodeLoaderService;
+            FileExplorer.WadExtractionService = wadExtractionService;
 
             FilePreviewer.LogService = logService;
             FilePreviewer.CustomMessageBoxService = customMessageBoxService;

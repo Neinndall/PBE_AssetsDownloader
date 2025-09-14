@@ -12,6 +12,14 @@
         <converters:PathToIconConverter x:Key="PathToIconConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
+        <ContextMenu x:Key="ExplorerContextMenu">
+            <MenuItem Header="Extract Selected" Click="ExtractSelected_Click">
+                <MenuItem.Icon>
+                    <materialIcons:MaterialIcon Kind="FileDownload"/>
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
         <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
             <Grid Margin="0,2,0,2">
                 <Grid.ColumnDefinitions>
@@ -72,11 +80,12 @@
                       Style="{StaticResource ModernTreeView}">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
-                        <Setter Property="ContextMenu" Value="{x:Null}" />
+                        <Setter Property="ContextMenu" Value="{StaticResource ExplorerContextMenu}"/>
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded"/>
+                        <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
                     </Style>
                 </TreeView.ItemContainerStyle>
             </TreeView>

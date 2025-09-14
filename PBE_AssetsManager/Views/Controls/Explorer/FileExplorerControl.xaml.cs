@@ -5,11 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Services.Comparator;
 using PBE_AssetsManager.Services.Hashes;
 using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
+using PBE_AssetsManager.Services.Explorer;
 using PBE_AssetsManager.Utils;
 using PBE_AssetsManager.Views.Models;
 
@@ -23,6 +27,7 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
         public CustomMessageBoxService CustomMessageBoxService { get; set; }
         public HashResolverService HashResolverService { get; set; }
         public WadNodeLoaderService WadNodeLoaderService { get; set; }
+        public WadExtractionService WadExtractionService { get; set; }
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
 
@@ -46,6 +51,62 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
                 FileTreeView.Visibility = Visibility.Collapsed;
                 NoDirectoryMessage.Visibility = Visibility.Visible;
             }
+        }
+
+        private async void ExtractSelected_Click(object sender, RoutedEventArgs e)
+        {
+            if (WadExtractionService == null)
+            {
+                CustomMessageBoxService.ShowError("Error", "Extraction Service is not available.", Window.GetWindow(this));
+                return;
+            }
+
+            if (FileTreeView.SelectedItem is not FileSystemNodeModel selectedNode)
+            {
+                CustomMessageBoxService.ShowInfo("Info", "Please select a file or folder to extract.", Window.GetWindow(this));
+                return;
+            }
+
+            var dialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+                Title = "Select Destination Folder"
+            };
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                string destinationPath = dialog.FileName;
+                try
+                {
+                    LogService.Log("Extracting selected files...");
+                    await WadExtractionService.ExtractNodeAsync(selectedNode, destinationPath);
+                    LogService.LogInteractiveSuccess($"Successfully extracted '{selectedNode.Name}' to '{destinationPath}'.", destinationPath);
+                }
+                catch (Exception ex)
+                {
+                    LogService.LogError(ex, $"Failed to extract '{selectedNode.Name}'.");
+                    CustomMessageBoxService.ShowError("Error", $"An error occurred during extraction: {ex.Message}", Window.GetWindow(this));
+                }
+            }
+        }
+
+        private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.Focus();
+                e.Handled = true;
+            }
+        }
+
+        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is TreeViewItem))
+                source = VisualTreeHelper.GetParent(source);
+
+            return source as TreeViewItem;
         }
 
         private void SelectLolDirButton_Click(object sender, RoutedEventArgs e)

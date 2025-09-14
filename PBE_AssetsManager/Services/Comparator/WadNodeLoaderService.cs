@@ -38,15 +38,16 @@ namespace PBE_AssetsManager.Services.Comparator
         {
             var childrenToAdd = await Task.Run(() =>
             {
-                var rootVirtualNode = new FileSystemNodeModel(wadNode.Name, true, wadNode.FullPath, wadNode.FullPath);
-                using (var wadFile = new WadFile(wadNode.FullPath))
+                string pathToWad = wadNode.Type == NodeType.WadFile ? wadNode.FullPath : wadNode.SourceWadPath;
+                var rootVirtualNode = new FileSystemNodeModel(wadNode.Name, true, wadNode.FullPath, pathToWad);
+                using (var wadFile = new WadFile(pathToWad))
                 {
                     foreach (var chunk in wadFile.Chunks.Values)
                     {
                         string virtualPath = _hashResolverService.ResolveHash(chunk.PathHash);
                         if (!string.IsNullOrEmpty(virtualPath) && virtualPath != chunk.PathHash.ToString("x16"))
                         {
-                            AddNodeToVirtualTree(rootVirtualNode, virtualPath, wadNode.FullPath, chunk.PathHash);
+                            AddNodeToVirtualTree(rootVirtualNode, virtualPath, pathToWad, chunk.PathHash);
                         }
                     }
                 }

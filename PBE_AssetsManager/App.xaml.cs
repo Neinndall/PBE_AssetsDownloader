@@ -77,6 +77,7 @@ namespace PBE_AssetsManager
             services.AddSingleton<UpdateCheckService>();
             services.AddSingleton<ProgressUIManager>();
             services.AddTransient<ExplorerPreviewService>();
+            services.AddSingleton<WadSearchBoxService>();
             services.AddSingleton<JsBeautifierService>();
             services.AddSingleton<DiffViewService>();
             services.AddSingleton<MonitorService>();

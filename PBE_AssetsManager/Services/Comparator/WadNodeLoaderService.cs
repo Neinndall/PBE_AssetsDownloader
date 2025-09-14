@@ -83,5 +83,6 @@ namespace PBE_AssetsManager.Services.Comparator
             };
             currentNode.Children.Add(fileNode);
         }
+
     }
 }

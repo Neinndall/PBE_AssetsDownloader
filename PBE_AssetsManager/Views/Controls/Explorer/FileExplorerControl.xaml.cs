@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Services.Comparator;
@@ -28,8 +30,10 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
         public HashResolverService HashResolverService { get; set; }
         public WadNodeLoaderService WadNodeLoaderService { get; set; }
         public WadExtractionService WadExtractionService { get; set; }
+        public WadSearchBoxService WadSearchBoxService { get; set; }
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
+        private readonly DispatcherTimer _searchTimer;
 
         public FileExplorerControl()
         {
@@ -37,14 +41,18 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
             RootNodes = new ObservableCollection<FileSystemNodeModel>();
             DataContext = this;
             this.Loaded += FileExplorerControl_Loaded;
+
+            _searchTimer = new DispatcherTimer();
+            _searchTimer.Interval = TimeSpan.FromMilliseconds(300);
+            _searchTimer.Tick += SearchTimer_Tick;
         }
 
-        private void FileExplorerControl_Loaded(object sender, RoutedEventArgs e)
+        private async void FileExplorerControl_Loaded(object sender, RoutedEventArgs e)
         {
             var settings = AppSettings.LoadSettings();
             if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
             {
-                LoadInitialDirectory(settings.LolDirectory);
+                await BuildInitialTree(settings.LolDirectory);
             }
             else
             {
@@ -109,7 +117,7 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
             return source as TreeViewItem;
         }
 
-        private void SelectLolDirButton_Click(object sender, RoutedEventArgs e)
+        private async void SelectLolDirButton_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog
             {
@@ -125,7 +133,7 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
                 string lolDirectory = Path.GetDirectoryName(openFileDialog.FileName);
                 if (Directory.Exists(lolDirectory))
                 {
-                    LoadInitialDirectory(lolDirectory);
+                    await BuildInitialTree(lolDirectory);
                 }
                 else
                 {
@@ -134,7 +142,7 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
             }
         }
 
-        private async void LoadInitialDirectory(string rootPath)
+        private async Task BuildInitialTree(string rootPath)
         {
             NoDirectoryMessage.Visibility = Visibility.Collapsed;
             FileTreeView.Visibility = Visibility.Collapsed;
@@ -148,97 +156,81 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
                 RootNodes.Clear();
 
                 string gamePath = Path.Combine(rootPath, "Game");
-                string pluginsPath = Path.Combine(rootPath, "Plugins");
-
-                bool directoryFound = false;
                 if (Directory.Exists(gamePath))
                 {
-                    RootNodes.Add(new FileSystemNodeModel(gamePath));
-                    directoryFound = true;
-                }
-                if (Directory.Exists(pluginsPath))
-                {
-                    RootNodes.Add(new FileSystemNodeModel(pluginsPath));
-                    directoryFound = true;
+                    var gameNode = new FileSystemNodeModel(gamePath);
+                    RootNodes.Add(gameNode);
+                    await LoadAllChildren(gameNode);
                 }
 
-                if (!directoryFound)
+                string pluginsPath = Path.Combine(rootPath, "Plugins");
+                if (Directory.Exists(pluginsPath))
+                {
+                    var pluginsNode = new FileSystemNodeModel(pluginsPath);
+                    RootNodes.Add(pluginsNode);
+                    await LoadAllChildren(pluginsNode);
+                }
+
+                if (RootNodes.Count == 0)
                 {
                     CustomMessageBoxService.ShowError("Error", "Could not find 'Game' or 'Plugins' subdirectories in the selected path.", Window.GetWindow(this));
                     NoDirectoryMessage.Visibility = Visibility.Visible;
                 }
-                else
-                {
-                    FileTreeView.Visibility = Visibility.Visible;
-                }
             }
             catch (Exception ex)
             {
-                LogService.LogError(ex, "Failed to load initial directory or hashes.");
+                LogService.LogError(ex, "Failed to build initial tree.");
                 CustomMessageBoxService.ShowError("Error", "Could not load the directory. Please check the logs.", Window.GetWindow(this));
-                FileTreeView.Visibility = Visibility.Collapsed;
                 NoDirectoryMessage.Visibility = Visibility.Visible;
             }
             finally
             {
                 LoadingIndicator.Visibility = Visibility.Collapsed;
+                FileTreeView.Visibility = Visibility.Visible;
             }
         }
 
-        private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
+        private async Task LoadAllChildren(FileSystemNodeModel node)
         {
-            var item = sender as TreeViewItem;
-            if (item?.DataContext is not FileSystemNodeModel node) return;
-
-            if (node.Children.Count != 1 || node.Children[0].Name != "Loading...") return;
-
-            item.IsEnabled = false;
-            try
+            if (node.Children.Count == 1 && node.Children[0].Name == "Loading...")
             {
                 node.Children.Clear();
-                switch (node.Type)
-                {
-                    case NodeType.RealDirectory:
-                        LoadRealDirectoryChildren(node);
-                        break;
-                    case NodeType.WadFile:
-                        var children = await WadNodeLoaderService.LoadChildrenAsync(node);
-                        foreach (var child in children)
-                        {
-                            node.Children.Add(child);
-                        }
-                        break;
-                }
             }
-            catch (Exception ex)
-            {
-                LogService.LogError(ex, $"Failed to expand node: {node.FullPath}");
-            }
-            finally
-            {
-                item.IsEnabled = true;
-            }
-        }
 
-        private void LoadRealDirectoryChildren(FileSystemNodeModel parent)
-        {
-            try
+            if (node.Type == NodeType.WadFile)
             {
-                var directories = Directory.GetDirectories(parent.FullPath);
-                foreach (var dir in directories.OrderBy(d => d))
+                var children = await WadNodeLoaderService.LoadChildrenAsync(node);
+                foreach (var child in children)
                 {
-                    parent.Children.Add(new FileSystemNodeModel(dir));
+                    node.Children.Add(child);
                 }
-
-                var files = Directory.GetFiles(parent.FullPath);
-                foreach (var file in files.OrderBy(f => f))
-                {
-                    parent.Children.Add(new FileSystemNodeModel(file));
-                }
+                return;
             }
-            catch (UnauthorizedAccessException)
+
+            if (node.Type == NodeType.RealDirectory)
             {
-                LogService.LogWarning($"Access denied to: {parent.FullPath}");
+                try
+                {
+                    var directories = Directory.GetDirectories(node.FullPath);
+                    foreach (var dir in directories.OrderBy(d => d))
+                    {
+                        var childNode = new FileSystemNodeModel(dir);
+                        node.Children.Add(childNode);
+                        await LoadAllChildren(childNode);
+                    }
+
+                    var files = Directory.GetFiles(node.FullPath);
+                    foreach (var file in files.OrderBy(f => f))
+                    {
+                        var childNode = new FileSystemNodeModel(file);
+                        node.Children.Add(childNode);
+                        await LoadAllChildren(childNode); // This will handle WAD files
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    LogService.LogWarning($"Access denied to: {node.FullPath}");
+                }
             }
         }
 
@@ -262,63 +254,16 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
 
         private void txtSearchExplorer_TextChanged(object sender, TextChangedEventArgs e)
         {
+            _searchTimer.Stop();
+            _searchTimer.Start();
+        }
+
+        private async void SearchTimer_Tick(object sender, EventArgs e)
+        {
+            _searchTimer.Stop();
             string searchText = txtSearchExplorer.Text;
 
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                SetVisibility(RootNodes, true);
-                return;
-            }
-
-            FilterTree(RootNodes, searchText, false);
-        }
-
-        private bool FilterTree(IEnumerable<FileSystemNodeModel> nodes, string searchText, bool parentMatched)
-        {
-            bool somethingVisibleInThisLevel = false;
-            if (nodes == null) return false;
-
-            foreach (var node in nodes)
-            {
-                if (node.Name == "Loading...")
-                {
-                    if (parentMatched)
-                    {
-                        node.IsVisible = true;
-                        somethingVisibleInThisLevel = true;
-                    }
-                    continue;
-                }
-
-                bool selfMatches = node.Name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
-
-                if (parentMatched || selfMatches)
-                {
-                    node.IsVisible = true;
-                    somethingVisibleInThisLevel = true;
-                    FilterTree(node.Children, searchText, true);
-                }
-                else
-                {
-                    bool childMatches = FilterTree(node.Children, searchText, false);
-                    node.IsVisible = childMatches;
-                    if (childMatches)
-                    { 
-                        node.IsExpanded = true;
-                        somethingVisibleInThisLevel = true;
-                    }
-                }
-            }
-            return somethingVisibleInThisLevel;
-        }
-
-        private void SetVisibility(IEnumerable<FileSystemNodeModel> nodes, bool isVisible)
-        {
-            foreach (var node in nodes)
-            {
-                node.IsVisible = isVisible;
-                SetVisibility(node.Children, isVisible);
-            }
+            await WadSearchBoxService.FilterTreeAsync(RootNodes, searchText);
         }
     }
 }

@@ -59,12 +59,7 @@ namespace PBE_AssetsManager.Views.Dialogs.Controls
             }
         }
 
-        public async Task LoadAndDisplayDiffAsync(string oldFilePath, string newFilePath)
-        {
-            string oldText = File.Exists(oldFilePath) ? await File.ReadAllTextAsync(oldFilePath) : "";
-            string newText = File.Exists(newFilePath) ? await File.ReadAllTextAsync(newFilePath) : "";
-            await LoadAndDisplayDiffAsync(oldText, newText, Path.GetFileName(oldFilePath), Path.GetFileName(newFilePath));
-        }
+
 
         
 

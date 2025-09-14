@@ -11,7 +11,7 @@
         Background="{StaticResource SidebarBackground}"
         FontFamily="Consolas, Courier New">
     <Grid>
-        <controls:JsonDiffControl x:Name="JsonDiffControl" Visibility="Collapsed"/>
+        <controls:JsonDiffControl x:Name="JsonDiffControl"/>
         
         <!-- Loading Overlay MEJORADO -->
         <Grid x:Name="LoadingOverlay" 

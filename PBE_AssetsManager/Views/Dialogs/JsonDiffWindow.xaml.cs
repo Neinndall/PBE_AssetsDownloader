@@ -44,16 +44,11 @@ namespace PBE_AssetsManager.Views.Dialogs
             }
         }
 
+        // Used by DiffViewService when the file content is already processed and available in memory.
         public async Task LoadAndDisplayDiffAsync(string oldText, string newText, string oldFileName, string newFileName)
         {
             JsonDiffControl.Visibility = Visibility.Visible;
             await JsonDiffControl.LoadAndDisplayDiffAsync(oldText, newText, oldFileName, newFileName);
-            ShowLoading(false);
-        }
-
-        public async Task LoadAndDisplayDiffAsync(string oldFilePath, string newFilePath)
-        {
-            await JsonDiffControl.LoadAndDisplayDiffAsync(oldFilePath, newFilePath);
             ShowLoading(false);
         }
     }

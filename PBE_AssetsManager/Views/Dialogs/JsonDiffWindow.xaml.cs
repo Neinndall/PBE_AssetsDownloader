@@ -14,7 +14,6 @@ namespace PBE_AssetsManager.Views.Dialogs
         public JsonDiffWindow(CustomMessageBoxService customMessageBoxService)
         {
             InitializeComponent();
-            JsonDiffControl.Visibility = Visibility.Collapsed;
             JsonDiffControl.CustomMessageBoxService = customMessageBoxService;
             JsonDiffControl.ComparisonFinished += (sender, success) =>
             {

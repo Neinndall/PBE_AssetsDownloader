@@ -16,20 +16,22 @@ namespace PBE_AssetsManager.Services.Monitor
 {
     public class DiffViewService
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly WadDifferenceService _wadDifferenceService;
         private readonly CustomMessageBoxService _customMessageBoxService;
         private readonly LogService _logService;
+        private readonly JsBeautifierService _jsBeautifierService;
+        private readonly Func<JsonDiffWindow> _jsonDiffWindowFactory;
 
         private static readonly string[] SupportedImageExtensions = { ".png", ".dds", ".tga", ".jpg", ".jpeg", ".bmp", ".gif", ".ico", ".tif", ".tiff", ".webp", ".tex" };
         private static readonly string[] SupportedTextExtensions = { ".json", ".js", ".txt", ".xml", ".yaml", ".html", ".ini", ".log", ".glsl", ".vert", ".frag", ".tes", ".bak", ".py", ".lua", ".scd", ".skl", ".wgeo", ".sco", ".ann", ".map" };
 
-        public DiffViewService(IServiceProvider serviceProvider, WadDifferenceService wadDifferenceService, CustomMessageBoxService customMessageBoxService, LogService logService)
+        public DiffViewService(WadDifferenceService wadDifferenceService, CustomMessageBoxService customMessageBoxService, LogService logService, JsBeautifierService jsBeautifierService, Func<JsonDiffWindow> jsonDiffWindowFactory)
         {
-            _serviceProvider = serviceProvider;
             _wadDifferenceService = wadDifferenceService;
             _customMessageBoxService = customMessageBoxService;
             _logService = logService;
+            _jsBeautifierService = jsBeautifierService;
+            _jsonDiffWindowFactory = jsonDiffWindowFactory;
         }
 
         public async Task ShowWadDiffAsync(SerializableChunkDiff diff, string oldPbePath, string newPbePath, System.Windows.Window owner)
@@ -52,7 +54,7 @@ namespace PBE_AssetsManager.Services.Monitor
 
             try
             {
-                var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
+                var diffWindow = _jsonDiffWindowFactory();
                 diffWindow.Owner = owner;
                 diffWindow.ShowLoading(true);
                 diffWindow.Show();
@@ -115,7 +117,7 @@ namespace PBE_AssetsManager.Services.Monitor
 
             try
             {
-                var diffWindow = _serviceProvider.GetRequiredService<JsonDiffWindow>();
+                var diffWindow = _jsonDiffWindowFactory();
                 diffWindow.Owner = owner;
                 diffWindow.ShowLoading(true);
                 diffWindow.Show();
@@ -152,11 +154,10 @@ namespace PBE_AssetsManager.Services.Monitor
                     if (newData != null) newText = await JsonDiffHelper.FormatJsonAsync(newData);
                     break;
                 case "js":
-                    var jsBeautifier = _serviceProvider.GetRequiredService<JsBeautifierService>();
                     try
                     {
-                        if (oldData != null) oldText = await jsBeautifier.BeautifyAsync((string)oldData);
-                        if (newData != null) newText = await jsBeautifier.BeautifyAsync((string)newData);
+                        if (oldData != null) oldText = await _jsBeautifierService.BeautifyAsync((string)oldData);
+                        if (newData != null) newText = await _jsBeautifierService.BeautifyAsync((string)newData);
                     }
                     catch (Exception ex)
                     {

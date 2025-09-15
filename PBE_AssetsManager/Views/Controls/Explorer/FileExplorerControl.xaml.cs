@@ -48,6 +48,10 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
 
         private async void FileExplorerControl_Loaded(object sender, RoutedEventArgs e)
         {
+            Toolbar.SearchTextChanged += Toolbar_SearchTextChanged;
+            Toolbar.CollapseAllClicked += Toolbar_CollapseAllClicked;
+
+
             var settings = AppSettings.LoadSettings();
             if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
             {
@@ -238,29 +242,24 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
             FileSelected?.Invoke(this, e);
         }
 
-        private void txtSearchExplorer_GotFocus(object sender, RoutedEventArgs e)
-        {
-            txtSearchExplorerPlaceholder.Visibility = Visibility.Collapsed;
-        }
-
-        private void txtSearchExplorer_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(txtSearchExplorer.Text))
-            {
-                txtSearchExplorerPlaceholder.Visibility = Visibility.Visible;
-            }
-        }
-
-        private void txtSearchExplorer_TextChanged(object sender, TextChangedEventArgs e)
+        private void Toolbar_SearchTextChanged(object sender, TextChangedEventArgs e)
         {
             _searchTimer.Stop();
             _searchTimer.Start();
         }
 
+        private void Toolbar_CollapseAllClicked(object sender, RoutedEventArgs e)
+        {
+            // This requires the FileSystemNodeModel to have an IsExpanded property
+            // that is two-way bound in the TreeView's ItemContainerStyle.
+            // For now, we just log that the feature is not fully implemented.
+            LogService?.LogWarning("Collapse All functionality is not yet fully implemented.");
+        }
+
         private async void SearchTimer_Tick(object sender, EventArgs e)
         {
             _searchTimer.Stop();
-            string searchText = txtSearchExplorer.Text;
+            string searchText = Toolbar.SearchText;
 
             var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
 

@@ -6,6 +6,7 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:models="clr-namespace:PBE_AssetsManager.Views.Models"
              xmlns:converters="clr-namespace:PBE_AssetsManager.Views.Converters"
+             xmlns:local="clr-namespace:PBE_AssetsManager.Views.Controls.Explorer"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="400">
     <UserControl.Resources>
@@ -68,33 +69,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Search Box -->
-        <Grid Grid.Row="0" Margin="5,10,5,0">
-            <Border Background="{StaticResource DarkBackground}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    SnapsToDevicePixels="True"/>
-            <TextBox x:Name="txtSearchExplorer"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     Padding="12,8"
-                     Margin="2"
-                     Foreground="{StaticResource TextPrimary}"
-                     FontSize="14"
-                     CaretBrush="White"
-                     TextChanged="txtSearchExplorer_TextChanged"
-                     GotFocus="txtSearchExplorer_GotFocus"
-                     LostFocus="txtSearchExplorer_LostFocus"/>
-            <TextBlock Text="🔍 Search files..."
-                       x:Name="txtSearchExplorerPlaceholder"
-                       IsHitTestVisible="False"
-                       Foreground="{StaticResource TextMuted}"
-                       FontSize="14"
-                       VerticalAlignment="Center"
-                       Margin="14,0,0,0">
-            </TextBlock>
-        </Grid>
+        <!-- Toolbar -->
+        <local:ExplorerToolbarControl x:Name="Toolbar" Grid.Row="0" Margin="5,10,5,0"/>
 
         <Grid Grid.Row="1">
             <TreeView x:Name="FileTreeView" 

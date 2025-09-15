@@ -136,18 +136,28 @@
                             </Border>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
                                 <Button Name="SaveAssetButton"
-                                        Style="{StaticResource SaveIconButton}"
                                         Click="SaveAssetButton_Click"
                                         ToolTip="Save Asset"
                                         Tag="{Binding}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                                            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Style>
+                                    </Button.Style>
                                     <materialDesign:MaterialIcon Kind="ContentSave" Width="14" Height="14"/>
                                 </Button>
                                 <Button Name="RemoveAssetButton"
-                                        Style="{StaticResource DeleteIconButton}"
                                         Click="RemoveAssetButton_Click"
                                         ToolTip="Remove Asset"
                                         Margin="10,0,0,0"
                                         Tag="{Binding}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                                            <Setter Property="Background" Value="{StaticResource AccentRed}"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Style>
+                                    </Button.Style>
                                     <materialDesign:MaterialIcon Kind="TrashCanOutline" Width="14" Height="14"/>
                                 </Button>
                             </StackPanel>

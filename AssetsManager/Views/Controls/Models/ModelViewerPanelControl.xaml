@@ -6,31 +6,7 @@
              xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="250">
-    <UserControl.Resources>
-        <Style x:Key="MeshesAnimationsListBoxItemStyle" TargetType="ListBoxItem">
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="Padding" Value="2"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Border"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentBrush}"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource CardBackground}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
+             
     <Border Grid.Column="2"
             Background="{StaticResource CardBackground}"
             BorderBrush="{StaticResource BorderColor}"
@@ -49,7 +25,7 @@
                              Background="{StaticResource SidebarBackground}"
                              BorderThickness="1"
                              BorderBrush="{StaticResource BorderColor}"
-                             ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
+                             ItemContainerStyle="{StaticResource ListBoxItemStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Margin="10,0,0,0">
@@ -75,7 +51,7 @@
                              Background="{StaticResource SidebarBackground}"
                              BorderThickness="1"
                              BorderBrush="{StaticResource BorderColor}"
-                             ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
+                             ItemContainerStyle="{StaticResource ListBoxItemStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -86,19 +62,28 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource TextPrimary}"/>
                                     <Button Grid.Column="1" x:Name="PlayButton"
-                                            Style="{StaticResource PlayIconButton}"
                                             Click="PlayButton_Click"
                                             Tag="{Binding}"
                                             ToolTip="Play Animation"
                                             Margin="5,0,0,0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                                                <Setter Property="Background" Value="White"/>
+                                                <Setter Property="Foreground" Value="Green"/>
+                                            </Style>
+                                        </Button.Style>
                                         <materialDesign:MaterialIcon Kind="Play" Width="14" Height="14"/>
                                     </Button>
                                     <Button Grid.Column="2" x:Name="StopButton"
-                                            Style="{StaticResource PauseIconButton}"
                                             Click="StopButton_Click"
                                             Tag="{Binding}"
                                             ToolTip="Pause/Resume"
                                             Margin="5,0,5,0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                                                <Setter Property="Foreground" Value="Red"/>
+                                            </Style>
+                                        </Button.Style>
                                         <materialDesign:MaterialIcon Kind="Pause" Width="14" Height="14"/>
                                     </Button>
                                 </Grid>
@@ -111,7 +96,7 @@
                              Background="{StaticResource SidebarBackground}"
                              BorderThickness="1"
                              BorderBrush="{StaticResource BorderColor}"
-                             ItemContainerStyle="{StaticResource MeshesAnimationsListBoxItemStyle}">
+                             ItemContainerStyle="{StaticResource ListBoxItemStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -121,11 +106,16 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource TextPrimary}"/>
                                     <Button Grid.Column="1" x:Name="DeleteModelButton"
-                                            Style="{StaticResource DeleteIconButton}"
                                             Click="DeleteModelButton_Click"
                                             Tag="{Binding}"
                                             ToolTip="Delete Model"
                                             Margin="5,0,5,0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                                                <Setter Property="Background" Value="{StaticResource AccentRed}"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Style>
+                                        </Button.Style>
                                         <materialDesign:MaterialIcon Kind="TrashCan" Width="14" Height="14"/>
                                     </Button>
                                 </Grid>

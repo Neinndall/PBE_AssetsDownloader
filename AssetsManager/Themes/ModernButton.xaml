@@ -253,6 +253,7 @@
         </Setter>
     </Style>
 
+    <!-- Estilo para iconos, se usará para iconos con un borde (ej: Asset Tracker icons) -->
     <Style x:Key="IconButton" TargetType="Button">
         <Setter Property="Width" Value="21"/>
         <Setter Property="Height" Value="21"/>
@@ -280,26 +281,7 @@
         </Setter>
     </Style>
 
-    <Style x:Key="SaveIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
-
-    <Style x:Key="DeleteIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Background" Value="{StaticResource AccentRed}"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style>
-
-    <Style x:Key="PlayIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="Green"/>
-    </Style>
-
-    <Style x:Key="PauseIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Foreground" Value="Red"/>
-    </Style>
-
-    <!-- Style for "loose" icon buttons, with no background/border -->
+    <!-- Estilo para iconos, se usará para iconos planos (ej: ToolBar del Explorer) -->
     <Style x:Key="TransparentIconButton" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>

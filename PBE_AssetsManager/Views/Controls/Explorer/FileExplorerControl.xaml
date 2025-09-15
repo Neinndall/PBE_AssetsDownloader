@@ -66,13 +66,16 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
         <local:ExplorerToolbarControl x:Name="Toolbar" Grid.Row="0" Margin="5,0,5,0"/>
 
-        <Grid Grid.Row="1">
+        <Border Grid.Row="1" Height="1" Background="{StaticResource BorderColor}" Margin="5,5,5,5"/>
+
+        <Grid Grid.Row="2">
             <TreeView x:Name="FileTreeView" 
                       Margin="5,0,5,5" 
                       ItemsSource="{Binding RootNodes}"

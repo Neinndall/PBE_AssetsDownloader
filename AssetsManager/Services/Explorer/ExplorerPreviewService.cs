@@ -202,7 +202,7 @@ namespace AssetsManager.Services.Explorer
                         
                         var escapedHtml = System.Net.WebUtility.HtmlEncode(formattedJson);
                         var scrollbarCss = GetScrollbarCss();
-                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
+                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 12px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
                     }
                     catch (Exception ex)
                     {
@@ -336,7 +336,7 @@ namespace AssetsManager.Services.Explorer
 
                         var escapedHtml = System.Net.WebUtility.HtmlEncode(formattedText);
                         var scrollbarCss = GetScrollbarCss();
-                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 14px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
+                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 12px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
                     }
                     catch (Exception ex)
                     {

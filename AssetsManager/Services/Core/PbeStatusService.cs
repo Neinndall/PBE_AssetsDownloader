@@ -77,12 +77,12 @@ namespace AssetsManager.Services.Core
 
                 if (translations == null) return string.Empty;
 
-                var enTranslation = translations.FirstOrDefault(t => t["locale"]?.ToString() == "en_US");
+                var enTranslation = translations.FirstOrDefault(t => t["locale"]?.ToString() == "en_US") ?? translations.FirstOrDefault(t => t["locale"]?.ToString().StartsWith("en_") ?? false);
                 string originalContent = enTranslation?["content"]?.ToString();
 
                 if (string.IsNullOrEmpty(originalContent)) return string.Empty;
 
-                // Regex to find a date, time, and timezone abbreviation.
+                // 1. Parse Maintenance Start Time
                 var match = Regex.Match(originalContent, @"(\d{2}/\d{2}/\d{4})\s*(\d{1,2}:\d{2})\s*([A-Z]{3})", RegexOptions.IgnoreCase);
 
                 if (!match.Success) return originalContent; // Return original message if no time is found
@@ -101,18 +101,42 @@ namespace AssetsManager.Services.Core
                     return originalContent; // Return original if timezone is unknown
                 }
 
-                var maintenanceTime = new DateTimeOffset(maintenanceDateTime, offset);
+                var maintenanceStartTime = new DateTimeOffset(maintenanceDateTime, offset);
 
-                // If maintenance is in the past, ignore it.
-                if (maintenanceTime.ToUniversalTime() < DateTime.UtcNow)
+                // 2. Parse Maintenance Duration
+                TimeSpan duration = TimeSpan.FromHours(3); // Default grace period of 3 hours
+                var durationMatch = Regex.Match(originalContent, @"for approximately (\d+)\s+(hour|minute)s?", RegexOptions.IgnoreCase);
+
+                if (durationMatch.Success)
                 {
-                    return string.Empty;
+                    if (int.TryParse(durationMatch.Groups[1].Value, out int durationValue))
+                    {
+                        string unit = durationMatch.Groups[2].Value.ToLower();
+                        if (unit.StartsWith("hour"))
+                        {
+                            duration = TimeSpan.FromHours(durationValue);
+                        }
+                        else if (unit.StartsWith("minute"))
+                        {
+                            duration = TimeSpan.FromMinutes(durationValue);
+                        }
+                    }
                 }
 
-                // Convert to user's local time for display.
-                var localMaintenanceTime = maintenanceTime.ToLocalTime();
+                // 3. Calculate End Time and Check if Expired
+                var maintenanceEndTime = maintenanceStartTime.Add(duration);
 
-                return $"Maintenance at {match.Value} (your time: {localMaintenanceTime:HH:mm}). {originalContent}";
+                if (maintenanceEndTime.ToUniversalTime() < DateTime.UtcNow)
+                {
+                    return string.Empty; // Maintenance window has passed
+                }
+
+                // 4. Format the final message by injecting the user's local time.
+                var localMaintenanceTime = maintenanceStartTime.ToLocalTime();
+                string newDateTimeString = $"{match.Value} ({localMaintenanceTime:HH:mm} your timezone)";
+                
+                return originalContent.Replace(match.Value, newDateTimeString);
+
             }
             catch (Exception ex)
             {

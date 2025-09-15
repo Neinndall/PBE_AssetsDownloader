@@ -12,80 +12,102 @@ namespace AssetsManager.Views.Settings
         public AdvancedSettingsView()
         {
             InitializeComponent();
-            Loaded += AdvancedSettingsView_Loaded;
-        }
-
-        private void AdvancedSettingsView_Loaded(object sender, RoutedEventArgs e)
-        {
-            // The parent window will pass the settings via ApplySettingsToUI
         }
 
         public void ApplySettingsToUI(AppSettings settings)
         {
             _settings = settings;
-            IntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
-            LoadIntervalSettings(); 
+            AssetTrackerIntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
+            PbeIntervalUnitComboBox.ItemsSource = new string[] { "Minutes", "Hours", "Days" };
+
+            EnableAssetTrackerCheckBox.IsChecked = _settings.AssetTrackerTimer;
+            EnablePbeStatusCheckBox.IsChecked = _settings.CheckPbeStatus;
+
+            LoadAssetTrackerIntervalSettings();
+            LoadPbeIntervalSettings();
         }
 
         public void SaveSettings()
         {
             if (_settings == null) return;
 
+            // Asset Tracker Settings
             _settings.AssetTrackerTimer = EnableAssetTrackerCheckBox.IsChecked ?? false;
+            if (_settings.AssetTrackerTimer)
+            {
+                if (int.TryParse(AssetTrackerIntervalValueTextBox.Text, out int assetValue) && assetValue >= 0)
+                {
+                    string selectedAssetUnit = AssetTrackerIntervalUnitComboBox.SelectedItem as string;
+                    if (selectedAssetUnit != null)
+                    {
+                        _settings.AssetTrackerFrequency = ConvertToMinutes(assetValue, selectedAssetUnit);
+                    }
+                }
+            }
+
+            // PBE Status Settings
             _settings.CheckPbeStatus = EnablePbeStatusCheckBox.IsChecked ?? false;
-            
-            if (!int.TryParse(IntervalValueTextBox.Text, out int value) || value < 0)
+            if (_settings.CheckPbeStatus)
             {
-                // On invalid input, perhaps default to a safe value or do nothing.
-                // For now, we'll just not save the interval.
-                return;
+                if (int.TryParse(PbeIntervalValueTextBox.Text, out int pbeValue) && pbeValue >= 0)
+                {
+                    string selectedPbeUnit = PbeIntervalUnitComboBox.SelectedItem as string;
+                    if (selectedPbeUnit != null)
+                    {
+                        _settings.PbeStatusFrequency = ConvertToMinutes(pbeValue, selectedPbeUnit);
+                    }
+                }
             }
-
-            string selectedUnit = IntervalUnitComboBox.SelectedItem as string;
-            if (selectedUnit == null) return;
-
-            int totalMinutes = 0;
-            switch (selectedUnit)
-            {
-                case "Days":
-                    totalMinutes = value * 1440;
-                    break;
-                case "Hours":
-                    totalMinutes = value * 60;
-                    break;
-                case "Minutes":
-                    totalMinutes = value;
-                    break;
-            }
-
-            _settings.AssetTrackerFrequency = totalMinutes;
         }
 
-        private void LoadIntervalSettings()
+        private int ConvertToMinutes(int value, string unit)
+        {
+            switch (unit)
+            {
+                case "Days":
+                    return value * 1440;
+                case "Hours":
+                    return value * 60;
+                case "Minutes":
+                default:
+                    return value;
+            }
+        }
+
+        private void LoadAssetTrackerIntervalSettings()
         {
             int totalMinutes = _settings.AssetTrackerFrequency;
+            var (value, unit) = ConvertFromMinutes(totalMinutes);
+            AssetTrackerIntervalValueTextBox.Text = value.ToString();
+            AssetTrackerIntervalUnitComboBox.SelectedItem = unit;
+        }
 
+        private void LoadPbeIntervalSettings()
+        {
+            int totalMinutes = _settings.PbeStatusFrequency;
+            var (value, unit) = ConvertFromMinutes(totalMinutes);
+            PbeIntervalValueTextBox.Text = value.ToString();
+            PbeIntervalUnitComboBox.SelectedItem = unit;
+        }
+
+        private (int, string) ConvertFromMinutes(int totalMinutes)
+        {
             if (totalMinutes <= 0)
             {
-                IntervalValueTextBox.Text = "0";
-                IntervalUnitComboBox.SelectedItem = "Minutes";
-                return;
+                return (0, "Minutes");
             }
 
             if (totalMinutes > 0 && totalMinutes % 1440 == 0)
             {
-                IntervalValueTextBox.Text = (totalMinutes / 1440).ToString();
-                IntervalUnitComboBox.SelectedItem = "Days";
+                return (totalMinutes / 1440, "Days");
             }
             else if (totalMinutes > 0 && totalMinutes % 60 == 0)
             {
-                IntervalValueTextBox.Text = (totalMinutes / 60).ToString();
-                IntervalUnitComboBox.SelectedItem = "Hours";
+                return (totalMinutes / 60, "Hours");
             }
             else
             {
-                IntervalValueTextBox.Text = totalMinutes.ToString();
-                IntervalUnitComboBox.SelectedItem = "Minutes";
+                return (totalMinutes, "Minutes");
             }
         }
     }

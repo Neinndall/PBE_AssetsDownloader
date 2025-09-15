@@ -66,7 +66,7 @@ namespace AssetsManager.Services.Core
             }
 
             // Start PBE Status timer
-            if (_appSettings.CheckPbeStatus)
+            if (_appSettings.CheckPbeStatus && _appSettings.PbeStatusFrequency > 0)
             {
                 if (_pbeStatusTimer == null)
                 {
@@ -74,9 +74,9 @@ namespace AssetsManager.Services.Core
                     _pbeStatusTimer.Elapsed += async (sender, e) => await CheckForPbeStatusAsync();
                     _pbeStatusTimer.AutoReset = true;
                 }
-                _pbeStatusTimer.Interval = _appSettings.UpdateCheckFrequency * 60 * 1000; // Use the same frequency
+                _pbeStatusTimer.Interval = _appSettings.PbeStatusFrequency * 60 * 1000;
                 _pbeStatusTimer.Enabled = true;
-                _logService.LogDebug($"PBE Status timer started. Frequency: {_appSettings.UpdateCheckFrequency} minutes.");
+                _logService.LogDebug($"PBE Status timer started. Frequency: {_appSettings.PbeStatusFrequency} minutes.");
             }
         }
 

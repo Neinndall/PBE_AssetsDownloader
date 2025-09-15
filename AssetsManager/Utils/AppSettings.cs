@@ -22,6 +22,7 @@ namespace AssetsManager.Utils
         public bool CheckPbeStatus { get; set; }
         public int UpdateCheckFrequency { get; set; }
         public int AssetTrackerFrequency { get; set; }
+        public int PbeStatusFrequency { get; set; }
 
         public string NewHashesPath { get; set; }
         public string OldHashesPath { get; set; }
@@ -125,6 +126,7 @@ namespace AssetsManager.Utils
                 CheckPbeStatus = false,
                 UpdateCheckFrequency = 10,
                 AssetTrackerFrequency = 60,
+                PbeStatusFrequency = 10,
                 NewHashesPath = null,
                 OldHashesPath = null,
                 LolDirectory = null,
@@ -161,6 +163,7 @@ namespace AssetsManager.Utils
             BackgroundUpdates = defaultSettings.BackgroundUpdates;
             CheckPbeStatus = defaultSettings.CheckPbeStatus;
             UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
+            PbeStatusFrequency = defaultSettings.PbeStatusFrequency;
             JsonDataModificationDates = defaultSettings.JsonDataModificationDates;
             MonitoredJsonFiles = defaultSettings.MonitoredJsonFiles;
             DiffHistory = defaultSettings.DiffHistory;

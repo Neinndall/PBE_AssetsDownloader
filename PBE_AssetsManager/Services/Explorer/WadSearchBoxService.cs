@@ -41,11 +41,6 @@ namespace PBE_AssetsManager.Services.Explorer
 
                 node.IsVisible = selfMatches || childMatches;
 
-                if (childMatches)
-                {
-                    node.IsExpanded = true;
-                }
-
                 if (node.IsVisible)
                 {
                     somethingVisibleInThisLevel = true;

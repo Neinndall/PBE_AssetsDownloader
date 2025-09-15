@@ -21,7 +21,7 @@
         </ContextMenu>
 
         <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
-            <Grid Margin="0,2,0,2">
+            <Grid Margin="5,2,0,2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -33,7 +33,7 @@
                                             Margin="0,0,5,0"
                                             Kind="{Binding Converter={StaticResource PathToIconConverter}}"/>
                 
-                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center">
+                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" FontSize="14">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Visible"/>
@@ -46,7 +46,7 @@
                     </TextBlock.Style>
                 </TextBlock>
 
-                <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="14">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -107,6 +107,7 @@
                         <Setter Property="ContextMenu" Value="{StaticResource ExplorerContextMenu}"/>
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                         <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
                     </Style>

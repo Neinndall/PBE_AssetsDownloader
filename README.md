@@ -3,11 +3,6 @@
 </div>
 
 ## ✅ APP Reliability
-I decided to create this section to provide reliability to the tool I've been developing for some time, so that all GitHub developers and users can trust my projects and future ones. Therefore, I decided to do it for your security. So you can verify that no file has been modified since its publication and that it is free of malware.
-
-GitHub includes a **SHA-256** security code linked to the .rar package. You can find this **SHA-256** number in the [releases of the tool](https://github.com/Neinndall/AssetsManager/releases) section, in the **ASSETS** section. It gives you the option to copy it and verify it with the **VIRUSTOTAL** link I will provide with each version release.
-
-If both the **SHA-256** from **GitHub** and **VIRUSTOTAL** match, it means that the .rar package that was scanned by virustotal has not been modified at any point, so you can confidently verify that the scan was performed on the .rar package of the latest version. With each release, I will provide you with the URL of each virustotal scan with its details and the package name for the version that will appear just above with its details. Most importantly, **SHA-256**, don't forget to check every detail.
 
 *   **Latest Version v2.3.0.0:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/26c66289016a37ae3500d06e71aee48531927c4f9c02e42c7b13c78ccdeec27d/details)** 
      *   *GITHUB* --> You cant get the sha-256 [here](https://github.com/Neinndall/AssetsManager/releases)

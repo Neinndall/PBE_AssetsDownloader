@@ -33,10 +33,11 @@ namespace AssetsManager.Services.Explorer
 
         private Image _imagePreview;
         private WebView2 _webView2Preview;
+        private TextBox _textPreview;
         private Panel _previewPlaceholder;
         private Panel _selectFileMessagePanel;
         private Panel _unsupportedFileMessagePanel;
-        private TextBlock _unsupportedFileMessage;
+        private TextBlock _unsupportedFileTextBlock;
 
         private readonly LogService _logService;
         private readonly DirectoriesCreator _directoriesCreator;
@@ -55,20 +56,15 @@ namespace AssetsManager.Services.Explorer
         }
 
         // Method to initialize UI-dependent components
-        public void Initialize(
-            Image imagePreview,
-            WebView2 webView2Preview,
-            Panel previewPlaceholder,
-            Panel selectFileMessagePanel,
-            Panel unsupportedFileMessagePanel,
-            TextBlock unsupportedFileMessage)
+        public void Initialize(Image imagePreview, WebView2 webView2Preview, TextBox textPreview, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
         {
             _imagePreview = imagePreview;
             _webView2Preview = webView2Preview;
-            _previewPlaceholder = previewPlaceholder;
-            _selectFileMessagePanel = selectFileMessagePanel;
-            _unsupportedFileMessagePanel = unsupportedFileMessagePanel;
-            _unsupportedFileMessage = unsupportedFileMessage;
+            _textPreview = textPreview;
+            _previewPlaceholder = placeholder;
+            _selectFileMessagePanel = selectFileMessage;
+            _unsupportedFileMessagePanel = unsupportedFileMessage;
+            _unsupportedFileTextBlock = unsupportedFileTextBlock;
         }
 
         private string GetScrollbarCss()
@@ -410,7 +406,7 @@ namespace AssetsManager.Services.Explorer
             SetPreviewer(Previewer.Placeholder);
             _selectFileMessagePanel.Visibility = Visibility.Collapsed;
             _unsupportedFileMessagePanel.Visibility = Visibility.Visible;
-            _unsupportedFileMessage.Text = $"Preview not available for '{extension}' files.";
+            _unsupportedFileTextBlock.Text = $"Preview not available for '{extension}' files.";
             await Task.CompletedTask;
         }
 

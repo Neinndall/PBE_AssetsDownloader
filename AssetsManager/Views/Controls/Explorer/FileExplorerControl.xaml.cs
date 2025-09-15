@@ -23,6 +23,10 @@ namespace AssetsManager.Views.Controls.Explorer
     public partial class FileExplorerControl : UserControl
     {
         public event RoutedPropertyChangedEventHandler<object> FileSelected;
+        public event EventHandler<FileSystemNodeModel> FilePinned;
+        public event RoutedEventHandler ExplorerContextMenuOpening;
+
+        public MenuItem PinMenuItem => (this.FindResource("ExplorerContextMenu") as ContextMenu)?.Items.OfType<MenuItem>().FirstOrDefault(m => m.Name == "PinMenuItem");
 
         public LogService LogService { get; set; }
         public CustomMessageBoxService CustomMessageBoxService { get; set; }
@@ -101,22 +105,41 @@ namespace AssetsManager.Views.Controls.Explorer
             }
         }
 
+        private void PinSelected_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTreeView.SelectedItem is FileSystemNodeModel selectedNode && selectedNode.Type != NodeType.RealDirectory && selectedNode.Type != NodeType.VirtualDirectory)
+            {
+                FilePinned?.Invoke(this, selectedNode);
+            }
+        }
+
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            ExplorerContextMenuOpening?.Invoke(this, e);
+        }
+
         private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
-
-            if (treeViewItem != null)
+            if (SafeVisualUpwardSearch(e.OriginalSource as DependencyObject) is TreeViewItem treeViewItem)
             {
-                treeViewItem.Focus();
+                treeViewItem.IsSelected = true;
                 e.Handled = true;
             }
         }
 
-        static TreeViewItem VisualUpwardSearch(DependencyObject source)
+        private static TreeViewItem SafeVisualUpwardSearch(DependencyObject source)
         {
             while (source != null && !(source is TreeViewItem))
-                source = VisualTreeHelper.GetParent(source);
-
+            {
+                if (source is Visual || source is System.Windows.Media.Media3D.Visual3D)
+                {
+                    source = VisualTreeHelper.GetParent(source);
+                }
+                else
+                {
+                    source = LogicalTreeHelper.GetParent(source);
+                }
+            }
             return source as TreeViewItem;
         }
 

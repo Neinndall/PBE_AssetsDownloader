@@ -6,56 +6,98 @@
              xmlns:local="clr-namespace:AssetsManager.Views.Controls.Explorer"
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             xmlns:converters="clr-namespace:AssetsManager.Views.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
-    <Grid x:Name="PreviewContainer" Margin="5">
-        <StackPanel x:Name="PreviewPlaceholder"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Visibility="Visible">
-            <StackPanel x:Name="SelectFileMessagePanel"
-                        Orientation="Vertical"
-                        HorizontalAlignment="Center">
-                <materialIcons:MaterialIcon Kind="FileUploadOutline"
-                                            Width="48" Height="48"
-                                            HorizontalAlignment="Center"
-                                            Foreground="{StaticResource TextMuted}"
-                                            Opacity="0.5"/>
-                <TextBlock x:Name="SelectFileMessage"
-                           Text="SELECT A FILE"
-                           FontSize="18" 
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource TextMuted}"
-                           HorizontalAlignment="Center"
-                           Margin="0,16,0,0"/>
-                <TextBlock x:Name="SelectFileSubMessage"
-                           Text="Select a file from the tree to preview its content"
-                           FontSize="14"
-                           Foreground="{StaticResource TextMuted}"
-                           HorizontalAlignment="Center"
-                           Margin="0,8,0,0"
-                           Opacity="0.7"/>
-            </StackPanel>
-            <StackPanel x:Name="UnsupportedFileMessagePanel"
-                        Orientation="Vertical"
+    <UserControl.Resources>
+        <converters:BoolToBrushConverter x:Key="BoolToBrushConverter"
+                                     TrueBrush="{StaticResource AccentBrush}"
+                                     FalseBrush="Transparent"/>
+
+        <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+
+        <Style x:Key="CloseTabButtonStyle" TargetType="Button" BasedOn="{StaticResource TransparentIconButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#33FFFFFF"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <DockPanel>
+        <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding PinnedFiles}" Background="{StaticResource SidebarBackground}" Margin="0,8,0,0">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{Binding IsSelected, Converter={StaticResource BoolToBrushConverter}}" CornerRadius="5,5,0,0" Margin="2,0,2,0" MouseDown="Tab_MouseDown">
+                        <StackPanel Orientation="Horizontal" Margin="8,2,8,2">
+                            <TextBlock Text="{Binding Header}" VerticalAlignment="Center" Foreground="White"/>
+                            <Button Click="CloseTabButton_Click" Style="{StaticResource CloseTabButtonStyle}" Margin="5,0,0,0">
+                                <materialIcons:MaterialIcon Kind="Close" Width="12" Height="12"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderColor}" Margin="5,5,5,5"
+                Visibility="{Binding PinnedFiles.Count, Converter={StaticResource CountToVisibilityConverter}}"/>
+
+        <Grid x:Name="PreviewContainer" Margin="5">
+            <StackPanel x:Name="PreviewPlaceholder"
                         HorizontalAlignment="Center"
-                        Visibility="Collapsed">
-                <materialIcons:MaterialIcon Kind="FileCancelOutline"
-                                            Width="48" Height="48"
-                                            HorizontalAlignment="Center"
-                                            Foreground="{StaticResource TextMuted}"
-                                            Opacity="0.5"/>
-                <TextBlock x:Name="UnsupportedFileMessage"
-                           Text="Preview not available for this file type"
-                           FontSize="16"
-                           FontWeight="SemiBold"
-                           Foreground="{StaticResource TextMuted}"
-                           HorizontalAlignment="Center"
-                           Margin="0,8,0,0"/>
+                        VerticalAlignment="Center"
+                        Visibility="Visible">
+                <StackPanel x:Name="SelectFileMessagePanel"
+                            Orientation="Vertical"
+                            HorizontalAlignment="Center">
+                    <materialIcons:MaterialIcon Kind="FileUploadOutline"
+                                                Width="48" Height="48"
+                                                HorizontalAlignment="Center"
+                                                Foreground="{StaticResource TextMuted}"
+                                                Opacity="0.5"/>
+                    <TextBlock x:Name="SelectFileMessage"
+                               Text="SELECT A FILE"
+                               FontSize="18" 
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,16,0,0"/>
+                    <TextBlock x:Name="SelectFileSubMessage"
+                               Text="Select a file from the tree to preview its content"
+                               FontSize="14"
+                               Foreground="{StaticResource TextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,0"
+                               Opacity="0.7"/>
+                </StackPanel>
+                <StackPanel x:Name="UnsupportedFileMessagePanel"
+                            Orientation="Vertical"
+                            HorizontalAlignment="Center"
+                            Visibility="Collapsed">
+                    <materialIcons:MaterialIcon Kind="FileCancelOutline"
+                                                Width="48" Height="48"
+                                                HorizontalAlignment="Center"
+                                                Foreground="{StaticResource TextMuted}"
+                                                Opacity="0.5"/>
+                    <TextBlock x:Name="UnsupportedFileMessage"
+                               Text="Preview not available for this file type"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextMuted}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,0"/>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
-        <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
-        <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
-        <wv2:WebView2 x:Name="WebView2Preview" Visibility="Collapsed"/>
-    </Grid>
+            <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
+            <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+            <wv2:WebView2 x:Name="WebView2Preview" Visibility="Collapsed"/>
+        </Grid>
+    </DockPanel>
 </UserControl>

@@ -1,0 +1,150 @@
+<UserControl x:Class="AssetsManager.Views.Settings.HashPathsSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel>
+        <!-- Page Header -->
+        <StackPanel Margin="0,0,0,32">
+            <TextBlock Text="Default Paths" 
+                         FontSize="28" 
+                         FontWeight="Light" 
+                         Foreground="{StaticResource TextPrimary}"
+                         Margin="0,4,0,0"/>
+            <TextBlock Text="Configure default directories for the application" 
+                         FontSize="14" 
+                         Foreground="{StaticResource TextMuted}"
+                         Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <!-- Hashes Paths Section -->
+        <Border Style="{StaticResource SettingsCard}">
+            <StackPanel>
+                <!-- New Hash Directory -->
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="FolderPlus" 
+                                                       Foreground="{StaticResource AccentGreen}"
+                                                       FontSize="20" 
+                                                       Margin="0,0,12,0" 
+                                                       VerticalAlignment="Center"/>
+                        <StackPanel>
+                            <TextBlock Text="New Hash Files Directory" 
+                                         FontSize="18" 
+                                         FontWeight="SemiBold"
+                                         Foreground="{StaticResource AccentGreen}"/>
+                            <TextBlock Text="Location where new hash files will be stored" 
+                                         FontSize="12" 
+                                         Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="textBoxNewHashPath"
+                                       Grid.Column="0"
+                                       Height="36"
+                                       IsReadOnly="True"
+                                       Style="{StaticResource ModernTextBox}"
+                                       Margin="0,0,12,0"/>
+                        <Button x:Name="btnBrowseNew" 
+                                      Content="Browse"
+                                      Grid.Column="1"
+                                      Height="36"
+                                      Width="100"
+                                      Click="btnBrowseNew_Click"
+                                      Style="{StaticResource SecondaryButton}"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Old Hash Directory -->
+                <StackPanel Margin="0,24,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <materialDesign:MaterialIcon Kind="FolderMinus" 
+                                                       Foreground="{StaticResource AccentOrange}"
+                                                       FontSize="20" 
+                                                       Margin="0,0,12,0" 
+                                                       VerticalAlignment="Center"/>
+                        <StackPanel>
+                            <TextBlock Text="Old Hash Files Directory" 
+                                         FontSize="18" 
+                                         FontWeight="SemiBold"
+                                         Foreground="{StaticResource AccentOrange}"/>
+                            <TextBlock Text="Location where existing hash files are located" 
+                                         FontSize="12" 
+                                         Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="textBoxOldHashPath"
+                                       Grid.Column="0"
+                                       Height="36"
+                                       IsReadOnly="True"
+                                       Style="{StaticResource ModernTextBox}"
+                                       Margin="0,0,12,0"/>
+                        <Button x:Name="btnBrowseOld" 
+                                      Content="Browse"
+                                      Grid.Column="1"
+                                      Height="36"
+                                      Width="100"
+                                      Click="btnBrowseOld_Click"
+                                      Style="{StaticResource SecondaryButton}"/>
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- PBE Directory for Explorer -->
+        <Border Style="{StaticResource SettingsCard}" Margin="0,16,0,0">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                    <materialDesign:MaterialIcon Kind="FolderSearch" 
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   FontSize="20" 
+                                                   Margin="0,0,12,0" 
+                                                   VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBlock Text="LoL Directory" 
+                                     FontSize="18" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{StaticResource AccentBrush}"/>
+                        <TextBlock Text="Directory where League of Legends is installed" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextMuted}"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox x:Name="textBoxLolPath"
+                                   Grid.Column="0"
+                                   Height="36"
+                                   IsReadOnly="True"
+                                   Style="{StaticResource ModernTextBox}"
+                                   Margin="0,0,12,0"/>
+                    
+                    <Button x:Name="btnBrowseLol" 
+                                  Content="Browse"
+                                  Grid.Column="1"
+                                  Height="36"
+                                  Width="100"
+                                  Click="btnBrowseLol_Click"
+                                  Style="{StaticResource SecondaryButton}"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

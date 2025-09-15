@@ -1,0 +1,82 @@
+<UserControl x:Class="AssetsManager.Views.ComparatorWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AssetsManager.Views"
+             xmlns:materialDesign="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:comparator="clr-namespace:AssetsManager.Views.Controls.Comparator"
+             mc:Ignorable="d"
+             FontFamily="Consolas, Courier New">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- CABECERA -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Padding="32,24">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <materialDesign:MaterialIcon Kind="Compare"
+                                             Height="54"
+                                             Width="54"
+                                             Margin="0,0,10,0"
+                                             VerticalAlignment="Center"
+                                             Foreground="{StaticResource AccentBrush}"
+                                             Grid.Column="0"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="COMPARATOR" 
+                               FontSize="26" 
+                               FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"
+                               Margin="0,2,0,0"/>
+                    <TextBlock Text="Manually compare JSON files or WAD files."
+                               FontSize="12" 
+                               Foreground="{StaticResource TextMuted}"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- CUERPO -->
+        <ScrollViewer Grid.Row="1" 
+                      Background="Transparent"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="32,24,32,0">
+            <StackPanel>
+                <!-- Header Card -->
+                <Border Style="{StaticResource SettingsCard}" Margin="0,0,0,15">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:MaterialIcon Kind="ToolboxOutline" 
+                                                   FontSize="20" 
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   Margin="0,0,12,0"
+                                                   VerticalAlignment="Center"/>
+                        <StackPanel>
+                            <TextBlock Text="Comparison Tools" 
+                                       FontSize="18" 
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="Select a tool to compare different types of assets" 
+                                       FontSize="12" 
+                                       Foreground="{StaticResource TextMuted}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <comparator:JsonComparisonControl x:Name="JsonComparisonControl" />
+                <comparator:WadComparisonControl x:Name="WadComparisonControl"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

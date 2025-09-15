@@ -147,6 +147,13 @@ namespace PBE_AssetsManager.Services.Core
         /// </summary>
         public async Task CheckForGeneralUpdatesAsync(bool silent = false)
         {
+            var (appUpdateAvailable, newVersion) = await _updateManager.IsNewVersionAvailableAsync();
+
+            if (appUpdateAvailable)
+            {
+                UpdatesFound?.Invoke($"Version {newVersion} is available!", newVersion);
+            }
+            
             if (_appSettings.SyncHashesWithCDTB)
             {
                 await _status.SyncHashesIfNeeds(_appSettings.SyncHashesWithCDTB, silent, () =>
@@ -161,12 +168,6 @@ namespace PBE_AssetsManager.Services.Core
             if (_appSettings.CheckJsonDataUpdates)
             {
                 await _jsonDataService.CheckJsonDataUpdatesAsync(silent, () => { UpdatesFound?.Invoke("JSON files have been updated!", null); });
-            }
-            var (appUpdateAvailable, newVersion) = await _updateManager.IsNewVersionAvailableAsync();
-
-            if (appUpdateAvailable)
-            {
-                UpdatesFound?.Invoke($"Version {newVersion} is available!", newVersion);
             }
         }
 

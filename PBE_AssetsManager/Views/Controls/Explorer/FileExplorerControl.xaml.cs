@@ -13,7 +13,6 @@ using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PBE_AssetsManager.Services.Comparator;
 using PBE_AssetsManager.Services.Hashes;
-using PBE_AssetsManager.Services;
 using PBE_AssetsManager.Services.Core;
 using PBE_AssetsManager.Services.Explorer;
 using PBE_AssetsManager.Utils;
@@ -263,7 +262,85 @@ namespace PBE_AssetsManager.Views.Controls.Explorer
             _searchTimer.Stop();
             string searchText = txtSearchExplorer.Text;
 
+            var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
+
             await WadSearchBoxService.FilterTreeAsync(RootNodes, searchText);
+
+            if (string.IsNullOrEmpty(searchText) && selectedNode != null)
+            {
+                // Use the dispatcher to give the UI time to update after the filter is cleared.
+                _ = Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    SelectAndFocusNode(selectedNode);
+                }), DispatcherPriority.ContextIdle);
+            }
+        }
+
+        private void SelectAndFocusNode(FileSystemNodeModel node)
+        {
+            var path = FindNodePath(RootNodes, node);
+            if (path == null) return;
+
+            var container = (ItemsControl)FileTreeView;
+            TreeViewItem itemContainer = null;
+
+            // Expand all parent nodes.
+            foreach (var parentNode in path)
+            {
+                if (parentNode == node) break;
+
+                itemContainer = (TreeViewItem)container.ItemContainerGenerator.ContainerFromItem(parentNode);
+                if (itemContainer == null)
+                {
+                    container.UpdateLayout(); // Force the container to be generated
+                    itemContainer = (TreeViewItem)container.ItemContainerGenerator.ContainerFromItem(parentNode);
+                }
+
+                if (itemContainer == null) return; // Could not create container
+
+                if (!itemContainer.IsExpanded)
+                {
+                    itemContainer.IsExpanded = true;
+                }
+                container = itemContainer;
+            }
+
+            // Select the final node.
+            itemContainer = (TreeViewItem)container.ItemContainerGenerator.ContainerFromItem(node);
+            if (itemContainer == null)
+            {
+                container.UpdateLayout();
+                itemContainer = (TreeViewItem)container.ItemContainerGenerator.ContainerFromItem(node);
+            }
+
+            if (itemContainer != null)
+            {
+                itemContainer.IsSelected = true;
+                itemContainer.BringIntoView();
+                itemContainer.Focus();
+            }
+        }
+
+        private List<FileSystemNodeModel> FindNodePath(IEnumerable<FileSystemNodeModel> nodes, FileSystemNodeModel nodeToFind)
+        {
+            foreach (var n in nodes)
+            {
+                if (n == nodeToFind)
+                {
+                    return new List<FileSystemNodeModel> { n };
+                }
+
+                if (n.Children != null)
+                {
+                    var path = FindNodePath(n.Children, nodeToFind);
+                    if (path != null)
+                    {
+                        path.Insert(0, n);
+                        return path;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

@@ -126,8 +126,8 @@
         <Setter Property="ItemContainerStyle" Value="{StaticResource ModernTreeViewItem}"/>
 
         <!-- Virtualization for performance with large item counts -->
-        <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
-        <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+        <!--<Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>-->
+        <!--<Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>-->
     </Style>
 
 </ResourceDictionary>

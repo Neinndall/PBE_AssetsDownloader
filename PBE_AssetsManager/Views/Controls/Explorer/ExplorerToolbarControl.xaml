@@ -6,45 +6,6 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="800">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <!-- Style for the search ToggleButton, specific to this control as it sets the icon content -->
-            <Style x:Key="SearchToggleStyle" TargetType="ToggleButton">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ToggleButton">
-                            <Border Background="Transparent" Padding="4">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="Content">
-                    <Setter.Value>
-                        <materialIcons:MaterialIcon Kind="Magnify" Width="18" Height="18"/>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
-                    </Trigger>
-                    <Trigger Property="IsChecked" Value="True">
-                        <Setter Property="Content">
-                            <Setter.Value>
-                                <materialIcons:MaterialIcon Kind="Close" Width="18" Height="18"/>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-        </ResourceDictionary>
-    </UserControl.Resources>
-
     <Grid>
         <!-- Action Buttons on the left -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">

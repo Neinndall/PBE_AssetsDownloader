@@ -61,7 +61,6 @@ namespace AssetsManager.Views.Controls.Explorer
             ExplorerPreviewService.Initialize(
                 ImagePreview,
                 WebView2Preview,
-                TextPreview,
                 PreviewPlaceholder,
                 SelectFileMessagePanel,
                 UnsupportedFileMessagePanel,

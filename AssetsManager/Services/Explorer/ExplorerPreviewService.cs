@@ -33,7 +33,6 @@ namespace AssetsManager.Services.Explorer
 
         private Image _imagePreview;
         private WebView2 _webView2Preview;
-        private TextBox _textPreview;
         private Panel _previewPlaceholder;
         private Panel _selectFileMessagePanel;
         private Panel _unsupportedFileMessagePanel;
@@ -56,11 +55,10 @@ namespace AssetsManager.Services.Explorer
         }
 
         // Method to initialize UI-dependent components
-        public void Initialize(Image imagePreview, WebView2 webView2Preview, TextBox textPreview, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
+        public void Initialize(Image imagePreview, WebView2 webView2Preview, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
         {
             _imagePreview = imagePreview;
             _webView2Preview = webView2Preview;
-            _textPreview = textPreview;
             _previewPlaceholder = placeholder;
             _selectFileMessagePanel = selectFileMessage;
             _unsupportedFileMessagePanel = unsupportedFileMessage;

@@ -23,8 +23,8 @@ namespace AssetsManager.Views.Controls.Explorer
     public partial class FileExplorerControl : UserControl
     {
         public event RoutedPropertyChangedEventHandler<object> FileSelected;
-        public event EventHandler<FileSystemNodeModel> FilePinned;
-        public event RoutedEventHandler ExplorerContextMenuOpening;
+
+        public FilePreviewerControl FilePreviewer { get; set; }
 
         public MenuItem PinMenuItem => (this.FindResource("ExplorerContextMenu") as ContextMenu)?.Items.OfType<MenuItem>().FirstOrDefault(m => m.Name == "PinMenuItem");
 
@@ -107,15 +107,18 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private void PinSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (FileTreeView.SelectedItem is FileSystemNodeModel selectedNode && selectedNode.Type != NodeType.RealDirectory && selectedNode.Type != NodeType.VirtualDirectory)
+            if (FileTreeView.SelectedItem is FileSystemNodeModel selectedNode)
             {
-                FilePinned?.Invoke(this, selectedNode);
+                FilePreviewer?.ViewModel.PinFile(selectedNode);
             }
         }
 
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
-            ExplorerContextMenuOpening?.Invoke(this, e);
+            if (PinMenuItem is not null && FileTreeView.SelectedItem is FileSystemNodeModel selectedNode)
+            {
+                PinMenuItem.IsEnabled = selectedNode.Type != NodeType.RealDirectory && selectedNode.Type != NodeType.VirtualDirectory;
+            }
         }
 
         private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)

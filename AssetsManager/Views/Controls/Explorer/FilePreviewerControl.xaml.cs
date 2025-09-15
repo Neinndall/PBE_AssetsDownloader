@@ -1,5 +1,5 @@
 using System;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,54 +20,23 @@ namespace AssetsManager.Views.Controls.Explorer
         public DirectoriesCreator DirectoriesCreator { get; set; }
         public ExplorerPreviewService ExplorerPreviewService { get; set; }
 
-        public ObservableCollection<PinnedFileViewModel> PinnedFiles { get; set; }
-
-        private PinnedFileViewModel _selectedFile;
-        public PinnedFileViewModel SelectedFile
-        {
-            get => _selectedFile;
-            set
-            {
-                if (_selectedFile != value)
-                {
-                    if (_selectedFile != null) _selectedFile.IsSelected = false;
-                    _selectedFile = value;
-                    if (_selectedFile != null) _selectedFile.IsSelected = true;
-                    _ = ShowPreviewAsync(_selectedFile?.Node);
-                }
-            }
-        }
+        public FilePreviewerViewModel ViewModel { get; set; }
 
         public FilePreviewerControl()
         {
             InitializeComponent();
-            this.DataContext = this;
-            PinnedFiles = new ObservableCollection<PinnedFileViewModel>();
+            ViewModel = new FilePreviewerViewModel();
+            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+            this.DataContext = ViewModel;
             this.Loaded += FilePreviewerControl_Loaded;
             this.Unloaded += FilePreviewerControl_Unloaded;
         }
 
-        public void PinFile(FileSystemNodeModel node)
+        private async void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (node == null || PinnedFiles.Any(x => x.Node == node)) return;
-
-            var newPinnedFile = new PinnedFileViewModel(node);
-            PinnedFiles.Add(newPinnedFile);
-            SelectedFile = newPinnedFile;
-        }
-
-        public void UnpinFile(PinnedFileViewModel fileToUnpin)
-        {
-            if (fileToUnpin == null) return;
-
-            int index = PinnedFiles.IndexOf(fileToUnpin);
-            if (index != -1)
+            if (e.PropertyName == nameof(FilePreviewerViewModel.SelectedFile))
             {
-                PinnedFiles.RemoveAt(index);
-                if (SelectedFile == fileToUnpin)
-                {
-                    SelectedFile = PinnedFiles.Count > 0 ? PinnedFiles[Math.Max(0, index - 1)] : null;
-                }
+                await ShowPreviewAsync(ViewModel.SelectedFile?.Node);
             }
         }
 
@@ -75,7 +44,7 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
             {
-                SelectedFile = vm;
+                ViewModel.SelectedFile = vm;
             }
         }
 
@@ -83,7 +52,7 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
             {
-                UnpinFile(vm);
+                ViewModel.UnpinFile(vm);
             }
         }
 
@@ -109,13 +78,13 @@ namespace AssetsManager.Views.Controls.Explorer
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
-            if (PinnedFiles.Count > 0 && SelectedFile == null)
+            if (ViewModel.PinnedFiles.Count > 0 && ViewModel.SelectedFile == null)
             {
-                SelectedFile = PinnedFiles.FirstOrDefault();
+                ViewModel.SelectedFile = ViewModel.PinnedFiles.FirstOrDefault();
                 return;
             }
 
-            if (PinnedFiles.Count > 0 && SelectedFile?.Node != node)
+            if (ViewModel.PinnedFiles.Count > 0 && ViewModel.SelectedFile?.Node != node)
             {
                 // A file is selected in the tree, but it's not the currently selected pinned tab.
                 // Do nothing to the previewer, preserving the pinned view.

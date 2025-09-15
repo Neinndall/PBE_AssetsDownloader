@@ -38,21 +38,7 @@ namespace AssetsManager.Views
             FilePreviewer.DirectoriesCreator = directoriesCreator;
             FilePreviewer.ExplorerPreviewService = explorerPreviewService;
 
-            FileExplorer.FilePinned += FileExplorer_FilePinned;
-            FileExplorer.ExplorerContextMenuOpening += FileExplorer_ExplorerContextMenuOpening;
-        }
-
-        private void FileExplorer_ExplorerContextMenuOpening(object sender, RoutedEventArgs e)
-        {
-            if (FileExplorer.PinMenuItem is not null && FileExplorer.FileTreeView.SelectedItem is FileSystemNodeModel selectedNode)
-            {
-                FileExplorer.PinMenuItem.IsEnabled = selectedNode.Type != NodeType.RealDirectory && selectedNode.Type != NodeType.VirtualDirectory;
-            }
-        }
-
-        private void FileExplorer_FilePinned(object sender, FileSystemNodeModel e)
-        {
-            FilePreviewer.PinFile(e);
+            FileExplorer.FilePreviewer = FilePreviewer; // Set the dependency
         }
 
         private async void FileExplorer_FileSelected(object sender, RoutedPropertyChangedEventArgs<object> e)

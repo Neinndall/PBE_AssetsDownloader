@@ -12,7 +12,7 @@
             <Button x:Name="CollapseAllButton" Style="{StaticResource TransparentIconButton}" ToolTip="Collapse All" Margin="5,0" Click="CollapseAllButton_Click">
                 <materialIcons:MaterialIcon Kind="ArrowCollapseAll" Width="18" Height="18"/>
             </Button>
-            <ToggleButton x:Name="SearchToggleButton" Style="{StaticResource SearchToggleStyle}" Margin="5,0"/>
+            <ToggleButton x:Name="SearchToggleButton" Style="{StaticResource SearchToggleStyle}" Margin="0,0,5,0"/>
 
             <!-- Search controls now appear next to the toggle button -->
             <Grid>

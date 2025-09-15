@@ -9,7 +9,7 @@
     <Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,6,0,0">
             <!-- Action Buttons on the left -->
-            <Button x:Name="CollapseAllButton" Style="{StaticResource TransparentIconButton}" ToolTip="Collapse All" Margin="5,0" Click="CollapseAllButton_Click">
+            <Button x:Name="CollapseToContainerButton" Style="{StaticResource TransparentIconButton}" ToolTip="Collapse to container" Margin="5,0" Click="CollapseToContainerButton_Click">
                 <materialIcons:MaterialIcon Kind="ArrowCollapseAll" Width="18" Height="18"/>
             </Button>
             <ToggleButton x:Name="SearchToggleButton" Style="{StaticResource SearchToggleStyle}" Margin="0,0,5,0"/>

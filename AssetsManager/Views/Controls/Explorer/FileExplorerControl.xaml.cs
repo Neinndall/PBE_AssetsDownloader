@@ -49,7 +49,7 @@ namespace AssetsManager.Views.Controls.Explorer
         private async void FileExplorerControl_Loaded(object sender, RoutedEventArgs e)
         {
             Toolbar.SearchTextChanged += Toolbar_SearchTextChanged;
-            Toolbar.CollapseAllClicked += Toolbar_CollapseAllClicked;
+            Toolbar.CollapseToContainerClicked += Toolbar_CollapseToContainerClicked;
 
 
             var settings = AppSettings.LoadSettings();
@@ -248,12 +248,43 @@ namespace AssetsManager.Views.Controls.Explorer
             _searchTimer.Start();
         }
 
-        private void Toolbar_CollapseAllClicked(object sender, RoutedEventArgs e)
+        private void Toolbar_CollapseToContainerClicked(object sender, RoutedEventArgs e)
         {
-            // This requires the FileSystemNodeModel to have an IsExpanded property
-            // that is two-way bound in the TreeView's ItemContainerStyle.
-            // For now, we just log that the feature is not fully implemented.
-            LogService?.LogWarning("Collapse All functionality is not yet fully implemented.");
+            var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
+            if (selectedNode == null) return;
+
+            var path = FindNodePath(RootNodes, selectedNode);
+            if (path == null) return;
+
+            FileSystemNodeModel containerNode = null;
+            for (int i = path.Count - 1; i >= 0; i--)
+            {
+                if (path[i].Type == NodeType.WadFile)
+                {
+                    containerNode = path[i];
+                    break;
+                }
+            }
+
+            if (containerNode != null)
+            {
+                containerNode.IsExpanded = false;
+
+                _ = Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    SelectAndFocusNode(containerNode, false);
+                }), DispatcherPriority.ContextIdle);
+            }
+        }
+
+        private void CollapseAll(FileSystemNodeModel node)
+        {
+            node.IsExpanded = false;
+            if (node.Children == null) return;
+            foreach (var child in node.Children)
+            {
+                CollapseAll(child);
+            }
         }
 
         private async void SearchTimer_Tick(object sender, EventArgs e)
@@ -275,7 +306,7 @@ namespace AssetsManager.Views.Controls.Explorer
             }
         }
 
-        private void SelectAndFocusNode(FileSystemNodeModel node)
+        private void SelectAndFocusNode(FileSystemNodeModel node, bool focusAndSelect = true)
         {
             var path = FindNodePath(RootNodes, node);
             if (path == null) return;
@@ -314,9 +345,12 @@ namespace AssetsManager.Views.Controls.Explorer
 
             if (itemContainer != null)
             {
-                itemContainer.IsSelected = true;
                 itemContainer.BringIntoView();
-                itemContainer.Focus();
+                if (focusAndSelect)
+                {
+                    itemContainer.IsSelected = true;
+                    itemContainer.Focus();
+                }
             }
         }
 

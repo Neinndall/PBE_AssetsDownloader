@@ -6,7 +6,7 @@ namespace AssetsManager.Views.Controls.Explorer
     public partial class ExplorerToolbarControl : UserControl
     {
         public event TextChangedEventHandler SearchTextChanged;
-        public event RoutedEventHandler CollapseAllClicked;
+        public event RoutedEventHandler CollapseToContainerClicked;
 
         public string SearchText => SearchTextBox.Text;
 
@@ -20,9 +20,9 @@ namespace AssetsManager.Views.Controls.Explorer
             SearchTextChanged?.Invoke(this, e);
         }
 
-        private void CollapseAllButton_Click(object sender, RoutedEventArgs e)
+        private void CollapseToContainerButton_Click(object sender, RoutedEventArgs e)
         {
-            CollapseAllClicked?.Invoke(this, e);
+            CollapseToContainerClicked?.Invoke(this, e);
         }
     }
 }

@@ -32,9 +32,33 @@
                                             VerticalAlignment="Center" 
                                             Margin="0,0,5,0"
                                             Kind="{Binding Converter={StaticResource PathToIconConverter}}"/>
-                <TextBlock Grid.Column="1" 
-                           Text="{Binding Name}" 
-                           VerticalAlignment="Center" />
+                
+                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasMatch}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasMatch}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                    <Run Text="{Binding PreMatch, Mode=OneWay}" /><Run Text="{Binding Match, Mode=OneWay}" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" /><Run Text="{Binding PostMatch, Mode=OneWay}" />
+                </TextBlock>
             </Grid>
         </HierarchicalDataTemplate>
     </UserControl.Resources>

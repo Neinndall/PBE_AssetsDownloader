@@ -41,6 +41,24 @@ namespace PBE_AssetsManager.Services.Explorer
 
                 node.IsVisible = selfMatches || childMatches;
 
+                if (selfMatches)
+                {
+                    var index = node.Name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase);
+                    var length = searchText.Length;
+
+                    node.PreMatch = node.Name.Substring(0, index);
+                    node.Match = node.Name.Substring(index, length);
+                    node.PostMatch = node.Name.Substring(index + length);
+                    node.HasMatch = true;
+                }
+                else
+                {
+                    node.HasMatch = false;
+                    node.PreMatch = null;
+                    node.Match = null;
+                    node.PostMatch = null;
+                }
+
                 if (node.IsVisible)
                 {
                     somethingVisibleInThisLevel = true;
@@ -55,6 +73,11 @@ namespace PBE_AssetsManager.Services.Explorer
             foreach (var node in nodes)
             {
                 node.IsVisible = isVisible;
+                node.HasMatch = false;
+                node.PreMatch = null;
+                node.Match = null;
+                node.PostMatch = null;
+
                 if (!isVisible)
                 {
                     node.IsExpanded = false;

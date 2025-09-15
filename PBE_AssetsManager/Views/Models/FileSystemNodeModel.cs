@@ -47,6 +47,62 @@ namespace PBE_AssetsManager.Views.Models
             }
         }
 
+        private string _preMatch;
+        public string PreMatch
+        {
+            get { return _preMatch; }
+            set
+            {
+                if (_preMatch != value)
+                {
+                    _preMatch = value;
+                    OnPropertyChanged(nameof(PreMatch));
+                }
+            }
+        }
+
+        private string _match;
+        public string Match
+        {
+            get { return _match; }
+            set
+            {
+                if (_match != value)
+                {
+                    _match = value;
+                    OnPropertyChanged(nameof(Match));
+                }
+            }
+        }
+
+        private string _postMatch;
+        public string PostMatch
+        {
+            get { return _postMatch; }
+            set
+            {
+                if (_postMatch != value)
+                {
+                    _postMatch = value;
+                    OnPropertyChanged(nameof(PostMatch));
+                }
+            }
+        }
+
+        private bool _hasMatch;
+        public bool HasMatch
+        {
+            get { return _hasMatch; }
+            set
+            {
+                if (_hasMatch != value)
+                {
+                    _hasMatch = value;
+                    OnPropertyChanged(nameof(HasMatch));
+                }
+            }
+        }
+
         // Constructor for real files/directories
         public FileSystemNodeModel(string path)
         {

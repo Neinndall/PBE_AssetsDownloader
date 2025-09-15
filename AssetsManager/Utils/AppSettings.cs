@@ -15,11 +15,11 @@ namespace AssetsManager.Utils
         public bool CreateBackUpOldHashes { get; set; }
         public bool OnlyCheckDifferences { get; set; }
         public bool CheckJsonDataUpdates { get; set; }
-
         public bool AssetTrackerTimer { get; set; }
         public bool SaveDiffHistory { get; set; }
         public bool BackgroundUpdates { get; set; }
         public bool CheckPbeStatus { get; set; }
+        
         public int UpdateCheckFrequency { get; set; }
         public int AssetTrackerFrequency { get; set; }
         public int PbeStatusFrequency { get; set; }
@@ -27,11 +27,12 @@ namespace AssetsManager.Utils
         public string NewHashesPath { get; set; }
         public string OldHashesPath { get; set; }
         public string LolDirectory { get; set; }
+        public string LastPbeStatusMessage { get; set; }
         public Dictionary<string, long> HashesSizes { get; set; }
 
-        // This will become redundant after migration
+        // Dictionary for File Watcher
         public Dictionary<string, DateTime> JsonDataModificationDates { get; set; }
-
+        
         // New structure for monitored files and directories
         public List<string> MonitoredJsonFiles { get; set; }
         public List<JsonDiffHistoryEntry> DiffHistory { get; set; }
@@ -130,6 +131,7 @@ namespace AssetsManager.Utils
                 NewHashesPath = null,
                 OldHashesPath = null,
                 LolDirectory = null,
+                LastPbeStatusMessage = null,
                 HashesSizes = new Dictionary<string, long>(),
                 JsonDataModificationDates = new Dictionary<string, DateTime>(),
                 MonitoredJsonFiles = new List<string>(),
@@ -162,6 +164,7 @@ namespace AssetsManager.Utils
             SaveDiffHistory = defaultSettings.SaveDiffHistory;
             BackgroundUpdates = defaultSettings.BackgroundUpdates;
             CheckPbeStatus = defaultSettings.CheckPbeStatus;
+            LastPbeStatusMessage = defaultSettings.LastPbeStatusMessage;
             UpdateCheckFrequency = defaultSettings.UpdateCheckFrequency;
             PbeStatusFrequency = defaultSettings.PbeStatusFrequency;
             JsonDataModificationDates = defaultSettings.JsonDataModificationDates;

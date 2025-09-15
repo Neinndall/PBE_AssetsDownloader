@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AssetsManager.Utils;
 using Newtonsoft.Json.Linq;
 
 namespace AssetsManager.Services.Core
@@ -13,7 +14,7 @@ namespace AssetsManager.Services.Core
     {
         private readonly HttpClient _httpClient;
         private readonly LogService _logService;
-        private string _lastStatusMessage = "";
+        private readonly AppSettings _appSettings;
         private const string PbeStatusUrl = "https://lol.secure.dyn.riotcdn.net/channels/public/x/status/pbe.json";
 
         // Dictionary to map common timezone abbreviations to their UTC offsets.
@@ -25,10 +26,11 @@ namespace AssetsManager.Services.Core
             // Add more as needed
         };
 
-        public PbeStatusService(LogService logService)
+        public PbeStatusService(LogService logService, AppSettings appSettings)
         {
             _httpClient = new HttpClient();
             _logService = logService;
+            _appSettings = appSettings;
         }
 
         public async Task<string> CheckPbeStatusAsync()
@@ -38,14 +40,16 @@ namespace AssetsManager.Services.Core
                 var response = await _httpClient.GetStringAsync(PbeStatusUrl);
                 string currentStatus = ExtractStatus(response);
 
-                if (!string.IsNullOrEmpty(currentStatus) && currentStatus != _lastStatusMessage)
+                if (!string.IsNullOrEmpty(currentStatus) && currentStatus != _appSettings.LastPbeStatusMessage)
                 {
-                    _lastStatusMessage = currentStatus;
+                    _appSettings.LastPbeStatusMessage = currentStatus;
+                    AppSettings.SaveSettings(_appSettings);
                     return $"PBE Status: {currentStatus}"; // Return the message
                 }
-                else if (string.IsNullOrEmpty(currentStatus) && !string.IsNullOrEmpty(_lastStatusMessage))
+                else if (string.IsNullOrEmpty(currentStatus) && !string.IsNullOrEmpty(_appSettings.LastPbeStatusMessage))
                 {
-                    _lastStatusMessage = "";
+                    _appSettings.LastPbeStatusMessage = "";
+                    AppSettings.SaveSettings(_appSettings);
                     return "PBE Status: Maintenance ended."; // Return the message
                 }
             }

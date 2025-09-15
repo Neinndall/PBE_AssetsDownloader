@@ -177,8 +177,11 @@ namespace AssetsManager.Services.Core
         /// Each individual check method is responsible for firing its own notification event.
         /// </summary>
         public async Task CheckForAllUpdatesAsync(bool silent = false)
-        {
+        {   
+            // Checkeo al arrancar de Json Updates, Hashes and New Version App
             await CheckForGeneralUpdatesAsync(silent);
+            
+            // Checkeo al arrancar de PbeStatus
             if (_appSettings.CheckPbeStatus)
             {
                 await CheckForPbeStatusAsync();

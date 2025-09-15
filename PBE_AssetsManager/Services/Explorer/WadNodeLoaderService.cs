@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LeagueToolkit.Core.Wad;
 
-namespace PBE_AssetsManager.Services.Comparator
+namespace PBE_AssetsManager.Services.Explorer
 {
     public class WadNodeLoaderService
     {

@@ -1,0 +1,142 @@
+<UserControl x:Class="AssetsManager.Views.Controls.Explorer.FileExplorerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:models="clr-namespace:AssetsManager.Views.Models"
+             xmlns:converters="clr-namespace:AssetsManager.Views.Converters"
+             xmlns:local="clr-namespace:AssetsManager.Views.Controls.Explorer"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="400">
+    <UserControl.Resources>
+        <converters:PathToIconConverter x:Key="PathToIconConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <ContextMenu x:Key="ExplorerContextMenu">
+            <MenuItem Header="Extract Selected" Click="ExtractSelected_Click">
+                <MenuItem.Icon>
+                    <materialIcons:MaterialIcon Kind="FileDownload"/>
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
+        <HierarchicalDataTemplate DataType="{x:Type models:FileSystemNodeModel}" ItemsSource="{Binding Children}">
+            <Grid Margin="5,2,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <materialIcons:MaterialIcon Grid.Column="0" 
+                                            Width="18" 
+                                            Height="18" 
+                                            VerticalAlignment="Center" 
+                                            Margin="0,0,5,0"
+                                            Kind="{Binding Converter={StaticResource PathToIconConverter}}"/>
+                
+                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" FontSize="14">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasMatch}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="14">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasMatch}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                    <Run Text="{Binding PreMatch, Mode=OneWay}" /><Run Text="{Binding Match, Mode=OneWay}" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" /><Run Text="{Binding PostMatch, Mode=OneWay}" />
+                </TextBlock>
+            </Grid>
+        </HierarchicalDataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <local:ExplorerToolbarControl x:Name="Toolbar" Grid.Row="0" Margin="5,0,5,0"/>
+
+        <Border Grid.Row="1" Height="1" Background="{StaticResource BorderColor}" Margin="5,5,5,5"/>
+
+        <Grid Grid.Row="2">
+            <TreeView x:Name="FileTreeView" 
+                      Margin="5,0,5,5" 
+                      ItemsSource="{Binding RootNodes}"
+                      SelectedItemChanged="FileTreeView_SelectedItemChanged"
+                      Style="{StaticResource ModernTreeView}">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem" BasedOn="{StaticResource ModernTreeViewItem}">
+                        <Setter Property="ContextMenu" Value="{StaticResource ExplorerContextMenu}"/>
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+            </TreeView>
+            <StackPanel x:Name="NoDirectoryMessage"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="10"
+                        Visibility="Collapsed">
+                <materialIcons:MaterialIcon Kind="FolderSearchOutline"
+                                            Width="48" Height="48"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{StaticResource TextMuted}"
+                                            Opacity="0.8"/>
+                <TextBlock Text="Select a LoL Directory"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+                <TextBlock Text="Choose the root folder where you installed League of Legends to browse its WAD files."
+                           TextWrapping="Wrap"
+                           FontSize="14"
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,8,0,0"
+                           Opacity="0.7"/>
+                <Button x:Name="SelectLolDirButton"
+                        Content="Select Directory"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="SelectLolDirButton_Click"
+                        Padding="16,0"
+                        Height="36"
+                        HorizontalAlignment="Center"
+                        Margin="0,20,0,0"
+                        ToolTip="Choose your League of Legends installation to browse its WAD files."/>
+            </StackPanel>
+            <StackPanel x:Name="LoadingIndicator"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed">
+                <ProgressBar IsIndeterminate="True" Width="100" Foreground="{StaticResource AccentBrush}" />
+                <TextBlock Text="Loading Files..."
+                           Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center"
+                           Margin="0,10,0,0" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

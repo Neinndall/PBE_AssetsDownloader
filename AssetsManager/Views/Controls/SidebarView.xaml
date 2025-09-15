@@ -1,0 +1,146 @@
+<UserControl x:Class="AssetsManager.Views.Controls.SidebarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:info="clr-namespace:AssetsManager.Info"
+             xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="730" d:DesignWidth="180"
+             Width="64">
+             
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+            <BeginStoryboard>
+                <Storyboard>
+                    <StaticResource ResourceKey="ExpandSidebar"/>
+                    <BooleanAnimationUsingKeyFrames Storyboard.TargetProperty="IsExpanded">
+                        <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="True"/>
+                    </BooleanAnimationUsingKeyFrames>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+            <BeginStoryboard>
+                <Storyboard>
+                    <StaticResource ResourceKey="CollapseSidebar"/>
+                    <BooleanAnimationUsingKeyFrames Storyboard.TargetProperty="IsExpanded">
+                        <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="False"/>
+                    </BooleanAnimationUsingKeyFrames>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers> 
+    
+    <Border Background="{StaticResource CardBackground}" 
+            BorderBrush="{StaticResource BorderColor}" 
+            BorderThickness="0,0,1,0" 
+            ClipToBounds="True">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" 
+                        VerticalAlignment="Top" 
+                        Margin="8,16,8,0">
+
+                <RadioButton x:Name="HomeButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Home" Margin="0,0,0,4" IsChecked="True" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="Home" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        
+                        <TextBlock Grid.Column="1" Text="Home" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton x:Name="ExportButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Export" Margin="2,0,0,4" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="Export" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Export" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton x:Name="ExplorerButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Explorer" Margin="2,0,0,4" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="FolderSearchOutline" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Explorer" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton x:Name="JsonDiffToolButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Comparator" Margin="2,0,0,4" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="Compare" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Comparator" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton x:Name="ModelsButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Models" Margin="2,0,0,4" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="CubeOutline" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Models" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton x:Name="MonitorButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Monitor" Margin="2,0,0,4" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="Radar" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Monitor" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton x:Name="SettingsButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Settings" Margin="0,0,0,4" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="Cog" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Settings" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton x:Name="HelpButton" Style="{StaticResource SidebarRadioButtonStyle}" Click="MenuButton_Click" Tag="Help" Margin="0,0,0,4" GroupName="SidebarNavigation">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialIcons:MaterialIcon Grid.Column="0" Kind="HelpCircleOutline" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Help" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" Margin="16,0,12,0" Style="{StaticResource SidebarMenuTextStyle}"/>
+                    </Grid>
+                </RadioButton>
+            </StackPanel>
+
+            <Border Grid.Row="1" Margin="8,0,8,8">
+                
+                <TextBlock Text="{x:Static info:ApplicationInfos.Version}" FontWeight="Medium" FontSize="10" Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" Style="{StaticResource SidebarMenuTextStyle}"/>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

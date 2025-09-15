@@ -48,7 +48,7 @@ Explore League of Legends 3D assets like never before.
 
 ### Installation
 
-1.  **Download the latest release:** Visit the [Releases page](https://github.com/Neinndall/PBE_AssetsManager/releases) (replace with your actual releases URL) and download the `PBE_AssetsManager.zip` file.
+1.  **Download the latest release:** Visit the [Releases page](https://github.com/Neinndall/PBE_AssetsManager/releases) and download the `PBE_AssetsManager.zip` file.
 2.  **Extract the contents:** Unzip the downloaded file to your desired location (e.g., `C:\PBE_AssetsManager`).
 3.  **Run the application:** Navigate to the extracted folder and run `PBE_AssetsManager.exe`.
 

@@ -7,16 +7,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="800">
     <Grid>
-        <!-- Action Buttons on the left -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,6,0,0">
+            <!-- Action Buttons on the left -->
             <Button x:Name="CollapseAllButton" Style="{StaticResource TransparentIconButton}" ToolTip="Collapse All" Margin="5,0" Click="CollapseAllButton_Click">
                 <materialIcons:MaterialIcon Kind="ArrowCollapseAll" Width="18" Height="18"/>
             </Button>
-        </StackPanel>
-
-        <!-- Search controls on the right -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <ToggleButton x:Name="SearchToggleButton" Style="{StaticResource SearchToggleStyle}" Margin="5,0"/>
+
+            <!-- Search controls now appear next to the toggle button -->
             <Grid>
                 <TextBox x:Name="SearchTextBox" 
                          Style="{StaticResource AnimatedSearchBoxStyle}" 

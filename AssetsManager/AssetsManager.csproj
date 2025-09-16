@@ -45,6 +45,7 @@
     <EmbeddedResource Include="Resources\JsonSyntaxHighlighting.xshd" />
     <EmbeddedResource Include="Resources\ManifestDownloader\ManifestDownloader.exe" />
     <EmbeddedResource Include="Themes\WebViewScrollbar.css" />
+    <EmbeddedResource Include="Themes\WebViewDarkTheme.css" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\**\*.dds" />

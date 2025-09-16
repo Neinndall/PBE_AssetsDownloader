@@ -7,6 +7,7 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              xmlns:converters="clr-namespace:AssetsManager.Views.Converters"
+             xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
         <UserControl.Resources>
@@ -94,7 +95,18 @@
                 </StackPanel>
             </StackPanel>
             <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
-            <TextBox x:Name="TextPreview" Visibility="Collapsed" IsReadOnly="true" Style="{StaticResource ModernTextBox}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+            <avalonedit:TextEditor x:Name="TextEditorPreview"
+                                   Visibility="Collapsed"
+                                   Background="Transparent"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   FontFamily="Consolas, 'Courier New', monospace"
+                                   FontSize="12"
+                                   ShowLineNumbers="True"
+                                   WordWrap="False"
+                                   HorizontalScrollBarVisibility="Auto"
+                                   VerticalScrollBarVisibility="Auto"
+                                   Padding="0"
+                                   Margin="-4,0,0,0"/>
             <wv2:WebView2 x:Name="WebView2Preview" Visibility="Collapsed"/>
         </Grid>
     </DockPanel>

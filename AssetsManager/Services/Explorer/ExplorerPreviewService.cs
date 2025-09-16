@@ -23,16 +23,21 @@ using AssetsManager.Views.Helpers;
 using AssetsManager.Services.Core;
 using AssetsManager.Services.Monitor;
 using System.Reflection;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using System.Xml;
 
 namespace AssetsManager.Services.Explorer
 {
     public class ExplorerPreviewService
     {
-        private enum Previewer { None, Image, WebView, Placeholder }
+        private enum Previewer { None, Image, WebView, AvalonEdit, Placeholder }
         private Previewer _activePreviewer = Previewer.None;
 
         private Image _imagePreview;
         private WebView2 _webView2Preview;
+        private TextEditor _textEditorPreview;
         private Panel _previewPlaceholder;
         private Panel _selectFileMessagePanel;
         private Panel _unsupportedFileMessagePanel;
@@ -42,8 +47,6 @@ namespace AssetsManager.Services.Explorer
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly HashResolverService _hashResolverService;
         private readonly JsBeautifierService _jsBeautifierService;
-
-        private string _customScrollbarCss;
 
         // Constructor for DI
         public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService, JsBeautifierService jsBeautifierService)
@@ -55,55 +58,22 @@ namespace AssetsManager.Services.Explorer
         }
 
         // Method to initialize UI-dependent components
-        public void Initialize(Image imagePreview, WebView2 webView2Preview, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
+        public void Initialize(Image imagePreview, WebView2 webView2Preview, TextEditor textEditor, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
         {
             _imagePreview = imagePreview;
             _webView2Preview = webView2Preview;
+            _textEditorPreview = textEditor;
             _previewPlaceholder = placeholder;
             _selectFileMessagePanel = selectFileMessage;
             _unsupportedFileMessagePanel = unsupportedFileMessage;
             _unsupportedFileTextBlock = unsupportedFileTextBlock;
         }
 
-        private string GetScrollbarCss()
-        {
-            if (_customScrollbarCss == null)
-            {
-                try
-                {
-                    var assembly = Assembly.GetExecutingAssembly();
-                    var resourceName = "AssetsManager.Themes.WebViewScrollbar.css";
-
-                    using (var stream = assembly.GetManifestResourceStream(resourceName))
-                    {
-                        if (stream == null)
-                        {
-                            _logService.LogWarning($"Embedded resource '{resourceName}' not found. Using default scrollbar style.");
-                            _customScrollbarCss = string.Empty;
-                        }
-                        else
-                        {
-                            using (var reader = new StreamReader(stream))
-                            {
-                                _customScrollbarCss = reader.ReadToEnd();
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logService.LogError(ex, "Failed to load embedded resource WebViewScrollbar.css.");
-                    _customScrollbarCss = string.Empty;
-                }
-            }
-            return _customScrollbarCss;
-        }
-
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
             if (node == null || node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory || node.Type == NodeType.WadFile)
             {
-                await ResetPreviewAsync(); // This will show _selectFileMessagePanel
+                await ResetPreviewAsync();
                 return;
             }
 
@@ -121,7 +91,7 @@ namespace AssetsManager.Services.Explorer
             catch (Exception ex)
             {
                 _logService.LogError(ex, $"Failed to preview file '{node.FullPath}'.");
-                await ShowUnsupportedPreviewAsync(node.Extension); // This will show _unsupportedFileMessagePanel
+                await ShowUnsupportedPreviewAsync(node.Extension);
             }
         }
 
@@ -179,50 +149,69 @@ namespace AssetsManager.Services.Explorer
             if (IsImageExtension(extension)) { await ShowImagePreviewAsync(data); }
             else if (IsTextureExtension(extension)) { await ShowTexturePreviewAsync(data); }
             else if (IsVectorImageExtension(extension)) { await ShowSvgPreviewAsync(data); }
-            else if (IsTextExtension(extension)) { await ShowTextPreviewAsync(data, extension); }
+            else if (IsJavaScriptExtension(extension)) { await ShowAvalonEditTextPreviewAsync(data, extension); }
+            else if (IsTextExtension(extension) || IsBinExtension(extension)) { await ShowAvalonEditTextPreviewAsync(data, extension); }
             else if (IsMediaExtension(extension)) { await ShowAudioVideoPreviewAsync(data, extension); }
-            else if (IsBinExtension(extension)) { await ShowBinPreviewAsync(data); }
             else { await ShowUnsupportedPreviewAsync(extension); }
         }
 
-        private async Task ShowBinPreviewAsync(byte[] data)
+        private async Task ShowAvalonEditTextPreviewAsync(byte[] data, string extension)
         {
+            SetPreviewer(Previewer.AvalonEdit);
             try
             {
-                string htmlContent = await Task.Run(async () =>
+                string textContent = string.Empty;
+
+                if (IsBinExtension(extension))
                 {
-                    try
+                    using var stream = new MemoryStream(data);
+                    var binTree = new BinTree(stream);
+                    var binDict = BinUtils.ConvertBinTreeToDictionary(binTree, _hashResolverService);
+                    textContent = await JsonDiffHelper.FormatJsonAsync(binDict);
+                }
+                else
+                {
+                    textContent = Encoding.UTF8.GetString(data);
+                    if (extension == ".js")
                     {
-                        using var stream = new MemoryStream(data);
-                        var binTree = new BinTree(stream);
-                        var binDict = BinUtils.ConvertBinTreeToDictionary(binTree, _hashResolverService);
-                        var formattedJson = await JsonDiffHelper.FormatJsonAsync(binDict);
-                        
-                        var escapedHtml = System.Net.WebUtility.HtmlEncode(formattedJson);
-                        var scrollbarCss = GetScrollbarCss();
-                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 12px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
+                        textContent = await _jsBeautifierService.BeautifyAsync(textContent);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _logService.LogError(ex, "Failed to deserialize .bin file.");
-                        return "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body { background-color: #252526; color: #f44747; font-family: Consolas; padding: 20px; }</style></head><body>Error: Could not deserialize .bin file. It may be corrupt or of an unsupported version.</body></html>";
+                        textContent = await JsonDiffHelper.FormatJsonAsync(textContent);
                     }
-                });
+                }
 
-                var tempFileName = "preview.html";
-                var tempFilePath = Path.Combine(_directoriesCreator.TempPreviewPath, tempFileName);
-                await File.WriteAllTextAsync(tempFilePath, htmlContent, Encoding.UTF8);
+                if (extension == ".json" || IsBinExtension(extension) || IsJavaScriptExtension(extension))
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var resourceName = "AssetsManager.Resources.JsonSyntaxHighlighting.xshd";
+                    using (var stream = assembly.GetManifestResourceStream(resourceName))
+                    {
+                        if (stream != null)
+                        {
+                            using (var reader = new XmlTextReader(stream))
+                            {
+                                _textEditorPreview.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                            }
+                        }
+                        else
+                        {
+                            _textEditorPreview.SyntaxHighlighting = null;
+                        }
+                    }
+                }
+                else
+                {
+                    _textEditorPreview.SyntaxHighlighting = null;
+                }
 
-                await _webView2Preview.EnsureCoreWebView2Async();
-                SetPreviewer(Previewer.WebView);
-                
-                var fileUrl = new Uri(tempFilePath).AbsoluteUri;
-                _webView2Preview.CoreWebView2.Navigate(fileUrl);
+                _textEditorPreview.Text = textContent;
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, "Failed to show .bin preview.");
-                await ShowUnsupportedPreviewAsync(".bin");
+                _logService.LogError(ex, $"Failed to show text preview for extension {extension}");
+                _textEditorPreview.Text = $"Error showing {extension} file.";
             }
         }
 
@@ -230,7 +219,6 @@ namespace AssetsManager.Services.Explorer
         {
             if (_activePreviewer == previewer) return;
 
-            // Solo ocultar WebView2 si cambiamos DESDE WebView a otro previewer
             if (_activePreviewer == Previewer.WebView && previewer != Previewer.WebView && _webView2Preview?.CoreWebView2 != null)
             {
                 _webView2Preview.Visibility = Visibility.Collapsed;
@@ -238,6 +226,7 @@ namespace AssetsManager.Services.Explorer
 
             _imagePreview.Visibility = previewer == Previewer.Image ? Visibility.Visible : Visibility.Collapsed;
             _webView2Preview.Visibility = previewer == Previewer.WebView ? Visibility.Visible : Visibility.Collapsed;
+            _textEditorPreview.Visibility = previewer == Previewer.AvalonEdit ? Visibility.Visible : Visibility.Collapsed;
             _previewPlaceholder.Visibility = previewer == Previewer.Placeholder ? Visibility.Visible : Visibility.Collapsed;
 
             _activePreviewer = previewer;
@@ -298,8 +287,7 @@ namespace AssetsManager.Services.Explorer
             try
             {
                 string svgContent = Encoding.UTF8.GetString(data);
-                var scrollbarCss = GetScrollbarCss();
-                var htmlContent = $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }} svg {{ width: 90%; height: 90%; object-fit: contain; }} {scrollbarCss}</style></head><body>{svgContent}</body></html>";
+                var htmlContent = $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }} svg {{ width: 90%; height: 90%; object-fit: contain; }}</style></head><body>{svgContent}</body></html>";
                 
                 await _webView2Preview.EnsureCoreWebView2Async();
                 SetPreviewer(Previewer.WebView);
@@ -309,54 +297,6 @@ namespace AssetsManager.Services.Explorer
             {
                 _logService.LogError(ex, "Failed to show SVG preview.");
                 await ShowUnsupportedPreviewAsync(".svg");
-            }
-        }
-
-        private async Task ShowTextPreviewAsync(byte[] data, string extension)
-        {
-            try
-            {
-                string htmlContent = await Task.Run(async () =>
-                {
-                    try
-                    {
-                        string textContent = Encoding.UTF8.GetString(data);
-                        string formattedText = textContent;
-
-                        if (extension == ".js")
-                        {
-                            formattedText = await _jsBeautifierService.BeautifyAsync(textContent);
-                        }
-                        else
-                        {
-                            formattedText = await JsonDiffHelper.FormatJsonAsync(textContent);
-                        }
-
-                        var escapedHtml = System.Net.WebUtility.HtmlEncode(formattedText);
-                        var scrollbarCss = GetScrollbarCss();
-                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #abb2bf; font-family: Consolas, 'Courier New', monospace; font-size: 12px; margin: 0; padding: 10px; }} pre {{ margin: 0; white-space: pre; line-height: 1.4; }} {scrollbarCss}</style></head><body><pre>{escapedHtml}</pre></body></html>";
-                    }
-                    catch (Exception ex)
-                    {
-                        _logService.LogError(ex, $"Failed to process text for extension {extension}");
-                        return $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: #252526; color: #f44747; font-family: Consolas; padding: 20px; }}</style></head><body>Error processing {extension} file.</body></html>";
-                    }
-                });
-
-                var tempFileName = "preview.html";
-                var tempFilePath = Path.Combine(_directoriesCreator.TempPreviewPath, tempFileName);
-                await File.WriteAllTextAsync(tempFilePath, htmlContent, Encoding.UTF8);
-
-                await _webView2Preview.EnsureCoreWebView2Async();
-                SetPreviewer(Previewer.WebView);
-                
-                var fileUrl = new Uri(tempFilePath).AbsoluteUri;
-                _webView2Preview.CoreWebView2.Navigate(fileUrl);
-            }
-            catch (Exception ex)
-            {
-                _logService.LogError(ex, $"Failed to show text preview for extension {extension}");
-                await ShowUnsupportedPreviewAsync(extension);
             }
         }
 
@@ -387,7 +327,7 @@ namespace AssetsManager.Services.Explorer
                 string tag = mimeType.StartsWith("video/") ? "video" : "audio";
                 string extraAttributes = tag == "video" ? "muted" : "";
                 var fileUrl = $"https://preview.assets/{tempFileName}";
-                var htmlContent = $"<body style=\"background-color: #252526; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{tag} controls autoplay {extraAttributes} style=\"width:{(tag == "audio" ? "300px" : "100%")}; height:{(tag == "audio" ? "80px" : "100%")};\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{tag}></body>";
+                var htmlContent = $"<body style=\"background-color: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{tag} controls autoplay {extraAttributes} style=\"width:{(tag == "audio" ? "300px" : "100%")}; height:{(tag == "audio" ? "80px" : "100%")};\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{tag}></body>";
 
                 await _webView2Preview.EnsureCoreWebView2Async();
                 _webView2Preview.CoreWebView2.NavigateToString(htmlContent);
@@ -424,7 +364,8 @@ namespace AssetsManager.Services.Explorer
         private bool IsImageExtension(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
         private bool IsVectorImageExtension(string extension) => extension == ".svg";
         private bool IsTextureExtension(string extension) => extension == ".tex" || extension == ".dds";
-        private bool IsTextExtension(string extension) => extension == ".json" || extension == ".lua" || extension == ".xml" || extension == ".yml" || extension == ".yaml" || extension == ".ini" || extension == ".log" || extension == ".txt" || extension == ".js";
+        private bool IsTextExtension(string extension) => extension == ".json" || extension == ".lua" || extension == ".xml" || extension == ".yml" || extension == ".yaml" || extension == ".ini" || extension == ".log" || extension == ".txt";
+        private bool IsJavaScriptExtension(string extension) => extension == ".js";
         private bool IsMediaExtension(string extension) => extension == ".ogg" || extension == ".wav" || extension == ".webm";
         private bool IsBinExtension(string extension) => extension == ".bin";
     }

@@ -48,7 +48,6 @@ namespace AssetsManager.Services.Explorer
         private readonly HashResolverService _hashResolverService;
         private readonly JsBeautifierService _jsBeautifierService;
 
-        // Constructor for DI
         public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService, JsBeautifierService jsBeautifierService)
         {
             _logService = logService;
@@ -57,7 +56,6 @@ namespace AssetsManager.Services.Explorer
             _jsBeautifierService = jsBeautifierService;
         }
 
-        // Method to initialize UI-dependent components
         public void Initialize(Image imagePreview, WebView2 webView2Preview, TextEditor textEditor, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
         {
             _imagePreview = imagePreview;
@@ -67,6 +65,30 @@ namespace AssetsManager.Services.Explorer
             _selectFileMessagePanel = selectFileMessage;
             _unsupportedFileMessagePanel = unsupportedFileMessage;
             _unsupportedFileTextBlock = unsupportedFileTextBlock;
+        }
+
+        public async Task ConfigureWebViewAfterInitializationAsync()
+        {
+            try
+            {
+                if (_webView2Preview?.CoreWebView2 == null)
+                {
+                    _logService.LogWarning("WebView2 not initialized when trying to configure");
+                    return;
+                }
+                
+                // Initial page background
+                await ClearWebViewAsync();
+                
+                // Additional configurations
+                _webView2Preview.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+                _webView2Preview.CoreWebView2.Settings.AreDevToolsEnabled = false;
+                _webView2Preview.CoreWebView2.Settings.IsSwipeNavigationEnabled = false;
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "Failed to configure WebView2 after initialization");
+            }
         }
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
@@ -97,10 +119,31 @@ namespace AssetsManager.Services.Explorer
 
         public async Task ResetPreviewAsync()
         {
+            // Limpiar WebView antes de cambiar al placeholder
+            await ClearWebViewAsync();
+            
             SetPreviewer(Previewer.Placeholder);
             _selectFileMessagePanel.Visibility = Visibility.Visible;
             _unsupportedFileMessagePanel.Visibility = Visibility.Collapsed;
-            await Task.CompletedTask;
+        }
+        
+        // Método centralizado para limpiar el WebView
+        private async Task ClearWebViewAsync()
+        {
+            try
+            {
+                if (_webView2Preview?.CoreWebView2 != null)
+                {
+                    var blankPage = @"<!DOCTYPE html><html><head><style>html, body {background-color: #252526 !important;margin: 0;padding: 0;height: 100vh;overflow: hidden;}</style></head><body></body></html>";
+                    _webView2Preview.CoreWebView2.NavigateToString(blankPage);
+                    // Pequeña pausa para que tome efecto
+                    await Task.Delay(50);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "Failed to clear WebView");
+            }
         }
 
         private async Task PreviewRealFile(FileSystemNodeModel node)
@@ -215,19 +258,48 @@ namespace AssetsManager.Services.Explorer
             }
         }
 
+        // Versión limpia de SetPreviewer
         private void SetPreviewer(Previewer previewer)
         {
             if (_activePreviewer == previewer) return;
 
-            if (_activePreviewer == Previewer.WebView && previewer != Previewer.WebView && _webView2Preview?.CoreWebView2 != null)
+            // Limpiar WebView cuando se sale de él o cuando se va a Placeholder
+            // if ((_activePreviewer == Previewer.WebView && previewer != Previewer.WebView) || 
+            //     previewer == Previewer.Placeholder)
+            // {
+            //     // Fire and forget - limpieza asíncrona sin bloquear
+            //     _ = ClearWebViewAsync();
+            // }
+
+            // Manejo especial para transiciones HACIA WebView
+            if (previewer == Previewer.WebView && _activePreviewer != Previewer.WebView)
             {
-                _webView2Preview.Visibility = Visibility.Collapsed;
+                // Fire and forget - limpieza asíncrona sin bloquear
+                _ = ClearWebViewAsync();
             }
 
-            _imagePreview.Visibility = previewer == Previewer.Image ? Visibility.Visible : Visibility.Collapsed;
-            _webView2Preview.Visibility = previewer == Previewer.WebView ? Visibility.Visible : Visibility.Collapsed;
-            _textEditorPreview.Visibility = previewer == Previewer.AvalonEdit ? Visibility.Visible : Visibility.Collapsed;
-            _previewPlaceholder.Visibility = previewer == Previewer.Placeholder ? Visibility.Visible : Visibility.Collapsed;
+            // Ocultar todos los controles primero
+            _imagePreview.Visibility = Visibility.Collapsed;
+            _webView2Preview.Visibility = Visibility.Collapsed;
+            _textEditorPreview.Visibility = Visibility.Collapsed;
+            _previewPlaceholder.Visibility = Visibility.Collapsed;
+
+            // Luego mostrar solo el que corresponde
+            switch (previewer)
+            {
+                case Previewer.Image:
+                    _imagePreview.Visibility = Visibility.Visible;
+                    break;
+                case Previewer.WebView:
+                    _webView2Preview.Visibility = Visibility.Visible;
+                    break;
+                case Previewer.AvalonEdit:
+                    _textEditorPreview.Visibility = Visibility.Visible;
+                    break;
+                case Previewer.Placeholder:
+                    _previewPlaceholder.Visibility = Visibility.Visible;
+                    break;
+            }
 
             _activePreviewer = previewer;
         }
@@ -284,13 +356,26 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ShowSvgPreviewAsync(byte[] data)
         {
+            if (_webView2Preview?.CoreWebView2 == null)
+            {
+                await ShowUnsupportedPreviewAsync(".svg");
+                return;
+            }
+
             try
             {
-                string svgContent = Encoding.UTF8.GetString(data);
-                var htmlContent = $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body {{ background-color: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }} svg {{ width: 90%; height: 90%; object-fit: contain; }}</style></head><body>{svgContent}</body></html>";
+                // Limpiar ANTES de establecer el previewer para evitar el anterior contenido
+                await ClearWebViewAsync();
                 
-                await _webView2Preview.EnsureCoreWebView2Async();
+                // Establecer el previewer (esto limpia automáticamente el WebView)
                 SetPreviewer(Previewer.WebView);
+                
+                // Pequeña pausa para permitir que la limpieza tome efecto
+                await Task.Delay(30);
+            
+                string svgContent = Encoding.UTF8.GetString(data);
+                var htmlContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""><style>html, body {{background-color: transparent !important;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;padding: 20px;box-sizing: border-box;overflow: hidden;}}svg {{width: 90%;height: 90%;object-fit: contain;}}</style></head><body>{svgContent}</body></html>";
+                
                 _webView2Preview.CoreWebView2.NavigateToString(htmlContent);
             }
             catch (Exception ex)
@@ -302,21 +387,45 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ShowAudioVideoPreviewAsync(byte[] data, string extension)
         {
-            SetPreviewer(Previewer.WebView);
+            if (_webView2Preview?.CoreWebView2 == null)
+            {
+                await ShowUnsupportedPreviewAsync(extension);
+                return;
+            }
+
             try
             {
+                // Limpiar ANTES de establecer el previewer para evitar el anterior contenido
+                await ClearWebViewAsync();
+                
+                // Establecer el previewer (esto limpia automáticamente el WebView)
+                SetPreviewer(Previewer.WebView);
+                
+                // Pequeña pausa para permitir que la limpieza tome efecto
+                await Task.Delay(30);
+
+                // Limpiar archivos temporales
                 await Task.Run(() =>
                 {
-                    foreach (var file in Directory.GetFiles(_directoriesCreator.TempPreviewPath))
+                    try
                     {
-                        File.Delete(file);
+                        foreach (var file in Directory.GetFiles(_directoriesCreator.TempPreviewPath))
+                        {
+                            File.Delete(file);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logService.LogError(ex, "Failed to clean temp files");
                     }
                 });
 
-                var tempFileName = "preview" + extension;
+                // Crear el nuevo archivo temporal
+                var tempFileName = $"preview_{DateTime.Now.Ticks}{extension}";
                 var tempFilePath = Path.Combine(_directoriesCreator.TempPreviewPath, tempFileName);
                 await File.WriteAllBytesAsync(tempFilePath, data);
 
+                // Preparar el contenido HTML
                 var mimeType = extension switch
                 {
                     ".ogg" => "audio/ogg",
@@ -324,12 +433,76 @@ namespace AssetsManager.Services.Explorer
                     ".webm" => "video/webm",
                     _ => "application/octet-stream"
                 };
+                
                 string tag = mimeType.StartsWith("video/") ? "video" : "audio";
                 string extraAttributes = tag == "video" ? "muted" : "";
                 var fileUrl = $"https://preview.assets/{tempFileName}";
-                var htmlContent = $"<body style=\"background-color: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;\"><{tag} controls autoplay {extraAttributes} style=\"width:{(tag == "audio" ? "300px" : "100%")}; height:{(tag == "audio" ? "80px" : "100%")};\"><source src=\"{fileUrl}\" type=\"{mimeType}\"></{tag}></body>";
+                
+                var htmlContent = $@"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset='UTF-8'>
+                        <style>
+                            html, body {{
+                                background-color: #252526 !important;
+                                margin: 0;
+                                padding: 0;
+                                height: 100vh;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                overflow: hidden;
+                            }}
+                            
+                            {tag} {{
+                                width: {(tag == "audio" ? "300px" : "auto")};
+                                height: {(tag == "audio" ? "80px" : "auto")};
+                                max-width: 100%;
+                                max-height: 100%;
+                                background-color: #252526;
+                                object-fit: contain;
+                                opacity: 0;
+                                transition: opacity 0.2s ease-out;
+                            }}
+                            
+                            {tag}.loaded {{
+                                opacity: 1;
+                            }}
+                        </style>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {{
+                                const mediaElement = document.getElementById('mediaElement');
+                                
+                                // Mostrar el elemento una vez que esté listo
+                                mediaElement.addEventListener('loadeddata', function() {{
+                                    mediaElement.classList.add('loaded');
+                                }});
+                                
+                                // Manejar errores
+                                mediaElement.addEventListener('error', function() {{
+                                    console.error('Error loading media');
+                                    mediaElement.style.opacity = '1'; // Mostrar aunque haya error
+                                }});
+                                
+                                // Fallback: mostrar después de 1 segundo si no hay evento loadeddata
+                                setTimeout(function() {{
+                                    if (!mediaElement.classList.contains('loaded')) {{
+                                        mediaElement.classList.add('loaded');
+                                    }}
+                                }}, 1000);
+                            }});
+                        </script>
+                    </head>
+                    <body>
+                        <{tag} id='mediaElement' controls autoplay {extraAttributes}>
+                            <source src='{fileUrl}' type='{mimeType}'>
+                            Your browser doesn't support this {(tag == "video" ? "video" : "audio")} format.
+                        </{tag}>
+                    </body>
+                    </html>";
 
-                await _webView2Preview.EnsureCoreWebView2Async();
+                // Navegar al contenido final
                 _webView2Preview.CoreWebView2.NavigateToString(htmlContent);
             }
             catch (Exception ex)
@@ -346,19 +519,6 @@ namespace AssetsManager.Services.Explorer
             _unsupportedFileMessagePanel.Visibility = Visibility.Visible;
             _unsupportedFileTextBlock.Text = $"Preview not available for '{extension}' files.";
             await Task.CompletedTask;
-        }
-
-        // Método auxiliar para limpiar WebView2 cuando sea necesario
-        public void CleanupWebView()
-        {
-            if (_webView2Preview?.CoreWebView2 != null)
-            {
-                try
-                {
-                    _webView2Preview.CoreWebView2.NavigateToString("about:blank");
-                }
-                catch { /* Ignorar errores de limpieza */ }
-            }
         }
 
         private bool IsImageExtension(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg";

@@ -58,6 +58,7 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async void FilePreviewerControl_Loaded(object sender, RoutedEventArgs e)
         {
+            // Initialize service with UI components
             ExplorerPreviewService.Initialize(
                 ImagePreview,
                 WebView2Preview,
@@ -68,12 +69,24 @@ namespace AssetsManager.Views.Controls.Explorer
                 UnsupportedFileMessage
             );
 
+            // Initialize WebView2 with custom environment
             await InitializeWebView2();
+            
+            // Configure WebView2 after initialization - esto ya maneja la limpieza
+            await ExplorerPreviewService.ConfigureWebViewAfterInitializationAsync();
         }
 
-        private void FilePreviewerControl_Unloaded(object sender, RoutedEventArgs e)
+        private async void FilePreviewerControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            WebView2Preview.CoreWebView2?.Navigate("about:blank");
+            try
+            {
+                // Usar el servicio para limpiar consistentemente
+                await ExplorerPreviewService.ResetPreviewAsync();
+            }
+            catch (Exception ex)
+            {
+                LogService.LogError(ex, "Error cleaning WebView2 on unload");
+            }
         }
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
@@ -100,7 +113,6 @@ namespace AssetsManager.Views.Controls.Explorer
             {
                 var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: DirectoriesCreator.WebView2DataPath);
                 await WebView2Preview.EnsureCoreWebView2Async(environment);
-                WebView2Preview.DefaultBackgroundColor = System.Drawing.Color.Transparent;
 
                 WebView2Preview.CoreWebView2.SetVirtualHostNameToFolderMapping(
                     "preview.assets",

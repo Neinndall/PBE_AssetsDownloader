@@ -34,6 +34,7 @@ namespace AssetsManager.Services.Explorer
     {
         private enum Previewer { None, Image, WebView, AvalonEdit, Placeholder }
         private Previewer _activePreviewer = Previewer.None;
+        private FileSystemNodeModel _currentlyDisplayedNode;
 
         private Image _imagePreview;
         private WebView2 _webView2Preview;
@@ -93,6 +94,13 @@ namespace AssetsManager.Services.Explorer
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
+            
+            if (_currentlyDisplayedNode == node) 
+            {                                    
+                return;                          
+            }                                    
+            _currentlyDisplayedNode = node;      
+
             if (node == null || node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory || node.Type == NodeType.WadFile)
             {
                 await ResetPreviewAsync();
@@ -119,10 +127,12 @@ namespace AssetsManager.Services.Explorer
 
         public async Task ResetPreviewAsync()
         {
+            _currentlyDisplayedNode = null;
+
             // Limpiar WebView antes de cambiar al placeholder
             await ClearWebViewAsync();
             
-            SetPreviewer(Previewer.Placeholder);
+            await SetPreviewer(Previewer.Placeholder);
             _selectFileMessagePanel.Visibility = Visibility.Visible;
             _unsupportedFileMessagePanel.Visibility = Visibility.Collapsed;
         }
@@ -200,7 +210,7 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ShowAvalonEditTextPreviewAsync(byte[] data, string extension)
         {
-            SetPreviewer(Previewer.AvalonEdit);
+            await SetPreviewer(Previewer.AvalonEdit);
             try
             {
                 string textContent = string.Empty;
@@ -259,32 +269,20 @@ namespace AssetsManager.Services.Explorer
         }
 
         // Versión limpia de SetPreviewer
-        private void SetPreviewer(Previewer previewer)
+        private async Task SetPreviewer(Previewer previewer)
         {
             if (_activePreviewer == previewer) return;
 
-            // Limpiar WebView cuando se sale de él o cuando se va a Placeholder
-            // if ((_activePreviewer == Previewer.WebView && previewer != Previewer.WebView) || 
-            //     previewer == Previewer.Placeholder)
-            // {
-            //     // Fire and forget - limpieza asíncrona sin bloquear
-            //     _ = ClearWebViewAsync();
-            // }
-
-            // Manejo especial para transiciones HACIA WebView
-            if (previewer == Previewer.WebView && _activePreviewer != Previewer.WebView)
+            if (previewer == Previewer.WebView)
             {
-                // Fire and forget - limpieza asíncrona sin bloquear
-                _ = ClearWebViewAsync();
+                await ClearWebViewAsync();
             }
 
-            // Ocultar todos los controles primero
             _imagePreview.Visibility = Visibility.Collapsed;
             _webView2Preview.Visibility = Visibility.Collapsed;
             _textEditorPreview.Visibility = Visibility.Collapsed;
             _previewPlaceholder.Visibility = Visibility.Collapsed;
 
-            // Luego mostrar solo el que corresponde
             switch (previewer)
             {
                 case Previewer.Image:
@@ -306,7 +304,7 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ShowImagePreviewAsync(byte[] data)
         {
-            SetPreviewer(Previewer.Image);
+            await SetPreviewer(Previewer.Image);
             var bitmap = await Task.Run(() =>
             {
                 using var stream = new MemoryStream(data);
@@ -323,7 +321,7 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ShowTexturePreviewAsync(byte[] data)
         {
-            SetPreviewer(Previewer.Image);
+            await SetPreviewer(Previewer.Image);
             var bitmapSource = await Task.Run(() =>
             {
                 using var stream = new MemoryStream(data);
@@ -364,14 +362,7 @@ namespace AssetsManager.Services.Explorer
 
             try
             {
-                // Limpiar ANTES de establecer el previewer para evitar el anterior contenido
-                await ClearWebViewAsync();
-                
-                // Establecer el previewer (esto limpia automáticamente el WebView)
-                SetPreviewer(Previewer.WebView);
-                
-                // Pequeña pausa para permitir que la limpieza tome efecto
-                await Task.Delay(30);
+                await SetPreviewer(Previewer.WebView);
             
                 string svgContent = Encoding.UTF8.GetString(data);
                 var htmlContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""><style>html, body {{background-color: transparent !important;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;padding: 20px;box-sizing: border-box;overflow: hidden;}}svg {{width: 90%;height: 90%;object-fit: contain;}}</style></head><body>{svgContent}</body></html>";
@@ -395,14 +386,7 @@ namespace AssetsManager.Services.Explorer
 
             try
             {
-                // Limpiar ANTES de establecer el previewer para evitar el anterior contenido
-                await ClearWebViewAsync();
-                
-                // Establecer el previewer (esto limpia automáticamente el WebView)
-                SetPreviewer(Previewer.WebView);
-                
-                // Pequeña pausa para permitir que la limpieza tome efecto
-                await Task.Delay(30);
+                await SetPreviewer(Previewer.WebView);
 
                 // Limpiar archivos temporales
                 await Task.Run(() =>
@@ -514,11 +498,10 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ShowUnsupportedPreviewAsync(string extension)
         {
-            SetPreviewer(Previewer.Placeholder);
+            await SetPreviewer(Previewer.Placeholder);
             _selectFileMessagePanel.Visibility = Visibility.Collapsed;
             _unsupportedFileMessagePanel.Visibility = Visibility.Visible;
             _unsupportedFileTextBlock.Text = $"Preview not available for '{extension}' files.";
-            await Task.CompletedTask;
         }
 
         private bool IsImageExtension(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg";

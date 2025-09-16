@@ -33,11 +33,20 @@ namespace AssetsManager.Views.Models
 
         public void PinFile(FileSystemNodeModel node)
         {
-            if (node == null || PinnedFiles.Any(x => x.Node == node)) return;
+            if (node == null) return;
 
-            var newPinnedFile = new PinnedFileViewModel(node);
-            PinnedFiles.Add(newPinnedFile);
-            SelectedFile = newPinnedFile;
+            var existingPin = PinnedFiles.FirstOrDefault(p => p.Node == node);
+
+            if (existingPin != null)
+            {
+                SelectedFile = existingPin;
+            }
+            else
+            {
+                var newPinnedFile = new PinnedFileViewModel(node);
+                PinnedFiles.Add(newPinnedFile);
+                SelectedFile = newPinnedFile;
+            }
         }
 
         public void UnpinFile(PinnedFileViewModel fileToUnpin)

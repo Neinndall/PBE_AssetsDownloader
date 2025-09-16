@@ -151,30 +151,18 @@ namespace AssetsManager
             DispatcherUnhandledException += (sender, args) =>
             {
                 var ex = args.Exception;
-                logService.LogError("An unhandled UI exception occurred. See application_errors.log for details.");
-                logService.LogCritical(ex, "Unhandled UI Exception");
+                logService.LogError(ex, "An unhandled UI exception occurred. See application_errors.log for details.");
 
-                customMessageBoxService.ShowError(
-                    "Error",
-                    "A critical error occurred in the UI. Please check the logs for details.",
-                    null,
-                    CustomMessageBoxIcon.Error
-                );
+                customMessageBoxService.ShowError("Error", "A critical error occurred in the UI. Please check the logs for details.", null);
                 args.Handled = true;
             };
 
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
             {
                 var ex = args.ExceptionObject as Exception;
-                logService.LogError("An unhandled non-UI exception occurred. See application_errors.log for details.");
-                logService.LogCritical(ex, "Unhandled Non-UI Exception");
+                logService.LogError(ex, "An unhandled non-UI exception occurred. See application_errors.log for details.");
 
-                customMessageBoxService.ShowError(
-                    "Error",
-                    "A critical error occurred in a background process. Please check the logs for details.",
-                    null,
-                    CustomMessageBoxIcon.Error
-                );
+                customMessageBoxService.ShowError("Error", "A critical error occurred in a background process. Please check the logs for details.", null);
             };
         }
     }

@@ -21,6 +21,7 @@ namespace AssetsManager.Views.Controls.Explorer
         public ExplorerPreviewService ExplorerPreviewService { get; set; }
 
         public FilePreviewerViewModel ViewModel { get; set; }
+        private bool _isLoaded = false;
 
         public FilePreviewerControl()
         {
@@ -36,7 +37,19 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             if (e.PropertyName == nameof(FilePreviewerViewModel.SelectedFile))
             {
+                await HandleSelectedFileChangedAsync();
+            }
+        }
+
+        private async Task HandleSelectedFileChangedAsync()
+        {
+            try
+            {
                 await ShowPreviewAsync(ViewModel.SelectedFile?.Node);
+            }
+            catch (Exception ex)
+            {
+                LogService.LogError(ex, "Error handling selected file change");
             }
         }
 
@@ -58,22 +71,28 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async void FilePreviewerControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Initialize service with UI components
-            ExplorerPreviewService.Initialize(
-                ImagePreview,
-                WebView2Preview,
-                TextEditorPreview,
-                PreviewPlaceholder,
-                SelectFileMessagePanel,
-                UnsupportedFileMessagePanel,
-                UnsupportedFileMessage
-            );
+            if (_isLoaded) return;
 
-            // Initialize WebView2 with custom environment
-            await InitializeWebView2();
-            
-            // Configure WebView2 after initialization - esto ya maneja la limpieza
-            await ExplorerPreviewService.ConfigureWebViewAfterInitializationAsync();
+            try
+            {
+                ExplorerPreviewService.Initialize(
+                    ImagePreview,
+                    WebView2Preview,
+                    TextEditorPreview,
+                    PreviewPlaceholder,
+                    SelectFileMessagePanel,
+                    UnsupportedFileMessagePanel,
+                    UnsupportedFileMessage
+                );
+
+                await InitializeWebView2();
+                await ExplorerPreviewService.ConfigureWebViewAfterInitializationAsync();
+                _isLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                LogService.LogError(ex, "Error loading FilePreviewerControl");
+            }
         }
 
         private async void FilePreviewerControl_Unloaded(object sender, RoutedEventArgs e)
@@ -91,16 +110,12 @@ namespace AssetsManager.Views.Controls.Explorer
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
-            if (ViewModel.PinnedFiles.Count > 0 && ViewModel.SelectedFile == null)
+            if (ViewModel.PinnedFiles.Any() && (ViewModel.SelectedFile == null || ViewModel.SelectedFile.Node != node))
             {
-                ViewModel.SelectedFile = ViewModel.PinnedFiles.FirstOrDefault();
-                return;
-            }
-
-            if (ViewModel.PinnedFiles.Count > 0 && ViewModel.SelectedFile?.Node != node)
-            {
-                // A file is selected in the tree, but it's not the currently selected pinned tab.
-                // Do nothing to the previewer, preserving the pinned view.
+                if (ViewModel.SelectedFile == null)
+                {
+                    ViewModel.SelectedFile = ViewModel.PinnedFiles.FirstOrDefault();
+                }
                 return;
             }
 

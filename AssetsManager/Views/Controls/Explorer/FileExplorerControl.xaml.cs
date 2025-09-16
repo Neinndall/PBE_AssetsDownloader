@@ -55,7 +55,6 @@ namespace AssetsManager.Views.Controls.Explorer
             Toolbar.SearchTextChanged += Toolbar_SearchTextChanged;
             Toolbar.CollapseToContainerClicked += Toolbar_CollapseToContainerClicked;
 
-
             var settings = AppSettings.LoadSettings();
             if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
             {

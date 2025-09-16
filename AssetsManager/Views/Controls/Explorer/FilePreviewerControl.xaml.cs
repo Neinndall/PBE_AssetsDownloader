@@ -53,11 +53,12 @@ namespace AssetsManager.Views.Controls.Explorer
             }
         }
 
-        private void Tab_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void Tab_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
             {
                 ViewModel.SelectedFile = vm;
+                await HandleSelectedFileChangedAsync();
             }
         }
 
@@ -110,15 +111,6 @@ namespace AssetsManager.Views.Controls.Explorer
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
-            if (ViewModel.PinnedFiles.Any() && (ViewModel.SelectedFile == null || ViewModel.SelectedFile.Node != node))
-            {
-                if (ViewModel.SelectedFile == null)
-                {
-                    ViewModel.SelectedFile = ViewModel.PinnedFiles.FirstOrDefault();
-                }
-                return;
-            }
-
             await ExplorerPreviewService.ShowPreviewAsync(node);
         }
 

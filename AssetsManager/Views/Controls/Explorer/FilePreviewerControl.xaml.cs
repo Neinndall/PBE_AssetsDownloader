@@ -111,7 +111,20 @@ namespace AssetsManager.Views.Controls.Explorer
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
-            await ExplorerPreviewService.ShowPreviewAsync(node);
+            var existingPin = ViewModel.PinnedFiles.FirstOrDefault(p => p.Node == node);
+
+            if (existingPin != null)
+            {
+                ViewModel.SelectedFile = existingPin;
+            }
+            else
+            {
+                ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+                ViewModel.SelectedFile = null;
+                ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+                await ExplorerPreviewService.ShowPreviewAsync(node);
+            }
         }
 
         private async Task InitializeWebView2()

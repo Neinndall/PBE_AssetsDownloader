@@ -361,12 +361,12 @@ namespace AssetsManager.Services.Explorer
             }
         }
 
-        private bool IsImageExtension(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif";
+        private bool IsImageExtension(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg";
         private bool IsVectorImageExtension(string extension) => extension == ".svg";
         private bool IsTextureExtension(string extension) => extension == ".tex" || extension == ".dds";
-        private bool IsTextExtension(string extension) => extension == ".json" || extension == ".lua" || extension == ".xml" || extension == ".yml" || extension == ".yaml" || extension == ".ini" || extension == ".log" || extension == ".txt";
+        private bool IsTextExtension(string extension) => extension == ".json" || extension == ".xml" || extension == ".yml" || extension == ".yaml" || extension == ".ini" || extension == ".log" || extension == ".txt";
         private bool IsJavaScriptExtension(string extension) => extension == ".js";
-        private bool IsMediaExtension(string extension) => extension == ".ogg" || extension == ".wav" || extension == ".webm";
+        private bool IsMediaExtension(string extension) => extension == ".ogg" || extension == ".webm";
         private bool IsBinExtension(string extension) => extension == ".bin";
     }
 }

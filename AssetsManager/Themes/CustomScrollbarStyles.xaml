@@ -97,8 +97,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <RepeatButton Grid.Column="0" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineLeftCommand}" Content="M 6 0 L 0 6 L 6 12 Z"/>
-            <Track x:Name="PART_Track" Grid.Column="1" IsDirectionReversed="false">
+            <RepeatButton Grid.Column="0" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineLeftCommand}" Content="M 4 0 L 0 4 L 4 8 Z" Margin="2,0,0,0"/>
+            <Track x:Name="PART_Track" Grid.Column="1" IsDirectionReversed="false" Margin="2,0">
                 <Track.DecreaseRepeatButton>
                     <RepeatButton Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.PageLeftCommand}"/>
                 </Track.DecreaseRepeatButton>
@@ -109,7 +109,7 @@
                     <RepeatButton Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.PageRightCommand}"/>
                 </Track.IncreaseRepeatButton>
             </Track>
-            <RepeatButton Grid.Column="2" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineRightCommand}" Content="M 0 0 L 6 6 L 0 12 Z"/>
+            <RepeatButton Grid.Column="2" Style="{StaticResource ScrollBarButton}" Command="{x:Static ScrollBar.LineRightCommand}" Content="M 0 0 L 4 4 L 0 8 Z" Margin="0,0,2,0"/>
         </Grid>
     </ControlTemplate>
 

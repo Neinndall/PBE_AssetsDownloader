@@ -54,7 +54,6 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             Toolbar.SearchTextChanged += Toolbar_SearchTextChanged;
             Toolbar.CollapseToContainerClicked += Toolbar_CollapseToContainerClicked;
-            Toolbar.FileExplorerControl = this;
 
             var settings = AppSettings.LoadSettings();
             if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
@@ -320,21 +319,33 @@ namespace AssetsManager.Views.Controls.Explorer
             _searchTimer.Stop();
             string searchText = Toolbar.SearchText;
 
-            var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
-
-            await WadSearchBoxService.FilterTreeAsync(RootNodes, searchText);
-
-            if (string.IsNullOrEmpty(searchText) && selectedNode != null)
+            if (string.IsNullOrEmpty(searchText))
             {
-                // Use the dispatcher to give the UI time to update after the filter is cleared.
-                _ = Dispatcher.BeginInvoke(new Action(() =>
+                await WadSearchBoxService.FilterTreeAsync(RootNodes, string.Empty);
+                var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
+                if (selectedNode != null)
                 {
-                    SelectAndFocusNode(selectedNode);
-                }), DispatcherPriority.ContextIdle);
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        SelectAndFocusNode(selectedNode);
+                    }), DispatcherPriority.ContextIdle);
+                }
+                return;
+            }
+
+            if (searchText.Contains("/"))
+            {
+                // This is a Go To path, execute it directly.
+                await ExpandToPath(searchText);
+            }
+            else
+            {
+                // This is a normal filter.
+                await WadSearchBoxService.FilterTreeAsync(RootNodes, searchText);
             }
         }
 
-        private void SelectAndFocusNode(FileSystemNodeModel node, bool focusAndSelect = true)
+        private void SelectAndFocusNode(FileSystemNodeModel node, bool focusNode = true)
         {
             var path = FindNodePath(RootNodes, node);
             if (path == null) return;
@@ -374,10 +385,10 @@ namespace AssetsManager.Views.Controls.Explorer
             if (itemContainer != null)
             {
                 itemContainer.BringIntoView();
-                if (focusAndSelect)
+                itemContainer.IsSelected = true; // Always select the item.
+                if (focusNode)
                 {
-                    itemContainer.IsSelected = true;
-                    itemContainer.Focus();
+                    itemContainer.Focus(); // Only set focus if requested.
                 }
             }
         }
@@ -411,24 +422,16 @@ namespace AssetsManager.Views.Controls.Explorer
 
             string[] pathComponents = path.Split('/');
 
-            LoadingIndicator.Visibility = Visibility.Visible;
-
             var targetNode = await FindNodeByPathSuffixAsync(RootNodes, pathComponents);
-
-            LoadingIndicator.Visibility = Visibility.Collapsed;
 
             if (targetNode != null)
             {
                 _ = Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    SelectAndFocusNode(targetNode, true);
+                    SelectAndFocusNode(targetNode, false); // Pass false to prevent focus stealing
                 }), DispatcherPriority.ContextIdle);
             }
-            else
-            {
-                string message = $"Could not find any item matching the path: '{path}'";
-                CustomMessageBoxService.ShowWarning("Path Not Found", message, Window.GetWindow(this));
-            }
+            // On failure, do nothing, per user request for a silent/fluent experience.
         }
 
         private async Task<FileSystemNodeModel> FindNodeByPathSuffixAsync(IEnumerable<FileSystemNodeModel> nodes, string[] pathSuffix)
@@ -436,7 +439,12 @@ namespace AssetsManager.Views.Controls.Explorer
             foreach (var node in nodes)
             {
                 // Check if the current node is the start of a potential match.
-                if (node.Name.Equals(pathSuffix[0], StringComparison.OrdinalIgnoreCase))
+                bool isFirstComponentLast = pathSuffix.Length == 1;
+                bool isMatch = isFirstComponentLast
+                    ? node.Name.StartsWith(pathSuffix[0], StringComparison.OrdinalIgnoreCase)
+                    : node.Name.Equals(pathSuffix[0], StringComparison.OrdinalIgnoreCase);
+
+                if (isMatch)
                 {
                     FileSystemNodeModel potentialMatch = node;
                     bool match = true;
@@ -453,7 +461,13 @@ namespace AssetsManager.Views.Controls.Explorer
                             }
                         }
 
-                        var nextNode = potentialMatch.Children.FirstOrDefault(c => c.Name.Equals(pathSuffix[i], StringComparison.OrdinalIgnoreCase));
+                        bool isLastComponentInLoop = (i == pathSuffix.Length - 1);
+                        var currentComponent = pathSuffix[i];
+                        
+                        var nextNode = isLastComponentInLoop
+                            ? potentialMatch.Children.FirstOrDefault(c => c.Name.StartsWith(currentComponent, StringComparison.OrdinalIgnoreCase))
+                            : potentialMatch.Children.FirstOrDefault(c => c.Name.Equals(currentComponent, StringComparison.OrdinalIgnoreCase));
+
                         if (nextNode != null)
                         {
                             potentialMatch = nextNode;

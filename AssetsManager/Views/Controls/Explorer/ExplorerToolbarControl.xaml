@@ -12,44 +12,15 @@
             <Button x:Name="CollapseToContainerButton" Style="{StaticResource TransparentIconButton}" ToolTip="Collapse to container" Margin="5,0" Click="CollapseToContainerButton_Click">
                 <materialIcons:MaterialIcon Kind="ArrowCollapseAll" Width="18" Height="18"/>
             </Button>
-            <ToggleButton x:Name="SearchToggleButton" Style="{StaticResource SearchToggleStyle}" Margin="0,0,5,0"/>
+            <ToggleButton x:Name="SearchToggleButton" 
+                          Style="{StaticResource SearchToggleStyle}" 
+                          Margin="0,0,5,0"/>
 
             <!-- Search controls now appear next to the toggle button -->
-            <Grid>
-                <TextBox x:Name="SearchTextBox" 
-                         Style="{StaticResource AnimatedSearchBoxStyle}" 
-                         Tag="{Binding IsChecked, ElementName=SearchToggleButton}"
-                         TextChanged="SearchTextBox_TextChanged"/>
-                <Button x:Name="GoToButton" 
-                        Style="{StaticResource TransparentIconButton}" 
-                        ToolTip="Go to path"
-                        Click="GoToButton_Click"
-                        Margin="5,0,0,0"
-                        HorizontalAlignment="Right"
-                        Visibility="Collapsed">
-                    <materialIcons:MaterialIcon Kind="SubdirectoryArrowRight" Width="18" Height="18"/>
-                </Button>
-                <TextBlock Text="Filter..." 
-                           Foreground="{StaticResource TextMuted}"
-                           VerticalAlignment="Center"
-                           Margin="12,0,0,0"
-                           IsHitTestVisible="False">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding Text, ElementName=SearchTextBox}" Value=""/>
-                                        <Condition Binding="{Binding IsChecked, ElementName=SearchToggleButton}" Value="True"/>
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </MultiDataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </Grid>
+            <TextBox x:Name="SearchTextBox" 
+                     Style="{StaticResource AnimatedSearchBoxStyle}" 
+                     Tag="{Binding IsChecked, ElementName=SearchToggleButton}"
+                     TextChanged="SearchTextBox_TextChanged"/>
         </StackPanel>
     </Grid>
 </UserControl>

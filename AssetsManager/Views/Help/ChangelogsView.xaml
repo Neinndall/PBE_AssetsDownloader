@@ -42,17 +42,6 @@
                                                         <Setter Property="FontSize" Value="14" />
                                                         <Setter Property="FontWeight" Value="SemiBold" />
                                                         <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Title}" Value="MAJOR UPDATE">
-                                                                <Setter Property="FontSize" Value="16" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Title}" Value="MEDIUM UPDATE">
-                                                                <Setter Property="FontSize" Value="16" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Title}" Value="HOTFIX UPDATE">
-                                                                <Setter Property="FontSize" Value="16" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
@@ -61,11 +50,11 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Grid>
-                                                        <!-- Subheading TextBlock -->
-                                                        <TextBlock Text="{Binding Text}"
-                                                                   FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimary}" Margin="10,8,0,4">
+                                                        <!-- Subheading -->
+                                                        <TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimary}" Margin="10,8,0,4">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="{Binding Text}"/>
                                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding IsSubheading}" Value="True">
@@ -76,14 +65,32 @@
                                                             </TextBlock.Style>
                                                         </TextBlock>
 
-                                                        <!-- Item TextBlock -->
+                                                        <!-- Description -->
+                                                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="10,2,0,2">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="{Binding Text}"/>
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsDescription}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+
+                                                        <!-- Item with Bullet -->
                                                         <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource TextSecondary}">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
                                                                     <Setter Property="Margin" Value="20,2,0,2"/>
+                                                                    <Setter Property="Visibility" Value="Visible"/>
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding IsSubheading}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsDescription}" Value="True">
                                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                                         </DataTrigger>
                                                                         <DataTrigger Binding="{Binding IndentationLevel}" Value="2">

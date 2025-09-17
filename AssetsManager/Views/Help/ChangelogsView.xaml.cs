@@ -16,6 +16,7 @@ namespace AssetsManager.Views.Help
     {
         public string Text { get; set; }
         public bool IsSubheading { get; set; }
+        public bool IsDescription { get; set; }
         public int IndentationLevel { get; set; }
     }
 
@@ -99,21 +100,37 @@ namespace AssetsManager.Views.Help
 
                 if (!line.StartsWith(" ") && !line.StartsWith("\t") && !trimmedLine.StartsWith("*") && !trimmedLine.StartsWith("-"))
                 {
-                    currentGroup = new ChangeGroup { Title = trimmedLine };
-                    string titleLower = trimmedLine.ToLower();
-                    if (titleLower.Contains("new features")) { currentGroup.Icon = MaterialIconKind.Star; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFC107"); }
-                    else if (titleLower.Contains("improvements")) { currentGroup.Icon = MaterialIconKind.ArrowUpBoldCircle; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#4CAF50"); }
-                    else if (titleLower.Contains("bug fixes")) { currentGroup.Icon = MaterialIconKind.Bug; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#F44336"); }
-                    else if (titleLower.Contains("changes")) { currentGroup.Icon = MaterialIconKind.Pencil; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#2196F3"); }
-                    else { currentGroup.Icon = MaterialIconKind.Info; currentGroup.IconColor = (SolidColorBrush)Application.Current.FindResource("TextMuted"); }
-                    currentVersion.Groups.Add(currentGroup);
+                    if (trimmedLine.Split(' ').Length <= 3)
+                    {
+                        currentGroup = new ChangeGroup { Title = trimmedLine };
+                        string titleLower = trimmedLine.ToLower();
+                        if (titleLower.Contains("major update")) { currentGroup.Icon = MaterialIconKind.AlertDecagram; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#F44336"); }
+                        else if (titleLower.Contains("medium update")) { currentGroup.Icon = MaterialIconKind.ArrowUpCircleOutline; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#2196F3"); }
+                        else if (titleLower.Contains("hotfix update")) { currentGroup.Icon = MaterialIconKind.Wrench; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#2196F3"); }
+                        else if (titleLower.Contains("app name")) { currentGroup.Icon = MaterialIconKind.Label; currentGroup.IconColor = (SolidColorBrush)Application.Current.FindResource("TextMuted"); }
+                        else if (titleLower.Contains("new features")) { currentGroup.Icon = MaterialIconKind.Star; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFC107"); }
+                        else if (titleLower.Contains("improvements")) { currentGroup.Icon = MaterialIconKind.ArrowUpBoldCircle; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#4CAF50"); }
+                        else if (titleLower.Contains("bug fixes")) { currentGroup.Icon = MaterialIconKind.Bug; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#F44336"); }
+                        else if (titleLower.Contains("changes")) { currentGroup.Icon = MaterialIconKind.Pencil; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#2196F3"); }
+                        else if (titleLower.Contains("notes")) { currentGroup.Icon = MaterialIconKind.Notebook; currentGroup.IconColor = (SolidColorBrush)Application.Current.FindResource("TextMuted"); }
+                        else { currentGroup.Icon = MaterialIconKind.Info; currentGroup.IconColor = (SolidColorBrush)Application.Current.FindResource("TextMuted"); }
+                        currentVersion.Groups.Add(currentGroup);
+                    }
+                    else
+                    {
+                        if (currentGroup != null)
+                        {
+                            var item = new ChangeItem { IsDescription = true, Text = trimmedLine, IndentationLevel = 1 };
+                            currentGroup.Changes.Add(item);
+                        }
+                    }
                 }
                 else if (currentGroup != null)
                 {
                     var indentation = line.Length - line.TrimStart().Length;
                     var item = new ChangeItem
                     {
-                        IndentationLevel = indentation / 4 // Assuming 4 spaces per indent level
+                        IndentationLevel = indentation / 4
                     };
 
                     if (trimmedLine.StartsWith("-"))
@@ -123,14 +140,14 @@ namespace AssetsManager.Views.Help
                     }
                     else if (trimmedLine.StartsWith("*"))
                     {
-                        item.IsSubheading = false;
+                        item.IsDescription = false;
                         item.Text = trimmedLine.Substring(1).Trim();
                     }
                     else
                     {
-                        item.IsSubheading = false;
+                        item.IsDescription = true;
                         item.Text = trimmedLine;
-                        item.IndentationLevel = 1; // Descriptions under a title
+                        item.IndentationLevel = 1;
                     }
                     currentGroup.Changes.Add(item);
                 }

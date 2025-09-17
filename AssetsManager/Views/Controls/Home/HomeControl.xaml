@@ -25,8 +25,8 @@
                     <!-- Textos -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Top">
                         <TextBlock Text="New Hash Directory" 
-                                           FontWeight="Medium"
-                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           FontSize="15"
                                            Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Select the directory containing new hash files" 
                                            FontSize="12" 
@@ -71,9 +71,9 @@
                                                                  Foreground="{StaticResource AccentOrange}"/>
                     <!-- Textos -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                        <TextBlock Text="Old Hashes Directory" 
-                                                   FontWeight="Medium"
-                                                   FontSize="14"
+                        <TextBlock Text="Old Hash Directory" 
+                                                   FontWeight="SemiBold"
+                                                   FontSize="15"
                                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Select the directory containing old hash files" 
                                                    FontSize="12" 
@@ -118,8 +118,8 @@
 
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="Actions" 
-                                   FontSize="14" 
-                                   FontWeight="Medium"
+                                   FontSize="15" 
+                                   FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Start the asset download process" 
                                    FontSize="12" 

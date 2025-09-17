@@ -20,7 +20,7 @@
                                                  Foreground="{StaticResource AccentBrush}"/>
                     <StackPanel>
                         <TextBlock Text="WADs Comparator" 
-                                   FontSize="18" 
+                                   FontSize="15" 
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Compare WAD files to identify differences" 
@@ -46,8 +46,8 @@
                                                              Foreground="{StaticResource AccentGreen}"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                                     <TextBlock Text="New Directory" 
-                                               FontWeight="Medium"
-                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               FontSize="15"
                                                Foreground="{StaticResource TextPrimary}"/>
                                     <TextBlock Text="Select the new directory or folder" 
                                                FontSize="12" 
@@ -90,8 +90,8 @@
                                                              Foreground="{StaticResource AccentOrange}"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                                     <TextBlock Text="Old Directory" 
-                                               FontWeight="Medium"
-                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               FontSize="15"
                                                Foreground="{StaticResource TextPrimary}"/>
                                     <TextBlock Text="Select the old directory or folder" 
                                                FontSize="12" 
@@ -139,8 +139,8 @@
                                                              Foreground="{StaticResource AccentGreen}"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                                     <TextBlock Text="New WAD File" 
-                                               FontWeight="Medium"
-                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               FontSize="15"
                                                Foreground="{StaticResource TextPrimary}"/>
                                     <TextBlock Text="Select the new WAD file to compare" 
                                                FontSize="12" 
@@ -183,8 +183,8 @@
                                                              Foreground="{StaticResource AccentOrange}"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                                     <TextBlock Text="Old WAD File" 
-                                               FontWeight="Medium"
-                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               FontSize="15"
                                                Foreground="{StaticResource TextPrimary}"/>
                                     <TextBlock Text="Select the old WAD file to compare" 
                                                FontSize="12" 
@@ -231,8 +231,8 @@
 
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="Actions" 
-                                   FontWeight="Medium"
-                                   FontSize="14"
+                                   FontSize="15" 
+                                   FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Compare WAD files or load previous results" 
                                    FontSize="12" 

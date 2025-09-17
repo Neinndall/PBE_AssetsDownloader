@@ -39,8 +39,8 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="Fetch Versions"
-                                     FontSize="14"
-                                     FontWeight="Medium"
+                                     FontSize="15"
+                                     FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Fetch manifests and download specific client versions."
                                      TextWrapping="Wrap"
@@ -78,8 +78,8 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="Locales"
-                                     FontSize="14"
-                                     FontWeight="Medium"
+                                     FontSize="15"
+                                     FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Select the locales for both 'Get League-Client' and 'Get LoL-Game-Client' actions."
                                      TextWrapping="Wrap"
@@ -113,8 +113,8 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="League Client Versions" 
-                                     FontSize="14" 
-                                     FontWeight="Medium"
+                                     FontSize="15" 
+                                     FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Versions of the League of Legends client" 
                                      FontSize="12" 
@@ -200,8 +200,8 @@
                                                    VerticalAlignment="Center"/>
                     <StackPanel>
                         <TextBlock Text="LoL Game Client Versions" 
-                                     FontSize="14" 
-                                     FontWeight="Medium"
+                                     FontSize="15" 
+                                     FontWeight="SemiBold"
                                      Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Versions of the LoL game client" 
                                      FontSize="12" 

@@ -27,8 +27,8 @@
                 <!-- Textos -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                     <TextBlock Text="Differences Folder" 
-                               FontWeight="Medium"
-                               FontSize="14"
+                               FontWeight="SemiBold"
+                               FontSize="15"
                                Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Select the directory containing differences files" 
                                FontSize="12" 
@@ -77,8 +77,8 @@
                 <!-- Contenido alineado -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                     <TextBlock Text="Download Target Folder" 
-                               FontWeight="Medium"
-                               FontSize="14"
+                               FontWeight="SemiBold"
+                               FontSize="15"
                                Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Select the directory where assets will be downloaded" 
                                FontSize="12" 
@@ -125,8 +125,8 @@
 
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="Actions" 
-                               FontSize="14" 
-                               FontWeight="Medium"
+                               FontSize="15" 
+                               FontWeight="SemiBold"
                                Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Preview or download assets" 
                                FontSize="12" 

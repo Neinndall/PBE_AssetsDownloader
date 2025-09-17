@@ -20,7 +20,7 @@
                                                  Foreground="{StaticResource AccentBrush}"/>
                     <StackPanel>
                         <TextBlock Text="Manual JSON Comparison" 
-                                   FontSize="18" 
+                                   FontSize="15" 
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Select two JSON files to compare" 
@@ -44,8 +44,8 @@
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Top">
                         <TextBlock Text="New File" 
-                                   FontWeight="Medium"
-                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   FontSize="15"
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Select the new JSON file to compare" 
                                    FontSize="12" 
@@ -88,8 +88,8 @@
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Top">
                         <TextBlock Text="Old File" 
-                                   FontWeight="Medium"
-                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   FontSize="15"
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Select the old JSON file to compare" 
                                    FontSize="12" 
@@ -132,8 +132,8 @@
 
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="Actions" 
-                                   FontWeight="Medium"
-                                   FontSize="14"
+                                   FontSize="15" 
+                                   FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimary}"/>
                         <TextBlock Text="Compare the two selected files" 
                                    FontSize="12" 

@@ -19,8 +19,8 @@
                                              Foreground="{StaticResource AccentBrush}"/>
                 <StackPanel>
                     <TextBlock Text="Filter Configuration" 
-                               FontSize="14" 
-                               FontWeight="Medium"
+                               FontSize="15" 
+                               FontWeight="SemiBold"
                                Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Choose which asset types to include" 
                                FontSize="12" 

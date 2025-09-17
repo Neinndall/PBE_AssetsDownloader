@@ -20,6 +20,15 @@
                          Style="{StaticResource AnimatedSearchBoxStyle}" 
                          Tag="{Binding IsChecked, ElementName=SearchToggleButton}"
                          TextChanged="SearchTextBox_TextChanged"/>
+                <Button x:Name="GoToButton" 
+                        Style="{StaticResource TransparentIconButton}" 
+                        ToolTip="Go to path"
+                        Click="GoToButton_Click"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Right"
+                        Visibility="Collapsed">
+                    <materialIcons:MaterialIcon Kind="SubdirectoryArrowRight" Width="18" Height="18"/>
+                </Button>
                 <TextBlock Text="Filter..." 
                            Foreground="{StaticResource TextMuted}"
                            VerticalAlignment="Center"

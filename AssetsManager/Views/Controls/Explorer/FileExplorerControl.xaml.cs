@@ -54,6 +54,7 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             Toolbar.SearchTextChanged += Toolbar_SearchTextChanged;
             Toolbar.CollapseToContainerClicked += Toolbar_CollapseToContainerClicked;
+            Toolbar.FileExplorerControl = this;
 
             var settings = AppSettings.LoadSettings();
             if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
@@ -397,6 +398,90 @@ namespace AssetsManager.Views.Controls.Explorer
                     {
                         path.Insert(0, n);
                         return path;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public async Task ExpandToPath(string path)
+        {
+            path = path.Replace("\\", "/").Trim('/'); // Normalize and remove leading/trailing slashes
+            if (string.IsNullOrEmpty(path)) return;
+
+            string[] pathComponents = path.Split('/');
+
+            LoadingIndicator.Visibility = Visibility.Visible;
+
+            var targetNode = await FindNodeByPathSuffixAsync(RootNodes, pathComponents);
+
+            LoadingIndicator.Visibility = Visibility.Collapsed;
+
+            if (targetNode != null)
+            {
+                _ = Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    SelectAndFocusNode(targetNode, true);
+                }), DispatcherPriority.ContextIdle);
+            }
+            else
+            {
+                string message = $"Could not find any item matching the path: '{path}'";
+                CustomMessageBoxService.ShowWarning("Path Not Found", message, Window.GetWindow(this));
+            }
+        }
+
+        private async Task<FileSystemNodeModel> FindNodeByPathSuffixAsync(IEnumerable<FileSystemNodeModel> nodes, string[] pathSuffix)
+        {
+            foreach (var node in nodes)
+            {
+                // Check if the current node is the start of a potential match.
+                if (node.Name.Equals(pathSuffix[0], StringComparison.OrdinalIgnoreCase))
+                {
+                    FileSystemNodeModel potentialMatch = node;
+                    bool match = true;
+
+                    // Look ahead to see if the rest of the path matches.
+                    for (int i = 1; i < pathSuffix.Length; i++)
+                    {
+                        // Ensure children are loaded before checking them.
+                        if (potentialMatch.Type == NodeType.WadFile || potentialMatch.Type == NodeType.RealDirectory || potentialMatch.Type == NodeType.VirtualDirectory)
+                        {
+                            if (potentialMatch.Children.Count == 0 || (potentialMatch.Children.Count == 1 && potentialMatch.Children[0].Name == "Loading..."))
+                            {
+                                await LoadAllChildren(potentialMatch);
+                            }
+                        }
+
+                        var nextNode = potentialMatch.Children.FirstOrDefault(c => c.Name.Equals(pathSuffix[i], StringComparison.OrdinalIgnoreCase));
+                        if (nextNode != null)
+                        {
+                            potentialMatch = nextNode;
+                        }
+                        else
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+
+                    if (match)
+                    {
+                        return potentialMatch; // Found the full suffix path.
+                    }
+                }
+
+                // ALWAYS try to search deeper, regardless of the check above.
+                if (node.Type == NodeType.WadFile || node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory)
+                {
+                    if (node.Children.Count == 0 || (node.Children.Count == 1 && node.Children[0].Name == "Loading..."))
+                    {
+                        await LoadAllChildren(node);
+                    }
+                    var foundInChild = await FindNodeByPathSuffixAsync(node.Children, pathSuffix);
+                    if (foundInChild != null)
+                    {
+                        return foundInChild; // Found it in a descendant.
                     }
                 }
             }

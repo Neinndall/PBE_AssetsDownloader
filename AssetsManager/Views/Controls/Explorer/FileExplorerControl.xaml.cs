@@ -319,29 +319,27 @@ namespace AssetsManager.Views.Controls.Explorer
             _searchTimer.Stop();
             string searchText = Toolbar.SearchText;
 
-            if (string.IsNullOrEmpty(searchText))
+            var nodeToSelect = await WadSearchBoxService.PerformSearchAsync(searchText, RootNodes, LoadAllChildren);
+
+            if (nodeToSelect != null)
             {
-                await WadSearchBoxService.FilterTreeAsync(RootNodes, string.Empty);
+                _ = Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    SelectAndFocusNode(nodeToSelect, false); // Pass false to prevent focus stealing
+                }), DispatcherPriority.ContextIdle);
+            }
+            else
+            {
+                // If service returns null, it was a filter operation or an empty search.
+                // The service already handled the filtering, so we just need to restore selection if possible.
                 var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
-                if (selectedNode != null)
+                if (selectedNode != null && string.IsNullOrEmpty(searchText))
                 {
                     _ = Dispatcher.BeginInvoke(new Action(() =>
                     {
                         SelectAndFocusNode(selectedNode);
                     }), DispatcherPriority.ContextIdle);
                 }
-                return;
-            }
-
-            if (searchText.Contains("/"))
-            {
-                // This is a Go To path, execute it directly.
-                await ExpandToPath(searchText);
-            }
-            else
-            {
-                // This is a normal filter.
-                await WadSearchBoxService.FilterTreeAsync(RootNodes, searchText);
             }
         }
 
@@ -367,6 +365,8 @@ namespace AssetsManager.Views.Controls.Explorer
 
                 if (itemContainer == null) return; // Could not create container
 
+                // Force expansion on both the model and the UI item to be safe.
+                parentNode.IsExpanded = true;
                 if (!itemContainer.IsExpanded)
                 {
                     itemContainer.IsExpanded = true;
@@ -409,93 +409,6 @@ namespace AssetsManager.Views.Controls.Explorer
                     {
                         path.Insert(0, n);
                         return path;
-                    }
-                }
-            }
-            return null;
-        }
-
-        public async Task ExpandToPath(string path)
-        {
-            path = path.Replace("\\", "/").Trim('/'); // Normalize and remove leading/trailing slashes
-            if (string.IsNullOrEmpty(path)) return;
-
-            string[] pathComponents = path.Split('/');
-
-            var targetNode = await FindNodeByPathSuffixAsync(RootNodes, pathComponents);
-
-            if (targetNode != null)
-            {
-                _ = Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    SelectAndFocusNode(targetNode, false); // Pass false to prevent focus stealing
-                }), DispatcherPriority.ContextIdle);
-            }
-            // On failure, do nothing, per user request for a silent/fluent experience.
-        }
-
-        private async Task<FileSystemNodeModel> FindNodeByPathSuffixAsync(IEnumerable<FileSystemNodeModel> nodes, string[] pathSuffix)
-        {
-            foreach (var node in nodes)
-            {
-                // Check if the current node is the start of a potential match.
-                bool isFirstComponentLast = pathSuffix.Length == 1;
-                bool isMatch = isFirstComponentLast
-                    ? node.Name.StartsWith(pathSuffix[0], StringComparison.OrdinalIgnoreCase)
-                    : node.Name.Equals(pathSuffix[0], StringComparison.OrdinalIgnoreCase);
-
-                if (isMatch)
-                {
-                    FileSystemNodeModel potentialMatch = node;
-                    bool match = true;
-
-                    // Look ahead to see if the rest of the path matches.
-                    for (int i = 1; i < pathSuffix.Length; i++)
-                    {
-                        // Ensure children are loaded before checking them.
-                        if (potentialMatch.Type == NodeType.WadFile || potentialMatch.Type == NodeType.RealDirectory || potentialMatch.Type == NodeType.VirtualDirectory)
-                        {
-                            if (potentialMatch.Children.Count == 0 || (potentialMatch.Children.Count == 1 && potentialMatch.Children[0].Name == "Loading..."))
-                            {
-                                await LoadAllChildren(potentialMatch);
-                            }
-                        }
-
-                        bool isLastComponentInLoop = (i == pathSuffix.Length - 1);
-                        var currentComponent = pathSuffix[i];
-                        
-                        var nextNode = isLastComponentInLoop
-                            ? potentialMatch.Children.FirstOrDefault(c => c.Name.StartsWith(currentComponent, StringComparison.OrdinalIgnoreCase))
-                            : potentialMatch.Children.FirstOrDefault(c => c.Name.Equals(currentComponent, StringComparison.OrdinalIgnoreCase));
-
-                        if (nextNode != null)
-                        {
-                            potentialMatch = nextNode;
-                        }
-                        else
-                        {
-                            match = false;
-                            break;
-                        }
-                    }
-
-                    if (match)
-                    {
-                        return potentialMatch; // Found the full suffix path.
-                    }
-                }
-
-                // ALWAYS try to search deeper, regardless of the check above.
-                if (node.Type == NodeType.WadFile || node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory)
-                {
-                    if (node.Children.Count == 0 || (node.Children.Count == 1 && node.Children[0].Name == "Loading..."))
-                    {
-                        await LoadAllChildren(node);
-                    }
-                    var foundInChild = await FindNodeByPathSuffixAsync(node.Children, pathSuffix);
-                    if (foundInChild != null)
-                    {
-                        return foundInChild; // Found it in a descendant.
                     }
                 }
             }

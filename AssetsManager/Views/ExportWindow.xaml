@@ -85,9 +85,8 @@
                     </StackPanel>
                 </Border>
 
-                <export:DirectoryConfigControl x:Name="DirectoryConfig"/>
                 <export:FilterConfigControl x:Name="FilterConfig"/>
-                <export:ExportActionsControl x:Name="ExportActions"/>
+                <export:DirectoryConfigControl x:Name="DirectoryConfig"/>
 
             </StackPanel>
         </ScrollViewer>

@@ -61,7 +61,7 @@
             </Grid>
 
             <!-- Download Target Folder -->
-            <Grid Margin="0,0,0,0">
+            <Grid Margin="0,0,0,24">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -108,6 +108,49 @@
                             Click="BtnBrowseDownloadTargetPath_Click"
                             ToolTip="Browse for download target folder"/>
                 </Grid>
+            </Grid>
+            
+            <!-- Actions -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
+                                             FontSize="20" 
+                                             Foreground="{StaticResource AccentBrush}"
+                                             Margin="0,0,12,0"
+                                             VerticalAlignment="Top"/>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Actions" 
+                               FontSize="14" 
+                               FontWeight="Medium"
+                               Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock Text="Preview or download assets" 
+                               FontSize="12" 
+                               Foreground="{StaticResource TextMuted}"
+                               Margin="0,2,0,12"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="btnPreviewAssets" 
+                                Content="🔍 Preview Assets" 
+                                Height="36"
+                                Width="160"
+                                Margin="0,0,16,0"
+                                Style="{StaticResource ModernButton}"
+                                Click="btnPreviewAssets_Click"
+                                ToolTip="Preview selected assets before download"/>
+
+                        <Button x:Name="BtnDownloadSelectedAssets" 
+                                Content="⬇️ Download Assets" 
+                                Height="36"
+                                Width="160"
+                                Style="{StaticResource ModernButton}"
+                                Click="BtnDownloadSelectedAssets_Click"
+                                ToolTip="Download the selected assets"/>
+                    </StackPanel>
+                </StackPanel>
             </Grid>
         </StackPanel>
     </Border>

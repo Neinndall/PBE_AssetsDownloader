@@ -21,7 +21,6 @@ namespace AssetsManager.Views
             FilterConfig.LogService = logService;
             FilterConfig.ExportService = exportService;
 
-            ExportActions.ExportService = exportService;
         }
     }
 }

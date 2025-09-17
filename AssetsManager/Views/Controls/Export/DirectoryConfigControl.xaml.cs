@@ -48,5 +48,15 @@ namespace AssetsManager.Views.Controls.Export
                 }
             }
         }
+
+        private void btnPreviewAssets_Click(object sender, RoutedEventArgs e)
+        {
+            ExportService.DoPreview();
+        }
+
+        private async void BtnDownloadSelectedAssets_Click(object sender, RoutedEventArgs e)
+        {
+            await ExportService.DoDownload();
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Material.Icons;
@@ -11,6 +12,13 @@ using AssetsManager.Services.Core;
 
 namespace AssetsManager.Views.Help
 {
+    public class ChangeItem
+    {
+        public string Text { get; set; }
+        public bool IsSubheading { get; set; }
+        public int IndentationLevel { get; set; }
+    }
+
     public class ChangelogVersion
     {
         public string Version { get; set; }
@@ -22,7 +30,7 @@ namespace AssetsManager.Views.Help
         public string Title { get; set; }
         public MaterialIconKind Icon { get; set; }
         public SolidColorBrush IconColor { get; set; }
-        public List<string> Changes { get; set; } = new List<string>();
+        public List<ChangeItem> Changes { get; set; } = new List<ChangeItem>();
     }
 
     public partial class ChangelogsView : UserControl
@@ -64,83 +72,71 @@ namespace AssetsManager.Views.Help
             }
         }
 
-        private List<ChangelogVersion> ParseChangelog(string text)
+        private List<ChangelogVersion> ParseChangelog(string changelogText)
         {
             var versions = new List<ChangelogVersion>();
-            var versionBlocks = text.Split(
-                new[] { ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" },
-                StringSplitOptions.RemoveEmptyEntries);
+            if (string.IsNullOrWhiteSpace(changelogText)) return versions;
 
-            foreach (var block in versionBlocks)
+            var lines = changelogText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+            ChangelogVersion currentVersion = null;
+            ChangeGroup currentGroup = null;
+
+            foreach (var line in lines)
             {
-                var lines = block.Trim().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                if (lines.Length == 0) continue;
+                var trimmedLine = line.Trim();
 
-                // Primera línea: nombre y versión (ej: AssetsManager - League of Legends | v2.2.0.0)
-                var version = new ChangelogVersion { Version = lines[0].Trim() };
-                ChangeGroup currentGroup = null;
-
-                foreach (var line in lines.Skip(1))
+                if (line.StartsWith("AssetsManager - League of Legends |"))
                 {
-                    var trimmedLine = line.Trim();
-
-                    // Detectar títulos de secciones
-                    bool isGroupTitle =
-                        trimmedLine.StartsWith("[") ||
-                        trimmedLine.Equals("New Features", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.Equals("Improvements", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.Equals("Changes", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.Equals("Bug Fixes", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.Equals("Notes", StringComparison.OrdinalIgnoreCase);
-
-                    // Detectar subtítulos de update (Major, Medium, Hotfix)
-                    bool isUpdateTitle =
-                        trimmedLine.Equals("MAJOR UPDATE", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.Equals("MEDIUM UPDATE", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.Equals("HOTFIX UPDATE", StringComparison.OrdinalIgnoreCase);
-
-                    if (isGroupTitle)
-                    {
-                        var title = trimmedLine.Trim('[', ']');
-                        currentGroup = new ChangeGroup { Title = title };
-                        version.Groups.Add(currentGroup);
-
-                        (currentGroup.Icon, currentGroup.IconColor) = title switch
-                        {
-                            "New Features" => (MaterialIconKind.Star, new SolidColorBrush(Colors.Gold)),
-                            "Improvements" => (MaterialIconKind.Flash, new SolidColorBrush(Colors.LightBlue)),
-                            "Changes" => (MaterialIconKind.Build, new SolidColorBrush(Colors.LightGreen)),
-                            "Bug Fixes" => (MaterialIconKind.Bug, new SolidColorBrush(Colors.OrangeRed)),
-                            "Notes" => (MaterialIconKind.NotebookOutline, new SolidColorBrush(Colors.Purple)),
-                            _ => (MaterialIconKind.Pencil, (SolidColorBrush)System.Windows.Application.Current.FindResource("TextSecondary"))
-                        };
-                    }
-                    else if (isUpdateTitle)
-                    {
-                        // Puedes decidir si lo guardas como "grupo especial" o en otra propiedad
-                        currentGroup = new ChangeGroup { Title = trimmedLine };
-                        version.Groups.Add(currentGroup);
-
-                        (currentGroup.Icon, currentGroup.IconColor) = trimmedLine.ToUpper() switch
-                        {
-                            "MAJOR UPDATE" => (MaterialIconKind.Rocket, new SolidColorBrush(Colors.Orange)),
-                            "MEDIUM UPDATE" => (MaterialIconKind.Update, new SolidColorBrush(Colors.CornflowerBlue)),
-                            "HOTFIX UPDATE" => (MaterialIconKind.Fire, new SolidColorBrush(Colors.Red)),
-                            _ => (MaterialIconKind.Pencil, (SolidColorBrush)System.Windows.Application.Current.FindResource("TextSecondary"))
-                        };
-                    }
-                    else if (currentGroup != null && !string.IsNullOrWhiteSpace(trimmedLine))
-                    {
-                        // Línea normal (item de changelog)
-                        currentGroup.Changes.Add(trimmedLine);
-                    }
+                    currentVersion = new ChangelogVersion { Version = trimmedLine };
+                    versions.Add(currentVersion);
+                    currentGroup = null;
+                    continue;
                 }
 
-                versions.Add(version);
+                if (currentVersion == null) continue;
+                if (string.IsNullOrWhiteSpace(trimmedLine)) continue;
+
+                if (!line.StartsWith(" ") && !line.StartsWith("\t") && !trimmedLine.StartsWith("*") && !trimmedLine.StartsWith("-"))
+                {
+                    currentGroup = new ChangeGroup { Title = trimmedLine };
+                    string titleLower = trimmedLine.ToLower();
+                    if (titleLower.Contains("new features")) { currentGroup.Icon = MaterialIconKind.Star; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFC107"); }
+                    else if (titleLower.Contains("improvements")) { currentGroup.Icon = MaterialIconKind.ArrowUpBoldCircle; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#4CAF50"); }
+                    else if (titleLower.Contains("bug fixes")) { currentGroup.Icon = MaterialIconKind.Bug; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#F44336"); }
+                    else if (titleLower.Contains("changes")) { currentGroup.Icon = MaterialIconKind.Pencil; currentGroup.IconColor = (SolidColorBrush)new BrushConverter().ConvertFrom("#2196F3"); }
+                    else { currentGroup.Icon = MaterialIconKind.Info; currentGroup.IconColor = (SolidColorBrush)Application.Current.FindResource("TextMuted"); }
+                    currentVersion.Groups.Add(currentGroup);
+                }
+                else if (currentGroup != null)
+                {
+                    var indentation = line.Length - line.TrimStart().Length;
+                    var item = new ChangeItem
+                    {
+                        IndentationLevel = indentation / 4 // Assuming 4 spaces per indent level
+                    };
+
+                    if (trimmedLine.StartsWith("-"))
+                    {
+                        item.IsSubheading = true;
+                        item.Text = trimmedLine.Substring(1).Trim();
+                    }
+                    else if (trimmedLine.StartsWith("*"))
+                    {
+                        item.IsSubheading = false;
+                        item.Text = trimmedLine.Substring(1).Trim();
+                    }
+                    else
+                    {
+                        item.IsSubheading = false;
+                        item.Text = trimmedLine;
+                        item.IndentationLevel = 1; // Descriptions under a title
+                    }
+                    currentGroup.Changes.Add(item);
+                }
             }
             return versions;
         }
-
-
     }
+
 }

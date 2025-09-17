@@ -74,7 +74,7 @@
                 </Grid>
 
                 <!-- Original File -->
-                <Grid Margin="0,0,0,0">
+                <Grid Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -116,41 +116,40 @@
                                 Click="btnSelectOriginal_Click"/>
                     </Grid>
                 </Grid>
-            </StackPanel>
-        </Border>
-        <Border Style="{StaticResource SettingsCard}">
-            <!-- Actions -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                
+                <!-- Actions -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
-                                             FontSize="20" 
-                                             Margin="0,0,12,0" 
-                                             VerticalAlignment="Top"
-                                             Foreground="{StaticResource AccentBrush}"/>
+                    <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
+                                                 FontSize="20" 
+                                                 Margin="0,0,12,0" 
+                                                 VerticalAlignment="Top"
+                                                 Foreground="{StaticResource AccentBrush}"/>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Actions" 
-                               FontWeight="Medium"
-                               FontSize="14"
-                               Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Compare the two selected files" 
-                               FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"
-                               Margin="0,2,0,12"/>
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="compareButton" 
-                            Content="Compare" 
-                            Height="36"
-                            Padding="36,0"
-                            Style="{StaticResource ModernButton}"
-                            Click="btnCompare_Click"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Actions" 
+                                   FontWeight="Medium"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Compare the two selected files" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"
+                                   Margin="0,2,0,12"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="compareButton" 
+                                Content="Compare" 
+                                Height="36"
+                                Padding="36,0"
+                                Style="{StaticResource ModernButton}"
+                                Click="btnCompare_Click"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </Grid>
+                </Grid>
+            </StackPanel>
         </Border>
     </StackPanel>
 </UserControl>

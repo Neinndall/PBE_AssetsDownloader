@@ -215,59 +215,58 @@
                         </StackPanel>
                     </TabItem>
                 </TabControl>
-            </StackPanel>
-        </Border>
-        <Border Style="{StaticResource SettingsCard}">
-            <!-- Actions -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                
+                <!-- Actions -->
+                <Grid Margin="0,24,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
-                                             FontSize="20" 
-                                             Margin="0,0,12,0" 
-                                             VerticalAlignment="Top"
-                                             Foreground="{StaticResource AccentBrush}"/>
+                    <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
+                                                 FontSize="20" 
+                                                 Margin="0,0,12,0" 
+                                                 VerticalAlignment="Top"
+                                                 Foreground="{StaticResource AccentBrush}"/>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Actions" 
-                               FontWeight="Medium"
-                               FontSize="14"
-                               Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Compare WAD files or load previous results" 
-                               FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"
-                               Margin="0,2,0,12"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Actions" 
+                                   FontWeight="Medium"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Compare WAD files or load previous results" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"
+                                   Margin="0,2,0,12"/>
 
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="createLolBackupButton" 
-                            Content="Create LoL Backup"
-                            Height="36"
-                            Padding="16,0"
-                            Style="{StaticResource SecondaryButton}"
-                            Click="createLolBackupButton_Click"
-                            ToolTip="Create a backup of the current LoL directory"
-                            Margin="0,0,12,0"/>
-                        <Button x:Name="loadButton" 
-                            Content="Load Results"
-                            Height="36"
-                            Padding="16,0"
-                            Style="{StaticResource SecondaryButton}"
-                            Click="loadButton_Click"
-                            ToolTip="Load previously saved WAD comparison results"
-                            Margin="0,0,12,0"/>
-                        <Button x:Name="compareWadButton" 
-                            Content="Compare" 
-                            Height="36"
-                            Padding="36,0"
-                            Style="{StaticResource ModernButton}"
-                            Click="compareWadButton_Click"
-                            ToolTip="Compare WAD files"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="createLolBackupButton" 
+                                Content="Create LoL Backup"
+                                Height="36"
+                                Padding="16,0"
+                                Style="{StaticResource SecondaryButton}"
+                                Click="createLolBackupButton_Click"
+                                ToolTip="Create a backup of the current LoL directory"
+                                Margin="0,0,12,0"/>
+                            <Button x:Name="loadButton" 
+                                Content="Load Results"
+                                Height="36"
+                                Padding="16,0"
+                                Style="{StaticResource SecondaryButton}"
+                                Click="loadButton_Click"
+                                ToolTip="Load previously saved WAD comparison results"
+                                Margin="0,0,12,0"/>
+                            <Button x:Name="compareWadButton" 
+                                Content="Compare" 
+                                Height="36"
+                                Padding="36,0"
+                                Style="{StaticResource ModernButton}"
+                                Click="compareWadButton_Click"
+                                ToolTip="Compare WAD files"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </Grid>
+                </Grid>
+            </StackPanel>
         </Border>
     </StackPanel>
 </UserControl>

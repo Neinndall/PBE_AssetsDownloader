@@ -57,7 +57,7 @@
                 </Grid>
 
                 <!-- Old Hash Directory -->
-                <Grid>
+                <Grid Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -102,43 +102,41 @@
                                                 ToolTip="Browse for directory"/>
                     </Grid>
                 </Grid>
-            </StackPanel>
-        </Border>
 
-        <Border Style="{StaticResource SettingsCard}">
-            <!-- Actions -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <!-- Actions -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
-                                             FontSize="20" 
-                                             Foreground="{StaticResource AccentBrush}"
-                                             Margin="0,0,12,0"
-                                             VerticalAlignment="Top"/>
+                    <materialDesign:MaterialIcon Grid.Column="0" Kind="Flash" 
+                                                 FontSize="20" 
+                                                 Foreground="{StaticResource AccentBrush}"
+                                                 Margin="0,0,12,0"
+                                                 VerticalAlignment="Top"/>
 
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Actions" 
-                               FontSize="14" 
-                               FontWeight="Medium"
-                               Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Start the asset download process" 
-                               FontSize="12" 
-                               Foreground="{StaticResource TextMuted}"
-                               Margin="0,2,0,12"/>
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="startButton" 
-                                Content="▶️ Start Download" 
-                                Height="36"
-                                Width="150"
-                                Style="{StaticResource ModernButton}"
-                                Click="startButton_Click"
-                                ToolTip="Start the download process"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Actions" 
+                                   FontSize="14" 
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Start the asset download process" 
+                                   FontSize="12" 
+                                   Foreground="{StaticResource TextMuted}"
+                                   Margin="0,2,0,12"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="startButton" 
+                                    Content="▶️ Start Download" 
+                                    Height="36"
+                                    Width="150"
+                                    Style="{StaticResource ModernButton}"
+                                    Click="startButton_Click"
+                                    ToolTip="Start the download process"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </Grid>
+                </Grid>
+            </StackPanel>
         </Border>
     </StackPanel>
 </UserControl>

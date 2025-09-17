@@ -10,7 +10,7 @@
 
 ## 🛠️ AssetsManager
 
-AssetsManager is a tool for League of Legends enthusiasts who need to analyze, manage, and track changes to game assets from PBE server updates. It goes beyond simple downloading, offering a powerful suite of features for deep asset analysis, exploration, and monitoring for changes.
+AssetsManager is a tool for League of Legends enthusiasts who need to analyze, manage, and track changes to game assets from PBE server updates. It goes beyond simple downloading, offering a powerful suite of features for deep asset analysis, 3D viewer model, exploration, and monitoring for changes.
 
 ## ✨ Key Features
 

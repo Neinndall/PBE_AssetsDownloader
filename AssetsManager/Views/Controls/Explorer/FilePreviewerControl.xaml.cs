@@ -20,13 +20,13 @@ namespace AssetsManager.Views.Controls.Explorer
         public DirectoriesCreator DirectoriesCreator { get; set; }
         public ExplorerPreviewService ExplorerPreviewService { get; set; }
 
-        public FilePreviewerViewModel ViewModel { get; set; }
+        public PinnedFilesManager ViewModel { get; set; }
         private bool _isLoaded = false;
 
         public FilePreviewerControl()
         {
             InitializeComponent();
-            ViewModel = new FilePreviewerViewModel();
+            ViewModel = new PinnedFilesManager();
             this.DataContext = ViewModel;
             this.Loaded += FilePreviewerControl_Loaded;
             this.Unloaded += FilePreviewerControl_Unloaded;
@@ -34,7 +34,7 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async void Tab_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
+            if (sender is FrameworkElement element && element.DataContext is PinnedFileModel vm)
             {
                 ViewModel.SelectedFile = vm;
                 await ExplorerPreviewService.ShowPreviewAsync(vm.Node);
@@ -43,7 +43,7 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private void CloseTabButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
+            if (sender is FrameworkElement element && element.DataContext is PinnedFileModel vm)
             {
                 ViewModel.UnpinFile(vm);
             }

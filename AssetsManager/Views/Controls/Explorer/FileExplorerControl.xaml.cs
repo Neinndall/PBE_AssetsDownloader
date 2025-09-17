@@ -275,35 +275,41 @@ namespace AssetsManager.Views.Controls.Explorer
             _searchTimer.Start();
         }
 
-        private void Toolbar_CollapseToContainerClicked(object sender, RoutedEventArgs e)
-        {
-            var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
-            if (selectedNode == null) return;
-
-            var path = FindNodePath(RootNodes, selectedNode);
-            if (path == null) return;
-
-            FileSystemNodeModel containerNode = null;
-            for (int i = path.Count - 1; i >= 0; i--)
-            {
-                if (path[i].Type == NodeType.WadFile)
+                private void Toolbar_CollapseToContainerClicked(object sender, RoutedEventArgs e)
                 {
-                    containerNode = path[i];
-                    break;
+                    var selectedNode = FileTreeView.SelectedItem as FileSystemNodeModel;
+                    if (selectedNode == null) return;
+        
+                    var path = FindNodePath(RootNodes, selectedNode);
+                    if (path == null) return;
+        
+                    FileSystemNodeModel containerNode = null;
+                    for (int i = path.Count - 1; i >= 0; i--)
+                    {
+                        if (path[i].Type == NodeType.WadFile)
+                        {
+                            containerNode = path[i];
+                            break;
+                        }
+                    }
+        
+                    if (containerNode != null)
+                    {
+                        // Collapse all children recursively
+                        foreach (var child in containerNode.Children)
+                        {
+                            CollapseAll(child);
+                        }
+        
+                        // Now, collapse the container itself
+                        containerNode.IsExpanded = false;
+        
+                        _ = Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            SelectAndFocusNode(containerNode, false);
+                        }), DispatcherPriority.ContextIdle);
+                    }
                 }
-            }
-
-            if (containerNode != null)
-            {
-                containerNode.IsExpanded = false;
-
-                _ = Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    SelectAndFocusNode(containerNode, false);
-                }), DispatcherPriority.ContextIdle);
-            }
-        }
-
         private void CollapseAll(FileSystemNodeModel node)
         {
             node.IsExpanded = false;

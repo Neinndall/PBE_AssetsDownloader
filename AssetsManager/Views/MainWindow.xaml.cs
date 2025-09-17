@@ -190,9 +190,7 @@ namespace AssetsManager.Views
 
         private void LoadExportWindow()
         {
-            var exportWindow = _serviceProvider.GetRequiredService<ExportWindow>();
-            exportWindow.PreviewRequested += OnPreviewRequested;
-            MainContentArea.Content = exportWindow;
+            MainContentArea.Content = _serviceProvider.GetRequiredService<ExportWindow>();
         }
 
         private void LoadComparatorWindow()
@@ -213,13 +211,6 @@ namespace AssetsManager.Views
             MainContentArea.Content = _serviceProvider.GetRequiredService<MonitorWindow>();
         }
 
-        private void OnPreviewRequested(object sender, PreviewRequestedEventArgs e)
-        {
-            var previewWindow = _serviceProvider.GetRequiredService<PreviewAssetsWindow>();
-            previewWindow.Owner = this;
-            previewWindow.InitializeData(e.DifferencesPath, e.SelectedAssetTypes, e.FilterLogic);
-            previewWindow.ShowDialog();
-        }
 
         private void OnLoadWadComparisonRequested(object sender, LoadWadComparisonEventArgs e)
         {

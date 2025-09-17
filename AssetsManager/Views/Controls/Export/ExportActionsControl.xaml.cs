@@ -1,3 +1,4 @@
+using AssetsManager.Services.Downloads;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,8 +7,7 @@ namespace AssetsManager.Views.Controls.Export
 {
     public partial class ExportActionsControl : UserControl
     {
-        public event EventHandler PreviewAssetsRequested;
-        public event EventHandler DownloadSelectedAssetsRequested;
+        public ExportService ExportService { get; set; }
 
         public ExportActionsControl()
         {
@@ -16,12 +16,12 @@ namespace AssetsManager.Views.Controls.Export
 
         private void btnPreviewAssets_Click(object sender, RoutedEventArgs e)
         {
-            PreviewAssetsRequested?.Invoke(this, EventArgs.Empty);
+            ExportService.DoPreview();
         }
 
-        private void BtnDownloadSelectedAssets_Click(object sender, RoutedEventArgs e)
+        private async void BtnDownloadSelectedAssets_Click(object sender, RoutedEventArgs e)
         {
-            DownloadSelectedAssetsRequested?.Invoke(this, EventArgs.Empty);
+            await ExportService.DoDownload();
         }
     }
 }

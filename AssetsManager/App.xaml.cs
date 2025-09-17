@@ -101,6 +101,7 @@ namespace AssetsManager
 
             // Main Application Logic Service
             services.AddTransient<ExtractionService>();
+            services.AddSingleton<ExportService>();
 
             // Windows, Views, and Dialogs
             services.AddTransient<MainWindow>();

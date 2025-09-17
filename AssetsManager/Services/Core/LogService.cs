@@ -238,7 +238,7 @@ namespace AssetsManager.Services.Core
                     link.RequestNavigate += (sender, e) => {
                         try
                         {
-                            Process.Start("explorer.exe", $"/select,\"{e.Uri.LocalPath}\"");
+                            Process.Start("explorer.exe", $"\"{e.Uri.LocalPath}\"");
                         }
                         catch (Exception ex)
                         {

@@ -27,30 +27,9 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             InitializeComponent();
             ViewModel = new FilePreviewerViewModel();
-            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
             this.DataContext = ViewModel;
             this.Loaded += FilePreviewerControl_Loaded;
             this.Unloaded += FilePreviewerControl_Unloaded;
-        }
-
-        private async void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(FilePreviewerViewModel.SelectedFile))
-            {
-                await HandleSelectedFileChangedAsync();
-            }
-        }
-
-        private async Task HandleSelectedFileChangedAsync()
-        {
-            try
-            {
-                await ShowPreviewAsync(ViewModel.SelectedFile?.Node);
-            }
-            catch (Exception ex)
-            {
-                LogService.LogError(ex, "Error handling selected file change");
-            }
         }
 
         private async void Tab_MouseDown(object sender, MouseButtonEventArgs e)
@@ -58,7 +37,7 @@ namespace AssetsManager.Views.Controls.Explorer
             if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
             {
                 ViewModel.SelectedFile = vm;
-                await HandleSelectedFileChangedAsync();
+                await ExplorerPreviewService.ShowPreviewAsync(vm.Node);
             }
         }
 
@@ -119,12 +98,10 @@ namespace AssetsManager.Views.Controls.Explorer
             }
             else
             {
-                ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
                 ViewModel.SelectedFile = null;
-                ViewModel.PropertyChanged += ViewModel_PropertyChanged;
-
-                await ExplorerPreviewService.ShowPreviewAsync(node);
             }
+            
+            await ExplorerPreviewService.ShowPreviewAsync(node);
         }
 
         private async Task InitializeWebView2()

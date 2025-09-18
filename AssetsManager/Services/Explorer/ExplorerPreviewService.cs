@@ -335,6 +335,13 @@ namespace AssetsManager.Services.Explorer
                     if (mainMip.Span.TryGetSpan(out Span<ColorRgba32> pixelSpan))
                     {
                         var pixelBytes = MemoryMarshal.AsBytes(pixelSpan).ToArray();
+                        for (int i = 0; i < pixelBytes.Length; i += 4)
+                        {
+                            var r = pixelBytes[i];
+                            var b = pixelBytes[i + 2];
+                            pixelBytes[i] = b;
+                            pixelBytes[i + 2] = r;
+                        }
                         var bmp = BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelBytes, width * 4);
                         bmp.Freeze();
                         return bmp;

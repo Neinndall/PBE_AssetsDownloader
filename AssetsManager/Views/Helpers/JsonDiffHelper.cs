@@ -1,6 +1,8 @@
 using DiffPlex.DiffBuilder.Model;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -24,22 +26,35 @@ namespace AssetsManager.Views.Helpers
 
         public static Task<string> FormatJsonAsync(object jsonInput)
         {
-            if (jsonInput == null) 
+            if (jsonInput == null)
                 return Task.FromResult(string.Empty);
 
             return Task.Run(() =>
             {
                 try
                 {
-                    string jsonString = jsonInput is string s ? s : JsonConvert.SerializeObject(jsonInput);
-                    var token = JToken.Parse(jsonString);
-                    return token.ToString(Formatting.Indented);
+                    using (var stringWriter = new StringWriter())
+                    using (var jsonWriter = new JsonTextWriter(stringWriter) { Formatting = Formatting.Indented })
+                    {
+                        if (jsonInput is string jsonString)
+                        {
+                            // If it's a string, read from it
+                            using (var stringReader = new StringReader(jsonString))
+                            using (var jsonReader = new JsonTextReader(stringReader))
+                            {
+                                jsonWriter.WriteToken(jsonReader);
+                            }
+                        }
+                        else
+                        {
+                            // If it's an object (like a Dictionary), serialize it directly
+                            var serializer = new JsonSerializer();
+                            serializer.Serialize(jsonWriter, jsonInput);
+                        }
+                        return stringWriter.ToString();
+                    }
                 }
-                catch (JsonReaderException)
-                {
-                    return jsonInput.ToString();
-                }
-                catch (JsonSerializationException)
+                catch (Exception) 
                 {
                     return jsonInput.ToString();
                 }

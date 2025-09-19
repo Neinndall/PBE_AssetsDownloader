@@ -119,6 +119,7 @@ namespace AssetsManager.Views.Dialogs.Controls
                 var viewportRatio = _newEditor.ViewportHeight / _newEditor.ExtentHeight;
                 var offsetRatio = _newEditor.VerticalOffset / _newEditor.ExtentHeight;
                 var viewportHeight = panelHeight * viewportRatio;
+                viewportHeight = Math.Min(viewportHeight, panelHeight); // Cap the height at the panel's height
                 var viewportTop = panelHeight * offsetRatio;
 
                 oldRect = new Rect(0, viewportTop, OldDiffMapHost.ActualWidth, Math.Max(2.0, viewportHeight));

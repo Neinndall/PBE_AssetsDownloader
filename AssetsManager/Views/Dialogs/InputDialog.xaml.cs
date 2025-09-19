@@ -17,11 +17,16 @@ namespace AssetsManager.Views.Dialogs
             textBoxInput.Focus();
         }
 
-        public void Initialize(string title, string question, string defaultAnswer = "")
+        public void Initialize(string title, string question, string defaultAnswer = "", bool isMultiLine = false)
         {
             Title = title;
             textBlockQuestion.Text = question;
             InputText = defaultAnswer;
+
+            if (isMultiLine)
+            {
+                // The XAML now handles the sizing dynamically.
+            }
         }
 
         private void btnOk_Click(object sender, RoutedEventArgs e)

@@ -74,8 +74,8 @@
                     </StackPanel>
                 </Border>
 
-                <comparator:JsonComparisonControl x:Name="JsonComparisonControl" />
                 <comparator:WadComparisonControl x:Name="WadComparisonControl"/>
+                <comparator:JsonComparisonControl x:Name="JsonComparisonControl" />
             </StackPanel>
         </ScrollViewer>
     </Grid>

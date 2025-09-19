@@ -22,11 +22,6 @@ namespace AssetsManager.Views.Dialogs
             Title = title;
             textBlockQuestion.Text = question;
             InputText = defaultAnswer;
-
-            if (isMultiLine)
-            {
-                // The XAML now handles the sizing dynamically.
-            }
         }
 
         private void btnOk_Click(object sender, RoutedEventArgs e)

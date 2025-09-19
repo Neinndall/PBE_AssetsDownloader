@@ -25,12 +25,10 @@ namespace AssetsManager.Views.Dialogs.Controls
     public partial class JsonDiffControl : UserControl
     {
         private SideBySideDiffModel _originalDiffModel;
-        private DiffPanelNavigation _diffPanelNavigation;
         private bool _isWordLevelDiff = false;
         private bool _hideUnchangedLines = false;
         public CustomMessageBoxService CustomMessageBoxService { get; set; }
         public event EventHandler<bool> ComparisonFinished;
-        
 
         public JsonDiffControl()
         {
@@ -58,10 +56,6 @@ namespace AssetsManager.Views.Dialogs.Controls
                 OnComparisonFinished(false);
             }
         }
-
-
-
-        
 
         private void ConfigureEditors()
         {
@@ -125,8 +119,9 @@ namespace AssetsManager.Views.Dialogs.Controls
 
             ApplyDiffHighlighting(modelToShow);
 
-            _diffPanelNavigation = new DiffPanelNavigation(OldNavigationPanel, NewNavigationPanel, OldJsonContent, NewJsonContent, modelToShow, originalModelForNav);
-            _diffPanelNavigation.ScrollRequested += ScrollToLine;
+            DiffNavigationPanel.Initialize(OldJsonContent, NewJsonContent, modelToShow, originalModelForNav);
+            DiffNavigationPanel.ScrollRequested -= ScrollToLine; // Avoid multiple subscriptions
+            DiffNavigationPanel.ScrollRequested += ScrollToLine;
 
             EventHandler layoutUpdatedHandler = null;
             layoutUpdatedHandler = (s, e) =>
@@ -134,11 +129,11 @@ namespace AssetsManager.Views.Dialogs.Controls
                 NewJsonContent.TextArea.TextView.LayoutUpdated -= layoutUpdatedHandler;
                 if (diffIndexToRestore.HasValue && diffIndexToRestore.Value != -1)
                 {
-                    _diffPanelNavigation?.NavigateToDifferenceByIndex(diffIndexToRestore.Value);
+                    DiffNavigationPanel?.NavigateToDifferenceByIndex(diffIndexToRestore.Value);
                 }
                 else
                 {
-                    _diffPanelNavigation?.NavigateToNextDifference(0);
+                    DiffNavigationPanel?.NavigateToNextDifference(0);
                 }
             };
             NewJsonContent.TextArea.TextView.LayoutUpdated += layoutUpdatedHandler;
@@ -180,10 +175,10 @@ namespace AssetsManager.Views.Dialogs.Controls
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
 
-                if (_diffPanelNavigation != null)
+                if (DiffNavigationPanel != null)
                 {
-                    _diffPanelNavigation.CurrentLine = lineNumber;
-                    _diffPanelNavigation.UpdateViewportGuide();
+                    DiffNavigationPanel.CurrentLine = lineNumber;
+                    DiffNavigationPanel.UpdateViewportGuide();
                 }
 
                 UpdateLayout();
@@ -212,8 +207,8 @@ namespace AssetsManager.Views.Dialogs.Controls
             NewJsonContent.TextArea.TextView.ScrollOffsetChanged += NewEditor_ScrollChanged;
 
             // This is the main optimization: only update the viewport guide on scroll
-            OldJsonContent.TextArea.TextView.ScrollOffsetChanged += (s, e) => _diffPanelNavigation?.UpdateViewportGuide();
-            NewJsonContent.TextArea.TextView.ScrollOffsetChanged += (s, e) => _diffPanelNavigation?.UpdateViewportGuide();
+            OldJsonContent.TextArea.TextView.ScrollOffsetChanged += (s, e) => DiffNavigationPanel?.UpdateViewportGuide();
+            NewJsonContent.TextArea.TextView.ScrollOffsetChanged += (s, e) => DiffNavigationPanel?.UpdateViewportGuide();
         }
 
         private void OldEditor_ScrollChanged(object sender, EventArgs e)
@@ -252,12 +247,12 @@ namespace AssetsManager.Views.Dialogs.Controls
 
         private void NextDiffButton_Click(object sender, RoutedEventArgs e)
         {
-            _diffPanelNavigation?.NavigateToNextDifference(NewJsonContent.TextArea.Caret.Line);
+            DiffNavigationPanel?.NavigateToNextDifference(NewJsonContent.TextArea.Caret.Line);
         }
 
         private void PreviousDiffButton_Click(object sender, RoutedEventArgs e)
         {
-            _diffPanelNavigation?.NavigateToPreviousDifference(NewJsonContent.TextArea.Caret.Line);
+            DiffNavigationPanel?.NavigateToPreviousDifference(NewJsonContent.TextArea.Caret.Line);
         }
 
         private void WordLevelDiffButton_Click(object sender, RoutedEventArgs e)
@@ -274,7 +269,7 @@ namespace AssetsManager.Views.Dialogs.Controls
         private void HideUnchangedButton_Click(object sender, RoutedEventArgs e)
         {
             _hideUnchangedLines = HideUnchangedButton.IsChecked ?? false;
-            int currentDiffIndex = _diffPanelNavigation?.FindClosestDifferenceIndex(NewJsonContent.TextArea.Caret.Line) ?? -1;
+            int currentDiffIndex = DiffNavigationPanel?.FindClosestDifferenceIndex(NewJsonContent.TextArea.Caret.Line) ?? -1;
             UpdateDiffView(currentDiffIndex);
         }
 

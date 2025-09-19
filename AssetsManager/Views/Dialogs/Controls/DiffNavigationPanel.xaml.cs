@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using DiffPlex.DiffBuilder.Model;
 using ICSharpCode.AvalonEdit;
 
@@ -24,7 +23,7 @@ namespace AssetsManager.Views.Dialogs.Controls
         public int CurrentLine { get; set; }
 
         private readonly SolidColorBrush _backgroundPanelBrush, _addedBrush, _removedBrush, _modifiedBrush, _imaginaryBrush, _viewportBrush;
-        private Rectangle _oldViewportGuide, _newViewportGuide;
+        private DrawingVisual _oldViewportGuide, _newViewportGuide;
 
         public event Action<int> ScrollRequested;
 
@@ -63,43 +62,43 @@ namespace AssetsManager.Views.Dialogs.Controls
 
         private void SetupEvents()
         {
-            OldDiffMapCanvas.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
-            OldDiffMapCanvas.MouseMove += NavigationPanel_MouseMove;
-            OldDiffMapCanvas.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
-            OldDiffMapCanvas.SizeChanged += (s, e) => { InitializeDiffMarkers(); UpdateViewportGuide(); };
+            OldDiffMapHost.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
+            OldDiffMapHost.MouseMove += NavigationPanel_MouseMove;
+            OldDiffMapHost.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
+            OldDiffMapHost.SizeChanged += (s, e) => { InitializeDiffMarkers(); UpdateViewportGuide(); };
 
-            NewDiffMapCanvas.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
-            NewDiffMapCanvas.MouseMove += NavigationPanel_MouseMove;
-            NewDiffMapCanvas.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
-            NewDiffMapCanvas.SizeChanged += (s, e) => { InitializeDiffMarkers(); UpdateViewportGuide(); };
+            NewDiffMapHost.MouseLeftButtonDown += NavigationPanel_MouseLeftButtonDown;
+            NewDiffMapHost.MouseMove += NavigationPanel_MouseMove;
+            NewDiffMapHost.MouseLeftButtonUp += NavigationPanel_MouseLeftButtonUp;
+            NewDiffMapHost.SizeChanged += (s, e) => { InitializeDiffMarkers(); UpdateViewportGuide(); };
         }
 
         public void InitializeDiffMarkers()
         {
-            OldDiffMapCanvas.Children.Clear();
-            NewDiffMapCanvas.Children.Clear();
-
-            OldDiffMapCanvas.Background = _backgroundPanelBrush;
-            NewDiffMapCanvas.Background = _backgroundPanelBrush;
+            OldDiffMapHost.ClearVisuals();
+            NewDiffMapHost.ClearVisuals();
 
             if (_diffModel?.OldText?.Lines == null) return;
 
-            var panelHeight = OldDiffMapCanvas.ActualHeight > 0 ? OldDiffMapCanvas.ActualHeight : 600;
+            var panelHeight = OldDiffMapHost.ActualHeight > 0 ? OldDiffMapHost.ActualHeight : 600;
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
             if (totalLines == 0) return;
             var lineHeight = panelHeight / totalLines;
 
-            DrawPanelContent(OldDiffMapCanvas, _diffModel.OldText.Lines, lineHeight);
-            DrawPanelContent(NewDiffMapCanvas, _diffModel.NewText.Lines, lineHeight);
+            DrawPanelContent(OldDiffMapHost, _diffModel.OldText.Lines, lineHeight);
+            DrawPanelContent(NewDiffMapHost, _diffModel.NewText.Lines, lineHeight);
         }
 
         public void UpdateViewportGuide()
         {
-            if (_oldViewportGuide != null) OldDiffMapCanvas.Children.Remove(_oldViewportGuide);
-            if (_newViewportGuide != null) NewDiffMapCanvas.Children.Remove(_newViewportGuide);
+            // Remove the old viewport visual from the host
+            if (_oldViewportGuide != null) OldDiffMapHost.RemoveVisual(_oldViewportGuide);
+            if (_newViewportGuide != null) NewDiffMapHost.RemoveVisual(_newViewportGuide);
 
-            var panelHeight = OldDiffMapCanvas.ActualHeight;
+            var panelHeight = OldDiffMapHost.ActualHeight;
             if (panelHeight <= 0) return;
+
+            Rect oldRect, newRect;
 
             if (_originalDiffModel != _diffModel)
             {
@@ -110,11 +109,8 @@ namespace AssetsManager.Views.Dialogs.Controls
                 if (lineIndex < 0 || lineIndex >= totalLines) return;
 
                 var highlighterTop = lineIndex * lineHeight;
-                _oldViewportGuide = new Rectangle { Width = OldDiffMapCanvas.ActualWidth, Height = Math.Max(2.0, lineHeight), Fill = _viewportBrush, IsHitTestVisible = false };
-                _newViewportGuide = new Rectangle { Width = NewDiffMapCanvas.ActualWidth, Height = Math.Max(2.0, lineHeight), Fill = _viewportBrush, IsHitTestVisible = false };
-
-                Canvas.SetTop(_oldViewportGuide, highlighterTop);
-                Canvas.SetTop(_newViewportGuide, highlighterTop);
+                oldRect = new Rect(0, highlighterTop, OldDiffMapHost.ActualWidth, Math.Max(2.0, lineHeight));
+                newRect = new Rect(0, highlighterTop, NewDiffMapHost.ActualWidth, Math.Max(2.0, lineHeight));
             }
             else
             {
@@ -125,35 +121,38 @@ namespace AssetsManager.Views.Dialogs.Controls
                 var viewportHeight = panelHeight * viewportRatio;
                 var viewportTop = panelHeight * offsetRatio;
 
-                _oldViewportGuide = new Rectangle { Width = OldDiffMapCanvas.ActualWidth, Height = Math.Max(2.0, viewportHeight), Fill = _viewportBrush, IsHitTestVisible = false };
-                _newViewportGuide = new Rectangle { Width = NewDiffMapCanvas.ActualWidth, Height = Math.Max(2.0, viewportHeight), Fill = _viewportBrush, IsHitTestVisible = false };
-
-                Canvas.SetTop(_oldViewportGuide, viewportTop);
-                Canvas.SetTop(_newViewportGuide, viewportTop);
+                oldRect = new Rect(0, viewportTop, OldDiffMapHost.ActualWidth, Math.Max(2.0, viewportHeight));
+                newRect = new Rect(0, viewportTop, NewDiffMapHost.ActualWidth, Math.Max(2.0, viewportHeight));
             }
 
-            OldDiffMapCanvas.Children.Add(_oldViewportGuide);
-            NewDiffMapCanvas.Children.Add(_newViewportGuide);
+            _oldViewportGuide = CreateRectangleVisual(oldRect, _viewportBrush);
+            _newViewportGuide = CreateRectangleVisual(newRect, _viewportBrush);
+
+            OldDiffMapHost.AddVisual(_oldViewportGuide);
+            NewDiffMapHost.AddVisual(_newViewportGuide);
         }
 
-        private void DrawPanelContent(Canvas panel, IReadOnlyList<DiffPiece> lines, double lineHeight)
+        private void DrawPanelContent(VisualHost host, IReadOnlyList<DiffPiece> lines, double lineHeight)
         {
             for (int i = 0; i < lines.Count; i++)
             {
                 var brush = GetBrushForChangeType(lines[i].Type);
                 if (brush == null) continue;
 
-                var rect = new Rectangle
-                {
-                    Width = panel.ActualWidth,
-                    Height = Math.Max(1.0, lineHeight),
-                    Fill = brush,
-                    IsHitTestVisible = false
-                };
-
-                Canvas.SetTop(rect, i * lineHeight);
-                panel.Children.Add(rect);
+                var rect = new Rect(0, i * lineHeight, host.ActualWidth, Math.Max(1.0, lineHeight));
+                var visual = CreateRectangleVisual(rect, brush);
+                host.AddVisual(visual);
             }
+        }
+
+        private DrawingVisual CreateRectangleVisual(Rect rect, Brush brush)
+        {
+            var visual = new DrawingVisual();
+            using (var dc = visual.RenderOpen())
+            {
+                dc.DrawRectangle(brush, null, rect);
+            }
+            return visual;
         }
 
         private void FindDiffLines()
@@ -286,7 +285,7 @@ namespace AssetsManager.Views.Dialogs.Controls
 
         private void NavigationPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Canvas panel)
+            if (sender is UIElement panel)
             {
                 _isDragging = true;
                 _wasActuallyDragged = false;
@@ -297,7 +296,7 @@ namespace AssetsManager.Views.Dialogs.Controls
 
         private void NavigationPanel_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDragging && sender is Canvas panel)
+            if (_isDragging && sender is UIElement panel)
             {
                 var currentPosition = e.GetPosition(panel);
                 var dragVector = _dragStartPoint - currentPosition;
@@ -318,7 +317,7 @@ namespace AssetsManager.Views.Dialogs.Controls
 
         private void NavigationPanel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isDragging && sender is Canvas panel)
+            if (_isDragging && sender is UIElement panel)
             {
                 if (!_wasActuallyDragged)
                 {
@@ -329,12 +328,12 @@ namespace AssetsManager.Views.Dialogs.Controls
             }
         }
 
-        private void NavigateToClosestDifference(Canvas panel, double y)
+        private void NavigateToClosestDifference(IInputElement panel, double y)
         {
             if (!_diffLines.Any()) return;
 
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-            var panelHeight = panel.ActualHeight;
+            var panelHeight = (panel as FrameworkElement).ActualHeight;
             if (panelHeight <= 0) return;
 
             var clickedLine = (int)((y / panelHeight) * totalLines) + 1;
@@ -342,10 +341,10 @@ namespace AssetsManager.Views.Dialogs.Controls
             ScrollToLine(closestDiffLine);
         }
 
-        private void HandleNavigation(Canvas panel, double y)
+        private void HandleNavigation(IInputElement panel, double y)
         {
             var totalLines = Math.Max(_diffModel.OldText.Lines.Count, _diffModel.NewText.Lines.Count);
-            var panelHeight = panel.ActualHeight;
+            var panelHeight = (panel as FrameworkElement).ActualHeight;
             if (panelHeight <= 0) return;
             var lineNumber = (int)((y / panelHeight) * totalLines) + 1;
             ScrollRequested?.Invoke(lineNumber);

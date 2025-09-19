@@ -158,32 +158,69 @@ namespace AssetsManager.Views.Helpers
         private void FindDiffLines()
         {
             if (_diffModel == null) return;
+            _diffLines.Clear();
+            var diffLineSet = new HashSet<int>();
 
-            ChangeType lastChangeType = ChangeType.Unchanged;
-            for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
+            // If we are in filtered mode, the logic must be more robust
+            if (_originalDiffModel != _diffModel && _diffModel.NewText.Lines.Count > 0)
             {
-                var currentLine = _diffModel.NewText.Lines[i];
-                if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
-                {
-                    _diffLines.Add(i + 1);
-                }
-                lastChangeType = currentLine.Type;
-            }
+                diffLineSet.Add(1); // First line is always a start
 
-            lastChangeType = ChangeType.Unchanged;
-            for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
-            {
-                var currentLine = _diffModel.OldText.Lines[i];
-                if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
+                ChangeType lastChangeTypeNew = _diffModel.NewText.Lines[0].Type;
+                ChangeType lastChangeTypeOld = _diffModel.OldText.Lines[0].Type;
+
+                for (int i = 1; i < _diffModel.NewText.Lines.Count; i++)
                 {
-                    if (!_diffLines.Contains(i + 1))
+                    var currentLineNew = _diffModel.NewText.Lines[i];
+                    var prevLineNew = _diffModel.NewText.Lines[i - 1];
+                    var currentLineOld = _diffModel.OldText.Lines[i];
+                    var prevLineOld = _diffModel.OldText.Lines[i - 1];
+
+                    // Condition 1: The type of change is different from the previous line's type (on either side)
+                    bool typeChanged = currentLineNew.Type != lastChangeTypeNew || currentLineOld.Type != lastChangeTypeOld;
+
+                    // Condition 2: There is a gap in the original line numbers
+                    bool gapDetected = (currentLineNew.Position.HasValue && prevLineNew.Position.HasValue && currentLineNew.Position.Value != prevLineNew.Position.Value + 1) ||
+                                       (currentLineOld.Position.HasValue && prevLineOld.Position.HasValue && currentLineOld.Position.Value != prevLineOld.Position.Value + 1);
+
+                    if (typeChanged || gapDetected)
                     {
-                        _diffLines.Add(i + 1);
+                        diffLineSet.Add(i + 1);
                     }
+
+                    lastChangeTypeNew = currentLineNew.Type;
+                    lastChangeTypeOld = currentLineOld.Type;
                 }
-                lastChangeType = currentLine.Type;
+            }
+            else // Original logic for unfiltered view
+            {
+                ChangeType lastChangeType = ChangeType.Unchanged;
+                for (int i = 0; i < _diffModel.NewText.Lines.Count; i++)
+                {
+                    var currentLine = _diffModel.NewText.Lines[i];
+                    if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
+                    {
+                        diffLineSet.Add(i + 1);
+                    }
+                    lastChangeType = currentLine.Type;
+                }
+
+                lastChangeType = ChangeType.Unchanged;
+                for (int i = 0; i < _diffModel.OldText.Lines.Count; i++)
+                {
+                    var currentLine = _diffModel.OldText.Lines[i];
+                    if (currentLine.Type != ChangeType.Unchanged && currentLine.Type != lastChangeType)
+                    {
+                        if (!diffLineSet.Contains(i + 1))
+                        {
+                            diffLineSet.Add(i + 1);
+                        }
+                    }
+                    lastChangeType = currentLine.Type;
+                }
             }
 
+            _diffLines.AddRange(diffLineSet);
             _diffLines.Sort();
         }
 

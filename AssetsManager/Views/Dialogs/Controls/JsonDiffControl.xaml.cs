@@ -180,7 +180,11 @@ namespace AssetsManager.Views.Dialogs.Controls
                 OldJsonContent.ScrollTo(lineNumber, 0);
                 NewJsonContent.ScrollTo(lineNumber, 0);
 
-                if (_diffPanelNavigation != null) _diffPanelNavigation.CurrentLine = lineNumber;
+                if (_diffPanelNavigation != null)
+                {
+                    _diffPanelNavigation.CurrentLine = lineNumber;
+                    _diffPanelNavigation.UpdateViewportGuide();
+                }
 
                 UpdateLayout();
 

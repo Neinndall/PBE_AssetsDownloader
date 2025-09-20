@@ -44,6 +44,8 @@ namespace AssetsManager.Services.Explorer
         private Panel _unsupportedFileMessagePanel;
         private TextBlock _unsupportedFileTextBlock;
 
+        private IHighlightingDefinition _jsonHighlightingDefinition;
+
         private readonly LogService _logService;
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly HashResolverService _hashResolverService;
@@ -94,11 +96,10 @@ namespace AssetsManager.Services.Explorer
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
-            
-            if (_currentlyDisplayedNode == node) 
-            {                                    
-                return;                          
-            }                                    
+            if (node != null && _currentlyDisplayedNode != null && _currentlyDisplayedNode.FullPath == node.FullPath)
+            {
+                return;
+            }
             _currentlyDisplayedNode = node;      
 
             if (node == null || node.Type == NodeType.RealDirectory || node.Type == NodeType.VirtualDirectory || node.Type == NodeType.WadFile)
@@ -237,22 +238,22 @@ namespace AssetsManager.Services.Explorer
 
                 if (extension == ".json" || IsBinExtension(extension) || IsJavaScriptExtension(extension))
                 {
-                    var assembly = Assembly.GetExecutingAssembly();
-                    var resourceName = "AssetsManager.Resources.JsonSyntaxHighlighting.xshd";
-                    using (var stream = assembly.GetManifestResourceStream(resourceName))
+                    if (_jsonHighlightingDefinition == null)
                     {
-                        if (stream != null)
+                        var assembly = Assembly.GetExecutingAssembly();
+                        var resourceName = "AssetsManager.Resources.JsonSyntaxHighlighting.xshd";
+                        using (var stream = assembly.GetManifestResourceStream(resourceName))
                         {
-                            using (var reader = new XmlTextReader(stream))
+                            if (stream != null)
                             {
-                                _textEditorPreview.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                                using (var reader = new XmlTextReader(stream))
+                                {
+                                    _jsonHighlightingDefinition = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                                }
                             }
                         }
-                        else
-                        {
-                            _textEditorPreview.SyntaxHighlighting = null;
-                        }
                     }
+                    _textEditorPreview.SyntaxHighlighting = _jsonHighlightingDefinition;
                 }
                 else
                 {
@@ -334,6 +335,13 @@ namespace AssetsManager.Services.Explorer
                     if (mainMip.Span.TryGetSpan(out Span<ColorRgba32> pixelSpan))
                     {
                         var pixelBytes = MemoryMarshal.AsBytes(pixelSpan).ToArray();
+                        for (int i = 0; i < pixelBytes.Length; i += 4)
+                        {
+                            var r = pixelBytes[i];
+                            var b = pixelBytes[i + 2];
+                            pixelBytes[i] = b;
+                            pixelBytes[i + 2] = r;
+                        }
                         var bmp = BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelBytes, width * 4);
                         bmp.Freeze();
                         return bmp;

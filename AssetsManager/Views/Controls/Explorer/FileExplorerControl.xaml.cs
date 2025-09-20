@@ -295,6 +295,13 @@ namespace AssetsManager.Views.Controls.Explorer
 
             if (containerNode != null)
             {
+                // Collapse all children recursively
+                foreach (var child in containerNode.Children)
+                {
+                    CollapseAll(child);
+                }
+
+                // Now, collapse the container itself
                 containerNode.IsExpanded = false;
 
                 _ = Dispatcher.BeginInvoke(new Action(() =>
@@ -303,7 +310,7 @@ namespace AssetsManager.Views.Controls.Explorer
                 }), DispatcherPriority.ContextIdle);
             }
         }
-
+        
         private void CollapseAll(FileSystemNodeModel node)
         {
             node.IsExpanded = false;

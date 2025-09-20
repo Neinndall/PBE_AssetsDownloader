@@ -68,7 +68,7 @@ namespace AssetsManager.Views.Controls.Monitor
             if (ServiceProvider == null || JsonDataService == null || AppSettings == null || CustomMessageBoxService == null) return;
 
             var dialog = ServiceProvider.GetRequiredService<InputDialog>();
-            dialog.Initialize("Add URL", "Enter the URL of the file or directory:", "");
+            dialog.Initialize("Add Urls", "Enter urls (one per line):", "", isMultiLine: true);
             dialog.Owner = Window.GetWindow(this);
 
             if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.InputText))
@@ -105,33 +105,47 @@ namespace AssetsManager.Views.Controls.Monitor
             }
         }
 
-        public async Task AddMonitoredUrlAsync(string newUrl)
+        public async Task AddMonitoredUrlAsync(string urlsAsText)
         {
-            if (string.IsNullOrWhiteSpace(newUrl) || !IsValidUrl(newUrl))
+            var initialUrls = urlsAsText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(url => url.Trim())
+                                        .Where(url => !string.IsNullOrWhiteSpace(url))
+                                        .ToList();
+
+            if (!initialUrls.Any())
             {
-                CustomMessageBoxService.ShowWarning("Invalid URL", "The entered URL is not valid.");
                 return;
             }
 
-            var urlsToAdd = new List<string>();
-
-            if (newUrl.EndsWith("/"))
+            var finalUrlsToAdd = new List<string>();
+            foreach (var url in initialUrls)
             {
-                var fileInfos = await JsonDataService.GetFileUrlsFromDirectoryAsync(newUrl);
-                if (!fileInfos.Any())
+                if (!IsValidUrl(url))
                 {
-                    CustomMessageBoxService.ShowWarning("Empty Directory", "Could not find any .json files in the specified directory.");
-                    return;
+                    CustomMessageBoxService.ShowWarning("Invalid URL", $"The URL '{url}' is not valid and will be ignored.");
+                    continue;
                 }
-                urlsToAdd.AddRange(fileInfos.Select(fi => fi.Url));
-            }
-            else
-            {
-                urlsToAdd.Add(newUrl);
+
+                if (url.EndsWith("/"))
+                {
+                    var fileInfos = await JsonDataService.GetFileUrlsFromDirectoryAsync(url);
+                    if (!fileInfos.Any())
+                    {
+                        CustomMessageBoxService.ShowWarning("Empty Directory", $"Could not find any .json files in '{url}'.");
+                    }
+                    else
+                    {
+                        finalUrlsToAdd.AddRange(fileInfos.Select(fi => fi.Url));
+                    }
+                }
+                else
+                {
+                    finalUrlsToAdd.Add(url);
+                }
             }
 
             int addedCount = 0;
-            foreach (var url in urlsToAdd)
+            foreach (var url in finalUrlsToAdd.Distinct())
             {
                 if (!AppSettings.MonitoredJsonFiles.Contains(url))
                 {
@@ -149,7 +163,7 @@ namespace AssetsManager.Views.Controls.Monitor
             }
             else
             {
-                CustomMessageBoxService.ShowInfo("Duplicate URL", "The specified URL(s) are already being monitored.");
+                CustomMessageBoxService.ShowInfo("No New URLs", "All specified URL(s) are already being monitored or were invalid.");
             }
         }
 

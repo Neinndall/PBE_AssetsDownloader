@@ -8,6 +8,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using BCnEncoder.Shared;
+using System.Runtime.InteropServices;
+using LeagueToolkit.Core.Renderer;
 
 namespace AssetsManager.Services.Explorer
 {
@@ -89,8 +94,18 @@ namespace AssetsManager.Services.Explorer
         {
             try
             {
-                string destFilePath = Path.Combine(destinationPath, fileNode.Name);
-                File.Copy(fileNode.FullPath, destFilePath, true);
+                if (Path.GetExtension(fileNode.Name).Equals(".tex", StringComparison.OrdinalIgnoreCase))
+                {
+                    string pngFileName = Path.ChangeExtension(fileNode.Name, ".png");
+                    string destFilePath = Path.Combine(destinationPath, pngFileName);
+                        
+                    byte[] fileData = File.ReadAllBytes(fileNode.FullPath);
+                    ConvertTexToPng(fileData, destFilePath);
+                }
+                else
+                {                    string destFilePath = Path.Combine(destinationPath, fileNode.Name);
+                    File.Copy(fileNode.FullPath, destFilePath, true);
+                }
             }
             catch (Exception ex)
             {
@@ -104,8 +119,6 @@ namespace AssetsManager.Services.Explorer
             {
                 try
                 {
-                    string destFilePath = Path.Combine(destinationPath, fileNode.Name);
-
                     using var wadFile = new WadFile(fileNode.SourceWadPath);
 
                     if (!wadFile.Chunks.TryGetValue(fileNode.SourceChunkPathHash, out var chunk))
@@ -114,15 +127,60 @@ namespace AssetsManager.Services.Explorer
                         return;
                     }
 
-                    using var decompressedData = wadFile.LoadChunkDecompressed(chunk);
+                    using var decompressedDataOwner = wadFile.LoadChunkDecompressed(chunk);
+                    var decompressedData = decompressedDataOwner.Span;
 
-                    File.WriteAllBytes(destFilePath, decompressedData.Span.ToArray());
+                    if (Path.GetExtension(fileNode.Name).Equals(".tex", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string pngFileName = Path.ChangeExtension(fileNode.Name, ".png");
+                        string destFilePath = Path.Combine(destinationPath, pngFileName);
+                        ConvertTexToPng(decompressedData.ToArray(), destFilePath);
+                    }
+                    else
+                    {
+                        string destFilePath = Path.Combine(destinationPath, fileNode.Name);
+                        File.WriteAllBytes(destFilePath, decompressedData.ToArray());
+                    }
                 }
                 catch (Exception ex)
                 {
                     _logService.LogError(ex, $"Failed to extract virtual file: {fileNode.FullPath}");
                 }
             });
+        }
+
+        private void ConvertTexToPng(byte[] texData, string destinationPngPath)
+        {
+            using var stream = new MemoryStream(texData);
+            var texture = Texture.Load(stream);
+            if (texture.Mips.Length > 0)
+            {
+                var mainMip = texture.Mips[0];
+                var width = mainMip.Width;
+                var height = mainMip.Height;
+                if (mainMip.Span.TryGetSpan(out Span<ColorRgba32> pixelSpan))
+                {
+                    var pixelBytes = MemoryMarshal.AsBytes(pixelSpan).ToArray();
+                    // Swap R and B channels
+                    for (int i = 0; i < pixelBytes.Length; i += 4)
+                    {
+                        var r = pixelBytes[i];
+                        var b = pixelBytes[i + 2];
+                        pixelBytes[i] = b;
+                        pixelBytes[i + 2] = r;
+                    }
+                    var bmp = BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixelBytes, width * 4);
+                    bmp.Freeze();
+                    
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bmp));
+
+                    using (var fileStream = new FileStream(destinationPngPath, FileMode.Create))
+                    {
+                        encoder.Save(fileStream);
+                    }
+                }
+            }
         }
     }
 }

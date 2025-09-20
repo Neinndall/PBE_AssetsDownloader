@@ -1,0 +1,27 @@
+<UserControl x:Class="AssetsManager.Views.Dialogs.Controls.DiffNavigationPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AssetsManager.Views.Dialogs.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="40">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Old Version Panel -->
+        <Grid Grid.Column="0">
+            <Rectangle Fill="{StaticResource SidebarBackground}"/>
+            <local:VisualHost x:Name="OldDiffMapHost"/>
+        </Grid>
+
+        <!-- New Version Panel -->
+        <Grid Grid.Column="1">
+            <Rectangle Fill="{StaticResource SidebarBackground}"/>
+            <local:VisualHost x:Name="NewDiffMapHost"/>
+        </Grid>
+    </Grid>
+</UserControl>

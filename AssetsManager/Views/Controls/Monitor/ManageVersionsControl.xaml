@@ -129,13 +129,13 @@
                         <ColumnDefinition Width="54*"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <materialDesign:MaterialIcon Kind="FileDocument" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="File Name" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="35,0,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
@@ -216,13 +216,13 @@
                         <ColumnDefinition Width="54*"/>
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <materialDesign:MaterialIcon Kind="FileDocument" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="File Name" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource HalfModernGridViewColumnHeader}">
-                        <StackPanel Orientation="Horizontal" Margin="35,0,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <materialDesign:MaterialIcon Kind="DateRange" Style="{StaticResource HeaderIconStyle}"/>
                             <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                         </StackPanel>

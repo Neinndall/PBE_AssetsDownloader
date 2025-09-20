@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace AssetsManager.Views.Models
 {
-    public class PinnedFileViewModel : INotifyPropertyChanged
+    public class PinnedFileModel : INotifyPropertyChanged
     {
         public FileSystemNodeModel Node { get; }
         public string Header => Node.Name;
@@ -21,7 +21,7 @@ namespace AssetsManager.Views.Models
             }
         }
 
-        public PinnedFileViewModel(FileSystemNodeModel node)
+        public PinnedFileModel(FileSystemNodeModel node)
         {
             Node = node;
         }

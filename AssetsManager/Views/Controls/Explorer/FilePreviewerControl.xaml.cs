@@ -20,51 +20,30 @@ namespace AssetsManager.Views.Controls.Explorer
         public DirectoriesCreator DirectoriesCreator { get; set; }
         public ExplorerPreviewService ExplorerPreviewService { get; set; }
 
-        public FilePreviewerViewModel ViewModel { get; set; }
+        public PinnedFilesManager ViewModel { get; set; }
         private bool _isLoaded = false;
 
         public FilePreviewerControl()
         {
             InitializeComponent();
-            ViewModel = new FilePreviewerViewModel();
-            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+            ViewModel = new PinnedFilesManager();
             this.DataContext = ViewModel;
             this.Loaded += FilePreviewerControl_Loaded;
             this.Unloaded += FilePreviewerControl_Unloaded;
         }
 
-        private async void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(FilePreviewerViewModel.SelectedFile))
-            {
-                await HandleSelectedFileChangedAsync();
-            }
-        }
-
-        private async Task HandleSelectedFileChangedAsync()
-        {
-            try
-            {
-                await ShowPreviewAsync(ViewModel.SelectedFile?.Node);
-            }
-            catch (Exception ex)
-            {
-                LogService.LogError(ex, "Error handling selected file change");
-            }
-        }
-
         private async void Tab_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
+            if (sender is FrameworkElement element && element.DataContext is PinnedFileModel vm)
             {
                 ViewModel.SelectedFile = vm;
-                await HandleSelectedFileChangedAsync();
+                await ExplorerPreviewService.ShowPreviewAsync(vm.Node);
             }
         }
 
         private void CloseTabButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is PinnedFileViewModel vm)
+            if (sender is FrameworkElement element && element.DataContext is PinnedFileModel vm)
             {
                 ViewModel.UnpinFile(vm);
             }
@@ -119,12 +98,10 @@ namespace AssetsManager.Views.Controls.Explorer
             }
             else
             {
-                ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
                 ViewModel.SelectedFile = null;
-                ViewModel.PropertyChanged += ViewModel_PropertyChanged;
-
-                await ExplorerPreviewService.ShowPreviewAsync(node);
             }
+            
+            await ExplorerPreviewService.ShowPreviewAsync(node);
         }
 
         private async Task InitializeWebView2()

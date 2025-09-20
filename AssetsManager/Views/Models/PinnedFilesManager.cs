@@ -6,12 +6,12 @@ using AssetsManager.Services.Explorer;
 
 namespace AssetsManager.Views.Models
 {
-    public class FilePreviewerViewModel : INotifyPropertyChanged
+    public class PinnedFilesManager : INotifyPropertyChanged
     {
-        public ObservableCollection<PinnedFileViewModel> PinnedFiles { get; set; }
+        public ObservableCollection<PinnedFileModel> PinnedFiles { get; set; }
 
-        private PinnedFileViewModel _selectedFile;
-        public PinnedFileViewModel SelectedFile
+        private PinnedFileModel _selectedFile;
+        public PinnedFileModel SelectedFile
         {
             get => _selectedFile;
             set
@@ -26,9 +26,9 @@ namespace AssetsManager.Views.Models
             }
         }
 
-        public FilePreviewerViewModel()
+        public PinnedFilesManager()
         {
-            PinnedFiles = new ObservableCollection<PinnedFileViewModel>();
+            PinnedFiles = new ObservableCollection<PinnedFileModel>();
         }
 
         public void PinFile(FileSystemNodeModel node)
@@ -43,13 +43,13 @@ namespace AssetsManager.Views.Models
             }
             else
             {
-                var newPinnedFile = new PinnedFileViewModel(node);
+                var newPinnedFile = new PinnedFileModel(node);
                 PinnedFiles.Add(newPinnedFile);
                 SelectedFile = newPinnedFile;
             }
         }
 
-        public void UnpinFile(PinnedFileViewModel fileToUnpin)
+        public void UnpinFile(PinnedFileModel fileToUnpin)
         {
             if (fileToUnpin == null) return;
 

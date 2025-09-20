@@ -96,7 +96,7 @@ namespace AssetsManager.Views.Help
                 }
 
                 if (currentVersion == null) continue;
-                if (string.IsNullOrWhiteSpace(trimmedLine)) continue;
+                if (string.IsNullOrWhiteSpace(trimmedLine) || trimmedLine.StartsWith(">>>>>")) continue;
 
                 if (!line.StartsWith(" ") && !line.StartsWith("\t") && !trimmedLine.StartsWith("*") && !trimmedLine.StartsWith("-"))
                 {

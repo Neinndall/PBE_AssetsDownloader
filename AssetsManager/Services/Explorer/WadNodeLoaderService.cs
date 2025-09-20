@@ -1,10 +1,12 @@
 using AssetsManager.Services.Hashes;
-using AssetsManager.Services;
 using AssetsManager.Views.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using LeagueToolkit.Core.Wad;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace AssetsManager.Services.Explorer
 {
@@ -15,6 +17,90 @@ namespace AssetsManager.Services.Explorer
         public WadNodeLoaderService(HashResolverService hashResolverService)
         {
             _hashResolverService = hashResolverService;
+        }
+
+        public async Task<List<FileSystemNodeModel>> LoadFromBackupAsync(string jsonPath)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter() }
+            };
+
+            string jsonContent = await File.ReadAllTextAsync(jsonPath);
+            var comparisonData = JsonSerializer.Deserialize<WadComparisonData>(jsonContent, options);
+
+            var rootNodes = new List<FileSystemNodeModel>();
+            if (comparisonData?.Diffs == null || !comparisonData.Diffs.Any())
+            {
+                return rootNodes;
+            }
+
+            string backupRoot = Path.GetDirectoryName(jsonPath);
+            var diffsByWad = comparisonData.Diffs.GroupBy(d => d.SourceWadFile);
+
+            foreach (var wadGroup in diffsByWad)
+            {
+                var wadNode = new FileSystemNodeModel(wadGroup.Key, true, wadGroup.Key, wadGroup.Key);
+
+                var newFiles = wadGroup.Where(d => d.Type == ChunkDiffType.New).ToList();
+                if (newFiles.Any())
+                {
+                    var newFilesNode = new FileSystemNodeModel("[+] New", true, "New", wadGroup.Key) { Status = DiffStatus.New };
+                    foreach (var file in newFiles)
+                    {
+                        string chunkPath = Path.Combine(backupRoot, "wad_chunks", "new", $"{file.NewPathHash:X16}.chunk");
+                        var node = AddNodeToVirtualTree(newFilesNode, file.Path, chunkPath, file.NewPathHash, DiffStatus.New);
+                        node.ChunkDiff = file;
+                    }
+                    wadNode.Children.Add(newFilesNode);
+                }
+
+                var modifiedFiles = wadGroup.Where(d => d.Type == ChunkDiffType.Modified).ToList();
+                if (modifiedFiles.Any())
+                {
+                    var modifiedFilesNode = new FileSystemNodeModel("[~] Modified", true, "Modified", wadGroup.Key) { Status = DiffStatus.Modified };
+                    foreach (var file in modifiedFiles)
+                    {
+                        string chunkPath = Path.Combine(backupRoot, "wad_chunks", "new", $"{file.NewPathHash:X16}.chunk");
+                        var node = AddNodeToVirtualTree(modifiedFilesNode, file.Path, chunkPath, file.NewPathHash, DiffStatus.Modified);
+                        node.ChunkDiff = file;
+                    }
+                    wadNode.Children.Add(modifiedFilesNode);
+                }
+
+                var renamedFiles = wadGroup.Where(d => d.Type == ChunkDiffType.Renamed).ToList();
+                if (renamedFiles.Any())
+                {
+                    var renamedFilesNode = new FileSystemNodeModel("[>] Renamed", true, "Renamed", wadGroup.Key) { Status = DiffStatus.Renamed };
+                    foreach (var file in renamedFiles)
+                    {
+                        string chunkPath = Path.Combine(backupRoot, "wad_chunks", "new", $"{file.NewPathHash:X16}.chunk");
+                        var node = AddNodeToVirtualTree(renamedFilesNode, file.Path, chunkPath, file.NewPathHash, DiffStatus.Renamed);
+                        node.OldPath = file.OldPath;
+                        node.ChunkDiff = file;
+                    }
+                    wadNode.Children.Add(renamedFilesNode);
+                }
+
+                var deletedFiles = wadGroup.Where(d => d.Type == ChunkDiffType.Removed).ToList();
+                if (deletedFiles.Any())
+                {
+                    var deletedFilesNode = new FileSystemNodeModel("[-] Deleted", true, "Deleted", wadGroup.Key) { Status = DiffStatus.Deleted };
+                    foreach (var file in deletedFiles)
+                    {
+                        string chunkPath = Path.Combine(backupRoot, "wad_chunks", "old", $"{file.OldPathHash:X16}.chunk");
+                        var node = AddNodeToVirtualTree(deletedFilesNode, file.Path, chunkPath, file.OldPathHash, DiffStatus.Deleted);
+                        node.ChunkDiff = file;
+                    }
+                    wadNode.Children.Add(deletedFilesNode);
+                }
+
+                SortChildrenRecursively(wadNode);
+                rootNodes.Add(wadNode);
+            }
+
+            return rootNodes;
         }
 
         private void SortChildrenRecursively(FileSystemNodeModel node)
@@ -59,7 +145,7 @@ namespace AssetsManager.Services.Explorer
             return childrenToAdd;
         }
 
-        private void AddNodeToVirtualTree(FileSystemNodeModel root, string virtualPath, string wadPath, ulong chunkHash)
+        private FileSystemNodeModel AddNodeToVirtualTree(FileSystemNodeModel root, string virtualPath, string wadPath, ulong chunkHash, DiffStatus status = DiffStatus.Unchanged)
         {
             string[] parts = virtualPath.Replace('\\', '/').Split('/');
             var currentNode = root;
@@ -71,7 +157,10 @@ namespace AssetsManager.Services.Explorer
                 if (childDir == null)
                 {
                     var newVirtualPath = string.Join("/", parts.Take(i + 1));
-                    childDir = new FileSystemNodeModel(dirName, true, newVirtualPath, wadPath);
+                    childDir = new FileSystemNodeModel(dirName, true, newVirtualPath, wadPath)
+                    {
+                        Status = status
+                    };
                     currentNode.Children.Add(childDir);
                 }
                 currentNode = childDir;
@@ -79,10 +168,11 @@ namespace AssetsManager.Services.Explorer
 
             var fileNode = new FileSystemNodeModel(parts.Last(), false, virtualPath, wadPath)
             {
-                SourceChunkPathHash = chunkHash
+                SourceChunkPathHash = chunkHash,
+                Status = status
             };
             currentNode.Children.Add(fileNode);
+            return fileNode;
         }
-
     }
 }

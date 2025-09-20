@@ -54,6 +54,7 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             Toolbar.SearchTextChanged += Toolbar_SearchTextChanged;
             Toolbar.CollapseToContainerClicked += Toolbar_CollapseToContainerClicked;
+            Toolbar.LoadComparisonClicked += Toolbar_LoadComparisonClicked;
 
             var settings = AppSettings.LoadSettings();
             if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
@@ -66,6 +67,52 @@ namespace AssetsManager.Views.Controls.Explorer
                 NoDirectoryMessage.Visibility = Visibility.Visible;
             }
         }
+
+        private async void Toolbar_LoadComparisonClicked(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "Select wadcomparison.json",
+                Filter = "WAD Comparison JSON|wadcomparison.json|All files (*.*)|*.*"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                await BuildTreeFromBackupAsync(openFileDialog.FileName);
+            }
+        }
+
+        private async Task BuildTreeFromBackupAsync(string jsonPath)
+        {
+            NoDirectoryMessage.Visibility = Visibility.Collapsed;
+            FileTreeView.Visibility = Visibility.Collapsed;
+            LoadingIndicator.Visibility = Visibility.Visible;
+
+            try
+            {
+                RootNodes.Clear();
+                // Note: LoadFromBackupAsync will be created in the next step.
+                var backupNodes = await WadNodeLoaderService.LoadFromBackupAsync(jsonPath);
+                foreach (var node in backupNodes)
+                {
+                    RootNodes.Add(node);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.LogError(ex, "Failed to build tree from backup.");
+                CustomMessageBoxService.ShowError("Error", "Could not load the backup file. Please check the logs.", Window.GetWindow(this));
+                NoDirectoryMessage.Visibility = Visibility.Visible;
+            }
+            finally
+            {
+                LoadingIndicator.Visibility = Visibility.Collapsed;
+                FileTreeView.Visibility = Visibility.Visible;
+                Toolbar.Visibility = Visibility.Visible;
+                ToolbarSeparator.Visibility = Visibility.Visible;
+            }
+        }
+
 
         private async void ExtractSelected_Click(object sender, RoutedEventArgs e)
         {
@@ -284,12 +331,25 @@ namespace AssetsManager.Views.Controls.Explorer
             if (path == null) return;
 
             FileSystemNodeModel containerNode = null;
+
+            // First, try to find a traditional WAD container
             for (int i = path.Count - 1; i >= 0; i--)
             {
                 if (path[i].Type == NodeType.WadFile)
                 {
                     containerNode = path[i];
                     break;
+                }
+            }
+
+            // If not found, we might be in a backup view. The container is the root of the backup.
+            if (containerNode == null && path.Count > 0)
+            {
+                var rootNode = path[0];
+                bool isBackupRoot = rootNode.Children.Any(c => c.Name.StartsWith("["));
+                if (isBackupRoot)
+                {
+                    containerNode = rootNode;
                 }
             }
 

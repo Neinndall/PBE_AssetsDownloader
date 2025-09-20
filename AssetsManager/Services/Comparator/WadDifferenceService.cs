@@ -102,6 +102,18 @@ namespace AssetsManager.Services.Comparator
             return await PrepareDataFromBytesAsync(oldData, newData, extension);
         }
 
+        public async Task<byte[]> GetDataFromChunkAsync(FileSystemNodeModel node)
+        {
+            if (node.ChunkDiff == null || !File.Exists(node.SourceWadPath))
+            {
+                return null;
+            }
+
+            byte[] compressedData = await File.ReadAllBytesAsync(node.SourceWadPath);
+            var compressionType = node.ChunkDiff.Type == ChunkDiffType.Removed ? node.ChunkDiff.OldCompressionType : node.ChunkDiff.NewCompressionType;
+            return WadChunkUtils.DecompressChunk(compressedData, compressionType);
+        }
+
         private async Task<(string DataType, object OldData, object NewData)> PrepareDataFromBytesAsync(byte[] oldData, byte[] newData, string extension)
         {
             var jsExtensions = new[] { ".js" };

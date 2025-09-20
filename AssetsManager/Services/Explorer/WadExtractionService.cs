@@ -119,27 +119,36 @@ namespace AssetsManager.Services.Explorer
             {
                 try
                 {
-                    using var wadFile = new WadFile(fileNode.SourceWadPath);
+                    byte[] decompressedData;
 
-                    if (!wadFile.Chunks.TryGetValue(fileNode.SourceChunkPathHash, out var chunk))
+                    if (fileNode.SourceWadPath.EndsWith(".chunk"))
                     {
-                        _logService.LogWarning($"Chunk with hash {fileNode.SourceChunkPathHash:x16} not found in {fileNode.SourceWadPath}");
-                        return;
+                        byte[] compressedData = File.ReadAllBytes(fileNode.SourceWadPath);
+                        var compressionType = fileNode.ChunkDiff.Type == ChunkDiffType.Removed ? fileNode.ChunkDiff.OldCompressionType : fileNode.ChunkDiff.NewCompressionType;
+                        decompressedData = WadChunkUtils.DecompressChunk(compressedData, compressionType);
                     }
-
-                    using var decompressedDataOwner = wadFile.LoadChunkDecompressed(chunk);
-                    var decompressedData = decompressedDataOwner.Span;
+                    else
+                    {
+                        using var wadFile = new WadFile(fileNode.SourceWadPath);
+                        if (!wadFile.Chunks.TryGetValue(fileNode.SourceChunkPathHash, out var chunk))
+                        {
+                            _logService.LogWarning($"Chunk with hash {fileNode.SourceChunkPathHash:x16} not found in {fileNode.SourceWadPath}");
+                            return;
+                        }
+                        using var decompressedDataOwner = wadFile.LoadChunkDecompressed(chunk);
+                        decompressedData = decompressedDataOwner.Span.ToArray();
+                    }
 
                     if (Path.GetExtension(fileNode.Name).Equals(".tex", StringComparison.OrdinalIgnoreCase))
                     {
                         string pngFileName = Path.ChangeExtension(fileNode.Name, ".png");
                         string destFilePath = Path.Combine(destinationPath, pngFileName);
-                        ConvertTexToPng(decompressedData.ToArray(), destFilePath);
+                        ConvertTexToPng(decompressedData, destFilePath);
                     }
                     else
                     {
                         string destFilePath = Path.Combine(destinationPath, fileNode.Name);
-                        File.WriteAllBytes(destFilePath, decompressedData.ToArray());
+                        File.WriteAllBytes(destFilePath, decompressedData);
                     }
                 }
                 catch (Exception ex)

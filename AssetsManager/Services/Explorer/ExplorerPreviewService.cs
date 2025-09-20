@@ -27,6 +27,7 @@ using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System.Xml;
+using AssetsManager.Services.Comparator;
 
 namespace AssetsManager.Services.Explorer
 {
@@ -50,13 +51,15 @@ namespace AssetsManager.Services.Explorer
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly HashResolverService _hashResolverService;
         private readonly JsBeautifierService _jsBeautifierService;
+        private readonly WadDifferenceService _wadDifferenceService;
 
-        public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService, JsBeautifierService jsBeautifierService)
+        public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService, JsBeautifierService jsBeautifierService, WadDifferenceService wadDifferenceService)
         {
             _logService = logService;
             _directoriesCreator = directoriesCreator;
             _hashResolverService = hashResolverService;
             _jsBeautifierService = jsBeautifierService;
+            _wadDifferenceService = wadDifferenceService;
         }
 
         public void Initialize(Image imagePreview, WebView2 webView2Preview, TextEditor textEditor, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
@@ -171,31 +174,50 @@ namespace AssetsManager.Services.Explorer
 
         private async Task PreviewWadFile(FileSystemNodeModel node)
         {
-            if (string.IsNullOrEmpty(node.SourceWadPath) || node.SourceChunkPathHash == 0)
+            if (string.IsNullOrEmpty(node.SourceWadPath))
             {
                 await ShowUnsupportedPreviewAsync(node.Extension);
                 return;
             }
 
-            byte[] decompressedData;
-            try
+            if (node.SourceWadPath.EndsWith(".chunk"))
             {
-                decompressedData = await Task.Run(() =>
+                byte[] decompressedData = await _wadDifferenceService.GetDataFromChunkAsync(node);
+                if (decompressedData == null)
                 {
-                    using var wadFile = new WadFile(node.SourceWadPath);
-                    var chunk = wadFile.FindChunk(node.SourceChunkPathHash);
-                    using var decompressedOwner = wadFile.LoadChunkDecompressed(chunk);
-                    return decompressedOwner.Span.ToArray();
-                });
+                    await ShowUnsupportedPreviewAsync(node.Extension);
+                    return;
+                }
+                await DispatchPreview(decompressedData, node.Extension);
             }
-            catch (Exception ex)
+            else
             {
-                _logService.LogError(ex, $"Failed to decompress chunk for preview: {node.FullPath}");
-                await ShowUnsupportedPreviewAsync(node.Extension);
-                return;
-            }
+                if (node.SourceChunkPathHash == 0)
+                {
+                    await ShowUnsupportedPreviewAsync(node.Extension);
+                    return;
+                }
 
-            await DispatchPreview(decompressedData, node.Extension);
+                byte[] decompressedData;
+                try
+                {
+                    decompressedData = await Task.Run(() =>
+                    {
+                        using var wadFile = new WadFile(node.SourceWadPath);
+                        var chunk = wadFile.FindChunk(node.SourceChunkPathHash);
+                        using var decompressedOwner = wadFile.LoadChunkDecompressed(chunk);
+                        return decompressedOwner.Span.ToArray();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError(ex, $"Failed to decompress chunk for preview: {node.FullPath}");
+                    await ShowUnsupportedPreviewAsync(node.Extension);
+                    return;
+                }
+
+                await DispatchPreview(decompressedData, node.Extension);
+            }
         }
 
         private async Task DispatchPreview(byte[] data, string extension)

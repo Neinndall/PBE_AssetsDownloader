@@ -22,7 +22,8 @@ namespace AssetsManager.Views
             WadSearchBoxService wadSearchBoxService,
             DirectoriesCreator directoriesCreator,
             ExplorerPreviewService explorerPreviewService,
-            JsBeautifierService jsBeautifierService
+            JsBeautifierService jsBeautifierService,
+            DiffViewService diffViewService
         )
         {
             InitializeComponent();
@@ -32,6 +33,7 @@ namespace AssetsManager.Views
             FileExplorer.WadNodeLoaderService = wadNodeLoaderService;
             FileExplorer.WadExtractionService = wadExtractionService;
             FileExplorer.WadSearchBoxService = wadSearchBoxService;
+            FileExplorer.DiffViewService = diffViewService;
 
             FilePreviewer.LogService = logService;
             FilePreviewer.CustomMessageBoxService = customMessageBoxService;

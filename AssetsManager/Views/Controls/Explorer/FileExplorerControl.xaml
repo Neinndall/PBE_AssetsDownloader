@@ -20,6 +20,11 @@
                     <materialIcons:MaterialIcon Kind="FileDownload"/>
                 </MenuItem.Icon>
             </MenuItem>
+            <MenuItem Header="View Changes" x:Name="ViewChangesMenuItem" Click="ViewChanges_Click">
+                <MenuItem.Icon>
+                    <materialIcons:MaterialIcon Kind="CompareHorizontal"/>
+                </MenuItem.Icon>
+            </MenuItem>
             <MenuItem Header="Pin" x:Name="PinMenuItem" Click="PinSelected_Click">
                 <MenuItem.Icon>
                     <materialIcons:MaterialIcon Kind="Pin"/>

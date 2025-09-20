@@ -11,12 +11,14 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using AssetsManager.Services.Comparator;
-using AssetsManager.Services.Hashes;
-using AssetsManager.Services.Core;
-using AssetsManager.Services.Explorer;
-using AssetsManager.Utils;
-using AssetsManager.Views.Models;
+using AssetsManager.Services.Monitor;
+using Microsoft.Extensions.DependencyInjection;
+using AssetsManager.Services.Comparator;  
+using AssetsManager.Services.Hashes;      
+using AssetsManager.Services.Core;        
+using AssetsManager.Services.Explorer;    
+using AssetsManager.Utils;                
+using AssetsManager.Views.Models;         
 
 namespace AssetsManager.Views.Controls.Explorer
 {
@@ -27,6 +29,7 @@ namespace AssetsManager.Views.Controls.Explorer
         public FilePreviewerControl FilePreviewer { get; set; }
 
         public MenuItem PinMenuItem => (this.FindResource("ExplorerContextMenu") as ContextMenu)?.Items.OfType<MenuItem>().FirstOrDefault(m => m.Name == "PinMenuItem");
+        public MenuItem ViewChangesMenuItem => (this.FindResource("ExplorerContextMenu") as ContextMenu)?.Items.OfType<MenuItem>().FirstOrDefault(m => m.Name == "ViewChangesMenuItem");
 
         public LogService LogService { get; set; }
         public CustomMessageBoxService CustomMessageBoxService { get; set; }
@@ -34,6 +37,7 @@ namespace AssetsManager.Views.Controls.Explorer
         public WadNodeLoaderService WadNodeLoaderService { get; set; }
         public WadExtractionService WadExtractionService { get; set; }
         public WadSearchBoxService WadSearchBoxService { get; set; }
+        public DiffViewService DiffViewService { get; set; }
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
         private readonly DispatcherTimer _searchTimer;
@@ -151,6 +155,17 @@ namespace AssetsManager.Views.Controls.Explorer
             }
         }
 
+        private async void ViewChanges_Click(object sender, RoutedEventArgs e)
+        {
+            if (FileTreeView.SelectedItem is not FileSystemNodeModel { ChunkDiff: not null } selectedNode) return;
+
+            string backupDir = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(selectedNode.SourceWadPath)));
+            string oldChunksPath = Path.Combine(backupDir, "wad_chunks", "old");
+            string newChunksPath = Path.Combine(backupDir, "wad_chunks", "new");
+
+            await DiffViewService.ShowWadDiffAsync(selectedNode.ChunkDiff, oldChunksPath, newChunksPath, Window.GetWindow(this));
+        }
+
         private void PinSelected_Click(object sender, RoutedEventArgs e)
         {
             if (FileTreeView.SelectedItem is FileSystemNodeModel selectedNode)
@@ -161,9 +176,16 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
-            if (PinMenuItem is not null && FileTreeView.SelectedItem is FileSystemNodeModel selectedNode)
+            if (FileTreeView.SelectedItem is not FileSystemNodeModel selectedNode) return;
+
+            if (PinMenuItem is not null)
             {
                 PinMenuItem.IsEnabled = selectedNode.Type != NodeType.RealDirectory && selectedNode.Type != NodeType.VirtualDirectory;
+            }
+
+            if (ViewChangesMenuItem is not null)
+            {
+                ViewChangesMenuItem.IsEnabled = selectedNode.Status == DiffStatus.Modified;
             }
         }
 

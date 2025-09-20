@@ -12,7 +12,6 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using AssetsManager.Services.Monitor;
-using Microsoft.Extensions.DependencyInjection;
 using AssetsManager.Services.Comparator;  
 using AssetsManager.Services.Hashes;      
 using AssetsManager.Services.Core;        

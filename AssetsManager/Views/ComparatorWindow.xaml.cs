@@ -13,8 +13,6 @@ namespace AssetsManager.Views
 {
     public partial class ComparatorWindow : UserControl
     {
-        public event EventHandler<LoadWadComparisonEventArgs> LoadWadComparisonRequested;
-
         public ComparatorWindow(
             CustomMessageBoxService customMessageBoxService,
             WadComparatorService wadComparatorService,
@@ -31,7 +29,6 @@ namespace AssetsManager.Views
             )
         {
             InitializeComponent();
-            WadComparisonControl.LoadWadComparisonRequested += (sender, args) => LoadWadComparisonRequested?.Invoke(this, args);
 
             // Set services for JsonComparisonControl
             JsonComparisonControl.CustomMessageBoxService = customMessageBoxService;

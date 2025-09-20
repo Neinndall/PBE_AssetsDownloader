@@ -40,18 +40,21 @@
         <!-- Manual Header -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="65*"/>
-                <ColumnDefinition Width="35*"/>
+                <ColumnDefinition Width="60*"/>
+                <ColumnDefinition Width="40*"/>
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Style="{StaticResource FirstModernGridViewColumnHeader}">
-                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <materialDesign:MaterialIcon Kind="FileDocument" Style="{StaticResource HeaderIconStyle}"/>
                     <TextBlock Text="FileName" Style="{StaticResource HeaderTextStyle}"/>
                 </StackPanel>
             </Border>
-            <Border Grid.Column="1" Style="{StaticResource LastModernGridViewColumnHeader}">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="-8,0,0,0">
+            <Border Grid.Column="1" 
+                    Style="{StaticResource LastModernGridViewColumnHeader}"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1,1,1,1">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <materialDesign:MaterialIcon Kind="Clock" Style="{StaticResource HeaderIconStyle}"/>
                     <TextBlock Text="Date" Style="{StaticResource HeaderTextStyle}"/>
                 </StackPanel>
@@ -70,14 +73,13 @@
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="65*"/>
-                            <ColumnDefinition Width="35*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="40*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" 
                                    Text="{Binding FileName}"
                                    Style="{StaticResource CellTextStyle}"
-                                   FontWeight="Medium"
-                                   Margin="10,0,0,0" />
+                                   FontWeight="Medium" />
                         <TextBlock Grid.Column="1" 
                                    Text="{Binding Timestamp, StringFormat='dd/MM/yyyy HH:mm:ss'}" 
                                    HorizontalAlignment="Center"

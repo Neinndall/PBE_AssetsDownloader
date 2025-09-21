@@ -47,6 +47,13 @@ namespace AssetsManager.Views
         {
             if (e.NewValue is FileSystemNodeModel selectedNode)
             {
+                // A Details tab should only be for a RENAMED FILE, not a directory.
+                if (selectedNode.Status == DiffStatus.Renamed && selectedNode.Type == NodeType.VirtualFile)
+                {
+                    FilePreviewer.UpdateAndEnsureSingleDetailsTab(selectedNode);
+                }
+
+                // Always show the preview for the selected node.
                 await FilePreviewer.ShowPreviewAsync(selectedNode);
             }
         }

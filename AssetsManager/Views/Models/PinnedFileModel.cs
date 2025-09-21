@@ -4,8 +4,23 @@ namespace AssetsManager.Views.Models
 {
     public class PinnedFileModel : INotifyPropertyChanged
     {
-        public FileSystemNodeModel Node { get; }
-        public string Header => Node.Name;
+        private FileSystemNodeModel _node;
+        public FileSystemNodeModel Node
+        {
+            get => _node;
+            set
+            {
+                if (_node != value)
+                {
+                    _node = value;
+                    OnPropertyChanged(nameof(Node));
+                    OnPropertyChanged(nameof(Header));
+                }
+            }
+        }
+
+        public bool IsDetailsTab { get; set; }
+        public string Header => IsDetailsTab ? "Details" : Node?.Name;
 
         private bool _isSelected;
         public bool IsSelected

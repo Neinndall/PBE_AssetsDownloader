@@ -60,6 +60,7 @@
                 Visibility="{Binding PinnedFiles.Count, Converter={StaticResource CountToVisibilityConverter}}"/>
 
         <Grid x:Name="PreviewContainer" Margin="5">
+            <local:DetailsTabView x:Name="DetailsPreview" Visibility="Collapsed"/>
             <StackPanel x:Name="PreviewPlaceholder"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"

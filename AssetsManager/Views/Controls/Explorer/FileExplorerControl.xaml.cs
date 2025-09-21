@@ -37,6 +37,7 @@ namespace AssetsManager.Views.Controls.Explorer
         public WadExtractionService WadExtractionService { get; set; }
         public WadSearchBoxService WadSearchBoxService { get; set; }
         public DiffViewService DiffViewService { get; set; }
+        public DirectoriesCreator DirectoriesCreator { get; set; }
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
         private readonly DispatcherTimer _searchTimer;
@@ -75,8 +76,9 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             var openFileDialog = new OpenFileDialog
             {
-                Title = "Select wadcomparison.json",
-                Filter = "WAD Comparison JSON|wadcomparison.json|All files (*.*)|*.*"
+                Title = "Select Wadcomparison File",
+                Filter = "WAD Comparison JSON|wadcomparison.json|All files (*.*)|*.*",
+                InitialDirectory = DirectoriesCreator.WadComparisonSavePath
             };
 
             if (openFileDialog.ShowDialog() == true)

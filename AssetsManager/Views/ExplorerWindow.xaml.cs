@@ -34,6 +34,7 @@ namespace AssetsManager.Views
             FileExplorer.WadExtractionService = wadExtractionService;
             FileExplorer.WadSearchBoxService = wadSearchBoxService;
             FileExplorer.DiffViewService = diffViewService;
+            FileExplorer.DirectoriesCreator = directoriesCreator;
 
             FilePreviewer.LogService = logService;
             FilePreviewer.CustomMessageBoxService = customMessageBoxService;

@@ -4,7 +4,7 @@
 
 ## ✅ APP Reliability
 
-*   **Latest Version v2.4.0.1:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/226dae73b273d0ed7c0711db39636313feb3f0dedbc1a09827562c8f98b4e005/details)** 
+*   **Latest Version v2.4.0.2:** **[VirusTotal details and scans](https://www.virustotal.com/gui/file/3ee54a5be4790ebf41b7a04e40be431140057f9363366247ed9a3075917fae6c/details)** 
      *   *GITHUB* --> You cant get the sha-256 [here](https://github.com/Neinndall/AssetsManager/releases)
      *   *VIRUSTOTAL* --> You cant get the sha-256 in `details` from the link of VirusTotal in details
 

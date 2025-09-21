@@ -35,6 +35,24 @@ namespace AssetsManager.Views.Controls.Explorer
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
 
+        private void FilePreviewerControl_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (TextEditorPreview.Visibility == Visibility.Visible)
+                {
+                    FindInDocumentControl.Visibility = Visibility.Visible;
+                    FindInDocumentControl.FocusInput();
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void FindInDocumentControl_Close(object sender, RoutedEventArgs e)
+        {
+            FindInDocumentControl.Visibility = Visibility.Collapsed;
+        }
+
         private async void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ViewModel.SelectedFile))

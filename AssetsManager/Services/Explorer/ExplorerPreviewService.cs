@@ -285,6 +285,7 @@ namespace AssetsManager.Services.Explorer
                 }
 
                 _textEditorPreview.Text = textContent;
+                _textEditorPreview.Focus();
             }
             catch (Exception ex)
             {

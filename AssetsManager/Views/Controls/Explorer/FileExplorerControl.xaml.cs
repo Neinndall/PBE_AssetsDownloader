@@ -350,7 +350,7 @@ namespace AssetsManager.Views.Controls.Explorer
             FileSelected?.Invoke(this, e);
         }
 
-        private void Toolbar_SearchTextChanged(object sender, TextChangedEventArgs e)
+        private void Toolbar_SearchTextChanged(object sender, RoutedEventArgs e)
         {
             _searchTimer.Stop();
             _searchTimer.Start();

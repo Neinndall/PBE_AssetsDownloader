@@ -167,9 +167,20 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private void PinSelected_Click(object sender, RoutedEventArgs e)
         {
-            if (FileTreeView.SelectedItem is FileSystemNodeModel selectedNode)
+            if (FileTreeView.SelectedItem is FileSystemNodeModel selectedNode && FilePreviewer != null)
             {
-                FilePreviewer?.ViewModel.PinFile(selectedNode);
+                var existingNormalPin = FilePreviewer.ViewModel.PinnedFiles.FirstOrDefault(p => p.Node == selectedNode && !p.IsDetailsTab);
+
+                if (existingNormalPin != null)
+                {
+                    FilePreviewer.ViewModel.SelectedFile = existingNormalPin;
+                }
+                else
+                {
+                    var newPin = new PinnedFileModel(selectedNode);
+                    FilePreviewer.ViewModel.PinnedFiles.Add(newPin);
+                    FilePreviewer.ViewModel.SelectedFile = newPin;
+                }
             }
         }
 

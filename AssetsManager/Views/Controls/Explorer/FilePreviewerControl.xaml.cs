@@ -134,6 +134,10 @@ namespace AssetsManager.Views.Controls.Explorer
 
                 DetailsPreview.Visibility = Visibility.Collapsed;
 
+                await ExplorerPreviewService.ResetPreviewAsync(); 
+
+                PreviewPlaceholder.Visibility = Visibility.Visible; // Workaround: Ensure placeholder is visible
+
                 await ExplorerPreviewService.ShowPreviewAsync(node);
                 _isShowingTemporaryPreview = false;
             }

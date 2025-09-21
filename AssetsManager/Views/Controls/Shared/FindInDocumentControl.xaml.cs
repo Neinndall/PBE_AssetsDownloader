@@ -84,7 +84,7 @@ namespace AssetsManager.Views.Controls.Shared
             if (TargetTextEditor.Document == null)
                 return;
 
-            int start = forward ? TargetTextEditor.CaretOffset : TargetTextEditor.CaretOffset - 1;
+            int start = forward ? TargetTextEditor.CaretOffset : TargetTextEditor.SelectionStart - 1;
             if (start < 0) start = 0;
 
             int index = -1;

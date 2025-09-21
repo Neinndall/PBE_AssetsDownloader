@@ -17,7 +17,8 @@
             </Button>
             <ToggleButton x:Name="SearchToggleButton" 
                           Style="{StaticResource SearchToggleStyle}" 
-                          Margin="0,0,5,0"/>
+                          Margin="0,0,5,0"
+                          ToolTip="Filter/Searcher"/>
 
             <!-- Search controls now appear next to the toggle button -->
             <Grid>

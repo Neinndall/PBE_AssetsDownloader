@@ -12,7 +12,6 @@
     <UserControl.Resources>
         <converters:PathToIconConverter x:Key="PathToIconConverter"/>
         <converters:WadComparisonIconConverter x:Key="WadComparisonIconConverter"/>
-        <converters:FileNameConverter x:Key="FileNameConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
         <ContextMenu x:Key="ExplorerContextMenu" Opened="ContextMenu_Opened">
@@ -71,13 +70,6 @@
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Visible"/>
                                         <Style.Triggers>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding Status}" Value="Renamed"/>
-                                                    <Condition Binding="{Binding Type}" Value="{x:Static models:NodeType.VirtualFile}"/>
-                                                </MultiDataTrigger.Conditions>
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </MultiDataTrigger>
                                             <DataTrigger Binding="{Binding HasMatch}" Value="True">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                             </DataTrigger>
@@ -102,25 +94,7 @@
                                 </TextBlock.Text>
                             </TextBlock>
 
-                            <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="14" Foreground="#FF9800">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding Status}" Value="Renamed"/>
-                                                    <Condition Binding="{Binding Type}" Value="{x:Static models:NodeType.VirtualFile}"/>
-                                                </MultiDataTrigger.Conditions>
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                                <Run Text="{Binding OldPath, Converter={StaticResource FileNameConverter}}"/>
-                                <Run Text=" → "/>
-                                <Run Text="{Binding Name}"/>
-                            </TextBlock>
+
 
                             <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="14">
                                 <TextBlock.Style>

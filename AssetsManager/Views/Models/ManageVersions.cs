@@ -1,5 +1,6 @@
 using AssetsManager.Services.Core;
 using AssetsManager.Services.Versions;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -71,6 +72,26 @@ namespace AssetsManager.Views.Models
                 foreach (var file in allFiles.Where(f => gameClientCategories.Contains(f.Category)))
                 {
                     LoLGameClientVersions.Add(file);
+                }
+            }
+        }
+
+        public void DeleteVersions(IEnumerable<VersionFileInfo> versionsToDelete)
+        {
+            if (versionsToDelete == null || !versionsToDelete.Any()) return;
+
+            if (_versionService.DeleteVersionFiles(versionsToDelete))
+            {
+                foreach (var versionFile in versionsToDelete.ToList()) // ToList() to avoid issues with modifying collection while iterating
+                {
+                    if (LeagueClientVersions.Contains(versionFile))
+                    {
+                        LeagueClientVersions.Remove(versionFile);
+                    }
+                    else if (LoLGameClientVersions.Contains(versionFile))
+                    {
+                        LoLGameClientVersions.Remove(versionFile);
+                    }
                 }
             }
         }

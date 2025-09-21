@@ -334,5 +334,66 @@ namespace AssetsManager.Services.Versions
 
             return versionFiles;
         }
+
+        public bool DeleteVersionFiles(IEnumerable<VersionFileInfo> versionFiles)
+        {
+            if (versionFiles == null || !versionFiles.Any())
+            {
+                _logService.LogWarning("DeleteVersionFiles called with no files.");
+                return false;
+            }
+
+            var successCount = 0;
+            foreach (var versionFile in versionFiles)
+            {
+                if (DeleteVersionFile(versionFile))
+                {
+                    successCount++;
+                }
+            }
+
+            if (successCount > 0)
+            {
+                _logService.LogSuccess($"Successfully deleted {successCount} version file(s).");
+            }
+
+            if (successCount < versionFiles.Count())
+            {
+                _logService.LogWarning($"Failed to delete {versionFiles.Count() - successCount} version file(s).");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool DeleteVersionFile(VersionFileInfo versionFile)
+        {
+            if (versionFile == null)
+            {
+                _logService.LogWarning("DeleteVersionFile called with null versionFile.");
+                return false;
+            }
+
+            try
+            {
+                var files = Directory.GetFiles(_directoriesCreator.VersionsPath, versionFile.FileName, SearchOption.AllDirectories);
+                if (files.Length > 0)
+                {
+                    var filePath = files[0];
+                    File.Delete(filePath);
+                    return true;
+                }
+                else
+                {
+                    _logService.LogWarning($"Version file not found: {versionFile.FileName}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, $"Error deleting version file: {versionFile.FileName}");
+                return false;
+            }
+        }
     }
 }

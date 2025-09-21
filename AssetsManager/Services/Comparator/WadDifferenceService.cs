@@ -199,7 +199,15 @@ namespace AssetsManager.Services.Comparator
                     if (mainMip.Span.TryGetSpan(out Span<ColorRgba32> pixelSpan))
                     {
                         var pixelByteSpan = MemoryMarshal.AsBytes(pixelSpan);
-                        return BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, pixelByteSpan.ToArray(), width * 4);
+                        var pixelBytes = pixelByteSpan.ToArray();
+                        for (int i = 0; i < pixelBytes.Length; i += 4)
+                        {
+                            var r = pixelBytes[i];
+                            var b = pixelBytes[i + 2];
+                            pixelBytes[i] = b;
+                            pixelBytes[i + 2] = r;
+                        }
+                        return BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, pixelBytes, width * 4);
                     }
 
                     return null;

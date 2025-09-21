@@ -71,9 +71,13 @@
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Visible"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Status}" Value="Renamed">
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Status}" Value="Renamed"/>
+                                                    <Condition Binding="{Binding Type}" Value="{x:Static models:NodeType.VirtualFile}"/>
+                                                </MultiDataTrigger.Conditions>
                                                 <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
+                                            </MultiDataTrigger>
                                             <DataTrigger Binding="{Binding HasMatch}" Value="True">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                             </DataTrigger>
@@ -86,6 +90,9 @@
                                             <DataTrigger Binding="{Binding Status}" Value="Deleted">
                                                 <Setter Property="Foreground" Value="#F44336"/>
                                                 <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="Renamed">
+                                                <Setter Property="Foreground" Value="#FF9800"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -100,9 +107,13 @@
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Status}" Value="Renamed">
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Status}" Value="Renamed"/>
+                                                    <Condition Binding="{Binding Type}" Value="{x:Static models:NodeType.VirtualFile}"/>
+                                                </MultiDataTrigger.Conditions>
                                                 <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
+                                            </MultiDataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>

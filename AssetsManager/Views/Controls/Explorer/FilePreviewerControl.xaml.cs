@@ -45,8 +45,10 @@ namespace AssetsManager.Views.Controls.Explorer
 
                 if (selectedPin == null)
                 {
-                    DetailsPreview.Visibility = Visibility.Collapsed;
-                    await ExplorerPreviewService.ResetPreviewAsync();
+                    if (!_isShowingTemporaryPreview)
+                    {
+                        await ExplorerPreviewService.ResetPreviewAsync();
+                    }
                     return;
                 }
 
@@ -94,7 +96,8 @@ namespace AssetsManager.Views.Controls.Explorer
                     PreviewPlaceholder,
                     SelectFileMessagePanel,
                     UnsupportedFileMessagePanel,
-                    UnsupportedFileMessage
+                    UnsupportedFileMessage,
+                    DetailsPreview
                 );
 
                 await InitializeWebView2();
@@ -132,11 +135,14 @@ namespace AssetsManager.Views.Controls.Explorer
                 _isShowingTemporaryPreview = true;
                 ViewModel.SelectedFile = null;
 
+                bool wasDetailsVisible = DetailsPreview.Visibility == Visibility.Visible;
+
                 DetailsPreview.Visibility = Visibility.Collapsed;
 
-                await ExplorerPreviewService.ResetPreviewAsync(); 
-
-                PreviewPlaceholder.Visibility = Visibility.Visible; // Workaround: Ensure placeholder is visible
+                if (wasDetailsVisible)
+                {
+                    PreviewPlaceholder.Visibility = Visibility.Visible;
+                }
 
                 await ExplorerPreviewService.ShowPreviewAsync(node);
                 _isShowingTemporaryPreview = false;

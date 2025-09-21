@@ -44,6 +44,7 @@ namespace AssetsManager.Services.Explorer
         private Panel _selectFileMessagePanel;
         private Panel _unsupportedFileMessagePanel;
         private TextBlock _unsupportedFileTextBlock;
+        private UserControl _detailsPreview;
 
         private IHighlightingDefinition _jsonHighlightingDefinition;
 
@@ -62,7 +63,7 @@ namespace AssetsManager.Services.Explorer
             _wadDifferenceService = wadDifferenceService;
         }
 
-        public void Initialize(Image imagePreview, WebView2 webView2Preview, TextEditor textEditor, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
+        public void Initialize(Image imagePreview, WebView2 webView2Preview, TextEditor textEditor, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock, UserControl detailsPreview)
         {
             _imagePreview = imagePreview;
             _webView2Preview = webView2Preview;
@@ -71,6 +72,7 @@ namespace AssetsManager.Services.Explorer
             _selectFileMessagePanel = selectFileMessage;
             _unsupportedFileMessagePanel = unsupportedFileMessage;
             _unsupportedFileTextBlock = unsupportedFileTextBlock;
+            _detailsPreview = detailsPreview;
         }
 
         public async Task ConfigureWebViewAfterInitializationAsync()
@@ -305,6 +307,7 @@ namespace AssetsManager.Services.Explorer
             _webView2Preview.Visibility = Visibility.Collapsed;
             _textEditorPreview.Visibility = Visibility.Collapsed;
             _previewPlaceholder.Visibility = Visibility.Collapsed;
+            _detailsPreview.Visibility = Visibility.Collapsed;
 
             switch (previewer)
             {
@@ -395,7 +398,7 @@ namespace AssetsManager.Services.Explorer
                 await SetPreviewer(Previewer.WebView);
             
                 string svgContent = Encoding.UTF8.GetString(data);
-                var htmlContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""><style>html, body {{background-color: transparent !important;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;padding: 20px;box-sizing: border-box;overflow: hidden;}}svg {{width: 90%;height: 90%;object-fit: contain;}}</style></head><body>{svgContent}</body></html>";
+                var htmlContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""/><style>html, body {{background-color: transparent !important;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;padding: 20px;box-sizing: border-box;overflow: hidden;}}svg {{width: 90%;height: 90%;object-fit: contain;}}</style></head><body>{svgContent}</body></html>";
                 
                 _webView2Preview.CoreWebView2.NavigateToString(htmlContent);
             }

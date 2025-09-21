@@ -51,6 +51,7 @@ namespace AssetsManager.Views.Controls.Explorer
         private void FindInDocumentControl_Close(object sender, RoutedEventArgs e)
         {
             FindInDocumentControl.Visibility = Visibility.Collapsed;
+            TextEditorPreview.Focus();
         }
 
         private async void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)

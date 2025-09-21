@@ -7,7 +7,6 @@
              d:DesignHeight="30" d:DesignWidth="200">
     <Grid>
         <TextBox x:Name="SearchTextBox"
-                 Style="{StaticResource AnimatedSearchBoxStyle}"
                  VerticalContentAlignment="Center"
                  Tag="{Binding Tag, RelativeSource={RelativeSource AncestorType=UserControl}}"
                  TextChanged="SearchTextBox_TextChanged"/>

@@ -11,12 +11,18 @@
              d:DesignHeight="450" d:DesignWidth="400">
     <UserControl.Resources>
         <converters:PathToIconConverter x:Key="PathToIconConverter"/>
+        <converters:WadComparisonIconConverter x:Key="WadComparisonIconConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
         <ContextMenu x:Key="ExplorerContextMenu" Opened="ContextMenu_Opened">
             <MenuItem Header="Extract Selected" Click="ExtractSelected_Click">
                 <MenuItem.Icon>
                     <materialIcons:MaterialIcon Kind="FileDownload"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="View Changes" x:Name="ViewChangesMenuItem" Click="ViewChanges_Click">
+                <MenuItem.Icon>
+                    <materialIcons:MaterialIcon Kind="CompareHorizontal"/>
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="Pin" x:Name="PinMenuItem" Click="PinSelected_Click">
@@ -57,9 +63,9 @@
                                                         Height="18" 
                                                         VerticalAlignment="Center" 
                                                         Margin="0,0,5,0"
-                                                        Kind="{Binding Converter={StaticResource PathToIconConverter}}"/>
+                                                        Kind="{Binding Converter={StaticResource WadComparisonIconConverter}}"/>
                             
-                            <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" FontSize="14">
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="14">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Visible"/>
@@ -67,10 +73,28 @@
                                             <DataTrigger Binding="{Binding HasMatch}" Value="True">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="New">
+                                                <Setter Property="Foreground" Value="#4CAF50"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="Modified">
+                                                <Setter Property="Foreground" Value="#2196F3"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="Deleted">
+                                                <Setter Property="Foreground" Value="#F44336"/>
+                                                <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="Renamed">
+                                                <Setter Property="Foreground" Value="#FF9800"/>
+                                            </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
+                                <TextBlock.Text>
+                                    <Binding Path="Name"/>
+                                </TextBlock.Text>
                             </TextBlock>
+
+
 
                             <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="14">
                                 <TextBlock.Style>

@@ -5,12 +5,16 @@ using System.IO;
 namespace AssetsManager.Views.Models
 {
     public enum NodeType { RealDirectory, RealFile, WadFile, VirtualDirectory, VirtualFile }
+    public enum DiffStatus { Unchanged, New, Modified, Renamed, Deleted }
 
     public class FileSystemNodeModel : INotifyPropertyChanged
     {
         public string Name { get; set; }
         public NodeType Type { get; set; }
         public string FullPath { get; set; } // Real path for RealDirectory/WadFile/RealFile, Virtual path for Virtual items
+        public DiffStatus Status { get; set; } = DiffStatus.Unchanged;
+        public string OldPath { get; set; }
+        public SerializableChunkDiff ChunkDiff { get; set; }
         public ObservableCollection<FileSystemNodeModel> Children { get; set; }
 
         // --- Data for WADs and Chunks ---

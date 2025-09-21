@@ -23,6 +23,8 @@ namespace AssetsManager.Views.Controls.Explorer
         public PinnedFilesManager ViewModel { get; set; }
         private bool _isLoaded = false;
 
+        private bool _isShowingTemporaryPreview = false;
+
         public FilePreviewerControl()
         {
             InitializeComponent();
@@ -30,14 +32,46 @@ namespace AssetsManager.Views.Controls.Explorer
             this.DataContext = ViewModel;
             this.Loaded += FilePreviewerControl_Loaded;
             this.Unloaded += FilePreviewerControl_Unloaded;
+            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
 
-        private async void Tab_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ViewModel.SelectedFile))
+            {
+                if (_isShowingTemporaryPreview) return;
+
+                var selectedPin = ViewModel.SelectedFile;
+
+                if (selectedPin == null)
+                {
+                    if (!_isShowingTemporaryPreview)
+                    {
+                        await ExplorerPreviewService.ResetPreviewAsync();
+                    }
+                    return;
+                }
+
+                if (selectedPin.IsDetailsTab)
+                {
+                    await ExplorerPreviewService.ResetPreviewAsync();
+                    DetailsPreview.DataContext = selectedPin.Node;
+                    DetailsPreview.Visibility = Visibility.Visible;
+                    PreviewPlaceholder.Visibility = Visibility.Collapsed; // Hide the placeholder
+                }
+                else
+                {
+                    DetailsPreview.Visibility = Visibility.Collapsed;
+                    await ExplorerPreviewService.ShowPreviewAsync(selectedPin.Node);
+                }
+            }
+        }
+
+        private void Tab_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is FrameworkElement element && element.DataContext is PinnedFileModel vm)
             {
                 ViewModel.SelectedFile = vm;
-                await ExplorerPreviewService.ShowPreviewAsync(vm.Node);
             }
         }
 
@@ -62,7 +96,8 @@ namespace AssetsManager.Views.Controls.Explorer
                     PreviewPlaceholder,
                     SelectFileMessagePanel,
                     UnsupportedFileMessagePanel,
-                    UnsupportedFileMessage
+                    UnsupportedFileMessage,
+                    DetailsPreview
                 );
 
                 await InitializeWebView2();
@@ -79,7 +114,6 @@ namespace AssetsManager.Views.Controls.Explorer
         {
             try
             {
-                // Usar el servicio para limpiar consistentemente
                 await ExplorerPreviewService.ResetPreviewAsync();
             }
             catch (Exception ex)
@@ -90,7 +124,7 @@ namespace AssetsManager.Views.Controls.Explorer
 
         public async Task ShowPreviewAsync(FileSystemNodeModel node)
         {
-            var existingPin = ViewModel.PinnedFiles.FirstOrDefault(p => p.Node == node);
+            var existingPin = ViewModel.PinnedFiles.FirstOrDefault(p => p.Node == node && !p.IsDetailsTab);
 
             if (existingPin != null)
             {
@@ -98,10 +132,39 @@ namespace AssetsManager.Views.Controls.Explorer
             }
             else
             {
+                _isShowingTemporaryPreview = true;
                 ViewModel.SelectedFile = null;
+
+                bool wasDetailsVisible = DetailsPreview.Visibility == Visibility.Visible;
+
+                DetailsPreview.Visibility = Visibility.Collapsed;
+
+                if (wasDetailsVisible)
+                {
+                    PreviewPlaceholder.Visibility = Visibility.Visible;
+                }
+
+                await ExplorerPreviewService.ShowPreviewAsync(node);
+                _isShowingTemporaryPreview = false;
             }
-            
-            await ExplorerPreviewService.ShowPreviewAsync(node);
+        }
+
+        public void UpdateAndEnsureSingleDetailsTab(FileSystemNodeModel node)
+        {
+            var existingDetailsPin = ViewModel.PinnedFiles.FirstOrDefault(p => p.IsDetailsTab);
+
+            if (existingDetailsPin != null)
+            {
+                existingDetailsPin.Node = node;
+            }
+            else
+            {
+                var newDetailsPin = new PinnedFileModel(node)
+                {
+                    IsDetailsTab = true
+                };
+                ViewModel.PinnedFiles.Add(newDetailsPin);
+            }
         }
 
         private async Task InitializeWebView2()

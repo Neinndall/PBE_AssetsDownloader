@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
-using AssetsManager.Utils;
-using AssetsManager.Services;
 using AssetsManager.Services.Core;
 using AssetsManager.Services.Monitor;
+using AssetsManager.Utils;
 
 namespace AssetsManager.Services.Downloads
 {
@@ -13,7 +13,7 @@ namespace AssetsManager.Services.Downloads
         // Game Hashes
         private const string GAME_HASHES_FILENAME = "hashes.game.txt";
         private const string LCU_HASHES_FILENAME = "hashes.lcu.txt";
-        
+
         // Bin Hashes
         private const string HASHES_BINENTRIES = "hashes.binentries.txt";
         private const string HASHES_BINFIELDS = "hashes.binfields.txt";
@@ -24,17 +24,20 @@ namespace AssetsManager.Services.Downloads
         private readonly Requests _requests;
         private readonly AppSettings _appSettings;
         private readonly JsonDataService _jsonDataService;
+        private readonly DirectoriesCreator _directoriesCreator;
 
         public Status(
             LogService logService,
             Requests requests,
             AppSettings appSettings,
-            JsonDataService jsonDataService)
+            JsonDataService jsonDataService,
+            DirectoriesCreator directoriesCreator)
         {
             _logService = logService;
             _requests = requests;
             _appSettings = appSettings;
             _jsonDataService = jsonDataService;
+            _directoriesCreator = directoriesCreator;
         }
 
         public async Task<bool> SyncHashesIfNeeds(bool syncHashesWithCDTB, bool silent = false, Action onUpdateFound = null)
@@ -42,7 +45,7 @@ namespace AssetsManager.Services.Downloads
             bool isUpdated = await IsUpdatedAsync(silent, onUpdateFound);
             if (isUpdated)
             {
-                if (!silent) _logService.Log("Server updated. Starting hash synchronization...");
+                if (!silent) _logService.Log("Server updated or local files out of date. Starting hash synchronization...");
                 await _requests.SyncHashesIfEnabledAsync(syncHashesWithCDTB);
                 if (!silent) _logService.LogSuccess("Synchronization completed.");
                 return true;
@@ -52,8 +55,50 @@ namespace AssetsManager.Services.Downloads
             return false;
         }
 
+        private bool AreLocalFilesOutOfSync()
+        {
+            var configSizes = _appSettings.HashesSizes;
+            var newHashesPath = _directoriesCreator.HashesNewPath;
+
+            if (configSizes == null || configSizes.Count == 0)
+            {
+                return false; // Nothing in config to check against.
+            }
+
+            if (string.IsNullOrEmpty(newHashesPath) || !Directory.Exists(newHashesPath))
+            {
+                _logService.LogWarning($"Skipping local file sync check: Hashes/new directory path is invalid or not found ('{newHashesPath}').");
+                return false; // Path is not valid, cannot check.
+            }
+
+            foreach (var entry in configSizes)
+            {
+                string filename = entry.Key;
+                long configSize = entry.Value;
+                string filePath = Path.Combine(newHashesPath, filename);
+
+                if (!File.Exists(filePath))
+                {
+                    if (configSize > 0) return true;
+                }
+                else
+                {
+                    long diskSize = new FileInfo(filePath).Length;
+                    if (configSize != diskSize) return true;
+                }
+            }
+
+            return false; 
+        }
+
         public async Task<bool> IsUpdatedAsync(bool silent = false, Action onUpdateFound = null)
         {
+            if (AreLocalFilesOutOfSync())
+            {
+                onUpdateFound?.Invoke();
+                return true;
+            }
+
             try
             {
                 if (!silent) _logService.Log("Getting update sizes from server...");

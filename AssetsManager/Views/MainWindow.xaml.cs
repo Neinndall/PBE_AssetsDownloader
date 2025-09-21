@@ -196,8 +196,6 @@ namespace AssetsManager.Views
         private void LoadComparatorWindow()
         {
             var comparatorWindow = _serviceProvider.GetRequiredService<ComparatorWindow>();
-            comparatorWindow.LoadWadComparisonRequested += OnLoadWadComparisonRequested;
-
             MainContentArea.Content = comparatorWindow;
         }
 
@@ -209,13 +207,6 @@ namespace AssetsManager.Views
         private void LoadMonitorWindow()
         {
             MainContentArea.Content = _serviceProvider.GetRequiredService<MonitorWindow>();
-        }
-
-
-        private void OnLoadWadComparisonRequested(object sender, LoadWadComparisonEventArgs e)
-        {
-            var resultWindow = new WadComparisonResultWindow(e.Diffs, _serviceProvider, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, _wadPackagingService, _diffViewService, _hashResolverService, e.OldPath, e.NewPath, e.JsonPath);
-            resultWindow.Show();
         }
 
         private void btnHelp_Click(object sender, RoutedEventArgs e)

@@ -51,8 +51,6 @@ namespace AssetsManager.Views.Controls.Comparator
         public DiffViewService DiffViewService { get; set; }
         public HashResolverService HashResolverService { get; set; }
 
-        public event EventHandler<LoadWadComparisonEventArgs> LoadWadComparisonRequested;
-
         private string _oldLolPath;
         private string _newLolPath;
 
@@ -242,55 +240,6 @@ namespace AssetsManager.Views.Controls.Comparator
             }
         }
 
-        private void loadButton_Click(object sender, RoutedEventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog
-            {
-                Filter = "WAD Comparison JSON (*.json)|*.json",
-                Title = "Load WAD Comparison Results"
-            };
 
-            if (openFileDialog.ShowDialog() != true) return;
-
-            try
-            {
-                string jsonPath = openFileDialog.FileName;
-                string jsonContent = File.ReadAllText(jsonPath);
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } };
-                var loadedResult = JsonSerializer.Deserialize<WadComparisonData>(jsonContent, options);
-
-                if (loadedResult == null || loadedResult.Diffs == null)
-                {
-                    CustomMessageBoxService.ShowError("Error", "Failed to load or parse the results file: Invalid format.", Window.GetWindow(this));
-                    return;
-                }
-
-                string comparisonDir = Path.GetDirectoryName(jsonPath);
-                string oldChunksPath = Path.Combine(comparisonDir, "wad_chunks", "old");
-                string newChunksPath = Path.Combine(comparisonDir, "wad_chunks", "new");
-
-                string oldPathToUse;
-                string newPathToUse;
-
-                if (Directory.Exists(oldChunksPath) && Directory.Exists(newChunksPath))
-                {
-                    oldPathToUse = oldChunksPath;
-                    newPathToUse = newChunksPath;
-                }
-                else
-                {
-                    CustomMessageBoxService.ShowWarning("Warning", "Could not find the 'wad_chunks' directory. Viewing differences might fail if the original PBE directories are not present.", Window.GetWindow(this));
-                    oldPathToUse = loadedResult.OldLolPath;
-                    newPathToUse = loadedResult.NewLolPath;
-                }
-
-                LoadWadComparisonRequested?.Invoke(this, new LoadWadComparisonEventArgs(loadedResult.Diffs, oldPathToUse, newPathToUse, jsonPath));
-            }
-            catch (Exception ex)
-            {
-                LogService.LogError(ex, "Failed to load comparison results.");
-                CustomMessageBoxService.ShowError("Error", $"Failed to load or parse the results file: {ex.Message}", Window.GetWindow(this));
-            }
-        }
     }
 }

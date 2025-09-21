@@ -27,6 +27,7 @@ using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System.Xml;
+using AssetsManager.Services.Comparator;
 
 namespace AssetsManager.Services.Explorer
 {
@@ -43,6 +44,7 @@ namespace AssetsManager.Services.Explorer
         private Panel _selectFileMessagePanel;
         private Panel _unsupportedFileMessagePanel;
         private TextBlock _unsupportedFileTextBlock;
+        private UserControl _detailsPreview;
 
         private IHighlightingDefinition _jsonHighlightingDefinition;
 
@@ -50,16 +52,18 @@ namespace AssetsManager.Services.Explorer
         private readonly DirectoriesCreator _directoriesCreator;
         private readonly HashResolverService _hashResolverService;
         private readonly JsBeautifierService _jsBeautifierService;
+        private readonly WadDifferenceService _wadDifferenceService;
 
-        public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService, JsBeautifierService jsBeautifierService)
+        public ExplorerPreviewService(LogService logService, DirectoriesCreator directoriesCreator, HashResolverService hashResolverService, JsBeautifierService jsBeautifierService, WadDifferenceService wadDifferenceService)
         {
             _logService = logService;
             _directoriesCreator = directoriesCreator;
             _hashResolverService = hashResolverService;
             _jsBeautifierService = jsBeautifierService;
+            _wadDifferenceService = wadDifferenceService;
         }
 
-        public void Initialize(Image imagePreview, WebView2 webView2Preview, TextEditor textEditor, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock)
+        public void Initialize(Image imagePreview, WebView2 webView2Preview, TextEditor textEditor, Panel placeholder, Panel selectFileMessage, Panel unsupportedFileMessage, TextBlock unsupportedFileTextBlock, UserControl detailsPreview)
         {
             _imagePreview = imagePreview;
             _webView2Preview = webView2Preview;
@@ -68,6 +72,7 @@ namespace AssetsManager.Services.Explorer
             _selectFileMessagePanel = selectFileMessage;
             _unsupportedFileMessagePanel = unsupportedFileMessage;
             _unsupportedFileTextBlock = unsupportedFileTextBlock;
+            _detailsPreview = detailsPreview;
         }
 
         public async Task ConfigureWebViewAfterInitializationAsync()
@@ -171,31 +176,50 @@ namespace AssetsManager.Services.Explorer
 
         private async Task PreviewWadFile(FileSystemNodeModel node)
         {
-            if (string.IsNullOrEmpty(node.SourceWadPath) || node.SourceChunkPathHash == 0)
+            if (string.IsNullOrEmpty(node.SourceWadPath))
             {
                 await ShowUnsupportedPreviewAsync(node.Extension);
                 return;
             }
 
-            byte[] decompressedData;
-            try
+            if (node.SourceWadPath.EndsWith(".chunk"))
             {
-                decompressedData = await Task.Run(() =>
+                byte[] decompressedData = await _wadDifferenceService.GetDataFromChunkAsync(node);
+                if (decompressedData == null)
                 {
-                    using var wadFile = new WadFile(node.SourceWadPath);
-                    var chunk = wadFile.FindChunk(node.SourceChunkPathHash);
-                    using var decompressedOwner = wadFile.LoadChunkDecompressed(chunk);
-                    return decompressedOwner.Span.ToArray();
-                });
+                    await ShowUnsupportedPreviewAsync(node.Extension);
+                    return;
+                }
+                await DispatchPreview(decompressedData, node.Extension);
             }
-            catch (Exception ex)
+            else
             {
-                _logService.LogError(ex, $"Failed to decompress chunk for preview: {node.FullPath}");
-                await ShowUnsupportedPreviewAsync(node.Extension);
-                return;
-            }
+                if (node.SourceChunkPathHash == 0)
+                {
+                    await ShowUnsupportedPreviewAsync(node.Extension);
+                    return;
+                }
 
-            await DispatchPreview(decompressedData, node.Extension);
+                byte[] decompressedData;
+                try
+                {
+                    decompressedData = await Task.Run(() =>
+                    {
+                        using var wadFile = new WadFile(node.SourceWadPath);
+                        var chunk = wadFile.FindChunk(node.SourceChunkPathHash);
+                        using var decompressedOwner = wadFile.LoadChunkDecompressed(chunk);
+                        return decompressedOwner.Span.ToArray();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logService.LogError(ex, $"Failed to decompress chunk for preview: {node.FullPath}");
+                    await ShowUnsupportedPreviewAsync(node.Extension);
+                    return;
+                }
+
+                await DispatchPreview(decompressedData, node.Extension);
+            }
         }
 
         private async Task DispatchPreview(byte[] data, string extension)
@@ -283,6 +307,7 @@ namespace AssetsManager.Services.Explorer
             _webView2Preview.Visibility = Visibility.Collapsed;
             _textEditorPreview.Visibility = Visibility.Collapsed;
             _previewPlaceholder.Visibility = Visibility.Collapsed;
+            _detailsPreview.Visibility = Visibility.Collapsed;
 
             switch (previewer)
             {
@@ -373,7 +398,7 @@ namespace AssetsManager.Services.Explorer
                 await SetPreviewer(Previewer.WebView);
             
                 string svgContent = Encoding.UTF8.GetString(data);
-                var htmlContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""><style>html, body {{background-color: transparent !important;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;padding: 20px;box-sizing: border-box;overflow: hidden;}}svg {{width: 90%;height: 90%;object-fit: contain;}}</style></head><body>{svgContent}</body></html>";
+                var htmlContent = $@"<!DOCTYPE html><html><head><meta charset=""UTF-8""/><style>html, body {{background-color: transparent !important;display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;padding: 20px;box-sizing: border-box;overflow: hidden;}}svg {{width: 90%;height: 90%;object-fit: contain;}}</style></head><body>{svgContent}</body></html>";
                 
                 _webView2Preview.CoreWebView2.NavigateToString(htmlContent);
             }

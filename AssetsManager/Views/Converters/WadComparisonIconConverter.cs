@@ -18,6 +18,38 @@ namespace AssetsManager.Views.Converters
                 WadGroupViewModel => MaterialIconKind.PackageVariant,
                 DiffTypeGroupViewModel diffType => GetDiffTypeIcon(diffType.Type),
                 SerializableChunkDiff chunk => GetFileExtensionIcon(chunk.Path),
+                FileSystemNodeModel node => GetNodeIcon(node),
+                _ => MaterialIconKind.FileQuestionOutline,
+            };
+        }
+
+        private static MaterialIconKind GetNodeIcon(FileSystemNodeModel node)
+        {
+            if (node.Status != DiffStatus.Unchanged && node.Type == NodeType.VirtualDirectory)
+            {
+                return GetDiffStatusIcon(node.Status);
+            }
+
+            switch (node.Type)
+            {
+                case NodeType.RealDirectory:
+                case NodeType.VirtualDirectory:
+                    return MaterialIconKind.FolderOutline;
+                case NodeType.WadFile:
+                    return MaterialIconKind.PackageVariant;
+                default:
+                    return node.Status != DiffStatus.Unchanged ? GetDiffStatusIcon(node.Status) : GetFileExtensionIcon(node.Name);
+            }
+        }
+
+        private static MaterialIconKind GetDiffStatusIcon(DiffStatus status)
+        {
+            return status switch
+            {
+                DiffStatus.New => MaterialIconKind.FilePlusOutline,
+                DiffStatus.Deleted => MaterialIconKind.FileRemoveOutline,
+                DiffStatus.Modified => MaterialIconKind.FileEditOutline,
+                DiffStatus.Renamed => MaterialIconKind.FileMoveOutline,
                 _ => MaterialIconKind.FileQuestionOutline,
             };
         }

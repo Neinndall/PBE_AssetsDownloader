@@ -5,7 +5,7 @@
         <ResourceDictionary Source="/Themes/Animations.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
-    <!-- Modern TextBox Style -->
+    <!-- Modern TextBox Style for Browse -->
     <Style x:Key="ModernTextBox" TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource SidebarBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
@@ -43,7 +43,7 @@
         </Setter>
     </Style>
 
-    <!-- Editable Modern TextBox Style -->
+    <!-- Editable Modern TextBox Style for SearchBox -->
     <Style x:Key="EditableModernTextBox" TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource SidebarBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>

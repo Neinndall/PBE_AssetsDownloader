@@ -26,27 +26,36 @@
                          Style="{StaticResource AnimatedSearchBoxStyle}" 
                          Tag="{Binding IsChecked, ElementName=SearchToggleButton}"
                          TextChanged="SearchTextBox_TextChanged"/>
-                <TextBlock Text="Filter..." 
-                           Foreground="{StaticResource TextSecondary}"
-                           IsHitTestVisible="False" 
-                           VerticalAlignment="Center" 
-                           HorizontalAlignment="Left" 
-                           Margin="15,0,0,0">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
+                <StackPanel Orientation="Horizontal"
+                            IsHitTestVisible="False"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="15,0,0,0">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding Text, ElementName=SearchTextBox}" Value=""/>
                                         <Condition Binding="{Binding IsChecked, ElementName=SearchToggleButton}" Value="True"/>
+                                        <Condition Binding="{Binding IsFocused, ElementName=SearchTextBox}" Value="False"/>
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </MultiDataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                    </StackPanel.Style>
+                    <materialIcons:MaterialIcon Kind="Magnify"
+                                                Width="14"
+                                                Height="14"
+                                                Foreground="{StaticResource TextSecondary}"
+                                                Margin="0,0,5,0"
+                                                VerticalAlignment="Center"/>
+                    <TextBlock Text="Search..."
+                               Foreground="{StaticResource TextSecondary}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
             </Grid>
         </StackPanel>
     </Grid>

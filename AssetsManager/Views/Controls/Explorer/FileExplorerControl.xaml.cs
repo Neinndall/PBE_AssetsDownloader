@@ -38,6 +38,7 @@ namespace AssetsManager.Views.Controls.Explorer
         public WadSearchBoxService WadSearchBoxService { get; set; }
         public DiffViewService DiffViewService { get; set; }
         public DirectoriesCreator DirectoriesCreator { get; set; }
+        public AppSettings AppSettings { get; set; }
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
         private readonly DispatcherTimer _searchTimer;
@@ -60,10 +61,9 @@ namespace AssetsManager.Views.Controls.Explorer
             Toolbar.CollapseToContainerClicked += Toolbar_CollapseToContainerClicked;
             Toolbar.LoadComparisonClicked += Toolbar_LoadComparisonClicked;
 
-            var settings = AppSettings.LoadSettings();
-            if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
+            if (!string.IsNullOrEmpty(AppSettings.LolDirectory) && Directory.Exists(AppSettings.LolDirectory))
             {
-                await BuildInitialTree(settings.LolDirectory);
+                await BuildInitialTree(AppSettings.LolDirectory);
             }
             else
             {
@@ -134,11 +134,10 @@ namespace AssetsManager.Views.Controls.Explorer
             }
 
             string destinationPath = null;
-            var settings = AppSettings.LoadSettings();
 
-            if (!string.IsNullOrEmpty(settings.DefaultExtractedSelectDirectory) && Directory.Exists(settings.DefaultExtractedSelectDirectory))
+            if (!string.IsNullOrEmpty(AppSettings.DefaultExtractedSelectDirectory) && Directory.Exists(AppSettings.DefaultExtractedSelectDirectory))
             {
-                destinationPath = settings.DefaultExtractedSelectDirectory;
+                destinationPath = AppSettings.DefaultExtractedSelectDirectory;
             }
             else
             {

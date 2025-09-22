@@ -23,7 +23,8 @@ namespace AssetsManager.Views
             DirectoriesCreator directoriesCreator,
             ExplorerPreviewService explorerPreviewService,
             JsBeautifierService jsBeautifierService,
-            DiffViewService diffViewService
+            DiffViewService diffViewService,
+            AppSettings appSettings
         )
         {
             InitializeComponent();
@@ -35,6 +36,7 @@ namespace AssetsManager.Views
             FileExplorer.WadSearchBoxService = wadSearchBoxService;
             FileExplorer.DiffViewService = diffViewService;
             FileExplorer.DirectoriesCreator = directoriesCreator;
+            FileExplorer.AppSettings = appSettings;
 
             FilePreviewer.LogService = logService;
             FilePreviewer.CustomMessageBoxService = customMessageBoxService;

@@ -92,10 +92,7 @@ namespace AssetsManager.Views.Controls.Home
                 return;
             }
 
-            AppSettings.NewHashesPath = NewHashesPath;
-            AppSettings.OldHashesPath = OldHashesPath;
-
-            await ExtractionService.ExecuteAsync();
+            await ExtractionService.ExecuteAsync(OldHashesPath, NewHashesPath);
         }
     }
 }

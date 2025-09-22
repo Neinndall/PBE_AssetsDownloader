@@ -37,12 +37,12 @@ namespace AssetsManager.Services.Downloads
             _appSettings = appSettings;
         }
 
-        public async Task ExecuteAsync()
+        public async Task ExecuteAsync(string oldHashesPath, string newHashesPath)
         {
             try
             {
                 await _directoriesCreator.CreateAllDirectoriesAsync();
-                await _hashesManager.CompareHashesAsync();
+                await _hashesManager.CompareHashesAsync(oldHashesPath, newHashesPath);
                 await _resources.GetResourcesFiles();
                 _directoryCleaner.CleanEmptyDirectories();
                 await _backupManager.HandleBackUpAsync(_appSettings.CreateBackUpOldHashes);

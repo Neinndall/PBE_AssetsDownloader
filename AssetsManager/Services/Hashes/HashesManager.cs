@@ -22,14 +22,14 @@ namespace AssetsManager.Services.Hashes
       _logService = logService;
     }
 
-    public async Task CompareHashesAsync()
+    public async Task CompareHashesAsync(string oldHashesPath, string newHashesPath)
     {
       _logService.Log("Comparing and filtering hashes, please wait...");
 
-      string oldGameHashesPath = Path.Combine(_appSettings.OldHashesPath, "hashes.game.txt");
-      string oldLcuHashesPath = Path.Combine(_appSettings.OldHashesPath, "hashes.lcu.txt");
-      string newGameHashesPath = Path.Combine(_appSettings.NewHashesPath, "hashes.game.txt");
-      string newLcuHashesPath = Path.Combine(_appSettings.NewHashesPath, "hashes.lcu.txt");
+      string oldGameHashesPath = Path.Combine(oldHashesPath, "hashes.game.txt");
+      string oldLcuHashesPath = Path.Combine(oldHashesPath, "hashes.lcu.txt");
+      string newGameHashesPath = Path.Combine(newHashesPath, "hashes.game.txt");
+      string newLcuHashesPath = Path.Combine(newHashesPath, "hashes.lcu.txt");
 
       var oldGameHashesTask = TryReadAllLinesAsync(oldGameHashesPath);
       var oldLcuHashesTask = TryReadAllLinesAsync(oldLcuHashesPath);
@@ -61,7 +61,7 @@ namespace AssetsManager.Services.Hashes
         }
       });
 
-      await FilterAndSaveDifferencesAsync(differencesGame.ToList(), differencesLcu.ToList());
+      await FilterAndSaveDifferencesAsync(differencesGame.ToList(), differencesLcu.ToList(), oldHashesPath);
     }
 
     private async Task<string[]> TryReadAllLinesAsync(string path)
@@ -82,10 +82,10 @@ namespace AssetsManager.Services.Hashes
       }
     }
 
-    public async Task FilterAndSaveDifferencesAsync(List<string> differencesGame, List<string> differencesLcu)
+    public async Task FilterAndSaveDifferencesAsync(List<string> differencesGame, List<string> differencesLcu, string oldHashesPath)
     {
-      string oldHashesPath = Path.Combine(_appSettings.OldHashesPath, "hashes.game.txt");
-      var oldHashes = await TryReadAllLinesAsync(oldHashesPath);
+      string oldGameHashesPath = Path.Combine(oldHashesPath, "hashes.game.txt");
+      var oldHashes = await TryReadAllLinesAsync(oldGameHashesPath);
 
       var oldPathsWithoutTex = new HashSet<string>(
           oldHashes

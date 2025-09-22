@@ -41,7 +41,6 @@ namespace AssetsManager.Services.Downloads
         {
             try
             {
-                await _directoriesCreator.CreateAllDirectoriesAsync();
                 await _hashesManager.CompareHashesAsync(oldHashesPath, newHashesPath);
                 await _resources.GetResourcesFiles();
                 _directoryCleaner.CleanEmptyDirectories();

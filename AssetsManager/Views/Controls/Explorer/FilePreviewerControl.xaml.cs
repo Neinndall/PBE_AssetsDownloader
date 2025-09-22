@@ -188,6 +188,7 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async Task InitializeWebView2()
         {
+            await DirectoriesCreator.CreateDirTempPreviewAsync();
             try
             {
                 var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: DirectoriesCreator.WebView2DataPath);

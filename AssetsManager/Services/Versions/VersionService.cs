@@ -35,7 +35,10 @@ namespace AssetsManager.Services.Versions
         public async Task FetchAllVersionsAsync()
         {
             _logService.Log("Starting version fetch process...");
-
+            
+            // Aseguramos la creacion de la carpeta necesaria
+            await _directoriesCreator.CreateDirVersionsAsync();
+            
             // Step 1: Fetch release versions
             foreach (var region in VersionSets)
             {
@@ -164,6 +167,7 @@ namespace AssetsManager.Services.Versions
 
         private async Task SaveClientVersionsAsync(List<(string region, string os, string version, string url)> versions)
         {
+            await _directoriesCreator.CreateDirVersionsAsync();
             foreach (var (region, os, version, url) in versions)
             {
                 var path = Path.Combine(_directoriesCreator.VersionsPath, region, os, "league-client");

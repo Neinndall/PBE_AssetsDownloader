@@ -23,6 +23,7 @@ namespace AssetsManager.Views.Settings
             textBoxNewHashPath.Text = _appSettings.NewHashesPath;
             textBoxOldHashPath.Text = _appSettings.OldHashesPath;
             textBoxLolPath.Text = _appSettings.LolDirectory;
+            textBoxDefaultExtractedPath.Text = _appSettings.DefaultExtractedSelectDirectory;
         }
         
         public void SaveSettings()
@@ -31,6 +32,7 @@ namespace AssetsManager.Views.Settings
             _appSettings.NewHashesPath = textBoxNewHashPath.Text;
             _appSettings.OldHashesPath = textBoxOldHashPath.Text;
             _appSettings.LolDirectory = textBoxLolPath.Text;
+            _appSettings.DefaultExtractedSelectDirectory = textBoxDefaultExtractedPath.Text;
         }
 
         private void btnBrowseNew_Click(object sender, RoutedEventArgs e)
@@ -71,6 +73,20 @@ namespace AssetsManager.Views.Settings
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     textBoxLolPath.Text = folderBrowserDialog.FileName;
+                }
+            }
+        }
+
+        private void btnBrowseDefaultExtracted_Click(object sender, RoutedEventArgs e)
+        {
+            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            {
+                folderBrowserDialog.IsFolderPicker = true;
+                folderBrowserDialog.Title = "Select Default Extraction Directory";
+
+                if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    textBoxDefaultExtractedPath.Text = folderBrowserDialog.FileName;
                 }
             }
         }

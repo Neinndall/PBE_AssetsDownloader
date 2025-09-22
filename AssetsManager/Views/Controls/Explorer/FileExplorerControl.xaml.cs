@@ -133,15 +133,29 @@ namespace AssetsManager.Views.Controls.Explorer
                 return;
             }
 
-            var dialog = new CommonOpenFileDialog
-            {
-                IsFolderPicker = true,
-                Title = "Select Destination Folder"
-            };
+            string destinationPath = null;
+            var settings = AppSettings.LoadSettings();
 
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            if (!string.IsNullOrEmpty(settings.DefaultExtractedSelectDirectory) && Directory.Exists(settings.DefaultExtractedSelectDirectory))
             {
-                string destinationPath = dialog.FileName;
+                destinationPath = settings.DefaultExtractedSelectDirectory;
+            }
+            else
+            {
+                var dialog = new CommonOpenFileDialog
+                {
+                    IsFolderPicker = true,
+                    Title = "Select Destination Folder"
+                };
+
+                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    destinationPath = dialog.FileName;
+                }
+            }
+
+            if (destinationPath != null)
+            {
                 try
                 {
                     LogService.Log("Extracting selected files...");
@@ -149,8 +163,7 @@ namespace AssetsManager.Views.Controls.Explorer
                     LogService.LogInteractiveSuccess($"Successfully extracted '{selectedNode.Name}' to '{destinationPath}'.", destinationPath);
                 }
                 catch (Exception ex)
-                {
-                    LogService.LogError(ex, $"Failed to extract '{selectedNode.Name}'.");
+                {                    LogService.LogError(ex, $"Failed to extract '{selectedNode.Name}'.");
                     CustomMessageBoxService.ShowError("Error", $"An error occurred during extraction: {ex.Message}", Window.GetWindow(this));
                 }
             }

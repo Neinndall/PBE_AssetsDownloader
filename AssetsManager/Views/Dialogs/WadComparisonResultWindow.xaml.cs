@@ -163,8 +163,10 @@ namespace AssetsManager.Views.Dialogs
                 string comparisonFullPath = _directoriesCreator.WadComparisonFullPath;
                 string oldChunksPath = _directoriesCreator.OldChunksPath;
                 string newChunksPath = _directoriesCreator.NewChunksPath;
-                Directory.CreateDirectory(oldChunksPath);
-                Directory.CreateDirectory(newChunksPath);
+                
+                // Aseguramos la creacion de carpetas necesarias
+                await _directoriesCreator.CreateDirOldChunksAsync();
+                await _directoriesCreator.CreateDirNewChunksAsync();
 
                 _logService.Log("Starting lean WAD packaging process...");
                 await _wadPackagingService.CreateLeanWadPackageAsync(_serializableDiffs, _oldPbePath, _newPbePath, oldChunksPath, newChunksPath);
@@ -185,8 +187,8 @@ namespace AssetsManager.Views.Dialogs
                 var json = JsonSerializer.Serialize(comparisonResult, options);
                 await File.WriteAllTextAsync(jsonFilePath, json);
 
-                _logService.Log("Finished saving comparison WAD files.");
-                _customMessageBoxService.ShowSuccess("Success", $"Results and associated WAD files saved successfully to: {comparisonFullPath}", this);
+                _logService.LogInteractiveInfo($"Saved comparison WAD files in {comparisonFullPath}", comparisonFullPath);
+                _customMessageBoxService.ShowSuccess("Success", "Results and associated WAD files saved successfully.", this);
             }
             catch (Exception ex)
             {

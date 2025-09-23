@@ -27,6 +27,7 @@ namespace AssetsManager.Utils
         public string NewHashesPath { get; set; }
         public string OldHashesPath { get; set; }
         public string LolDirectory { get; set; }
+        public string DefaultExtractedSelectDirectory { get; set; }
         public string LastPbeStatusMessage { get; set; }
         public Dictionary<string, long> HashesSizes { get; set; }
 
@@ -131,6 +132,7 @@ namespace AssetsManager.Utils
                 NewHashesPath = null,
                 OldHashesPath = null,
                 LolDirectory = null,
+                DefaultExtractedSelectDirectory = null,
                 LastPbeStatusMessage = null,
                 HashesSizes = new Dictionary<string, long>(),
                 JsonDataModificationDates = new Dictionary<string, DateTime>(),
@@ -161,6 +163,7 @@ namespace AssetsManager.Utils
             NewHashesPath = defaultSettings.NewHashesPath;
             OldHashesPath = defaultSettings.OldHashesPath;
             LolDirectory = defaultSettings.LolDirectory;
+            DefaultExtractedSelectDirectory = defaultSettings.DefaultExtractedSelectDirectory;
             SaveDiffHistory = defaultSettings.SaveDiffHistory;
             BackgroundUpdates = defaultSettings.BackgroundUpdates;
             CheckPbeStatus = defaultSettings.CheckPbeStatus;

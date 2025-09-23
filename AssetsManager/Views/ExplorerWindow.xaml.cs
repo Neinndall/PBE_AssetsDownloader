@@ -1,13 +1,12 @@
+using System.Windows;
+using System.Windows.Controls;
 using AssetsManager.Services.Hashes;
 using AssetsManager.Services.Comparator;
 using AssetsManager.Services.Explorer;
-using AssetsManager.Services;
 using AssetsManager.Services.Core;
 using AssetsManager.Services.Monitor;
 using AssetsManager.Utils;
 using AssetsManager.Views.Models;
-using System.Windows;
-using System.Windows.Controls;
 
 namespace AssetsManager.Views
 {
@@ -23,7 +22,8 @@ namespace AssetsManager.Views
             DirectoriesCreator directoriesCreator,
             ExplorerPreviewService explorerPreviewService,
             JsBeautifierService jsBeautifierService,
-            DiffViewService diffViewService
+            DiffViewService diffViewService,
+            AppSettings appSettings
         )
         {
             InitializeComponent();
@@ -34,6 +34,8 @@ namespace AssetsManager.Views
             FileExplorer.WadExtractionService = wadExtractionService;
             FileExplorer.WadSearchBoxService = wadSearchBoxService;
             FileExplorer.DiffViewService = diffViewService;
+            FileExplorer.DirectoriesCreator = directoriesCreator;
+            FileExplorer.AppSettings = appSettings;
 
             FilePreviewer.LogService = logService;
             FilePreviewer.CustomMessageBoxService = customMessageBoxService;

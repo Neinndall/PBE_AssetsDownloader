@@ -101,10 +101,12 @@ namespace AssetsManager.Views.Controls.Monitor
                 return;
             }
 
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = $"Select folder to save the assets";
+                IsFolderPicker = true,
+                Title = $"Select folder to save the assets"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     string destinationPath = folderBrowserDialog.FileName;

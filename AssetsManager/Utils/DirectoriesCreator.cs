@@ -77,7 +77,6 @@ namespace AssetsManager.Utils
 
             WebView2DataPath = Path.Combine(appFolderPath, "WebView2Data");
             TempPreviewPath = Path.Combine(WebView2DataPath, "TempPreview");
-            Directory.CreateDirectory(TempPreviewPath);
             
             WadComparisonSavePath = Path.Combine(appFolderPath, "WadComparison");
             WadComparisonDirName = $"Comparison_{date}";
@@ -86,22 +85,21 @@ namespace AssetsManager.Utils
             NewChunksPath = Path.Combine(WadComparisonFullPath, "wad_chunks", "new");
 
             VersionsPath = Path.Combine(appFolderPath, "Versions");
-            Directory.CreateDirectory(VersionsPath);
         }
 
-        public Task CreateDirResourcesAsync() => CreateFoldersAsync(ResourcesPath);
-        public Task CreateDirSubAssetsDownloadedAsync() => CreateFoldersAsync(SubAssetsDownloadedPath);
-        public Task CreateBackUpOldHashesAsync() => CreateFoldersAsync(BackUpOldHashesPath);
-        public Task CreatePreviewAssetsAsync() => CreateFoldersAsync(PreviewAssetsPath);
-        public Task CreateDirJsonCacheNewAsync() => CreateFoldersAsync(JsonCacheNewPath);
-        public Task CreateDirJsonCacheOldAsync() => CreateFoldersAsync(JsonCacheOldPath);
-
-        public async Task CreateAllDirectoriesAsync()
-        {
-            await CreateDirSubAssetsDownloadedAsync();
-            await CreateDirResourcesAsync();
-        }
-
+        public Task CreateDirSubAssetsDownloadedAsync() => CreateDirectoryInternal(SubAssetsDownloadedPath, true);
+        
+        public Task CreateDirResourcesAsync() => CreateDirectoryInternal(ResourcesPath, false);
+        public Task CreateBackUpOldHashesAsync() => CreateDirectoryInternal(BackUpOldHashesPath, false);
+        public Task CreatePreviewAssetsAsync() => CreateDirectoryInternal(PreviewAssetsPath, false);
+        public Task CreateDirJsonCacheNewAsync() => CreateDirectoryInternal(JsonCacheNewPath, false);
+        public Task CreateDirJsonCacheOldAsync() => CreateDirectoryInternal(JsonCacheOldPath, false);
+        public Task CreateDirVersionsAsync() => CreateDirectoryInternal(VersionsPath, false);
+        public Task CreateDirTempPreviewAsync() => CreateDirectoryInternal(TempPreviewPath, false);
+        public Task CreateDirWebView2DataAsync() => CreateDirectoryInternal(WebView2DataPath, false);
+        public Task CreateDirOldChunksAsync() => CreateDirectoryInternal(OldChunksPath, false);
+        public Task CreateDirNewChunksAsync() => CreateDirectoryInternal(NewChunksPath, false);
+ 
         public string CreateAssetDirectoryPath(string url, string downloadDirectory)
         {
             string path = new Uri(url).AbsolutePath;
@@ -138,20 +136,21 @@ namespace AssetsManager.Utils
             return directory;
         }
 
-        private Task CreateFoldersAsync(string path)
+        private Task CreateDirectoryInternal(string path, bool withLogging)
         {
             try
             {
                 if (!Directory.Exists(path))
                 {
-                    // Usar interpolación de cadenas para el mensaje
                     Directory.CreateDirectory(path);
-                    _logService.Log($"Directory created successfully at: {path}");
+                    if (withLogging)
+                    {
+                        _logService.LogInteractiveInfo($"Directory created at: {path}", path);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                // Usar interpolación de cadenas para el mensaje
                 _logService.LogError(ex, $"Error during directory creation for path: {path}.");
             }
 

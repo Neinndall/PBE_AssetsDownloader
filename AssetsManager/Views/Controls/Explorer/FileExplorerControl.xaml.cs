@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Microsoft.Win32;
+
 using Microsoft.WindowsAPICodePack.Dialogs;
 using AssetsManager.Services.Monitor;
 using AssetsManager.Services.Comparator;  
@@ -37,6 +37,8 @@ namespace AssetsManager.Views.Controls.Explorer
         public WadExtractionService WadExtractionService { get; set; }
         public WadSearchBoxService WadSearchBoxService { get; set; }
         public DiffViewService DiffViewService { get; set; }
+        public DirectoriesCreator DirectoriesCreator { get; set; }
+        public AppSettings AppSettings { get; set; }
 
         public ObservableCollection<FileSystemNodeModel> RootNodes { get; set; }
         private readonly DispatcherTimer _searchTimer;
@@ -59,10 +61,9 @@ namespace AssetsManager.Views.Controls.Explorer
             Toolbar.CollapseToContainerClicked += Toolbar_CollapseToContainerClicked;
             Toolbar.LoadComparisonClicked += Toolbar_LoadComparisonClicked;
 
-            var settings = AppSettings.LoadSettings();
-            if (!string.IsNullOrEmpty(settings.LolDirectory) && Directory.Exists(settings.LolDirectory))
+            if (!string.IsNullOrEmpty(AppSettings.LolDirectory) && Directory.Exists(AppSettings.LolDirectory))
             {
-                await BuildInitialTree(settings.LolDirectory);
+                await BuildInitialTree(AppSettings.LolDirectory);
             }
             else
             {
@@ -73,13 +74,14 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async void Toolbar_LoadComparisonClicked(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Title = "Select wadcomparison.json",
-                Filter = "WAD Comparison JSON|wadcomparison.json|All files (*.*)|*.*"
+                Title = "Select Wadcomparison File",
+                Filters = { new CommonFileDialogFilter("WAD Comparison JSON", "wadcomparison.json"), new CommonFileDialogFilter("All files", "*.*") },
+                InitialDirectory = DirectoriesCreator.WadComparisonSavePath
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 await BuildTreeFromBackupAsync(openFileDialog.FileName);
             }
@@ -131,15 +133,28 @@ namespace AssetsManager.Views.Controls.Explorer
                 return;
             }
 
-            var dialog = new CommonOpenFileDialog
-            {
-                IsFolderPicker = true,
-                Title = "Select Destination Folder"
-            };
+            string destinationPath = null;
 
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            if (!string.IsNullOrEmpty(AppSettings.DefaultExtractedSelectDirectory) && Directory.Exists(AppSettings.DefaultExtractedSelectDirectory))
             {
-                string destinationPath = dialog.FileName;
+                destinationPath = AppSettings.DefaultExtractedSelectDirectory;
+            }
+            else
+            {
+                var dialog = new CommonOpenFileDialog
+                {
+                    IsFolderPicker = true,
+                    Title = "Select Destination Folder"
+                };
+
+                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    destinationPath = dialog.FileName;
+                }
+            }
+
+            if (destinationPath != null)
+            {
                 try
                 {
                     LogService.Log("Extracting selected files...");
@@ -147,8 +162,7 @@ namespace AssetsManager.Views.Controls.Explorer
                     LogService.LogInteractiveSuccess($"Successfully extracted '{selectedNode.Name}' to '{destinationPath}'.", destinationPath);
                 }
                 catch (Exception ex)
-                {
-                    LogService.LogError(ex, $"Failed to extract '{selectedNode.Name}'.");
+                {                    LogService.LogError(ex, $"Failed to extract '{selectedNode.Name}'.");
                     CustomMessageBoxService.ShowError("Error", $"An error occurred during extraction: {ex.Message}", Window.GetWindow(this));
                 }
             }
@@ -226,18 +240,15 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async void SelectLolDirButton_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var dialog = new CommonOpenFileDialog
             {
-                Title = "Select the League of Legends Directory",
-                Filter = "All files (*.*)|*.*",
-                CheckFileExists = false,
-                ValidateNames = false,
-                FileName = "Folder Selection."
+                IsFolderPicker = true,
+                Title = "Select the League of Legends Directory"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                string lolDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                string lolDirectory = dialog.FileName;
                 if (Directory.Exists(lolDirectory))
                 {
                     await BuildInitialTree(lolDirectory);
@@ -348,7 +359,7 @@ namespace AssetsManager.Views.Controls.Explorer
             FileSelected?.Invoke(this, e);
         }
 
-        private void Toolbar_SearchTextChanged(object sender, TextChangedEventArgs e)
+        private void Toolbar_SearchTextChanged(object sender, RoutedEventArgs e)
         {
             _searchTimer.Stop();
             _searchTimer.Start();

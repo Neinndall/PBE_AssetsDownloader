@@ -81,8 +81,8 @@
         <!-- Update Notification Icon -->
         <materialIcons:MaterialIcon x:Name="UpdateNotificationIcon"
                                     Kind="AlertCircle"
-                                    Width="24"
-                                    Height="24"
+                                    Width="20"
+                                    Height="20"
                                     Foreground="LightSkyBlue"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
@@ -103,18 +103,18 @@
 
         <!-- Progress Icon -->
         <Button x:Name="ProgressSummaryButton"
+                Style="{StaticResource TransparentIconButton}"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
                 Background="Transparent" BorderThickness="0"
                 Visibility="Collapsed"
-                Padding="0" Margin="0,0,30,10"
-                Width="24" Height="24"
+                Margin="0,0,26,10"
                 ToolTip="">
-            <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Loading"
-                                        Width="16" Height="16"
+            <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Sync"
+                                        Width="20" Height="20"
                                         Foreground="{StaticResource AccentBrush}"
                                         VerticalAlignment="Center">
                 <materialIcons:MaterialIcon.RenderTransform>
-                    <RotateTransform CenterX="8" CenterY="8"/>
+                    <RotateTransform CenterX="10" CenterY="10"/>
                 </materialIcons:MaterialIcon.RenderTransform>
             </materialIcons:MaterialIcon>
         </Button>

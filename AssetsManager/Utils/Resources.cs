@@ -27,6 +27,9 @@ namespace AssetsManager.Utils
 
         public async Task GetResourcesFiles()
         {
+            // Aseguramos la creacion del directorio necesario
+            await _directoryCreator.CreateDirResourcesAsync();
+            
             var resourcesPath = _directoryCreator.ResourcesPath;
             var differencesGameFilePath = Path.Combine(resourcesPath, "differences_game.txt");
             var differencesLcuFilePath = Path.Combine(resourcesPath, "differences_lcu.txt");
@@ -90,19 +93,17 @@ namespace AssetsManager.Utils
             })
             .ToList();
 
-            var allNotFoundAssets = modifiedNotFoundGameAssets
-                .ToList();
-
+            var allNotFoundAssets = modifiedNotFoundGameAssets.ToList();
             var notFoundFilePath = Path.Combine(resourcesPath, "NotFounds.txt");
 
             try
             {
                 await File.WriteAllLinesAsync(notFoundFilePath, allNotFoundAssets);
-                _logService.Log($"Successfully saved not found assets to: {notFoundFilePath}");
+                _logService.LogInteractiveInfo($"Saved not found assets to {resourcesPath}", resourcesPath);
             }
             catch (Exception ex)
             {
-                _logService.LogError(ex, "Error saving NotFounds.txt.");
+                _logService.LogError(ex, "Error saving the NotFound file");
                 throw;
             }
         }

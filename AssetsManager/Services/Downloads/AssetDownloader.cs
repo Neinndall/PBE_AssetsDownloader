@@ -40,7 +40,8 @@ namespace AssetsManager.Services.Downloads
 
         public void NotifyDownloadCompleted()
         {
-            _logService.LogSuccess("Download of assets completed.");
+            var downloadAssetsPath = _directoriesCreator.SubAssetsDownloadedPath;
+            _logService.LogInteractiveSuccess($"Download of new assets completed in {downloadAssetsPath}", downloadAssetsPath);
             DownloadCompleted?.Invoke();
         }
 
@@ -50,7 +51,7 @@ namespace AssetsManager.Services.Downloads
             int currentBatchTotalFiles = assetsList.Count;
             int currentBatchCompletedFiles = 0;
 
-            _logService.Log("Starting download of assets ...");
+            _logService.Log("Starting download of new assets...");
             foreach (var (relativePath, baseUrl) in assetsList)
             {
                 string url = baseUrl + relativePath;
@@ -207,6 +208,7 @@ namespace AssetsManager.Services.Downloads
 
         public async Task<int> DownloadWadAssetsAsync(IEnumerable<SerializableChunkDiff> diffs)
         {
+            await _directoriesCreator.CreateDirSubAssetsDownloadedAsync();
             string gameBaseUrl = "https://raw.communitydragon.org/pbe/game/";
             string pluginBaseUrl = "https://raw.communitydragon.org/pbe/";
             int successCount = 0;

@@ -1,4 +1,4 @@
-using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using AssetsManager.Services;
 using AssetsManager.Services.Core;
 using AssetsManager.Services.Monitor;
@@ -20,13 +20,13 @@ namespace AssetsManager.Views.Controls.Comparator
 
         private void btnSelectOriginal_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+                Filters = { new CommonFileDialogFilter("JSON files", "*.json"), new CommonFileDialogFilter("All files", "*.*") },
                 Title = "Select Original JSON File"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 originalFileTextBox.Text = openFileDialog.FileName;
             }
@@ -34,13 +34,13 @@ namespace AssetsManager.Views.Controls.Comparator
 
         private void btnSelectNew_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+                Filters = { new CommonFileDialogFilter("JSON files", "*.json"), new CommonFileDialogFilter("All files", "*.*") },
                 Title = "Select New JSON File"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 newFileTextBox.Text = openFileDialog.FileName;
             }

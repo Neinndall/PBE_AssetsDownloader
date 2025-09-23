@@ -224,6 +224,9 @@ namespace AssetsManager.Services.Explorer
 
         private async Task DispatchPreview(byte[] data, string extension)
         {
+            // Aseguramos la creacion de la carpeta necesaria
+            await _directoriesCreator.CreateDirTempPreviewAsync();
+                        
             if (IsImageExtension(extension)) { await ShowImagePreviewAsync(data); }
             else if (IsTextureExtension(extension)) { await ShowTexturePreviewAsync(data); }
             else if (IsVectorImageExtension(extension)) { await ShowSvgPreviewAsync(data); }
@@ -285,6 +288,7 @@ namespace AssetsManager.Services.Explorer
                 }
 
                 _textEditorPreview.Text = textContent;
+                _textEditorPreview.Focus();
             }
             catch (Exception ex)
             {

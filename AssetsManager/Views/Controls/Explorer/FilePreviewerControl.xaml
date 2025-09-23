@@ -8,8 +8,10 @@
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              xmlns:converters="clr-namespace:AssetsManager.Views.Converters"
              xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             xmlns:shared="clr-namespace:AssetsManager.Views.Controls.Shared"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="400">
+             d:DesignHeight="450" d:DesignWidth="400"
+             PreviewKeyDown="FilePreviewerControl_PreviewKeyDown">
         <UserControl.Resources>
             <converters:BoolToBrushConverter x:Key="BoolToBrushConverter" TrueBrush="{StaticResource AccentBrush}" FalseBrush="Transparent"/>
             <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
@@ -113,6 +115,7 @@
                                    Foreground="{StaticResource TextPrimary}"
                                    FontFamily="Consolas, 'Courier New', monospace"
                                    FontSize="12"
+                                   IsReadOnly="True"
                                    ShowLineNumbers="True"
                                    WordWrap="False"
                                    HorizontalScrollBarVisibility="Auto"
@@ -120,6 +123,15 @@
                                    Padding="0"
                                    Margin="-4,0,0,0"/>
             <wv2:WebView2 x:Name="WebView2Preview" DefaultBackgroundColor="#252526" Visibility="Collapsed"/>
+
+            <shared:FindInDocumentControl x:Name="FindInDocumentControl"
+                                          Grid.Row="0"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Top"
+                                          Margin="0,0,15,0"
+                                          Visibility="Collapsed"
+                                          TargetTextEditor="{Binding ElementName=TextEditorPreview}"
+                                          Close="FindInDocumentControl_Close"/>
         </Grid>
     </DockPanel>
 </UserControl>

@@ -176,27 +176,6 @@ namespace AssetsManager.Views.Controls.Monitor
         private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             FilterMonitoredItems(txtSearch.Text);
-            if (string.IsNullOrEmpty(txtSearch.Text))
-            {
-                txtSearchPlaceholder.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                txtSearchPlaceholder.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void TxtSearch_GotFocus(object sender, RoutedEventArgs e)
-        {
-            txtSearchPlaceholder.Visibility = Visibility.Collapsed;
-        }
-
-        private void TxtSearch_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(txtSearch.Text))
-            {
-                txtSearchPlaceholder.Visibility = Visibility.Visible;
-            }
         }
     }
 }

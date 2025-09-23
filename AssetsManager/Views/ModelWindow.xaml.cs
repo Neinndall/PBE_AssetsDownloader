@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using LeagueToolkit.Core.Animation;
 using LeagueToolkit.Core.Mesh;
-using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Diagnostics;
 using System.Linq;
 using AssetsManager.Views.Camera;
@@ -70,12 +70,12 @@ namespace AssetsManager.Views
 
         private void OpenFile_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Filter = "3D Model Files (*.skn, *.skl)|*.skn;*.skl|All Files|*.*"
+                Filters = { new CommonFileDialogFilter("3D Model Files", "*.skn;*.skl"), new CommonFileDialogFilter("All Files", "*.*") }
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 var extension = Path.GetExtension(openFileDialog.FileName).ToLower();
                 if (extension == ".skl")

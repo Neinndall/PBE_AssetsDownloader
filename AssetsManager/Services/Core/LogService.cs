@@ -234,7 +234,8 @@ namespace AssetsManager.Services.Core
 
                     // The hyperlink
                     var link = new Hyperlink(new Run(logEntry.ClickablePath));
-                    link.NavigateUri = new Uri(logEntry.ClickablePath);
+                    link.Foreground = Application.Current.FindResource("AccentBrush") as SolidColorBrush;
+                    link.NavigateUri = new Uri(Path.GetFullPath(logEntry.ClickablePath));
                     link.RequestNavigate += (sender, e) => {
                         try
                         {

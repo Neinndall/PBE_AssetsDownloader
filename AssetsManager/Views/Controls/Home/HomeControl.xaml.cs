@@ -1,6 +1,7 @@
 using Microsoft.WindowsAPICodePack.Dialogs;
 using AssetsManager.Services;
 using AssetsManager.Services.Core;
+using AssetsManager.Services.Downloads;
 using AssetsManager.Utils;
 using System;
 using System.Windows;
@@ -10,10 +11,10 @@ namespace AssetsManager.Views.Controls.Home
 {
     public partial class HomeControl : UserControl
     {
-        public event EventHandler StartRequested;
-
         public LogService LogService { get; set; }
         public AppSettings AppSettings { get; set; }
+        public ExtractionService ExtractionService { get; set; }
+        public CustomMessageBoxService CustomMessageBoxService { get; set; }
 
         public string NewHashesPath => newHashesTextBox.Text;
         public string OldHashesPath => oldHashesTextBox.Text;
@@ -56,10 +57,12 @@ namespace AssetsManager.Views.Controls.Home
 
         private void btnSelectNewHashesDirectory_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select New Hashes Directory";
+                IsFolderPicker = true,
+                Title = "Select New Hashes Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     newHashesTextBox.Text = folderBrowserDialog.FileName;
@@ -70,10 +73,12 @@ namespace AssetsManager.Views.Controls.Home
 
         private void btnSelectOldHashesDirectory_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select Old Hashes Directory";
+                IsFolderPicker = true,
+                Title = "Select Old Hashes Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     oldHashesTextBox.Text = folderBrowserDialog.FileName;
@@ -82,9 +87,16 @@ namespace AssetsManager.Views.Controls.Home
             }
         }
 
-        private void startButton_Click(object sender, RoutedEventArgs e)
+        private async void startButton_Click(object sender, RoutedEventArgs e)
         {
-            StartRequested?.Invoke(this, EventArgs.Empty);
+            if (string.IsNullOrEmpty(OldHashesPath) || string.IsNullOrEmpty(NewHashesPath))
+            {
+                LogService.LogWarning("Please select both hash directories.");
+                CustomMessageBoxService.ShowWarning("Warning", "Please select both hash directories.", Window.GetWindow(this));
+                return;
+            }
+
+            await ExtractionService.ExecuteAsync(OldHashesPath, NewHashesPath);
         }
     }
 }

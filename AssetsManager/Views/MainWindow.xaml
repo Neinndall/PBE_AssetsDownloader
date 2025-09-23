@@ -103,13 +103,14 @@
 
         <!-- Progress Icon -->
         <Button x:Name="ProgressSummaryButton"
+                Style="{StaticResource TransparentIconButton}"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
                 Background="Transparent" BorderThickness="0"
                 Visibility="Collapsed"
                 Padding="0" Margin="0,0,30,10"
                 Width="24" Height="24"
                 ToolTip="">
-            <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Loading"
+            <materialIcons:MaterialIcon x:Name="ProgressIcon" Kind="Sync"
                                         Width="16" Height="16"
                                         Foreground="{StaticResource AccentBrush}"
                                         VerticalAlignment="Center">

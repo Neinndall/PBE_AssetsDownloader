@@ -190,7 +190,7 @@ namespace AssetsManager.Services.Versions
         private async Task RunManifestDownloaderAsync(string arguments)
         {
             string resourceName = "AssetsManager.Resources.ManifestDownloader.ManifestDownloader.exe";
-            string tempExePath = Path.Combine(Path.GetTempPath(), "ManifestDownloader.exe");
+            string manifestDownloader = Path.Combine(_directoriesCreator.VersionsPath, "ManifestDownloader.exe");
 
             try
             {
@@ -202,7 +202,7 @@ namespace AssetsManager.Services.Versions
                         _logService.LogError("Embedded resource 'ManifestDownloader.exe' not found.");
                         return;
                     }
-                    using (FileStream fs = new FileStream(tempExePath, FileMode.Create, FileAccess.Write))
+                    using (FileStream fs = new FileStream(manifestDownloader, FileMode.Create, FileAccess.Write))
                     {
                         await stream.CopyToAsync(fs);
                     }
@@ -210,7 +210,7 @@ namespace AssetsManager.Services.Versions
 
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = tempExePath,
+                    FileName = manifestDownloader,
                     Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -239,9 +239,9 @@ namespace AssetsManager.Services.Versions
             }
             finally
             {
-                if (File.Exists(tempExePath))
+                if (File.Exists(manifestDownloader))
                 {
-                    File.Delete(tempExePath);
+                    File.Delete(manifestDownloader);
                 }
             }
         }

@@ -187,7 +187,7 @@ namespace AssetsManager.Views.Dialogs
                 var json = JsonSerializer.Serialize(comparisonResult, options);
                 await File.WriteAllTextAsync(jsonFilePath, json);
 
-                _logService.LogInteractiveInfo("Saved comparison WAD files in {comparisonFullPath}", comparisonFullPath);
+                _logService.LogInteractiveInfo($"Saved comparison WAD files in {comparisonFullPath}", comparisonFullPath);
                 _customMessageBoxService.ShowSuccess("Success", "Results and associated WAD files saved successfully.", this);
             }
             catch (Exception ex)

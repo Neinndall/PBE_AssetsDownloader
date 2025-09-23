@@ -57,10 +57,12 @@ namespace AssetsManager.Views.Controls.Home
 
         private void btnSelectNewHashesDirectory_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select New Hashes Directory";
+                IsFolderPicker = true,
+                Title = "Select New Hashes Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     newHashesTextBox.Text = folderBrowserDialog.FileName;
@@ -71,10 +73,12 @@ namespace AssetsManager.Views.Controls.Home
 
         private void btnSelectOldHashesDirectory_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select Old Hashes Directory";
+                IsFolderPicker = true,
+                Title = "Select Old Hashes Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     oldHashesTextBox.Text = folderBrowserDialog.FileName;

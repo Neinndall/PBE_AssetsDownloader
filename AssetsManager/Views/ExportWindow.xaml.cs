@@ -1,8 +1,9 @@
+using System;
+using System.Windows.Controls;
 using AssetsManager.Services.Core;
 using AssetsManager.Services.Downloads;
 using AssetsManager.Views.Controls.Export;
-using System;
-using System.Windows.Controls;
+using AssetsManager.Utils;
 
 namespace AssetsManager.Views
 {
@@ -10,6 +11,7 @@ namespace AssetsManager.Views
     {
         public ExportWindow(
             LogService logService,
+            DirectoriesCreator directoriesCreator,
             ExportService exportService
             )
         {
@@ -17,7 +19,8 @@ namespace AssetsManager.Views
 
             DirectoryConfig.LogService = logService;
             DirectoryConfig.ExportService = exportService;
-
+            DirectoryConfig.DirectoriesCreator = directoriesCreator;
+            
             FilterConfig.LogService = logService;
             FilterConfig.ExportService = exportService;
 

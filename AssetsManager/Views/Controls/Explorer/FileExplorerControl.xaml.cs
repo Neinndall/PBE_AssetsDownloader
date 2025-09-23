@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Microsoft.Win32;
+
 using Microsoft.WindowsAPICodePack.Dialogs;
 using AssetsManager.Services.Monitor;
 using AssetsManager.Services.Comparator;  
@@ -74,14 +74,14 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async void Toolbar_LoadComparisonClicked(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
                 Title = "Select Wadcomparison File",
-                Filter = "WAD Comparison JSON|wadcomparison.json|All files (*.*)|*.*",
+                Filters = { new CommonFileDialogFilter("WAD Comparison JSON", "wadcomparison.json"), new CommonFileDialogFilter("All files", "*.*") },
                 InitialDirectory = DirectoriesCreator.WadComparisonSavePath
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 await BuildTreeFromBackupAsync(openFileDialog.FileName);
             }
@@ -240,18 +240,15 @@ namespace AssetsManager.Views.Controls.Explorer
 
         private async void SelectLolDirButton_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var dialog = new CommonOpenFileDialog
             {
-                Title = "Select the League of Legends Directory",
-                Filter = "All files (*.*)|*.*",
-                CheckFileExists = false,
-                ValidateNames = false,
-                FileName = "Folder Selection."
+                IsFolderPicker = true,
+                Title = "Select the League of Legends Directory"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                string lolDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                string lolDirectory = dialog.FileName;
                 if (Directory.Exists(lolDirectory))
                 {
                     await BuildInitialTree(lolDirectory);

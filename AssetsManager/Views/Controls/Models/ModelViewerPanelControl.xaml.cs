@@ -1,7 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using AssetsManager.Views.Models;
 
 namespace AssetsManager.Views.Controls.Models
@@ -36,13 +36,13 @@ namespace AssetsManager.Views.Controls.Models
 
         private void LoadModelButton_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Filter = "SKN files (*.skn)|*.skn|All files (*.*)|*.*",
+                Filters = { new CommonFileDialogFilter("SKN files", "*.skn"), new CommonFileDialogFilter("All files", "*.*") },
                 Title = "Select a SKN File"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 ModelFileLoaded?.Invoke(this, openFileDialog.FileName);
             }
@@ -50,14 +50,14 @@ namespace AssetsManager.Views.Controls.Models
 
         private void LoadAnimationButton_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Filter = "Animation files (*.anm)|*.anm|All files (*.*)|*.*",
+                Filters = { new CommonFileDialogFilter("Animation files", "*.anm"), new CommonFileDialogFilter("All files", "*.*") },
                 Title = "Select Animation Files",
                 Multiselect = true
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 foreach (string fileName in openFileDialog.FileNames)
                 {

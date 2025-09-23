@@ -1,13 +1,12 @@
+using System.Windows;
+using System.Windows.Controls;
 using AssetsManager.Services.Hashes;
 using AssetsManager.Services.Comparator;
 using AssetsManager.Services.Explorer;
-using AssetsManager.Services;
 using AssetsManager.Services.Core;
 using AssetsManager.Services.Monitor;
 using AssetsManager.Utils;
 using AssetsManager.Views.Models;
-using System.Windows;
-using System.Windows.Controls;
 
 namespace AssetsManager.Views
 {

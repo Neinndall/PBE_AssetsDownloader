@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
+
 using Microsoft.WindowsAPICodePack.Dialogs;
 using AssetsManager.Views.Models;
 using AssetsManager.Services.Comparator;
@@ -147,10 +147,12 @@ namespace AssetsManager.Views.Controls.Comparator
 
         private void btnSelectOldLolDirectory_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select Old Directory";
+                IsFolderPicker = true,
+                Title = "Select Old Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     oldLolDirectoryTextBox.Text = folderBrowserDialog.FileName;
@@ -161,10 +163,12 @@ namespace AssetsManager.Views.Controls.Comparator
 
         private void btnSelectNewLolDirectory_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select New Directory";
+                IsFolderPicker = true,
+                Title = "Select New Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     newLolDirectoryTextBox.Text = folderBrowserDialog.FileName;
@@ -175,13 +179,13 @@ namespace AssetsManager.Views.Controls.Comparator
 
         private void btnSelectOldWadFile_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Filter = "WAD files (*.wad, *.wad.client)|*.wad;*.wad.client|All files (*.*)|*.*",
+                Filters = { new CommonFileDialogFilter("WAD files", "*.wad;*.wad.client"), new CommonFileDialogFilter("All files", "*.*") },
                 Title = "Select Old WAD File"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 oldWadFileTextBox.Text = openFileDialog.FileName;
             }
@@ -189,13 +193,13 @@ namespace AssetsManager.Views.Controls.Comparator
 
         private void btnSelectNewWadFile_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
+            var openFileDialog = new CommonOpenFileDialog
             {
-                Filter = "WAD files (*.wad, *.wad.client)|*.wad;*.wad.client|All files (*.*)|*.*",
+                Filters = { new CommonFileDialogFilter("WAD files", "*.wad;*.wad.client"), new CommonFileDialogFilter("All files", "*.*") },
                 Title = "Select New WAD File"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 newWadFileTextBox.Text = openFileDialog.FileName;
             }

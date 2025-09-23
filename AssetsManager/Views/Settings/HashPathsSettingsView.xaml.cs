@@ -37,11 +37,12 @@ namespace AssetsManager.Views.Settings
 
         private void btnBrowseNew_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select New Hashes Folder";
-
+                IsFolderPicker = true,
+                Title = "Select New Hashes Folder"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     textBoxNewHashPath.Text = folderBrowserDialog.FileName;
@@ -51,11 +52,12 @@ namespace AssetsManager.Views.Settings
 
         private void btnBrowseOld_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select Old Hashes Folder";
-
+                IsFolderPicker = true,
+                Title = "Select Old Hashes Folder"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     textBoxOldHashPath.Text = folderBrowserDialog.FileName;
@@ -65,11 +67,12 @@ namespace AssetsManager.Views.Settings
 
         private void btnBrowseLol_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select LoL Directory";
-
+                IsFolderPicker = true,
+                Title = "Select LoL Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     textBoxLolPath.Text = folderBrowserDialog.FileName;
@@ -79,11 +82,12 @@ namespace AssetsManager.Views.Settings
 
         private void btnBrowseDefaultExtracted_Click(object sender, RoutedEventArgs e)
         {
-            using (var folderBrowserDialog = new CommonOpenFileDialog())
+            using (var folderBrowserDialog = new CommonOpenFileDialog
             {
-                folderBrowserDialog.IsFolderPicker = true;
-                folderBrowserDialog.Title = "Select Default Extraction Directory";
-
+                IsFolderPicker = true,
+                Title = "Select Default Extraction Directory"
+            })
+            {
                 if (folderBrowserDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     textBoxDefaultExtractedPath.Text = folderBrowserDialog.FileName;

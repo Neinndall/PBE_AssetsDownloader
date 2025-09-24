@@ -136,36 +136,46 @@ namespace AssetsManager.Services.Versions
             var urlsSeen = new HashSet<string>();
             string tempDir = Path.Combine(_directoriesCreator.AppDirectory, "TempVersions");
 
-            foreach (var (region, url) in configs)
+            try
             {
-                if (urlsSeen.Contains(url)) continue;
-                urlsSeen.Add(url);
+                ExtractManifestDownloader();
 
-                try
+                foreach (var (region, url) in configs)
                 {
-                    Directory.CreateDirectory(tempDir);
-                    await ExtractAndRunManifestDownloader(url, tempDir);
+                    if (urlsSeen.Contains(url)) continue;
+                    urlsSeen.Add(url);
 
-                    string exePath = Path.Combine(tempDir, TargetFilename);
-                    string version = GetExeVersion(exePath);
-
-                    if (version != null)
+                    try
                     {
-                        versions.Add((region, "windows", version, url));
+                        Directory.CreateDirectory(tempDir);
+                        await ExtractAndRunManifestDownloader(url, tempDir);
+
+                        string exePath = Path.Combine(tempDir, TargetFilename);
+                        string version = GetExeVersion(exePath);
+
+                        if (version != null)
+                        {
+                            versions.Add((region, "windows", version, url));
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logService.LogError(ex, $"Error downloading from {url}");
-                }
-                finally
-                {
-                    if (Directory.Exists(tempDir))
+                    catch (Exception ex)
                     {
-                        Directory.Delete(tempDir, true);
+                        _logService.LogError(ex, $"Error downloading from {url}");
+                    }
+                    finally
+                    {
+                        if (Directory.Exists(tempDir))
+                        {
+                            Directory.Delete(tempDir, true);
+                        }
                     }
                 }
             }
+            finally
+            {
+                CleanupManifestDownloader();
+            }
+            
             return versions;
         }
 

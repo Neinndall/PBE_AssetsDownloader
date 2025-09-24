@@ -17,7 +17,7 @@ namespace AssetsManager.Services.Versions
     public class VersionService
     {
         public event EventHandler<string> VersionDownloadStarted;
-        public event EventHandler<(string TaskName, int Progress, string Details)> VersionDownloadProgressChanged;
+        public event EventHandler<(string TaskName, int CurrentValue, int TotalValue, string CurrentFile)> VersionDownloadProgressChanged;
         public event EventHandler<(string TaskName, bool Success, string Message)> VersionDownloadCompleted;
 
         private readonly LogService _logService;
@@ -188,10 +188,10 @@ namespace AssetsManager.Services.Versions
         private async Task ExtractAndRunManifestDownloader(string manifestUrl, string outputDir)
         {
             string arguments = $"\"{manifestUrl}\" -f {TargetFilename} -o \"{outputDir}\" -t 4";
-            await RunManifestDownloaderAsync(arguments);
+            await RunManifestDownloaderAsync(arguments, "Downloading League Client Executable");
         }
 
-        private async Task RunManifestDownloaderAsync(string arguments)
+        private async Task RunManifestDownloaderAsync(string arguments, string taskName)
         {
             string resourceName = "AssetsManager.Resources.ManifestDownloader.ManifestDownloader.exe";
             string manifestDownloader = Path.Combine(_directoriesCreator.VersionsPath, "ManifestDownloader.exe");
@@ -224,11 +224,50 @@ namespace AssetsManager.Services.Versions
 
                 using (Process process = Process.Start(startInfo))
                 {
-                    // Asynchronous reading of the output streams to prevent deadlocks
-                    var outputTask = process.StandardOutput.ReadToEndAsync();
-                    var errorTask = process.StandardError.ReadToEndAsync();
+                    var outputReader = process.StandardOutput;
+                    var errorReader = process.StandardError;
 
-                    await process.WaitForExitAsync();
+                    var outputTask = Task.Run(async () =>
+                    {
+                        string line;
+                        int fileCounter = 0;
+                        Regex verifyingRegex = new Regex(@"^Verifying file (.+?)\.\.\.$");
+                        Regex incorrectRegex = new Regex(@"^File (.+?) is incorrect\.$");
+                        Regex fixingUpRegex = new Regex(@"^Fixing up file (.+?)\.\.\.$");
+
+                        while ((line = await outputReader.ReadLineAsync()) != null)
+                        {
+                            string fileName = null;
+
+                            Match verifyingMatch = verifyingRegex.Match(line);
+                            if (verifyingMatch.Success)
+                            {
+                                fileName = verifyingMatch.Groups[1].Value;
+                            }
+
+                            Match incorrectMatch = incorrectRegex.Match(line);
+                            if (incorrectMatch.Success)
+                            {
+                                fileName = incorrectMatch.Groups[1].Value;
+                            }
+
+                            Match fixingUpMatch = fixingUpRegex.Match(line);
+                            if (fixingUpMatch.Success)
+                            {
+                                fileName = fixingUpMatch.Groups[1].Value;
+                            }
+
+                            if (fileName != null)
+                            {
+                                fileCounter++;
+                                VersionDownloadProgressChanged?.Invoke(this, (taskName, fileCounter, 0, fileName));
+                            }
+                        }
+                    });
+
+                    var errorTask = errorReader.ReadToEndAsync();
+
+                    await Task.WhenAll(process.WaitForExitAsync(), outputTask);
 
                     string error = await errorTask;
 
@@ -287,7 +326,7 @@ namespace AssetsManager.Services.Versions
                 string arguments = $"\"{manifestUrl}\" -o \"{lolDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
 
                 _logService.Log("Starting updating the plugins...");
-                await RunManifestDownloaderAsync(arguments);
+                await RunManifestDownloaderAsync(arguments, taskName);
                 _logService.LogSuccess("Plugin download process finished.");
                 success = true;
             }
@@ -322,7 +361,7 @@ namespace AssetsManager.Services.Versions
                 string arguments = $"\"{manifestUrl}\" -o \"{gameDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
 
                 _logService.Log("Starting updating the game client...");
-                await RunManifestDownloaderAsync(arguments);
+                await RunManifestDownloaderAsync(arguments, taskName);
                 _logService.LogSuccess("Game client download process finished.");
                 success = true;
             }

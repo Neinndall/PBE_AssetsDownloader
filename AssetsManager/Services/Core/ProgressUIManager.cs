@@ -179,8 +179,10 @@ namespace AssetsManager.Services.Core
 
         public void OnVersionDownloadProgressChanged(object sender, (string TaskName, int Progress, string Details) data)
         {
-            // This can be implemented later if VersionService provides detailed progress.
-            // For now, the UI will just show a generic "in progress" state.
+            _owner.Dispatcher.Invoke(() =>
+            {
+                _progressDetailsWindow?.UpdateProgress(0, 1, data.Details, true, null); // Indeterminate progress, update current file
+            });
         }
 
         public void OnVersionDownloadCompleted(object sender, (string TaskName, bool Success, string Message) data)

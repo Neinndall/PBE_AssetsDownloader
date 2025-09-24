@@ -10,7 +10,7 @@ using AssetsManager.Services.Downloads;
 using AssetsManager.Services.Hashes;
 using AssetsManager.Services.Explorer;
 using AssetsManager.Services.Monitor;
-using AssetsManager.Services;
+using AssetsManager.Services.Versions;
 using AssetsManager.Services.Core;
 using AssetsManager.Utils;
 using AssetsManager.Views.Controls;
@@ -100,9 +100,9 @@ namespace AssetsManager.Views
             _wadComparatorService.ComparisonProgressChanged += _progressUIManager.OnComparisonProgressChanged;
             _wadComparatorService.ComparisonCompleted += _progressUIManager.OnComparisonCompleted;
 
-            _versionService.VersionDownloadStarted += _progressUIManager.OnVersionDownloadStarted;
-            _versionService.VersionDownloadProgressChanged += _progressUIManager.OnVersionDownloadProgressChanged;
-            _versionService.VersionDownloadCompleted += _progressUIManager.OnVersionDownloadCompleted;
+            _versionService.VersionDownloadStarted += (sender, e) => _progressUIManager.OnVersionDownloadStarted(sender, e);
+            _versionService.VersionDownloadProgressChanged += (sender, e) => _progressUIManager.OnDownloadProgressChanged(e.CurrentValue, e.TotalValue, e.CurrentFile, true, null);
+            _versionService.VersionDownloadCompleted += (sender, e) => _progressUIManager.OnDownloadCompleted();
 
             _updateCheckService.UpdatesFound += OnUpdatesFound;
 

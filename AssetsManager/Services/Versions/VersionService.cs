@@ -16,6 +16,10 @@ namespace AssetsManager.Services.Versions
 {
     public class VersionService
     {
+        public event EventHandler<string> VersionDownloadStarted;
+        public event EventHandler<(string TaskName, int Progress, string Details)> VersionDownloadProgressChanged;
+        public event EventHandler<(string TaskName, bool Success, string Message)> VersionDownloadCompleted;
+
         private readonly LogService _logService;
         private readonly HttpClient _httpClient;
         private readonly DirectoriesCreator _directoriesCreator;
@@ -266,35 +270,71 @@ namespace AssetsManager.Services.Versions
 
         public async Task DownloadPluginsAsync(string manifestUrl, string lolDirectory, List<string> locales)
         {
-            if (string.IsNullOrEmpty(manifestUrl) || string.IsNullOrEmpty(lolDirectory) || locales == null || !locales.Any())
+            const string taskName = "Downloading Plugins";
+            bool success = false;
+            try
             {
-                _logService.LogWarning("DownloadPluginsAsync called with invalid parameters.");
-                return;
+                if (string.IsNullOrEmpty(manifestUrl) || string.IsNullOrEmpty(lolDirectory) || locales == null || !locales.Any())
+                {
+                    _logService.LogWarning("DownloadPluginsAsync called with invalid parameters.");
+                    VersionDownloadCompleted?.Invoke(this, (taskName, false, "Invalid parameters."));
+                    return;
+                }
+
+                VersionDownloadStarted?.Invoke(this, taskName);
+
+                string localesArgument = string.Join(" ", locales);
+                string arguments = $"\"{manifestUrl}\" -o \"{lolDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
+
+                _logService.Log("Starting updating the plugins...");
+                await RunManifestDownloaderAsync(arguments);
+                _logService.LogSuccess("Plugin download process finished.");
+                success = true;
             }
-
-            string localesArgument = string.Join(" ", locales);
-            string arguments = $"\"{manifestUrl}\" -o \"{lolDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
-
-            _logService.Log("Starting updating the plugins...");
-            await RunManifestDownloaderAsync(arguments);
-            _logService.LogSuccess("Plugin download process finished.");
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "An error occurred during plugin download.");
+                success = false;
+            }
+            finally
+            {
+                VersionDownloadCompleted?.Invoke(this, (taskName, success, success ? "Plugin download finished." : "Plugin download failed."));
+            }
         }
 
         public async Task DownloadGameClientAsync(string manifestUrl, string lolDirectory, List<string> locales)
         {
-            if (string.IsNullOrEmpty(manifestUrl) || string.IsNullOrEmpty(lolDirectory) || locales == null || !locales.Any())
+            const string taskName = "Downloading Game Client";
+            bool success = false;
+            try
             {
-                _logService.LogWarning("DownloadGameClientAsync called with invalid parameters.");
-                return;
+                if (string.IsNullOrEmpty(manifestUrl) || string.IsNullOrEmpty(lolDirectory) || locales == null || !locales.Any())
+                {
+                    _logService.LogWarning("DownloadGameClientAsync called with invalid parameters.");
+                    VersionDownloadCompleted?.Invoke(this, (taskName, false, "Invalid parameters."));
+                    return;
+                }
+
+                VersionDownloadStarted?.Invoke(this, taskName);
+
+                string gameDirectory = Path.Combine(lolDirectory, "Game");
+                string localesArgument = string.Join(" ", locales);
+                string arguments = $"\"{manifestUrl}\" -o \"{gameDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
+
+                _logService.Log("Starting updating the game client...");
+                await RunManifestDownloaderAsync(arguments);
+                _logService.LogSuccess("Game client download process finished.");
+                success = true;
             }
-
-            string gameDirectory = Path.Combine(lolDirectory, "Game");
-            string localesArgument = string.Join(" ", locales);
-            string arguments = $"\"{manifestUrl}\" -o \"{gameDirectory}\" -l {localesArgument} -n -t 4 skip-existing";
-
-            _logService.Log("Starting updating the game client...");
-            await RunManifestDownloaderAsync(arguments);
-            _logService.LogSuccess("Game client download process finished.");
+            catch (Exception ex)
+            {
+                _logService.LogError(ex, "An error occurred during game client download.");
+                success = false;
+            }
+            finally
+            {
+                VersionDownloadCompleted?.Invoke(this, (taskName, success, success ? "Game client download finished." : "Game client download failed."));
+            }
         }
 
         public async Task<List<VersionFileInfo>> GetVersionFilesAsync()

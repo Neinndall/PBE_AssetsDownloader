@@ -40,6 +40,7 @@ namespace AssetsManager.Views
         private readonly UpdateCheckService _updateCheckService;
         private readonly DiffViewService _diffViewService;
         private readonly MonitorService _monitorService;
+        private readonly VersionService _versionService; // Add this
 
         private string _latestAppVersionAvailable;
         private readonly List<string> _notificationMessages = new List<string>();
@@ -62,7 +63,8 @@ namespace AssetsManager.Views
             UpdateCheckService updateCheckService,
             ProgressUIManager progressUIManager,
             DiffViewService diffViewService,
-            MonitorService monitorService)
+            MonitorService monitorService,
+            VersionService versionService) // Add this
         {
             InitializeComponent();
 
@@ -84,6 +86,7 @@ namespace AssetsManager.Views
             _progressUIManager = progressUIManager;
             _diffViewService = diffViewService;
             _monitorService = monitorService;
+            _versionService = versionService; // Add this
 
             _progressUIManager.Initialize(ProgressSummaryButton, ProgressIcon, this);
 
@@ -96,6 +99,10 @@ namespace AssetsManager.Views
             _wadComparatorService.ComparisonStarted += _progressUIManager.OnComparisonStarted;
             _wadComparatorService.ComparisonProgressChanged += _progressUIManager.OnComparisonProgressChanged;
             _wadComparatorService.ComparisonCompleted += _progressUIManager.OnComparisonCompleted;
+
+            _versionService.VersionDownloadStarted += _progressUIManager.OnVersionDownloadStarted;
+            _versionService.VersionDownloadProgressChanged += _progressUIManager.OnVersionDownloadProgressChanged;
+            _versionService.VersionDownloadCompleted += _progressUIManager.OnVersionDownloadCompleted;
 
             _updateCheckService.UpdatesFound += OnUpdatesFound;
 

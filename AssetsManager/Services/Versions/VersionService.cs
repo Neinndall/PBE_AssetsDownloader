@@ -269,7 +269,7 @@ namespace AssetsManager.Services.Versions
 
                     while ((line = await outputReader.ReadLineAsync()) != null)
                     {
-                        if (verifyingRegex.IsMatch(line) || incorrectRegex.IsMatch(line) || fixingUpRegex.IsMatch(line))
+                        if (verifyingRegex.IsMatch(line))
                         {
                             filesToUpdate++;
                         }
@@ -317,28 +317,10 @@ namespace AssetsManager.Services.Versions
 
                     while ((line = await outputReader.ReadLineAsync()) != null)
                     {
-                        string fileName = null;
-
                         Match verifyingMatch = verifyingRegex.Match(line);
                         if (verifyingMatch.Success)
                         {
-                            fileName = verifyingMatch.Groups[1].Value;
-                        }
-
-                        Match incorrectMatch = incorrectRegex.Match(line);
-                        if (incorrectMatch.Success)
-                        {
-                            fileName = incorrectMatch.Groups[1].Value;
-                        }
-
-                        Match fixingUpMatch = fixingUpRegex.Match(line);
-                        if (fixingUpMatch.Success)
-                        {
-                            fileName = fixingUpMatch.Groups[1].Value;
-                        }
-
-                        if (fileName != null)
-                        {
+                            string fileName = verifyingMatch.Groups[1].Value;
                             fileCounter++;
                             VersionDownloadProgressChanged?.Invoke(this, (taskName, fileCounter, totalFiles, fileName));
                         }

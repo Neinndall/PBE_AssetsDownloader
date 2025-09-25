@@ -160,13 +160,11 @@ namespace AssetsManager.Views.Dialogs
 
             try
             {
+                _directoriesCreator.GenerateNewWadComparisonPaths();
+
                 string comparisonFullPath = _directoriesCreator.WadComparisonFullPath;
                 string oldChunksPath = _directoriesCreator.OldChunksPath;
                 string newChunksPath = _directoriesCreator.NewChunksPath;
-                
-                // Aseguramos la creacion de carpetas necesarias
-                await _directoriesCreator.CreateDirOldChunksAsync();
-                await _directoriesCreator.CreateDirNewChunksAsync();
 
                 _logService.Log("Starting lean WAD packaging process...");
                 await _wadPackagingService.CreateLeanWadPackageAsync(_serializableDiffs, _oldPbePath, _newPbePath, oldChunksPath, newChunksPath);

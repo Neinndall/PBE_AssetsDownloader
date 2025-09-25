@@ -33,6 +33,7 @@ namespace AssetsManager.Utils
         public string WadNewAssetsPath { get; private set; }
         public string WadModifiedAssetsPath { get; private set; }
         public string WadRenamedAssetsPath { get; private set; }
+        public string WadRemovedAssetsPath { get; private set; }
 
         public string WebView2DataPath { get; private set; }
         public string TempPreviewPath { get; private set; }
@@ -46,10 +47,6 @@ namespace AssetsManager.Utils
         {
             _logService = logService;
 
-            string date = DateTime.Now.ToString("ddMMyyyy_HHmmss");
-            SubAssetsDownloadedPath = Path.Combine("AssetsDownloaded", date);
-            ResourcesPath = Path.Combine("Resources", date);
-
             HashesNewPath = Path.Combine("hashes", "new");
             HashesOldsPaths = Path.Combine("hashes", "olds");
 
@@ -60,9 +57,7 @@ namespace AssetsManager.Utils
             JsonCacheNewPath = Path.Combine(appFolderPath, "json_cache", "new");
             JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
             JsonCacheHistoryPath = Path.Combine(appFolderPath, "json_cache", "history");
-            BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
 
-            // New paths for updater
             AppDirectory = AppDomain.CurrentDomain.BaseDirectory;
             CurrentConfigFilePath = Path.Combine(AppDirectory, "config.json");
             UpdateCachePath = Path.Combine(appFolderPath, "update_cache");
@@ -70,37 +65,70 @@ namespace AssetsManager.Utils
             UpdateBatchFilePath = Path.Combine(UpdateCachePath, "update_script.bat");
             UpdateLogFilePath = Path.Combine(UpdateCachePath, "update_log.txt");
             UpdateTempBackupConfigFilePath = Path.Combine(UpdateCachePath, "config.backup.json");
-            
-            WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
-            WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
-            WadRenamedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "RENAMED");
 
             WebView2DataPath = Path.Combine(appFolderPath, "WebView2Data");
             TempPreviewPath = Path.Combine(WebView2DataPath, "TempPreview");
             
             WadComparisonSavePath = Path.Combine(appFolderPath, "WadComparison");
+            VersionsPath = Path.Combine(appFolderPath, "Versions");
+        }
+
+        public void GenerateNewResourcesPath()
+        {
+            string date = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+            ResourcesPath = Path.Combine("Resources", date);
+            CreateDirectoryInternal(ResourcesPath, false);
+        }
+
+        public void GenerateNewSubAssetsDownloadedPath()
+        {
+            string date = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+            SubAssetsDownloadedPath = Path.Combine("AssetsDownloaded", date);
+            CreateDirectoryInternal(SubAssetsDownloadedPath, false);
+        }
+
+        public void GenerateNewWadSubPaths()
+        {
+            string date = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+            SubAssetsDownloadedPath = Path.Combine("AssetsDownloaded", date);
+            WadNewAssetsPath = Path.Combine(SubAssetsDownloadedPath, "NEW");
+            WadModifiedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "MODIFIED");
+            WadRenamedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "RENAMED");
+            WadRemovedAssetsPath = Path.Combine(SubAssetsDownloadedPath, "REMOVED");
+            
+            CreateDirectoryInternal(WadNewAssetsPath, false);
+            CreateDirectoryInternal(WadModifiedAssetsPath, false);
+            CreateDirectoryInternal(WadRenamedAssetsPath, false);
+            CreateDirectoryInternal(WadRemovedAssetsPath, false);
+        }
+
+        public void GenerateNewBackUpOldHashesPath()
+        {
+            string date = DateTime.Now.ToString("ddMMyyyy_HHmmss");
+            BackUpOldHashesPath = Path.Combine("hashes", "olds", "BackUp", date);
+            CreateDirectoryInternal(BackUpOldHashesPath, false);
+        }
+
+        public void GenerateNewWadComparisonPaths()
+        {
+            string date = DateTime.Now.ToString("ddMMyyyy_HHmmss");
             WadComparisonDirName = $"Comparison_{date}";
             WadComparisonFullPath = Path.Combine(WadComparisonSavePath, WadComparisonDirName);
             OldChunksPath = Path.Combine(WadComparisonFullPath, "wad_chunks", "old");
             NewChunksPath = Path.Combine(WadComparisonFullPath, "wad_chunks", "new");
 
-            VersionsPath = Path.Combine(appFolderPath, "Versions");
+            CreateDirectoryInternal(OldChunksPath, false);
+            CreateDirectoryInternal(NewChunksPath, false);
         }
-
-        public Task CreateDirSubAssetsDownloadedAsync() => CreateDirectoryInternal(SubAssetsDownloadedPath, true);
-        
-        public Task CreateDirResourcesAsync() => CreateDirectoryInternal(ResourcesPath, false);
-        public Task CreateBackUpOldHashesAsync() => CreateDirectoryInternal(BackUpOldHashesPath, false);
+                                                                                                                                                                                                                          
         public Task CreatePreviewAssetsAsync() => CreateDirectoryInternal(PreviewAssetsPath, false);
-        public Task CreateDirJsonCacheNewAsync() => CreateDirectoryInternal(JsonCacheNewPath, false);
-        public Task CreateDirJsonCacheOldAsync() => CreateDirectoryInternal(JsonCacheOldPath, false);
-        public Task CreateDirVersionsAsync() => CreateDirectoryInternal(VersionsPath, false);
-        public Task CreateDirTempPreviewAsync() => CreateDirectoryInternal(TempPreviewPath, false);
-        public Task CreateDirWebView2DataAsync() => CreateDirectoryInternal(WebView2DataPath, false);
-        public Task CreateDirOldChunksAsync() => CreateDirectoryInternal(OldChunksPath, false);
-        public Task CreateDirNewChunksAsync() => CreateDirectoryInternal(NewChunksPath, false);
+        public Task CreateDirJsonCacheNewAsync() => CreateDirectoryInternal(JsonCacheNewPath, false);                                                                                 
+        public Task CreateDirJsonCacheOldAsync() => CreateDirectoryInternal(JsonCacheOldPath, false);                                                                                 
+        public Task CreateDirVersionsAsync() => CreateDirectoryInternal(VersionsPath, false); 
+        public Task CreateDirTempPreviewAsync() => CreateDirectoryInternal(TempPreviewPath, false);                                                                                 
+        public Task CreateDirWebView2DataAsync() => CreateDirectoryInternal(WebView2DataPath, false);                                                                                 
  
-        public string CreateAssetDirectoryPath(string url, string downloadDirectory)
+        public string CreateAssetDirectoryPath(string url, string downloadDirectory) 
         {
             string path = new Uri(url).AbsolutePath;
 

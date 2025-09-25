@@ -208,7 +208,9 @@ namespace AssetsManager.Services.Downloads
 
         public async Task<int> DownloadWadAssetsAsync(IEnumerable<SerializableChunkDiff> diffs)
         {
-            await _directoriesCreator.CreateDirSubAssetsDownloadedAsync();
+            // Llamamos a la creacion de la carpeta tras descargar los assets de WadComparisonResults
+            _directoriesCreator.GenerateNewWadSubPaths();
+
             string gameBaseUrl = "https://raw.communitydragon.org/pbe/game/";
             string pluginBaseUrl = "https://raw.communitydragon.org/pbe/";
             int successCount = 0;
@@ -237,6 +239,9 @@ namespace AssetsManager.Services.Downloads
                         break;
                     case ChunkDiffType.Renamed:
                         baseSavePath = _directoriesCreator.WadRenamedAssetsPath;
+                        break;
+                    case ChunkDiffType.Removed:
+                        baseSavePath = _directoriesCreator.WadRemovedAssetsPath;
                         break;
                     default:
                         // Skip downloading for other types like 'Removed'

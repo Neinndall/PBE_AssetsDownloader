@@ -49,7 +49,7 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ExtractVirtualDirectoryAsync(FileSystemNodeModel dirNode, string destinationPath)
         {
-            string newDirPath = Path.Combine(destinationPath, dirNode.Name);
+            string newDirPath = Path.Combine(destinationPath, SanitizeName(dirNode.Name));
             Directory.CreateDirectory(newDirPath);
 
             // If children are not loaded (i.e., it's the dummy node), load them.
@@ -72,7 +72,7 @@ namespace AssetsManager.Services.Explorer
 
         private async Task ExtractRealDirectoryAsync(FileSystemNodeModel dirNode, string destinationPath)
         {
-            string newDirPath = Path.Combine(destinationPath, dirNode.Name);
+            string newDirPath = Path.Combine(destinationPath, SanitizeName(dirNode.Name));
             Directory.CreateDirectory(newDirPath);
 
             var subDirectories = Directory.GetDirectories(dirNode.FullPath);
@@ -96,14 +96,14 @@ namespace AssetsManager.Services.Explorer
             {
                 if (Path.GetExtension(fileNode.Name).Equals(".tex", StringComparison.OrdinalIgnoreCase))
                 {
-                    string pngFileName = Path.ChangeExtension(fileNode.Name, ".png");
+                    string pngFileName = Path.ChangeExtension(SanitizeName(fileNode.Name), ".png");
                     string destFilePath = Path.Combine(destinationPath, pngFileName);
                         
                     byte[] fileData = File.ReadAllBytes(fileNode.FullPath);
                     ConvertTexToPng(fileData, destFilePath);
                 }
                 else
-                {                    string destFilePath = Path.Combine(destinationPath, fileNode.Name);
+                {                    string destFilePath = Path.Combine(destinationPath, SanitizeName(fileNode.Name));
                     File.Copy(fileNode.FullPath, destFilePath, true);
                 }
             }
@@ -141,13 +141,13 @@ namespace AssetsManager.Services.Explorer
 
                     if (Path.GetExtension(fileNode.Name).Equals(".tex", StringComparison.OrdinalIgnoreCase))
                     {
-                        string pngFileName = Path.ChangeExtension(fileNode.Name, ".png");
+                        string pngFileName = Path.ChangeExtension(SanitizeName(fileNode.Name), ".png");
                         string destFilePath = Path.Combine(destinationPath, pngFileName);
                         ConvertTexToPng(decompressedData, destFilePath);
                     }
                     else
                     {
-                        string destFilePath = Path.Combine(destinationPath, fileNode.Name);
+                        string destFilePath = Path.Combine(destinationPath, SanitizeName(fileNode.Name));
                         File.WriteAllBytes(destFilePath, decompressedData);
                     }
                 }
@@ -190,6 +190,19 @@ namespace AssetsManager.Services.Explorer
                     }
                 }
             }
+        }
+
+        private string SanitizeName(string name)
+        {
+            const int MaxLength = 240; // A bit less than 255 to be safe.
+            if (name.Length > MaxLength)
+            {
+                var extension = Path.GetExtension(name);
+                var newLength = MaxLength - extension.Length;
+                var sanitizedName = name.Substring(0, newLength) + extension;
+                return sanitizedName;
+            }
+            return name;
         }
     }
 }

@@ -278,7 +278,7 @@ namespace AssetsManager.Views.Controls.Explorer
                 {
                     var gameNode = new FileSystemNodeModel(gamePath);
                     RootNodes.Add(gameNode);
-                    await LoadWadChildren(gameNode, "*.wad.client");
+                    await LoadAllChildren(gameNode);
                 }
 
                 string pluginsPath = Path.Combine(rootPath, "Plugins");
@@ -286,7 +286,7 @@ namespace AssetsManager.Views.Controls.Explorer
                 {
                     var pluginsNode = new FileSystemNodeModel(pluginsPath);
                     RootNodes.Add(pluginsNode);
-                    await LoadWadChildren(pluginsNode, "*.wad");
+                    await LoadAllChildren(pluginsNode);
                 }
 
                 // Prune empty directories after loading
@@ -339,31 +339,6 @@ namespace AssetsManager.Views.Controls.Explorer
             return node.Children.Any();
         }
 
-        private async Task LoadWadChildren(FileSystemNodeModel node, string searchPattern)
-        {
-            try
-            {
-                var directories = Directory.GetDirectories(node.FullPath);
-                foreach (var dir in directories.OrderBy(d => d))
-                {
-                    var childNode = new FileSystemNodeModel(dir);
-                    node.Children.Add(childNode);
-                    await LoadWadChildren(childNode, searchPattern);
-                }
-
-                var files = Directory.GetFiles(node.FullPath, searchPattern);
-                foreach (var file in files.OrderBy(f => f))
-                {
-                    var childNode = new FileSystemNodeModel(file);
-                    node.Children.Add(childNode);
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                LogService.LogWarning($"Access denied to: {node.FullPath}");
-            }
-        }
-
         private async Task LoadAllChildren(FileSystemNodeModel node)
         {
             if (node.Children.Count == 1 && node.Children[0].Name == "Loading...")
@@ -385,6 +360,7 @@ namespace AssetsManager.Views.Controls.Explorer
             {
                 try
                 {
+                    // Recurse into subdirectories
                     var directories = Directory.GetDirectories(node.FullPath);
                     foreach (var dir in directories.OrderBy(d => d))
                     {
@@ -393,12 +369,31 @@ namespace AssetsManager.Views.Controls.Explorer
                         await LoadAllChildren(childNode);
                     }
 
+                    // Process files
                     var files = Directory.GetFiles(node.FullPath);
                     foreach (var file in files.OrderBy(f => f))
                     {
-                        var childNode = new FileSystemNodeModel(file);
-                        node.Children.Add(childNode);
-                        await LoadAllChildren(childNode); // This will handle WAD files
+                        string lowerFile = file.ToLowerInvariant();
+
+                        // Determine if the file is a WAD file we want to keep
+                        bool keepFile = false;
+                        if (lowerFile.EndsWith(".wad.client"))
+                        {
+                            if (node.FullPath.StartsWith(Path.Combine(AppSettings.LolDirectory, "Game")))
+                                keepFile = true;
+                        }
+                        else if (lowerFile.EndsWith(".wad"))
+                        {
+                            if (node.FullPath.StartsWith(Path.Combine(AppSettings.LolDirectory, "Plugins")))
+                                keepFile = true;
+                        }
+
+                        if (keepFile)
+                        {
+                            var childNode = new FileSystemNodeModel(file);
+                            node.Children.Add(childNode);
+                            await LoadAllChildren(childNode); // Eager load WAD content
+                        }
                     }
                 }
                 catch (UnauthorizedAccessException)

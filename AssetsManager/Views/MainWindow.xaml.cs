@@ -16,7 +16,6 @@ using AssetsManager.Utils;
 using AssetsManager.Views.Controls;
 using AssetsManager.Views.Controls.Comparator;
 using AssetsManager.Views.Dialogs;
-using AssetsManager.Views.Controls.Export;
 using AssetsManager.Views.Models;
 
 namespace AssetsManager.Views
@@ -204,7 +203,6 @@ namespace AssetsManager.Views
             switch (viewTag)
             {
                 case "Home": LoadHomeWindow(); break;
-                case "Export": LoadExportWindow(); break;
                 case "Explorer": LoadExplorerWindow(); break;
                 case "Comparator": LoadComparatorWindow(); break;
                 case "Models": LoadModelWindow(); break;
@@ -222,11 +220,6 @@ namespace AssetsManager.Views
         private void LoadExplorerWindow()
         {
             MainContentArea.Content = _serviceProvider.GetRequiredService<ExplorerWindow>();
-        }
-
-        private void LoadExportWindow()
-        {
-            MainContentArea.Content = _serviceProvider.GetRequiredService<ExportWindow>();
         }
 
         private void LoadComparatorWindow()

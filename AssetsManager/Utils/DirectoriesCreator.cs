@@ -11,7 +11,6 @@ namespace AssetsManager.Utils
         private readonly LogService _logService;
 
         public string ResourcesPath { get; private set; }
-        public string PreviewAssetsPath { get; private set; }
         public string HashesNewPath { get; private set; }
         public string HashesOldsPaths { get; private set; }
         public string JsonCacheNewPath { get; private set; }
@@ -53,7 +52,6 @@ namespace AssetsManager.Utils
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string appFolderPath = Path.Combine(appDataPath, "AssetsManager");
 
-            PreviewAssetsPath = Path.Combine(appFolderPath, "PBE_PreviewAssets");
             JsonCacheNewPath = Path.Combine(appFolderPath, "json_cache", "new");
             JsonCacheOldPath = Path.Combine(appFolderPath, "json_cache", "old");
             JsonCacheHistoryPath = Path.Combine(appFolderPath, "json_cache", "history");
@@ -121,7 +119,6 @@ namespace AssetsManager.Utils
             CreateDirectoryInternal(NewChunksPath, false);
         }
                                                                                                                                                                                                                           
-        public Task CreatePreviewAssetsAsync() => CreateDirectoryInternal(PreviewAssetsPath, false);
         public Task CreateDirJsonCacheNewAsync() => CreateDirectoryInternal(JsonCacheNewPath, false);                                                                                 
         public Task CreateDirJsonCacheOldAsync() => CreateDirectoryInternal(JsonCacheOldPath, false);                                                                                 
         public Task CreateDirVersionsAsync() => CreateDirectoryInternal(VersionsPath, false); 

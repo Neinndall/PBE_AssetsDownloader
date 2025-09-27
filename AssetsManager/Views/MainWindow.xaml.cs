@@ -17,6 +17,7 @@ using AssetsManager.Views.Controls;
 using AssetsManager.Views.Controls.Comparator;
 using AssetsManager.Views.Dialogs;
 using AssetsManager.Views.Controls.Export;
+using AssetsManager.Views.Models;
 
 namespace AssetsManager.Views
 {
@@ -99,6 +100,7 @@ namespace AssetsManager.Views
             _wadComparatorService.ComparisonStarted += _progressUIManager.OnComparisonStarted;
             _wadComparatorService.ComparisonProgressChanged += _progressUIManager.OnComparisonProgressChanged;
             _wadComparatorService.ComparisonCompleted += _progressUIManager.OnComparisonCompleted;
+            _wadComparatorService.ComparisonCompleted += OnWadComparisonCompleted;
 
             _versionService.VersionDownloadStarted += (sender, e) => _progressUIManager.OnVersionDownloadStarted(sender, e);
             _versionService.VersionDownloadProgressChanged += (sender, e) => _progressUIManager.OnDownloadProgressChanged(e.CurrentValue, e.TotalValue, e.CurrentFile, true, null);
@@ -116,6 +118,33 @@ namespace AssetsManager.Views
 
             _updateCheckService.Start();
             _ = _updateCheckService.CheckForAllUpdatesAsync();
+        }
+
+        private void OnWadComparisonCompleted(List<ChunkDiff> allDiffs, string oldLolPath, string newLolPath)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (allDiffs != null)
+                {
+                    var serializableDiffs = allDiffs.Select(d => new SerializableChunkDiff
+                    {
+                        Type = d.Type,
+                        OldPath = d.OldPath,
+                        NewPath = d.NewPath,
+                        SourceWadFile = d.SourceWadFile,
+                        OldPathHash = d.OldChunk.PathHash,
+                        NewPathHash = d.NewChunk.PathHash,
+                        OldUncompressedSize = (d.Type == ChunkDiffType.New) ? (ulong?)null : (ulong)d.OldChunk.UncompressedSize,
+                        NewUncompressedSize = (d.Type == ChunkDiffType.Removed) ? (ulong?)null : (ulong)d.NewChunk.UncompressedSize,
+                        OldCompressionType = (d.Type == ChunkDiffType.New) ? null : d.OldChunk.Compression,
+                        NewCompressionType = (d.Type == ChunkDiffType.Removed) ? null : d.NewChunk.Compression
+                    }).ToList();
+
+                    var resultWindow = new WadComparisonResultWindow(serializableDiffs, _serviceProvider, _customMessageBoxService, _directoriesCreator, _assetDownloader, _logService, _wadDifferenceService, _wadPackagingService, _diffViewService, _hashResolverService, oldLolPath, newLolPath);
+                    resultWindow.Owner = this;
+                    resultWindow.Show();
+                }
+            });
         }
 
         private void OnUpdatesFound(string message, string latestVersion)

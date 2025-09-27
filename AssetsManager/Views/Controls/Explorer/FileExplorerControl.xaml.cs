@@ -278,7 +278,7 @@ namespace AssetsManager.Views.Controls.Explorer
                 {
                     var gameNode = new FileSystemNodeModel(gamePath);
                     RootNodes.Add(gameNode);
-                    await LoadAllChildren(gameNode);
+                    await LoadWadChildren(gameNode, "*.wad.client");
                 }
 
                 string pluginsPath = Path.Combine(rootPath, "Plugins");
@@ -286,12 +286,21 @@ namespace AssetsManager.Views.Controls.Explorer
                 {
                     var pluginsNode = new FileSystemNodeModel(pluginsPath);
                     RootNodes.Add(pluginsNode);
-                    await LoadAllChildren(pluginsNode);
+                    await LoadWadChildren(pluginsNode, "*.wad");
+                }
+
+                // Prune empty directories after loading
+                for (int i = RootNodes.Count - 1; i >= 0; i--)
+                {
+                    if (!PruneEmptyDirectories(RootNodes[i]))
+                    {
+                        RootNodes.RemoveAt(i);
+                    }
                 }
 
                 if (RootNodes.Count == 0)
                 {
-                    CustomMessageBoxService.ShowError("Error", "Could not find 'Game' or 'Plugins' subdirectories in the selected path.", Window.GetWindow(this));
+                    CustomMessageBoxService.ShowError("Error", "Could not find any WAD files in 'Game' or 'Plugins' subdirectories.", Window.GetWindow(this));
                     NoDirectoryMessage.Visibility = Visibility.Visible;
                 }
             }
@@ -307,6 +316,51 @@ namespace AssetsManager.Views.Controls.Explorer
                 FileTreeView.Visibility = Visibility.Visible;
                 Toolbar.Visibility = Visibility.Visible;
                 ToolbarSeparator.Visibility = Visibility.Visible;
+            }
+        }
+
+        private bool PruneEmptyDirectories(FileSystemNodeModel node)
+        {
+            if (node.Type != NodeType.RealDirectory)
+            {
+                return true; // Keep files
+            }
+
+            // Recursively prune children
+            for (int i = node.Children.Count - 1; i >= 0; i--)
+            {
+                if (!PruneEmptyDirectories(node.Children[i]))
+                {
+                    node.Children.RemoveAt(i);
+                }
+            }
+
+            // If directory is now empty, it should be pruned
+            return node.Children.Any();
+        }
+
+        private async Task LoadWadChildren(FileSystemNodeModel node, string searchPattern)
+        {
+            try
+            {
+                var directories = Directory.GetDirectories(node.FullPath);
+                foreach (var dir in directories.OrderBy(d => d))
+                {
+                    var childNode = new FileSystemNodeModel(dir);
+                    node.Children.Add(childNode);
+                    await LoadWadChildren(childNode, searchPattern);
+                }
+
+                var files = Directory.GetFiles(node.FullPath, searchPattern);
+                foreach (var file in files.OrderBy(f => f))
+                {
+                    var childNode = new FileSystemNodeModel(file);
+                    node.Children.Add(childNode);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                LogService.LogWarning($"Access denied to: {node.FullPath}");
             }
         }
 

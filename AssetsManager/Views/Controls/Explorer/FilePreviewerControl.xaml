@@ -107,7 +107,9 @@
                                FontWeight="SemiBold"
                                Foreground="{StaticResource TextMuted}"
                                HorizontalAlignment="Center"
-                               Margin="0,8,0,0"/>
+                               Margin="0,8,0,0"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"/>
                 </StackPanel>
             </StackPanel>
             <Image x:Name="ImagePreview" Visibility="Collapsed" Stretch="Uniform"/>
